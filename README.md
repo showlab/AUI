@@ -1,4 +1,4 @@
-# AUI: Computer-Use Agents as Judges for Automatic GUI Design
+# Computer-Use Agents as Judges for Automatic GUI Design
 
 <p align="right">
   <b>English</b>
