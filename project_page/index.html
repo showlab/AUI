@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="keywords" content="Automatic GUI Design, Computer-Use Agents, AUI, Benchmark">
+  <meta name="description" content="AUI introduces agent-centric UI design with Coder–CUA collaboration and the AUI-Gym benchmark.">
+
+  <title>AUI: Computer-Use Agents as Judges for Automatic GUI Design</title>
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-5C9M7TXSHJ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-5C9M7TXSHJ');
+  </script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/nunito@5.0.18/index.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.1/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/fontawesome.min.css">
+  <link rel="stylesheet" href="vendor/image-zoom.css">
+  <link rel="stylesheet" href="index.css">
+  <link rel="icon" href="assets/icon.png">
+
+  <script async src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/js/all.min.js"></script>
+  <script async src="vendor/image-zoom.js"></script>
+</head>
+
+<body>
+  <section class="hero">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <div class="title-header">
+            <img class="logo" src="figures/AUI_logo.png" alt="AUI logo">
+            <h1 class="title publication-title is-bold">
+              <span>AUI: Computer-Use Agents as Judges for Automatic GUI Design</span>
+            </h1>
+          </div>
+          <div class="is-size-5 publication-author">
+            <span class="author-block">
+              <a href="https://qhlin.me/" target="_blank">Kevin Qinghong Lin</a><sup>1&dagger;</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://github.com/h-siyuan" target="_blank">Siyuan Hu</a><sup>2&dagger;</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://www.microsoft.com/en-us/research/people/linjli/" target="_blank">Linjie Li</a><sup>3</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://zyang-ur.github.io/" target="_blank">Zhengyuan Yang</a><sup>3</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://www.microsoft.com/en-us/research/people/lijuanw/" target="_blank">Lijuan Wang</a><sup>3</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://www.robots.ox.ac.uk/~phst/" target="_blank">Philip Torr</a><sup>1</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://sites.google.com/view/showlab" target="_blank">Mike Zheng Shou</a><sup>2&#9993;</sup>
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-institution">
+            <span class="author-block"><sup>1</sup>University of Oxford</span>
+            <span class="author-block"><sup>2</sup>Show Lab, National University of Singapore</span>
+            <span class="author-block"><sup>3</sup>Microsoft</span>
+          </div>
+
+          <div class="is-size-5 publication-role">
+            <span class="author-block"><sup>&dagger;</sup><i>Equal Contribution</i></span>
+            <span class="author-block"><sup>&#9993;</sup><i>Corresponding Author</i></span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <span class="link-block">
+                <a class="button is-normal is-rounded is-dark" href="#" aria-disabled="true" onclick="return false;">
+                  <i class="button-icon far fa-paper-plane"></i>
+                  <span>Paper</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a class="button is-normal is-rounded is-dark" href="https://github.com/showlab/AUI" target="_blank">
+                  <i class="button-icon fa-brands fa-github"></i>
+                  <span>Code</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a class="button is-normal is-rounded is-dark" href="https://github.com/showlab/AUI" target="_blank">
+                  <i class="button-icon fa-regular fa-compass"></i>
+                  <span>Benchmark</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a class="button is-normal is-rounded is-dark" href="#citation">
+                  <i class="button-icon fa-regular fa-bookmark"></i>
+                  <span>BibTeX</span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title">Abstract</h2>
+          <div class="content has-text-justified">
+            <p>Computer-Use Agents (CUAs) are increasingly capable of operating complex graphical user interfaces, yet most digital environments remain tailored for humans. Aesthetic-heavy layouts, hidden interactions, and manually triggered workflows hinder agents from executing tasks efficiently.</p>
+            <p>We present <strong>AUI</strong>, a framework that rethinks UI creation for agents by pairing a coding-oriented <em>Coder</em> with an autonomous <em>CUA Judge</em>. The Coder iteratively designs interfaces while the CUA probes them through task-solving trajectories. AUI introduces the <strong>AUI-Gym</strong> benchmark spanning 52 applications across six domains and proposes the <strong>CUA Dashboard</strong>, a compact visualization that condenses multi-step rollouts into actionable feedback.</p>
+            <p>Across state-of-the-art proprietary and open Coders—and multiple CUAs—AUI substantially improves both functionality completeness and navigation success. Our agent-as-judge paradigm shifts interface design toward agent-native reliability and paves the way for scalable automatic GUI development.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-half">
+          <h2 class="title">What is AUI?</h2>
+          <img src="figures/teaser.png" alt="AUI Teaser" data-zoom-image />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title">Coder&ndash;CUA Collaboration</h2>
+          <img src="figures/workflow.png" alt="AUI Framework" data-zoom-image />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h3 class="title">Agent-Centric Revisions</h3>
+        </div>
+      </div>
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-two-fifths">
+          <img src="figures/coder_revision.png" alt="Coder Refinement" data-zoom-image />
+          <div class="caption">Coder as Designer: extend functionality from CUA feedback.</div>
+        </div>
+        <div class="column is-two-fifths">
+          <img src="figures/cua_revision.png" alt="CUA Refinement" data-zoom-image />
+          <div class="caption">CUA as Judge: surface usability bottlenecks for agents.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title">CUA Dashboard</h2>
+          <img src="figures/dashboard.png" alt="CUA Dashboard" data-zoom-image />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="citation">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h3 class="title">Citation</h3>
+          <div class="caption">Please kindly cite our paper if you find this project helpful.</div>
+        </div>
+      </div>
+      <div class="columns is-centered">
+        <pre><code>@inproceedings{lin2025aui,<br>  title={Computer-Use Agents as Judges for Automatic GUI Design},<br>  author={Lin, Kevin Qinghong and Hu, Siyuan and Li, Linjie and Yang, Zhengyuan and Wang, Lijuan and Torr, Philip and Shou, Mike Zheng},<br>  booktitle={NeurIPS 2025 Workshop on Agents},<br>  year={2025}<br>}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <div class="content">
+            <p>This website is modified from <a href="https://nerfies.github.io/" target="_blank">Nerfies's Project Page</a>. Source code is licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank">CC BY-SA 4.0</a>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+
+</html>
