@@ -1,4 +1,4 @@
-# Computer-Use Agents as Judges for Automatic GUI Design
+# Computer-Use Agents as Judges for Generative User Interface
 
 <!-- <p align="right">
   <b>English</b>
