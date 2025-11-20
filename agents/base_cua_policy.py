@@ -51,7 +51,7 @@ class BaseCUAPolicy:
             await browser.start()
             await browser.navigate_to(website_url)
             await browser.inject_state_monitor_script()
-            # 等待两帧以稳定首帧初始化
+            # Wait a couple of frames to stabilize the initial view
             try:
                 await browser.wait_for_animation_frames(2)
             except Exception:
@@ -187,7 +187,7 @@ class BaseCUAPolicy:
                 else:
                     print(f"       ✅ Success: {result.get('message', 'Action completed')}")
                 
-                # 立即检查是否已满足完成条件（早停止）
+                # Immediately check whether completion rule is satisfied (early stop)
                 rule_str = completion_rule
                 try:
                     if self._check_task_completion(rule_str, new_state):

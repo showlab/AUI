@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Stage 3: 基于失败生成修订版网站
-根据初始网站的失败任务与不支持任务生成改进后的修订版
+Stage 3: Generate revised websites based on failures.
+Use failed and unsupported tasks from the initial websites to produce improved revisions.
 """
 
 import argparse
@@ -370,7 +370,7 @@ async def _process_single_app(model_name: str, app_name: str, revision_component
                     model_name, app_name, "✅ Generated revised website", 
                     retry_info=result['retry_details']
                 )
-                # 也写入timing日志，保持在屏幕上
+                # Also write into timing log so details stay visible
                 details = result['retry_details']
                 if isinstance(details, list):
                     for at in details:
@@ -428,7 +428,7 @@ async def _process_single_app(model_name: str, app_name: str, revision_component
                     model_name, app_name, f"❌ Failed after {result.get('attempts', '?')} attempts", 
                     retry_info=result['retry_details']
                 )
-                # 也写入timing日志
+                # Also write into timing log
                 details = result['retry_details']
                 if isinstance(details, list):
                     for at in details:
@@ -445,7 +445,7 @@ async def _process_single_app(model_name: str, app_name: str, revision_component
                         progress_tracker.add_timing_info(model_name, app_name, f"RETRY {icon}: {' '.join(parts)}")
                 else:
                     progress_tracker.add_timing_info(model_name, app_name, f"RETRY: {app_name} {str(details)}")
-            # 持久化错误到timing
+            # Persist error into timing log
             progress_tracker.add_timing_info(model_name, app_name, f"ERROR: {result.get('error', 'Unknown error')}")
             
             return {
@@ -490,12 +490,11 @@ async def run_model_batches(runner, model_app_groups, stage_name: str, **kwargs)
         **kwargs
     )
 
-# Legacy function - not used in new batch approach
 async def run_valid_combinations_old(runner, valid_combinations, task_func, stage_name, **kwargs):
-    """运行有效的模型-应用组合"""
+    """Run valid model–app combinations (legacy helper, kept for compatibility)."""
     from utils.progress_tracker import ProgressTracker
     
-    # 创建模型和应用列表用于进度显示
+    # Build model and app lists for progress display
     all_models = sorted(set(combo[0] for combo in valid_combinations))
     all_apps = sorted(set(combo[1] for combo in valid_combinations))
     
@@ -510,7 +509,7 @@ async def run_valid_combinations_old(runner, valid_combinations, task_func, stag
     )
 
 async def run_valid_combinations_with_tracker(runner, valid_combinations, task_func, progress_tracker, **kwargs):
-    """运行有效的模型-应用组合 - 使用外部提供的progress_tracker"""
+    """Run valid model–app combinations using an external progress_tracker."""
     # Create tasks for valid combinations
     async def create_task(model_name, app_name):
         async with runner.semaphore:
@@ -614,10 +613,10 @@ async def main():
     # Destylization is tied to revision type (CUA/integrated on; unsupported off)
     args.destylized = True if args.revision_type in ['cua', 'integrated'] else False
     
-    # 解析模型列表
+    # Parse model list
     models = args.models.split(',')
     
-    # 解析应用列表
+    # Parse app list
     if args.apps.lower() == 'all':
         apps = DEFAULT_APPS
     else:

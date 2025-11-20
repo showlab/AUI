@@ -11,23 +11,21 @@ MAX_RATIO = 200
 
 
 def convert_point_to_coordinates(text, is_answer=False):
-    # 匹配 <bbox> 后面的四个数字
+    # Match coordinates inside <point> tags
     pattern = r"<point>(\d+)\s+(\d+)</point>"
 
     def replace_match(match):
         x1, y1 = map(int, match.groups())
-        x = (x1 + x1) // 2  # 使用截断取整
-        y = (y1 + y1) // 2  # 使用截断取整
+        x = (x1 + x1) // 2  # Use integer truncation
+        y = (y1 + y1) // 2  # Use integer truncation
         if is_answer:
-            return f"({x},{y})"  # 只返回 (x, y) 格式
-        return f"({x},{y})"  # 返回带标签的格式
+            return f"({x},{y})"  # Return only the coordinate format
+        return f"({x},{y})"
 
-    # 去掉 [EOS] 并替换 <bbox> 坐标
+    # Strip [EOS] markers and replace <point> coordinates
     text = re.sub(r"\[EOS\]", "", text)
     return re.sub(pattern, replace_match, text).strip()
 
-
-# 定义一个函数来解析每个 action
 def parse_action(action_str):
     try:
         # Handle escaped quotes in finished() content parameter
@@ -46,21 +44,21 @@ def parse_action(action_str):
                 return f'finished(content="{content}")'
             action_str = re.sub(pattern, fix_finished_quotes, action_str)
         
-        # 解析字符串为 AST 节点
+        # Parse string into an AST node
         node = ast.parse(action_str, mode='eval')
 
-        # 确保节点是一个表达式
+        # Ensure the node is an expression
         if not isinstance(node, ast.Expression):
             raise ValueError("Not an expression")
 
-        # 获取表达式的主体
+        # Get expression body
         call = node.body
 
-        # 确保主体是一个函数调用
+        # Ensure body is a function call
         if not isinstance(call, ast.Call):
             raise ValueError("Not a function call")
 
-        # 获取函数名
+        # Extract function name
         if isinstance(call.func, ast.Name):
             func_name = call.func.id
         elif isinstance(call.func, ast.Attribute):
@@ -68,14 +66,14 @@ def parse_action(action_str):
         else:
             func_name = None
 
-        # 获取关键字参数
+        # Extract keyword arguments
         kwargs = {}
         for kw in call.keywords:
             key = kw.arg
-            # 处理不同类型的值，这里假设都是常量
+            # Handle different value types, assuming constants here
             if isinstance(kw.value, ast.Constant):
                 value = kw.value.value
-            elif isinstance(kw.value, ast.Str):  # 兼容旧版本 Python
+            elif isinstance(kw.value, ast.Str):  # Backward compatibility for older Python
                 value = kw.value.s
             else:
                 value = None
@@ -89,7 +87,7 @@ def parse_action(action_str):
 
 
 def escape_single_quotes(text):
-    # 匹配未转义的单引号（不匹配 \\'）
+    # Match unescaped single quotes (excluding \')
     pattern = r"(?<!\\)'"
     return re.sub(pattern, r"\\'", text)
 
@@ -116,7 +114,10 @@ def linear_resize(height: int,
                   max_pixels: int = MAX_PIXELS) -> tuple[int, int]:
     if width * height > max_pixels:
         """
-        如果图片超过/低于像素限制，则计算一个缩放因子resize_factor，使图片的像素数缩小到等于或小于max_pixels。这个缩放因子是通过开平方根计算的，确保纵横比保持不变,这样原始的相对坐标可以不经转换直接复用
+        If the image exceeds the pixel limit, compute a resize_factor so that
+        the total pixels shrink to less than or equal to max_pixels. The factor
+        is computed via square root to preserve aspect ratio so original
+        relative coordinates can be reused directly.
         """
         resize_factor = math.sqrt(max_pixels / (width * height))
         width, height = int(width * resize_factor), int(height * resize_factor)
@@ -185,7 +186,7 @@ def parse_action_to_structure_output(text,
             min_pixels=min_pixels,
             max_pixels=max_pixels)
 
-    # 正则表达式匹配 Action 字符串
+    # Regular expressions to match the Action string
     if text.startswith("Thought:"):
         thought_pattern = r"Thought: (.+?)(?=\s*Action: |$)"
         thought_hint = "Thought: "
@@ -215,19 +216,19 @@ def parse_action_to_structure_output(text,
         if "type(content" in action_str:
             if not action_str.strip().endswith(")"):
                 action_str = action_str.strip() + ")"
-            # 正则表达式匹配 content 中的字符串并转义单引号
+            # Use regex to extract content string and escape single quotes
             def escape_quotes(match):
-                content = match.group(1)  # 获取 content 的值
+                content = match.group(1)  # Extract content value
                 return content
 
-            # 使用正则表达式进行替换
-            pattern = r"type\(content='(.*?)'\)"  # 匹配 type(content='...')
-            if re.search(pattern, action_str):  # 检查是否有匹配项
+            # Apply regex replacement
+            pattern = r"type\(content='(.*?)'\)"  # Match type(content='...')
+            if re.search(pattern, action_str):  # Check if there is a match
                 content = re.sub(pattern, escape_quotes, action_str)
             else:
                 raise ValueError("Pattern not found in the input string.")
 
-            # 处理字符串
+            # Process normalized content string
             action_str = escape_single_quotes(content)
             action_str = "type(content='" + action_str + "')"
         if not action_str.strip().endswith(")"):
@@ -250,8 +251,8 @@ def parse_action_to_structure_output(text,
         action_inputs = {}
         for param_name, param in params.items():
             if param == "": continue
-            param = param.lstrip()  # 去掉引号和多余的空格
-            # 处理start_box或者end_box参数格式 '<bbox>x1 y1 x2 y2</bbox>'
+            param = param.lstrip()  # Strip quotes and extra spaces
+            # Handle start_box / end_box parameters of the form '<bbox>x1 y1 x2 y2</bbox>'
             action_inputs[param_name.strip()] = param
 
             if "start_box" in param_name or "end_box" in param_name:
@@ -303,19 +304,21 @@ def parsing_response_to_pyautogui_code(responses,
                                        image_width: int,
                                        input_swap: bool = True) -> str:
     '''
-    将M模型的输出解析为OSWorld中的action，生成pyautogui代码字符串
-    参数:
-        response: 包含模型输出的字典，结构类似于：
-        {
-            "action_type": "hotkey",
-            "action_inputs": {
-                "hotkey": "v ctrl",
-                "start_box": None,
-                "end_box": None
+    Parse model outputs into OSWorld-style actions and generate pyautogui code.
+
+    Args:
+        responses: A single dict or list of dicts, each shaped like:
+            {
+                "action_type": "hotkey",
+                "action_inputs": {
+                    "hotkey": "v ctrl",
+                    "start_box": None,
+                    "end_box": None
+                }
             }
-        }
-    返回:
-        生成的pyautogui代码字符串
+
+    Returns:
+        A Python code string that uses pyautogui to reproduce the actions.
     '''
 
     pyautogui_code = f"import pyautogui\nimport time\n"
@@ -469,8 +472,7 @@ def parsing_response_to_pyautogui_code(responses,
                 x = round(float((x1 + x2) / 2) * image_width, 3)
                 y = round(float((y1 + y2) / 2) * image_height, 3)
 
-                # # 先点对应区域，再滚动
-                # pyautogui_code += f"\npyautogui.click({x}, {y}, button='left')"
+                # Note: could click the region then scroll if needed
             else:
                 x = None
                 y = None

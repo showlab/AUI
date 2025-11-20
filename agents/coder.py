@@ -11,17 +11,17 @@ from .prompts.coder_prompts import (
 )
 class Coder:
     def __init__(self, model_client):
-        """代码生成Agent"""
+        """Code generation agent."""
         self.model_client = model_client
         
     async def generate_initial_website(self, model_name: str, app_name: str, instruction: str,
                                       progress_tracker: Optional[Any] = None,
                                       verbosity: Optional[str] = None,
                                       reasoning_effort: Optional[str] = None) -> str:
-        """生成初始网站（对GPT-5系列启用streaming并打印进度）"""
+        """Generate initial website (enable streaming and progress for GPT-5 series)."""
         prompt = build_coder_v0_prompt(instruction)
 
-        # 对 GPT-5 / GPT-5.1 启用 streaming 以便实时进度输出
+        # Enable streaming for GPT-5 / GPT-5.1 to surface liveness
         if model_name in ('gpt5', 'gpt5.1'):
             stream_chars = {'n': 0}
             last_log = {'t': time.time()}
@@ -43,7 +43,7 @@ class Coder:
                     pass
 
             v = verbosity if verbosity else "low"
-            # GPT-5.1 默认关闭 reasoning effort 以减速；GPT-5 保持低开销
+            # GPT-5.1 defaults to reasoning_effort=none for speed; GPT-5 keeps low overhead
             if model_name == 'gpt5.1':
                 r = reasoning_effort if reasoning_effort else "none"
             else:
@@ -67,7 +67,7 @@ class Coder:
                            v0_dir: str = None, progress_tracker: Optional[Any] = None,
                            verbosity: Optional[str] = None, reasoning_effort: Optional[str] = None,
                            non_regression_contract_prompt: Optional[str] = None) -> Dict[str, Any]:
-        """基于失败生成修订版网站 - 综合分析和改进"""
+        """Generate revised website from failures – integrated analysis and improvement."""
         # Use full initial HTML directly (no summarization)
         
         # Load task descriptions for context
@@ -110,7 +110,7 @@ class Coder:
         failure_summary = "\n".join(detailed_failures)
         v0_length = len(v0_html.strip())
         
-        # 本地模型使用无限重试，云端模型限制重试次数
+        # Local models use unbounded retries; cloud models use a capped retry count
         is_local_model = model_name in ['qwen', 'uitars']
         max_retries = float('inf') if is_local_model else 5
         retry_details = []
@@ -139,7 +139,7 @@ class Coder:
                     apply_destylization=bool(apply_destylization),
                 )
                 
-                # Streaming support for GPT-5 系列 to surface liveness
+                # Streaming support for GPT-5 series to surface liveness
                 stream_chars = {'n': 0}
                 last_log = {'t': time.time()}
 
@@ -163,7 +163,7 @@ class Coder:
                     except Exception:
                         pass
 
-                # GPT-5 与 GPT-5.1 均使用 streaming；5.1 默认 reasoning_effort=none
+                # GPT-5 and GPT-5.1 both use streaming; 5.1 defaults to reasoning_effort=none
                 if model_name == 'gpt5.1':
                     response = await self.model_client.call_coder(
                         model_name, prompt,
@@ -216,10 +216,10 @@ class Coder:
                         'retry_details': retry_details
                     }
                 else:
-                    # 对于本地模型，短HTML也要重试
+                    # For local models, retry on short HTML
                     if is_local_model:
                         attempt += 1
-                        # 调试：显示实际返回的内容
+                        # Debug: show actual returned content when HTML is too short
                         short_content = html_content[:50] if html_content else "None"
                         ts_print(f"🔄 {model_name} generated short HTML ({html_length} chars), content: {repr(short_content)}, retrying (attempt {attempt})")
                         if progress_tracker:
@@ -236,7 +236,7 @@ class Coder:
                                 pass
                         continue
                     else:
-                        # 云端模型：记录将重试（由外层重试控制）
+                        # Cloud models: record that an outer loop will retry
                         if progress_tracker:
                             try:
                                 progress_tracker.add_timing_info(
@@ -266,7 +266,7 @@ class Coder:
                     except Exception:
                         pass
                 
-                # 对于本地模型，所有异常都重试
+                # For local models, retry on all exceptions
                 if is_local_model:
                     attempt += 1
                     error_msg = str(e)[:50]
@@ -279,7 +279,7 @@ class Coder:
                             pass
                     continue
                     
-            # 云端模型检查重试次数
+            # For cloud models, respect max_retries
             attempt += 1
             if not is_local_model and attempt >= max_retries:
                 break
@@ -339,7 +339,7 @@ Reason Unsupported: {task.get('reason', 'Unknown reason')}
             ablate_no_contract=ablate_no_contract,
         )
 
-        # 本地模型使用无限重试，云端模型限制重试次数
+        # Local models use unbounded retries; cloud models use a capped retry count
         is_local_model = model_name in ['qwen', 'uitars']
         max_retries = float('inf') if is_local_model else 5
         
@@ -359,10 +359,10 @@ Reason Unsupported: {task.get('reason', 'Unknown reason')}
                         'attempts': attempt + 1
                     }
                 else:
-                    # 对于本地模型，短HTML也要重试
+                    # For local models, retry on short HTML
                     if is_local_model:
                         attempt += 1
-                        # 调试：显示实际返回的内容
+                        # Debug: show actual returned content when HTML is too short
                         short_content = html_content[:50] if html_content else "None"
                         ts_print(f"🔄 {model_name} unsupported revision generated short HTML ({len(html_content.strip())} chars), content: {repr(short_content)}, retrying (attempt {attempt})")
                         continue
@@ -374,10 +374,10 @@ Reason Unsupported: {task.get('reason', 'Unknown reason')}
                     ts_print(f"🔄 {model_name} unsupported revision error: {error_msg}..., retrying (attempt {attempt})")
                     continue
                 else:
-                    # 云端模型直接抛出异常
+                    # Cloud models: propagate error directly
                     raise e
                     
-            # 云端模型检查重试次数
+            # For cloud models, enforce max_retries
             attempt += 1
             if not is_local_model and attempt >= max_retries:
                 break
@@ -388,32 +388,32 @@ Reason Unsupported: {task.get('reason', 'Unknown reason')}
         }
     
     def _extract_html_from_response(self, response_text: str) -> str:
-        """从响应中提取HTML内容"""
-        # 尝试找到HTML代码块
+        """Extract HTML content from model response."""
+        # Try to find an explicit HTML code block
         lines = response_text.split('\n')
         html_lines = []
         in_html_block = False
         
         for line in lines:
-            # 检测HTML代码块开始
+            # Detect start of HTML code block
             if '```html' in line.lower() or '```' in line and in_html_block == False and '<!DOCTYPE' in response_text:
                 in_html_block = True
                 continue
             
-            # 检测代码块结束
+            # Detect end of HTML code block
             if '```' in line and in_html_block:
                 break
                 
-            # 如果在HTML块中，添加行
+            # If inside HTML block, collect line
             if in_html_block:
                 html_lines.append(line)
             
-            # 如果没有代码块标记但发现HTML开头，直接提取
+            # If there is no explicit code fence but HTML appears, start collecting
             if '<!DOCTYPE html>' in line or '<html' in line:
                 in_html_block = True
                 html_lines.append(line)
         
-        # 如果没有找到代码块，尝试直接提取HTML；否则返回空字符串以触发上层重试
+        # If no block was found, attempt coarse extraction from raw response; otherwise return empty to trigger retries
         if not html_lines:
             if '<!DOCTYPE html>' in response_text or '<html' in response_text:
                 start_idx = response_text.find('<!DOCTYPE html>')
@@ -426,11 +426,11 @@ Reason Unsupported: {task.get('reason', 'Unknown reason')}
         
         html_content = '\n'.join(html_lines)
         
-        # 验证HTML完整性
+        # Verify HTML is non-empty
         if not html_content.strip():
-            return ""  # 返回空以便上层识别并重试/失败
+            return ""  # Return empty so caller can detect and retry/fail
         
-        # 确保有基本的HTML结构
+        # Ensure basic HTML structure exists
         if '<!DOCTYPE html>' not in html_content and '<html' not in html_content:
             html_content = ""
         
@@ -438,14 +438,14 @@ Reason Unsupported: {task.get('reason', 'Unknown reason')}
     
      
     def load_app_instruction(self, app_name: str) -> str:
-        """加载应用指令"""
+        """Load app instruction prompt from YAML."""
         instruction_path = Path(f"examples/{app_name}.yaml")
         with open(instruction_path, 'r', encoding='utf-8') as f:
             config = yaml.safe_load(f)
             return config.get('prompt', '')
     
     def save_website(self, html_content: str, app_name: str, model_name: str, phase: str = "initial", base_dir: str = "websites") -> str:
-        """保存网站文件"""
+        """Save website file to disk."""
         if phase == "initial":
             website_dir = Path(f"{base_dir}/{app_name}/{model_name}")
         else:  # revised

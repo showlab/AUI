@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Stage 0: 生成任务
-使用GPT-5为每个应用生成30个任务，基于标签应用不同的测试哲学
+Stage 0: Generate tasks.
+Use GPT-5 to generate 30 tasks per app, applying tag-based testing philosophies.
 """
 
 import argparse
@@ -39,11 +39,11 @@ def build_json_format_example(app_name: str, app_tags: list) -> str:
 
 
 async def generate_tasks_for_app(model_name: str, app_name: str, progress_tracker, initial_dir: str = "tasks", **kwargs) -> dict:
-    """为单个应用生成任务（并行任务函数）"""
+    """Generate tasks for a single app (parallel worker)."""
     model_client = ModelClient()
     
     progress_tracker.update_status(model_name, app_name, "📋 Loading instruction...")
-    # 加载应用指令
+    # Load app instruction
     instruction_path = Path(f"examples/{app_name}.yaml")
     
     if not instruction_path.exists():
@@ -52,18 +52,18 @@ async def generate_tasks_for_app(model_name: str, app_name: str, progress_tracke
     with open(instruction_path, 'r', encoding='utf-8') as f:
         config = yaml.safe_load(f)
 
-    # 严格依赖配置字段（不做默认回退）
+    # Strictly depend on config fields (no default fallbacks)
     app_description = config['prompt']
     app_title = config['title']
     app_tags = config['tags']
     
     progress_tracker.update_status(model_name, app_name, f"✏️ Generating 30 tasks (tag: {app_tags[0]})...")
     
-    # 获取基于标签的特定内容
+    # Get tag-specific prompt content
     tag_specific_content = get_tag_based_prompt_template(app_tags)
     primary_tag = app_tags[0].lower()
     
-    # 构建基础prompt
+    # Build base prompt
     base_prompt = build_base_prompt(
         tag_type=primary_tag,
         app_title=app_title,
@@ -72,13 +72,13 @@ async def generate_tasks_for_app(model_name: str, app_name: str, progress_tracke
         primary_tag=primary_tag,
     )
     
-    # 构建JSON格式部分（严格为valid JSON示例）
+    # Build JSON-format section (strictly a valid JSON example)
     json_format = build_json_format_example(app_name, app_tags)
     
-    # 组合完整prompt
+    # Compose full prompt
     prompt = f"{base_prompt}\n\n{json_format}"
     
-    # JSON解析重试机制
+    # JSON parsing retry loop
     tasks_data = None
     last_error = None
     
@@ -89,20 +89,20 @@ async def generate_tasks_for_app(model_name: str, app_name: str, progress_tracke
             
             response = await model_client.call_task_generator(prompt)
             
-            # 尝试解析JSON响应
+            # Try to parse JSON response
             tasks_data = json.loads(response)
-            break  # 成功解析，退出循环
+            break
             
         except json.JSONDecodeError as e:
             last_error = f"JSON parsing failed (attempt {attempt + 1}/5): {str(e)}\nResponse: {response[:200]}..."
-            if attempt < 4:  # 不是最后一次尝试
-                await asyncio.sleep(1)  # 稍等一下再重试
+            if attempt < 4:
+                await asyncio.sleep(1)
             continue
     
     if tasks_data is None:
         raise ValueError(f"Failed to parse JSON after 5 attempts. Last error: {last_error}")
     
-    # 验证任务数量
+    # Validate number of tasks
     tasks = tasks_data.get('tasks', [])
     
     if not tasks:
@@ -110,7 +110,7 @@ async def generate_tasks_for_app(model_name: str, app_name: str, progress_tracke
     
     progress_tracker.update_status(model_name, app_name, "💾 Saving tasks...")
     
-    # 保存任务到文件
+    # Save tasks to file
     tasks_file = save_tasks(app_name, tasks, app_tags, base_dir=initial_dir)
     
     return {
@@ -122,8 +122,9 @@ async def generate_tasks_for_app(model_name: str, app_name: str, progress_tracke
         'tasks_file': tasks_file
     }
 
+
 def save_tasks(app_name: str, tasks: list, tags: list, base_dir: str = "tasks") -> str:
-    """保存任务到文件"""
+    """Save tasks to file."""
     tasks_dir = Path(f"{base_dir}/{app_name}")
     tasks_dir.mkdir(parents=True, exist_ok=True)
     
@@ -151,7 +152,7 @@ async def main():
     
     args = parser.parse_args()
     
-    # 解析应用列表
+    # Parse app list
     if args.apps.lower() == 'all':
         apps = DEFAULT_APPS
     else:
@@ -162,27 +163,27 @@ async def main():
     print(f"Using GPT-5 to generate 30 tasks per app with tag-based philosophy")
     print(f"Running {len(apps)} apps in parallel\n")
     
-    # 创建initial目录结构  
+    # Create initial directory layout  
     v0_base_path = f"initial/{args.initial_dir}/tasks"
     
-    # 使用ParallelRunner并行生成任务
-    runner = ParallelRunner(max_concurrent=5)  # GPT-5 only, no model parallelization needed
+    # Use ParallelRunner to generate tasks in parallel (GPT-5 only, no model parallelization)
+    runner = ParallelRunner(max_concurrent=5)
     
-    # 生成任务（只用GPT-5）
+    # Generate tasks (GPT-5 only)
     summary = await runner.run_parallel_tasks(
-        models=['gpt5'],  # 只用GPT-5生成任务
+        models=['gpt5'],
         apps=apps,
         task_func=generate_tasks_for_app,
         stage_name="Stage 0: Generate Tasks",
         initial_dir=v0_base_path
     )
     
-    # 统计结果
+    # Aggregate results
     successful_results = [r for r in summary['results'] if not r['result'].get('error')]
     total_tasks = sum(r['result'].get('count', 0) for r in successful_results)
     failed_results = [r for r in summary['results'] if r['result'].get('error')]
     
-    # 保存总结（包括详细错误信息）
+    # Save summary (including detailed error information)
     summary_data = {
         'stage': 'Stage 0: Generate Tasks',
         'total_apps': len(apps),
@@ -214,7 +215,7 @@ async def main():
     print(f"📝 Total tasks: {total_tasks}")
     print(f"📁 Summary saved to: {summary_path}")
     
-    # 显示错误概览（如果有）
+    # Show error overview (if any)
     if failed_results:
         print(f"\n❌ Failed Apps:")
         for result in failed_results:

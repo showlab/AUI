@@ -8,17 +8,17 @@ from .prompts.judge_prompts import (
 )
 
 class Judge:
-    """Judge Agent - 使用GPT-5提取状态和生成规则"""
+    """Judge Agent – use GPT-5 to extract state and generate rules."""
     
     def __init__(self, model_client=None):
         self.model_client = model_client
     
     async def analyze_website_tasks(self, app_name: str, html_content: str, 
                              tasks: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """分析网站和任务，提取状态规则"""
+        """Analyze website and tasks, and extract state rules."""
         
         try:
-            # 构建任务列表
+            # Build task list
             tasks_text = "\n".join([
                 f"{i+1}. {task.get('description', '')}"
                 for i, task in enumerate(tasks)
@@ -26,7 +26,7 @@ class Judge:
             
             prompt = build_analyze_prompt(html_content, tasks_text)
 
-            # JSON解析与结构校验重试机制
+            # JSON parsing + schema validation retry loop
             def _valid_schema(obj) -> bool:
                 if not isinstance(obj, list):
                     return False
@@ -43,17 +43,17 @@ class Judge:
             for attempt in range(5):
                 try:
                     if attempt > 0:
-                        # 重试时强调JSON格式与字段要求
+                        # On retry, emphasize JSON format and required fields
                         prompt += f"\n\nIMPORTANT: Output valid JSON array only with objects containing keys: task_index, task_description, supportable, rule, expected_outcome, reason. Attempt {attempt + 1}/5."
                     response = await self.model_client.call_judge(prompt)
                     content = response
-                    # 提取JSON部分
+                    # Extract JSON segment
                     if '```json' in content:
                         content = content.split('```json')[1].split('```')[0]
                     elif '```' in content:
                         content = content.split('```')[1].split('```')[0]
                     task_rules = json.loads(content)
-                    # 结构校验：若不合规，视为解析失败进入重试
+                    # Validate structure; if invalid, treat as parse failure and retry
                     if not _valid_schema(task_rules):
                         if attempt == 4:
                             return {
@@ -63,14 +63,14 @@ class Judge:
                         continue
                     break
                 except (json.JSONDecodeError, IndexError) as e:
-                    if attempt == 4:  # 最后一次尝试失败
+                    if attempt == 4:  # Last attempt failed
                         return {
                             'success': False,
                             'error': f"Failed to parse JSON after 5 attempts: {str(e)}"
                         }
                     continue
             
-            # 统计
+            # Aggregate statistics
             supported = [t for t in task_rules if t.get('supportable')]
             unsupported = [t for t in task_rules if not t.get('supportable')]
             
@@ -93,16 +93,16 @@ class Judge:
     
     async def analyze_website_tasks_three_component(self, app_name: str, html_content: str, 
                              tasks: List[Dict[str, Any]], component: str = "full") -> Dict[str, Any]:
-        """三组件分析 - 支持task_description, expected_outcome, reason的不同组合"""
+        """Three-component analysis – supports combinations of description, expected_outcome, and reason."""
         
         try:
-            # 构建任务列表
+            # Build task list
             tasks_text = "\n".join([
                 f"{i+1}. {task.get('description', '')}"
                 for i, task in enumerate(tasks)
             ])
             
-            # 根据组件类型调整prompt
+            # Adjust instruction based on requested component type
             if component == "description_only":
                 analysis_instruction = """Analyze each task based ONLY on the task description. Do not infer expected outcomes or provide detailed reasoning.
 
@@ -139,19 +139,19 @@ Include all six fields for each task."""
             
             prompt = build_analyze_three_component_prompt(html_content, tasks_text, analysis_instruction)
 
-            # JSON解析重试机制
+            # JSON parsing retry loop
             task_rules = None
             for attempt in range(5):
                 try:
                     if attempt > 0:
-                        # 重试时强调JSON格式
+                        # Emphasize JSON-only output on retries
                         prompt += f"\n\nIMPORTANT: You must output valid JSON only. This is attempt {attempt + 1}/5."
                     
                     response = await self.model_client.call_judge(prompt)
                     
-                    # 解析响应
+                    # Parse response
                     content = response
-                    # 提取JSON部分
+                    # Extract JSON segment
                     if '```json' in content:
                         content = content.split('```json')[1].split('```')[0]
                     elif '```' in content:
@@ -160,14 +160,14 @@ Include all six fields for each task."""
                     task_rules = json.loads(content)
                     break
                 except (json.JSONDecodeError, IndexError) as e:
-                    if attempt == 4:  # 最后一次尝试失败
+                    if attempt == 4:  # Last attempt failed
                         return {
                             'success': False,
                             'error': f"Failed to parse JSON after 5 attempts: {str(e)}"
                         }
                     continue
             
-            # 统计
+            # Aggregate statistics
             supported = [t for t in task_rules if t.get('supportable')]
             unsupported = [t for t in task_rules if not t.get('supportable')]
             
@@ -191,11 +191,11 @@ Include all six fields for each task."""
 
     async def generate_task_completion_rule(self, task_description: str, 
                                      html_content: str) -> Dict[str, Any]:
-        """为单个任务生成完成规则"""
+        """Generate completion rule for a single task."""
         
         prompt = build_single_rule_prompt(task_description, html_content)
 
-        # JSON解析重试机制
+        # JSON parsing retry loop
         for attempt in range(5):
             if attempt > 0:
                 prompt += f"\n\nIMPORTANT: You must output valid JSON only. This is attempt {attempt + 1}/5."
@@ -210,10 +210,10 @@ Include all six fields for each task."""
             return rule
     
     def evaluate_task_completion(self, rule_str: str, page_state: Dict[str, Any]) -> bool:
-        """评估任务是否完成（增强版: 支持属性选择器与更严格的exists语义）"""
+        """Evaluate whether a task is complete (enhanced: attribute selectors and stricter `exists` semantics)."""
         if not rule_str:
             return False
-        # 处理复合规则（AND/OR逻辑）
+        # Handle composite rules (AND/OR logic)
         if ' AND ' in rule_str:
             conditions = rule_str.split(' AND ')
             return all(self._evaluate_single_condition(cond.strip(), page_state) for cond in conditions)
@@ -224,7 +224,7 @@ Include all six fields for each task."""
             return self._evaluate_single_condition(rule_str, page_state)
     
     def _evaluate_single_condition(self, condition: str, page_state: Dict[str, Any]) -> bool:
-        """评估单个条件（支持 #id[attr] / #id[attr^='x'] / #id exists 等）"""
+        """Evaluate a single condition (supports #id[attr], #id[attr^='x'], #id exists, etc.)."""
         if not condition:
             return False
         condition = condition.strip()
@@ -354,9 +354,9 @@ Include all six fields for each task."""
                 actual = str(page_state.get(el_id, ''))
                 return (actual == expected) if op.strip() == '==' else (actual != expected)
 
-        # 处理复杂条件如 "#color-word text != ''"，以及 contains/startswith/endswith 变体
+        # Handle rich text conditions such as "#color-word text != ''" and contains/startswith/endswith variants
         if ' text ' in condition:
-            # 提取元素ID和操作
+            # Extract element ID and operator
             if ' text !=' in condition:
                 parts = condition.split(' text !=')
                 element_id = parts[0].strip('#')
@@ -395,7 +395,7 @@ Include all six fields for each task."""
             if left.startswith('.') or (' .' in left):
                 cls = left.split('.')[-1]
                 return _class_exists(cls)
-            # [attr...] / #id [attr...] → 全局属性扫描
+            # [attr...] / #id [attr...] → global attribute scan
             if left.startswith('[') or ('[' in left and ']' in left):
                 inside = left[left.find('[')+1 : left.rfind(']')].strip()
                 name = inside
@@ -412,7 +412,7 @@ Include all six fields for each task."""
                     pref = val or ''
                     return any(i.startswith(pref) for i in _all_ids())
                 return _scan_global_attr(name, op, val)
-            # 默认：#id[attr...] 或 #id exists
+            # Default: #id[attr...] or #id exists
             el_id, attr_name, attr_op, attr_val = _parse_id_attr(left)
             if not el_id:
                 return False
@@ -428,15 +428,15 @@ Include all six fields for each task."""
                 return _attr_matches(attr_op, v, attr_val)
             return _id_exists(el_id)
         
-        # 样式相关/点击文案等无法从纯state评估的条件不再自动通过
+        # Conditions about styles / click copy that cannot be evaluated from pure state no longer auto-pass
         if 'getComputedStyle' in condition or 'background-color' in condition or 'Clicked' in condition:
             return False
         
-        # CSS规则检查不做自动通过
+        # CSS rule checks never auto-pass
         if 'Stylesheet contains' in condition:
             return False
         
-        # 处理简单规则（扩展：icontains/startswith/endswith/比较符）
+        # Handle simple rules (extended: icontains/startswith/endswith/comparators)
         if ' icontains ' in condition:
             parts = condition.split(' icontains ')
             if len(parts) == 2:
@@ -477,7 +477,7 @@ Include all six fields for each task."""
                 try:
                     actual = float(page_state.get(element_id, 0))
                 except Exception:
-                    # 从文本中尝试提取首个数字
+                    # Try to extract first numeric token from text
                     import re
                     m = re.search(r"-?\d+(?:\.\d+)?", str(page_state.get(element_id, '')))
                     actual = float(m.group(0)) if m else 0.0
@@ -514,7 +514,7 @@ Include all six fields for each task."""
         return False
     
     def save_rules(self, app_name: str, model_name: str, rules: Dict[str, Any], version: str = "initial", v0_dir: str = None):
-        """保存规则到文件"""
+        """Save rules to a JSON file."""
         if version == "initial":
             if v0_dir:
                 rules_dir = Path(f"initial/{v0_dir}/tasks/{app_name}/states/{model_name}")

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Stage 3.1: Judge 评估修订版网站
-使用 Judge 模型分析修订版网站，重新提取状态规则
+Stage 3.1: Judge evaluation on revised websites.
+Use the Judge model to analyze revised websites and re-extract state rules.
 """
 
 import argparse
@@ -19,15 +19,16 @@ from utils.run_key import build_run_key, short_run_key
 from agents.judge import Judge
 from utils.constants import DEFAULT_APPS
 
+
 async def judge_revised_website_task(model_name: str, app_name: str, progress_tracker, experiment_name: str = "exp1", run_key: str = None, v0_dir: str = None, **kwargs) -> dict:
-    """单个修订版网站 judge 任务"""
+    """Single Judge task for one revised website."""
     try:
         model_client = ModelClient()
         judge = Judge(model_client)
         
         progress_tracker.update_status(model_name, app_name, "Loading revised website...")
         
-        # 构建修订版网站路径 (run_key layout)
+        # Build revised website path (run_key layout)
         revised_website_path = Path(f"experiments/{experiment_name}/runs/{run_key}/stage3_0/{app_name}/{model_name}/revised_website/index.html")
         
         if not revised_website_path.exists():
@@ -43,7 +44,7 @@ async def judge_revised_website_task(model_name: str, app_name: str, progress_tr
         
         progress_tracker.update_status(model_name, app_name, "Loading tasks...")
         
-        # 加载任务（使用相同的任务集）
+        # Load tasks (reuse the same task set)
         if v0_dir:
             tasks_path = Path(f"initial/{v0_dir}/tasks/{app_name}/tasks.json")
         else:
@@ -63,13 +64,13 @@ async def judge_revised_website_task(model_name: str, app_name: str, progress_tr
         
         progress_tracker.update_status(model_name, app_name, "Analyzing revised website...")
         
-        # 分析v1网站和任务（单一规则输出）
+        # Analyze v1 website and tasks (single rules output)
         analysis_result = await judge.analyze_website_tasks(app_name, html_content, tasks)
         
         if analysis_result['success']:
             progress_tracker.update_status(model_name, app_name, "Saving revised rules...")
             
-            # 保存v1规则到 runs/[run_key]/stage3_1 并清理同级目录
+            # Save v1 rules to runs/[run_key]/stage3_1 and clean sibling directory
             from shutil import rmtree
             rules_dir = Path(f"experiments/{experiment_name}/runs/{run_key}/stage3_1/{app_name}/{model_name}")
             if rules_dir.exists():
@@ -79,7 +80,7 @@ async def judge_revised_website_task(model_name: str, app_name: str, progress_tr
             with open(rules_file, 'w', encoding='utf-8') as f:
                 json.dump(analysis_result, f, indent=2, ensure_ascii=False)
             
-            # 简要比较v0和v1的支持度（可选统计）
+            # Optionally compare v0 vs v1 support counts
             if v0_dir:
                 v0_rules_path = Path(f"initial/{v0_dir}/tasks/{app_name}/states/{model_name}/rules.json")
             else:
@@ -142,21 +143,21 @@ async def main():
     
     args = parser.parse_args()
     
-    # 解析模型列表
+    # Parse model list
     models = args.models.split(',')
     
-    # 解析应用列表
+    # Parse app list
     if args.apps.lower() == 'all':
         apps = DEFAULT_APPS
     else:
         apps = args.apps.split(',')
     
-    # 处理 run_key
+    # Build run_key
     revision_type = args.revision_type
     run_key = build_run_key(revision_type, args.commenter, args.initial_dir)
     rk_short = short_run_key(run_key)
     
-    # 检查实验目录结构
+    # Check experiment directory structure
     exp_dir = Path(f"experiments/{args.experiment}")
     if not exp_dir.exists():
         print(f"Experiment directory not found: {exp_dir}")
@@ -171,13 +172,13 @@ async def main():
     print(f"Apps: {apps}")
     print(f"Using GPT-5 to analyze revised websites and extract rules")
     
-    # 检查必要文件并过滤有效组合
+    # Check required files and filter valid combinations
     valid_combinations = []
     skipped_combinations = []
     
     for model in models:
         for app in apps:
-            # 检查 run_key 路径
+            # Check run_key paths
             revised_website_path = Path(f"experiments/{args.experiment}/runs/{run_key}/stage3_0/{app}/{model}/revised_website/index.html")
             if args.initial_dir:
                 tasks_path = Path(f"initial/{args.initial_dir}/tasks/{app}/tasks.json")
@@ -204,7 +205,7 @@ async def main():
             print(f"  {model}/{app}: {', '.join(missing_files)}")
         print()
     
-    # 更新模型和应用列表为有效组合
+    # Update model/app lists to valid combinations only
     valid_models = list(set(combo[0] for combo in valid_combinations))
     valid_apps = list(set(combo[1] for combo in valid_combinations))
     print(f"✅ Processing {len(valid_combinations)} valid combinations")
@@ -212,10 +213,10 @@ async def main():
     print(f"Apps: {valid_apps}")
     print()
     
-    # 创建并行执行器
+    # Create parallel runner
     runner = ParallelRunner(max_concurrent=args.max_concurrent)
     
-    # 运行任务
+    # Run Judge tasks
     summary = await runner.run_parallel_tasks(
         models=valid_models,
         apps=valid_apps,
@@ -227,7 +228,7 @@ async def main():
         v0_dir=args.initial_dir
     )
     
-    # 计算统计信息
+    # Aggregate statistics
     total_v0_supported = 0
     total_v1_supported = 0
     total_improvement = 0
@@ -241,7 +242,7 @@ async def main():
             total_improvement += result_data.get('improvement', 0)
             total_tasks += result_data.get('total_tasks', 0)
     
-    # 保存总结
+    # Save summary payload
     detailed_summary = {
         **summary,
         'experiment_name': args.experiment,
@@ -254,14 +255,14 @@ async def main():
         'revised_support_rate': total_v1_supported / total_tasks if total_tasks > 0 else 0
     }
     
-    # 保存本地总结
+    # Save local summary
     local_summary_path = Path(f"experiments/{args.experiment}/summaries/stage3_1_judge_v1/{run_key}_summary.json")
     
     local_summary_path.parent.mkdir(parents=True, exist_ok=True)
     with open(local_summary_path, 'w', encoding='utf-8') as f:
         json.dump(detailed_summary, f, indent=2, ensure_ascii=False)
     
-    # 保存全局总结
+    # Save global summary
     base = Path(__file__).resolve().parent
     summary_path = base / "progress" / "experiments" / args.experiment / "summaries" / "stage3_1_judge_v1" / f"{run_key}_summary.json"
     summary_path.parent.mkdir(parents=True, exist_ok=True)

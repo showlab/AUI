@@ -7,7 +7,7 @@ from .prompts.commenter_prompts import build_text_only_prompt
 
 class CommenterTextOnly(BaseCommenter):
     def _load_task_info(self, app_name: str, task_id: int, v0_dir: str = None) -> Tuple[str, str]:
-        """从tasks.json加载任务信息"""
+        """Load task information from tasks.json."""
         if v0_dir:
             tasks_path = Path(f"initial/{v0_dir}/tasks/{app_name}/tasks.json")
         else:
@@ -23,7 +23,7 @@ class CommenterTextOnly(BaseCommenter):
         return f"Task {task_id}", "Unknown expected outcome"
     
     def _load_trajectory_text(self, trajectory_dir: str) -> List[dict]:
-        """从trajectory.json提取文字信息"""
+        """Extract textual information from trajectory.json."""
         trajectory_path = Path(trajectory_dir) / "trajectory.json"
         
         if not trajectory_path.exists():
@@ -38,7 +38,7 @@ class CommenterTextOnly(BaseCommenter):
             action_data = step_data.get('action', {})
             thought = step_data.get('thought', '')
             
-            # 格式化action信息
+            # Format action into a compact textual summary
             action_type = action_data.get('action', 'unknown')
             if action_type == 'left_click':
                 coord = action_data.get('coordinate', [0, 0])
@@ -65,12 +65,12 @@ class CommenterTextOnly(BaseCommenter):
         return steps
     
     def _prepare_analysis_inputs(self, storyboard_path: str, html_content: str, website_screenshot: str, width: int, height: int) -> Tuple[str, List[str]]:
-        """准备分析输入 - 使用纯文字信息"""
-        # 从storyboard路径推导trajectory目录
+        """Prepare analysis inputs using trajectory text only."""
+        # Derive trajectory directory from storyboard path
         storyboard_path_obj = Path(storyboard_path)
         trajectory_dir = storyboard_path_obj.parent
         
-        # 从路径提取app_name和task_id信息
+        # Extract app_name and task_id information from path
         path_parts = trajectory_dir.parts
         app_name = None
         task_id = None
@@ -87,21 +87,21 @@ class CommenterTextOnly(BaseCommenter):
         if not app_name or task_id is None:
             raise ValueError("Cannot extract task information from storyboard path")
         
-        # 加载任务信息
+        # Load task information
         task_description, expected_outcome = self._load_task_info(app_name, task_id, v0_dir)
         
-        # 加载轨迹文字信息
+        # Load trajectory text information
         trajectory_steps = self._load_trajectory_text(str(trajectory_dir))
         
         if not trajectory_steps:
             raise ValueError("No trajectory data found")
         
-        # 构建文字描述
+        # Build textual summary of steps
         steps_text = ""
         for step in trajectory_steps:
             steps_text += f"{step['step']}. Action: {step['action']}, Thought: {step['thought']}\n"
         
-        # 构建分析prompt（要求结构化JSON输出）
+        # Build analysis prompt (expects structured JSON output)
         step_count = len(trajectory_steps)
         prompt = build_text_only_prompt(width, height, task_description, expected_outcome, steps_text, step_count)
 

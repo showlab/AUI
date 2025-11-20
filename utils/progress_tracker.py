@@ -8,18 +8,18 @@ from datetime import datetime
 
 class ProgressTracker:
     def __init__(self, stage_name: str, models: List[str], apps: List[str]):
-        """终端进度跟踪器，优化并行任务显示"""
+        """Terminal progress tracker optimized for parallel task display."""
         self.stage_name = stage_name
         self.models = models
         self.apps = apps
         self.status_matrix = {}
-        self.error_details = {}  # 存储详细错误信息
-        self.retry_details = {}  # 存储重试详情
-        self.timing_info = {}  # 存储timing信息
-        self.analysis_info = {}  # 存储analysis内容
+        self.error_details = {}  # Store detailed error information
+        self.retry_details = {}  # Store retry details
+        self.timing_info = {}  # Store timing information
+        self.analysis_info = {}  # Store analysis entries
         self.start_time = time.time()
         self.running = True
-        self.lock = threading.Lock()  # 线程安全锁
+        self.lock = threading.Lock()  # Thread-safe lock
         self.last_update = time.time()
         # Grid paging & sizing
         self.page_index = 0
@@ -29,7 +29,7 @@ class ProgressTracker:
         self._term_cols = shutil.get_terminal_size((100, 40)).columns
         self._term_lines = shutil.get_terminal_size((100, 40)).lines
         
-        # 初始化状态矩阵
+        # Initialize status matrix
         for model in models:
             self.status_matrix[model] = {}
             self.error_details[model] = {}
@@ -44,22 +44,22 @@ class ProgressTracker:
                 self.analysis_info[model][app] = []
     
     def update_status(self, model: str, app: str, status: str, error_detail: str = None, retry_info: dict = None):
-        """线程安全的更新任务状态"""
+        """Thread-safe update of a single model/app cell."""
         with self.lock:
             if model in self.status_matrix and app in self.status_matrix[model]:
                 self.status_matrix[model][app] = status
                 if error_detail:
                     self.error_details[model][app] = error_detail
-                    # 持久化到timing日志，确保不会被刷新覆盖
+                    # Persist into timing log so it is not lost on refresh
                     ts = datetime.now().strftime("%H:%M:%S")
                     short_err = error_detail if len(error_detail) <= 150 else (error_detail[:147] + "...")
                     self.timing_info[model][app].append(f"[{ts}] ERROR: {short_err}")
                 if retry_info:
                     self.retry_details[model][app] = retry_info
-                    # 将重试摘要写入timing日志，避免刷新丢失
+                    # Write retry summary into timing log to avoid losing details
                     ts = datetime.now().strftime("%H:%M:%S")
                     if isinstance(retry_info, list):
-                        # 逐次记录更直观
+                        # Record individual attempts for clearer visualization
                         for at in retry_info:
                             attempt = at.get('attempt', '?')
                             success = at.get('success', False)
@@ -80,7 +80,7 @@ class ProgressTracker:
                 self.last_update = time.time()
     
     def add_timing_info(self, model: str, app: str, timing_text: str):
-        """添加timing信息"""
+        """Append timing information for a given model/app."""
         with self.lock:
             if model in self.timing_info and app in self.timing_info[model]:
                 from datetime import datetime
@@ -89,7 +89,7 @@ class ProgressTracker:
                 self.last_update = time.time()
     
     def add_analysis_info(self, model: str, app: str, analysis_text: str):
-        """添加analysis内容"""
+        """Append analysis content for a given model/app."""
         with self.lock:
             if model in self.analysis_info and app in self.analysis_info[model]:
                 # Truncate long analysis to 200 chars for display
@@ -100,33 +100,33 @@ class ProgressTracker:
                 self.last_update = time.time()
     
     def stop(self):
-        """停止显示循环"""
+        """Stop the display loop."""
         self.running = False
     
     async def display_loop(self):
-        """显示循环，定期刷新终端"""
+        """Display loop that periodically refreshes terminal output."""
         last_display_time = 0
         while self.running:
-            # 更频繁的检查更新，但只在有变化时刷新
+            # Poll frequently but refresh only when state changes
             current_time = time.time()
             if (current_time - last_display_time >= 1.0) or (self.last_update > last_display_time):
                 self._display_matrix()
                 last_display_time = current_time
-            await asyncio.sleep(0.5)  # 每0.5秒检查一次
+            await asyncio.sleep(0.5)  # Check every 0.5 seconds
         
-        # 最后显示一次
+        # Final paint once after stop
         self._display_matrix()
     
     def _display_matrix(self):
-        """显示状态矩阵"""
-        with self.lock:  # 确保读取状态时的线程安全
-            # 清屏并移动到顶部
+        """Render the status matrix and associated diagnostics."""
+        with self.lock:  # Ensure thread-safe reads while rendering
+            # Clear screen and move cursor to top
             os.system('clear' if os.name == 'posix' else 'cls')
-            # 读取终端尺寸
+            # Read terminal size
             size = shutil.get_terminal_size((100, 40))
             self._term_cols, self._term_lines = size.columns, size.lines
             self._small_screen = self._term_cols < 100 or self._term_lines < 40
-            # 轮换分页（仅当有多页时）
+            # Rotate pages when multiple pages exist
             now = time.time()
             if now - self.last_page_switch >= self.page_interval:
                 self.page_index += 1
@@ -140,14 +140,14 @@ class ProgressTracker:
             print(f"⏰ Time: {current_time} | Elapsed: {elapsed_str}")
             print("=" * self._term_cols)
             
-            # 动态计算列宽 + 分页
+            # Dynamically compute column width and paging
             model_col_width = 12
             available_width = max(20, self._term_cols - model_col_width - 2)
-            base_col_width = 18  # 适中列宽，避免小屏拥挤
+            base_col_width = 18  # Moderate column width to avoid a cramped grid
             col_width = max(12, min(28, base_col_width))
-            # 计算每页可容纳的app列数
+            # Compute how many app columns can fit per page
             apps_per_page = max(1, available_width // col_width)
-            # 过滤掉特殊的 BATCH 列不在可视网格中显示
+            # Exclude special BATCH column from visible grid
             display_apps_all = [a for a in self.apps if a != "BATCH"]
             total_apps = len(display_apps_all)
             total_pages = max(1, (total_apps + apps_per_page - 1) // apps_per_page) if total_apps else 1
@@ -158,24 +158,24 @@ class ProgressTracker:
             end_idx = min(total_apps, start_idx + apps_per_page)
             visible_apps = display_apps_all[start_idx:end_idx]
             
-            # 表头
+            # Header row
             header = f"{'Model':<{model_col_width}}"
             for app in visible_apps:
                 app_display = app if len(app) <= col_width - 2 else app[:max(1, col_width-5)] + "..."
                 header += f"{app_display:<{col_width}}"
             print(header)
-            # 页信息
+            # Page info
             if total_apps > 0 and total_pages > 1:
                 page_info = f"Apps {start_idx+1}-{end_idx} of {total_apps} (page {page+1}/{total_pages})"
                 print(page_info)
             print("-" * self._term_cols)
             
-            # 状态行
+            # Status rows
             for model in self.models:
                 row = f"{model:<{model_col_width}}"
                 for app in visible_apps:
                     status = self.status_matrix[model][app]
-                    # 严格截断以适配小屏网格，完整错误在下方错误区显示
+                    # Aggressively truncate to fit small grids; full errors go to detail sections
                     if len(status) > col_width - 1:
                         if "✏️" in status and "Generating" in status:
                             status = "✏️ Gen..."
@@ -188,7 +188,7 @@ class ProgressTracker:
                     row += f"{status:<{col_width}}"
                 print(row)
             
-            # 统计信息
+            # Aggregate status information
             total_tasks = len(self.models) * len(display_apps_all)
             completed = 0
             failed = 0
@@ -211,12 +211,12 @@ class ProgressTracker:
             
             if total_tasks > 0:
                 progress_percent = (completed + failed) / total_tasks * 100
-                # 动态进度条宽度，保留文案空间
+                # Dynamic progress bar width while reserving text area
                 pb_width = max(10, min(40, self._term_cols - 20))
                 progress_bar = self._create_progress_bar(progress_percent, width=pb_width)
                 print(f"📈 Progress: {progress_bar} {progress_percent:.1f}%")
                 
-                # ETA估算
+                # ETA estimation
                 if completed > 0 and elapsed > 0:
                     avg_time_per_task = elapsed / completed
                     remaining_tasks = total_tasks - completed - failed
@@ -224,20 +224,20 @@ class ProgressTracker:
                     eta_str = f"{int(eta_seconds//60):02d}:{int(eta_seconds%60):02d}"
                     print(f"⏱️ ETA: {eta_str} (avg {avg_time_per_task:.1f}s/task)")
             
-            # 显示详细错误信息、重试详情、分析内容和timing信息
+            # Render detailed error, retry, analysis, and timing sections
             self._display_errors()
             self._display_retry_details()
             self._display_analysis_info()
             self._display_timing_info()
     
     def _create_progress_bar(self, percent: float, width: int = 40) -> str:
-        """创建进度条"""
+        """Create a textual progress bar."""
         filled = int(width * percent / 100)
         bar = "█" * filled + "░" * (width - filled)
         return f"[{bar}]"
     
     def _display_errors(self):
-        """显示详细错误信息"""
+        """Display detailed error information."""
         errors = []
         
         for model in self.models:
@@ -260,13 +260,13 @@ class ProgressTracker:
                 print(f"❌ ... ({hidden} earlier errors hidden)")
             for error_info in show_list:
                 print(f"❌ {error_info['app']} + {error_info['model']}:")
-                # 显示完整错误详情
+                # Show full error text
                 error_text = error_info['error']
                 print(f"   {error_text}")
             print("━" * 40)
     
     def _display_analysis_info(self):
-        """显示最近的分析内容"""
+        """Display recent analysis entries."""
         analysis_entries = []
         
         for model in self.models:
@@ -290,7 +290,7 @@ class ProgressTracker:
             print("━" * 35)
     
     def _display_retry_details(self):
-        """显示重试详情，特别关注GPT-5的重试信息"""
+        """Display retry details, with emphasis on GPT-5 related retries."""
         retry_info = []
         
         for model in self.models:
@@ -344,7 +344,7 @@ class ProgressTracker:
             print("━" * 35)
     
     def get_summary(self) -> Dict[str, int]:
-        """获取当前状态统计"""
+        """Return current status counts."""
         total = len(self.models) * len(self.apps)
         completed = 0
         failed = 0
@@ -365,7 +365,7 @@ class ProgressTracker:
         }
     
     def get_all_errors(self) -> List[Dict[str, str]]:
-        """获取所有错误信息，用于保存到summary文件"""
+        """Return all error entries for writing into summary files."""
         errors = []
         
         for model in self.models:
@@ -381,7 +381,7 @@ class ProgressTracker:
         return errors
     
     def _display_timing_info(self):
-        """显示timing信息和错误 - 优先显示错误信息"""
+        """Display timing and error-related timing entries (errors first)."""
         timing_entries = []
         error_entries = []
         
@@ -389,18 +389,18 @@ class ProgressTracker:
             for app in self.apps:
                 if self.timing_info[model][app]:
                     for timing in self.timing_info[model][app]:
-                        # 分离错误和普通timing信息
+                        # Split error vs regular timing messages
                         if ("failed:" in timing.lower() or "error:" in timing.lower() or 
                             "exception:" in timing.lower() or "FAILED:" in timing or 
                             "ERROR:" in timing or "EXCEPTION:" in timing):
-                            # 截断错误信息到合理长度
+                            # Truncate very long error timing messages
                             if len(timing) > 150:
                                 timing = timing[:147] + "..."
                             error_entries.append(f"{app} + {model}: {timing}")
                         else:
                             timing_entries.append(f"{app} + {model}: {timing}")
         
-        # 先显示错误信息
+        # First show error-related timing entries
         if error_entries:
             print("\n" + "━" * 10 + " ERRORS/FAILURES " + "━" * 10)
             elimit = 10 if self._small_screen else 15
@@ -410,7 +410,7 @@ class ProgressTracker:
             for error in recent_errors:
                 print(f"❌ {error}")
         
-        # 再显示普通timing信息
+        # Then show regular timing entries
         if timing_entries:
             print("\n" + "━" * 10 + " TIMING INFO " + "━" * 10)
             tlimit = 12 if self._small_screen else 20

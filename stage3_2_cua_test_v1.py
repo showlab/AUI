@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Stage 3.2: CUA 测试修订版网站
-使用 UI‑TARS 7B 在修订版网站上执行任务
+Stage 3.2: CUA test on revised websites.
+Use UI‑TARS 7B to execute tasks on revised websites.
 """
 
 import argparse
@@ -20,15 +20,16 @@ from utils.run_key import build_run_key, short_run_key
 from agents.cua_policy import create_cua_policy
 from utils.constants import DEFAULT_APPS
 
+
 async def cua_test_v1_task(model_name: str, app_name: str, progress_tracker, experiment_name: str = "exp1", run_key: str = None, v0_dir: str = None, cua_model: str = "uitars", **kwargs) -> dict:
-    """单个修订版网站 CUA 测试任务"""
+    """Single CUA test task for one revised website."""
     try:
         model_client = ModelClient()
         cua_policy = create_cua_policy(model_client, cua_model_name=cua_model, max_steps=20)
         
         progress_tracker.update_status(model_name, app_name, "Loading revised rules...")
         
-        # 加载v1规则 (run_key layout)
+        # Load v1 rules (run_key layout)
         v1_rules_path = Path(f"experiments/{experiment_name}/runs/{run_key}/stage3_1/{app_name}/{model_name}/rules.json")
         
         if not v1_rules_path.exists():
@@ -42,7 +43,7 @@ async def cua_test_v1_task(model_name: str, app_name: str, progress_tracker, exp
         with open(v1_rules_path, 'r', encoding='utf-8') as f:
             rules_data = json.load(f)
         
-        # 获取支持的任务
+        # Get supported tasks
         supported_tasks = rules_data.get('analysis', {}).get('supported_tasks', [])
         
         if not supported_tasks:
@@ -58,16 +59,16 @@ async def cua_test_v1_task(model_name: str, app_name: str, progress_tracker, exp
         
         progress_tracker.update_status(model_name, app_name, f"Testing {len(supported_tasks)} revised tasks...")
         
-        # 构建修订版网站 URL（路径使用 revised_website）
+        # Build revised website URL (path uses revised_website)
         revised_website_path = Path(f"experiments/{experiment_name}/runs/{run_key}/stage3_0/{app_name}/{model_name}/revised_website/index.html").absolute()
         
         website_url = f"file://{revised_website_path}"
         
-        # 执行任务
+        # Execute tasks
         task_results = []
         completed_count = 0
         
-        # 加载任务描述映射
+        # Load task description mapping
         if v0_dir:
             tasks_file = f"initial/{v0_dir}/tasks/{app_name}/tasks.json"
         else:
@@ -76,7 +77,7 @@ async def cua_test_v1_task(model_name: str, app_name: str, progress_tracker, exp
             tasks_data = json.load(f)
         task_map = {t['id']: t['description'] for t in tasks_data['tasks']}
         
-        # 清理并创建保存轨迹与结果的目录
+        # Clean and create directory for saving trajectories and results
         from shutil import rmtree
         base_out_dir = Path(f"experiments/{experiment_name}/runs/{run_key}/stage3_2/{cua_model}/{app_name}/{model_name}")
         if base_out_dir.exists():
@@ -95,11 +96,11 @@ async def cua_test_v1_task(model_name: str, app_name: str, progress_tracker, exp
                 f"[{task_id}] Revised Task {i+1}/{len(supported_tasks)}: {task_description[:30]}..."
             )
             
-            # 为每个任务创建单独的轨迹目录（使用任务ID）
+            # Create a separate trajectory directory per task (keyed by task_id)
             task_trajectory_dir = trajectories_dir / f"{task_id}"
             task_trajectory_dir.mkdir(parents=True, exist_ok=True)
             
-            # 执行任务
+            # Execute task
             _t_start = datetime.now().isoformat()
             result = await cua_policy.execute_task(
                 app_name=app_name,
@@ -142,7 +143,7 @@ async def cua_test_v1_task(model_name: str, app_name: str, progress_tracker, exp
             if result.get('completed', False):
                 completed_count += 1
         
-        # 加载initial结果进行比较
+        # Load initial run results for comparison
         if v0_dir:
             v0_results_path = Path(f"initial/{v0_dir}/tasks/{app_name}/initial_cua_results/{model_name}/{cua_model}/results.json")
         else:
@@ -156,7 +157,7 @@ async def cua_test_v1_task(model_name: str, app_name: str, progress_tracker, exp
             v0_completed = v0_results.get('completed_tasks', 0)
             v0_total = v0_results.get('tested_tasks', 0)
         
-        # 保存聚合概览（覆盖写）
+        # Save aggregated overview (overwrite)
         summary = {
             'run_key': run_key,
             'cua_model': cua_model,
@@ -219,21 +220,21 @@ async def main():
     
     args = parser.parse_args()
     
-    # 解析模型列表
+    # Parse model list
     models = args.models.split(',')
     
-    # 解析应用列表
+    # Parse app list
     if args.apps.lower() == 'all':
         apps = DEFAULT_APPS
     else:
         apps = args.apps.split(',')
     
-    # 处理 run_key
+    # Build run_key
     revision_type = args.revision_type
     run_key = build_run_key(revision_type, args.commenter, args.initial_dir)
     rk_short = short_run_key(run_key)
     
-    # 检查实验目录结构
+    # Check experiment directory structure
     exp_dir = Path(f"experiments/{args.experiment}")
     if not exp_dir.exists():
         print(f"Experiment directory not found: {exp_dir}")
@@ -250,13 +251,13 @@ async def main():
     cua_models = args.cua_models.split(',')
     print(f"CUA models: {cua_models}")
     
-    # 检查必要文件并过滤有效组合
+    # Check required files and filter valid combinations
     valid_combinations = []
     skipped_combinations = []
     
     for model in models:
         for app in apps:
-            # 检查 run_key 路径
+            # Check run_key paths
             revised_website_path = Path(f"experiments/{args.experiment}/runs/{run_key}/stage3_0/{app}/{model}/revised_website/index.html")
             v1_rules_path = Path(f"experiments/{args.experiment}/runs/{run_key}/stage3_1/{app}/{model}/rules.json")
             
@@ -280,7 +281,7 @@ async def main():
             print(f"  {model}/{app}: {', '.join(missing_files)}")
         print()
     
-    # 更新模型和应用列表为有效组合
+    # Update model and app lists to valid combinations only
     valid_models = list(set(combo[0] for combo in valid_combinations))
     valid_apps = list(set(combo[1] for combo in valid_combinations))
     print(f"✅ Processing {len(valid_combinations)} valid combinations")
@@ -288,10 +289,10 @@ async def main():
     print(f"Apps: {valid_apps}")
     print()
     
-    # 创建并行执行器
+    # Create parallel runner
     runner = ParallelRunner(max_concurrent=args.max_concurrent)
     
-    # 为每个CUA模型运行任务
+    # Run tasks for each CUA model
     all_results = []
     for cua_model in cua_models:
         print(f"\n🤖 Testing with CUA model: {cua_model}")
@@ -311,7 +312,7 @@ async def main():
             'summary': summary
         })
     
-    # 计算统计信息 (跨所有 CUA 模型)
+    # Aggregate statistics across all CUA models
     total_initial_completed = 0
     total_revised_completed = 0
     total_improvement = 0
@@ -326,7 +327,7 @@ async def main():
                 total_improvement += result_data.get('improvement', 0)
                 total_tested += result_data.get('total_tasks', 0)
     
-    # 保存总结 (包含所有 CUA 模型结果)
+    # Save summary (including all CUA models)
     detailed_summary = {
         'cua_models': cua_models,
         'all_results': all_results,
@@ -340,14 +341,14 @@ async def main():
         'revised_success_rate': total_revised_completed / total_tested if total_tested > 0 else 0
     }
     
-    # 保存本地总结
+    # Save local summary
     local_summary_path = Path(f"experiments/{args.experiment}/summaries/stage3_2_cua_test_v1/{run_key}_summary.json")
     
     local_summary_path.parent.mkdir(parents=True, exist_ok=True)
     with open(local_summary_path, 'w', encoding='utf-8') as f:
         json.dump(detailed_summary, f, indent=2, ensure_ascii=False)
     
-    # 保存全局总结
+    # Save global summary
     base = Path(__file__).resolve().parent
     summary_path = base / "progress" / "experiments" / args.experiment / "summaries" / "stage3_2_cua_test_v1" / f"{run_key}_summary.json"
     summary_path.parent.mkdir(parents=True, exist_ok=True)

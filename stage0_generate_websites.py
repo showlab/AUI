@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Stage 0: 生成初始网站
-并行生成多个模型×多个 app 的初始网站
+Stage 0: Generate initial websites.
+Run initial website generation in parallel for multiple models × multiple apps.
 """
 
 import argparse
@@ -17,19 +17,20 @@ from utils.parallel_runner import ParallelRunner
 from agents.coder import Coder
 from utils.constants import DEFAULT_APPS
 
+
 async def generate_website_task(model_name: str, app_name: str, progress_tracker, initial_dir: str = "websites", **kwargs) -> dict:
-    """单个网站生成任务"""
+    """Single website generation task."""
     model_client = ModelClient()
     coder = Coder(model_client)
     
     progress_tracker.update_status(model_name, app_name, "📋 Loading instruction...")
     
-    # 加载应用指令
+    # Load app instruction
     instruction = coder.load_app_instruction(app_name)
     
     progress_tracker.update_status(model_name, app_name, "✏️ Generating website...")
     
-    # 生成网站（对GPT-5系列启用streaming，进度输出由Coder负责）
+    # Generate website (GPT-5 series use streaming; Coder handles progress output)
     html_content = await coder.generate_initial_website(
         model_name, app_name, instruction,
         progress_tracker=progress_tracker
@@ -37,7 +38,7 @@ async def generate_website_task(model_name: str, app_name: str, progress_tracker
     
     progress_tracker.update_status(model_name, app_name, "💾 Saving website...")
     
-    # 保存网站
+    # Save website
     website_path = coder.save_website(html_content, app_name, model_name, phase="initial", base_dir=initial_dir)
     
     return {
@@ -60,10 +61,10 @@ async def main():
     
     args = parser.parse_args()
     
-    # 解析模型列表
+    # Parse model list
     models = args.models.split(',')
     
-    # 解析应用列表
+    # Parse app list
     if args.apps.lower() == 'all':
         apps = DEFAULT_APPS
     else:
@@ -74,13 +75,13 @@ async def main():
     print(f"Apps: {apps}")
     print(f"Total tasks: {len(models)} × {len(apps)} = {len(models) * len(apps)}")
     
-    # 创建并行执行器
+    # Create parallel runner
     runner = ParallelRunner(max_concurrent=args.max_concurrent)
     
-    # 创建v0目录结构
+    # Build v0 directory layout
     v0_base_path = f"initial/{args.initial_dir}/websites"
     
-    # 运行任务
+    # Run tasks
     summary = await runner.run_parallel_tasks(
         models=models,
         apps=apps,
@@ -89,13 +90,13 @@ async def main():
         initial_dir=v0_base_path
     )
     
-    # 保存总结（包括详细错误信息）
+    # Save summary (including detailed error information)
     import json
     
     successful_count = summary['successful_tasks']
     failed_count = summary['failed_tasks']
     
-    # 增强的summary数据
+    # Enriched summary payload
     enhanced_summary = {
         'stage': summary['stage'],
         'total_tasks': summary['total_tasks'],

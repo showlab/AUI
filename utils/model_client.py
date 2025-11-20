@@ -10,18 +10,18 @@ from .providers.openai_generic import chat_completion as openai_chat
 from .logging_utils import ts_print
 
 class ModelClient:
-    """统一模型客户端，支持多种模型（无额外配额/限流控制）"""
+    """Unified model client supporting multiple models (no extra quota/throttle layer here)."""
     
     def __init__(self):
         self.config = self._load_config()
         self._check_environment_variables()
 
-    # 移除Azure限流与配额逻辑；直接调用
+    # Azure-specific throttling/quotas are removed; direct calls are used.
         
     def _load_config(self) -> Dict[str, Any]:
-        """加载并处理模型配置（严格要求配置文件存在且可解析）
-        
-        - 支持对所有形如 ${VARNAME} 的字符串做环境变量替换
+        """Load and process model configuration (config file must exist and be parseable).
+
+        - Supports environment-variable substitution for all strings of the form ${VARNAME}
         """
         import yaml
         config_path = 'configs/models.yaml'
@@ -44,7 +44,7 @@ class ModelClient:
         return {'models': models}
     
     def _check_environment_variables(self):
-        """检查必要的环境变量"""
+        """Check required environment variables."""
         missing_vars = []
         
         for model_name, model_config in self.config['models'].items():
@@ -54,13 +54,13 @@ class ModelClient:
                     missing_vars.append(f"OPENAI_API_KEY (for {model_name})")
                 elif model_config['provider'] == 'azure_openai':
                     missing_vars.append(f"AZURE_OPENAI_API_KEY (for {model_name})")
-                # gemini 使用GCP项目认证，这里不强制检查
+                # Gemini uses GCP project authentication; do not enforce key check here
         
         if missing_vars:
             raise ValueError(f"Missing environment variables: {', '.join(missing_vars)}")
     
     def _get_client(self, model_name: str):
-        """获取模型客户端"""
+        """Get underlying SDK client for the configured provider."""
         model_config = self.config['models'][model_name]
         provider = model_config['provider']
         
@@ -80,11 +80,11 @@ class ModelClient:
             project = model_config.get('project')
             location = model_config.get('location', 'global')
             return genai.Client(vertexai=True, project=project, location=location)
-        # openai
+        # OpenAI-compatible default
         return OpenAI(api_key=model_config['api_key'])
     
     def _build_openai_messages(self, prompt: str, images: Optional[List[str]] = None) -> List[Dict[str, Any]]:
-        """构建OpenAI兼容的messages结构（文本+可选图像）"""
+        """Build OpenAI-compatible messages (text + optional images)."""
         if not images:
             return [{"role": "user", "content": prompt}]
         content: List[Dict[str, Any]] = [{"type": "text", "text": prompt}]
@@ -106,7 +106,7 @@ class ModelClient:
         return [{"role": "user", "content": content}]
     
     def _is_rate_limit_error(self, error: Exception) -> bool:
-        """检查是否为429错误"""
+        """Check whether the error corresponds to a 429 rate-limit response."""
         error_str = str(error)
         return '429' in error_str
     
@@ -116,14 +116,14 @@ class ModelClient:
                                          verbosity: str = "medium", 
                                          reasoning_effort: str = "medium",
                                          stream_callback: Optional[Callable[[str], None]] = None) -> str:
-        """调用模型API - GPT-5专用版本，支持verbosity和reasoning_effort参数"""
+        """Call model API for GPT-5 series with verbosity and reasoning_effort parameters."""
         import asyncio
 
         client = self._get_client(model_name)
         model_config = self.config['models'][model_name]
         is_local = model_config['provider'] == 'local'
         
-        # 构建消息
+        # Build messages payload
         messages = []
         if images:
             content = [{"type": "text", "text": prompt}]
@@ -180,7 +180,7 @@ class ModelClient:
                     loop = asyncio.get_event_loop()
                     return await loop.run_in_executor(None, _do_call)
                 else:
-                    # 其他提供商使用常规调用
+                    # Other providers use the generic call_model path
                     return await self.call_model(model_name, prompt, images, temperature)
                 
             except Exception as e:
@@ -191,7 +191,7 @@ class ModelClient:
                     continue
                 if attempt == 4:
                     raise e
-                # 对于非429错误，也要继续重试
+                # For non-429 errors, continue retrying with a short delay
                 await asyncio.sleep(1)
                 continue
         
@@ -200,7 +200,7 @@ class ModelClient:
     async def call_model(self, model_name: str, prompt: str, 
                    images: Optional[List[str]] = None,
                    temperature: float = 0.3) -> str:
-        """异步调用模型API"""
+        """Asynchronously call a model API."""
         import asyncio
         
         client = self._get_client(model_name)
@@ -214,7 +214,7 @@ class ModelClient:
         while True:
             try:
                 def _make_request():
-                    # Gemini 3 通过 google-genai 接口（支持文本+截图）
+                    # Gemini 3 via google-genai interface (supports text + screenshots)
                     if provider == 'gemini':
                         from google.genai import types  # type: ignore
                         parts: List[Any] = [types.Part(text=prompt)]
@@ -300,13 +300,13 @@ class ModelClient:
                 raise e
     
     async def call_operator_model(self, prompt: str, screenshot: Optional[str] = None) -> str:
-        """调用operator模型使用computer-use-preview API"""
+        """Call operator model using computer-use-preview API."""
         import asyncio
         
         client = self._get_client('operator')
         model_config = self.config['models']['operator']
         
-        # 构建input按照OpenAI computer-use格式
+        # Build input in OpenAI computer-use format
         content = [{"type": "input_text", "text": prompt}]
         
         if screenshot:
@@ -315,12 +315,12 @@ class ModelClient:
             elif (("/" in screenshot or "\\" in screenshot) and 
                   not screenshot.startswith(("iVBOR", "/9j", "UklG")) and
                   len(screenshot) < 1000):
-                # 文件路径格式
+                # Screenshot path – load and encode
                 with open(screenshot, "rb") as f:
                     base64_data = base64.b64encode(f.read()).decode()
                 base64_image = f"data:image/png;base64,{base64_data}"
             else:
-                # 纯base64字符串
+                # Raw base64-encoded string
                 base64_image = f"data:image/png;base64,{screenshot}"
             
             content.append({
@@ -330,7 +330,7 @@ class ModelClient:
         
         input_data = [{"role": "user", "content": content}]
         
-        # 重试机制 - OpenAI有限重试
+        # Retry mechanism – bounded retries for OpenAI
         max_retries = 5
         attempt = 0
         
@@ -357,19 +357,19 @@ class ModelClient:
                 loop = asyncio.get_event_loop()
                 response = await loop.run_in_executor(None, _make_request)
                 
-                # 返回原始OpenAI响应对象，让OperatorCUAPolicy处理
+                # Return raw OpenAI response to be handled by OperatorCUAPolicy
                 return response
                 
             except Exception as e:
                 attempt += 1
                 error_msg = str(e)[:100]
                 
-                # 有限重试
+                # Bounded retry loop
                 if attempt > max_retries:
                     ts_print(f"❌ {model_config.get('deployment', 'operator')} model failed after {max_retries} attempts: {error_msg}")
                     raise e
                 
-                # 重试逻辑
+                # Retry with fixed delay
                 retry_delay = 2
                 ts_print(f"🔄 {model_config.get('deployment', 'operator')} model error (attempt {attempt}/{max_retries}): {error_msg}... retrying in {retry_delay}s")
                 await asyncio.sleep(retry_delay)
@@ -468,8 +468,9 @@ class ModelClient:
         return await loop.run_in_executor(None, _make_request)
     
     async def call_coder(self, model_name: str, prompt: str, *, verbosity: str = None, reasoning_effort: str = None, stream_callback: Optional[Callable[[str], None]] = None) -> str:
-        """调用代码生成模型
-        - 支持可选的verbosity与reasoning_effort（GPT-5 系列有效）
+        """Call code-generation model.
+
+        - Supports optional verbosity and reasoning_effort (for GPT-5 series).
         """
         if model_name in ('gpt5', 'gpt5.1'):
             v = verbosity if verbosity else "low"
@@ -481,15 +482,15 @@ class ModelClient:
         return await self.call_model(model_name, prompt, temperature=0.7)
     
     async def call_judge(self, prompt: str, images: Optional[List[str]] = None) -> str:
-        """调用judge模型 - 使用GPT-5.1"""
+        """Call judge model (GPT-5.1)."""
         return await self.call_model('gpt5.1', prompt, images, temperature=0.3)
     
     async def call_task_generator(self, prompt: str) -> str:
-        """调用任务生成模型 - 使用GPT-5.1"""
+        """Call task-generation model (GPT-5.1)."""
         return await self.call_model('gpt5.1', prompt, temperature=0.3)
     
     async def call_commenter(self, model_name: str, prompt: str, images: List[str]) -> str:
-        """调用commenter模型进行版本选择 - 针对简短分析任务优化"""
+        """Call commenter model for version selection (optimized for short analyses)."""
         # GPT-5 commenter: low reasoning_effort; GPT-5.1 commenter: none
         if model_name == 'gpt5':
             return await self.call_model_with_gpt5_params(
@@ -504,11 +505,11 @@ class ModelClient:
         return await self.call_model(model_name, prompt, images, temperature=0.3)
     
     async def call_cua_model(self, model_name: str, prompt: str, images: Optional[List[str]] = None) -> str:
-        """调用CUA模型（UI-TARS或operator）"""
+        """Call CUA model (UI-TARS or operator)."""
         if model_name == 'operator':
-            # operator模型使用特殊的API
+            # Operator model uses a dedicated API
             screenshot = images[0] if images else None
             return await self.call_operator_model(prompt, screenshot)
         else:
-            # UI-TARS等其他CUA模型使用常规API
+            # UI-TARS and other CUA models use generic call_model
             return await self.call_model(model_name, prompt, images, temperature=0.3)

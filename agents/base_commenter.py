@@ -17,15 +17,15 @@ _pool_lock = asyncio.Lock()
 
 class BaseCommenter(ABC):
     def __init__(self, model_client):
-        """分析CUA失败轨迹的UI问题 - 基类"""
+        """Base class for analyzing UI issues from failed CUA trajectories."""
         self.model_client = model_client
-        # 映射到对应的VLM模型配置
+        # Map logical model names to concrete VLM configs
         self.model_mapping = {
             'qwen': 'qwen2.5-vl-72b'
         }
         
     def _get_actual_model_name(self, model_name: str) -> str:
-        """获取实际的模型名称"""
+        """Resolve the actual model name used by the client."""
         return self.model_mapping.get(model_name, model_name)
     
     async def _safe_capture_screenshot(self, html_content: str, timeout_seconds: int = 30) -> tuple[str, tuple[int, int]]:
@@ -59,7 +59,7 @@ class BaseCommenter(ABC):
                     pass  # Ignore cleanup errors
     
     async def _capture_version_screenshot(self, html_content: str) -> tuple[str, tuple[int, int]]:
-        """为HTML版本截图 - 使用浏览器池防止资源耗尽
+        """Capture screenshot for HTML version using a browser pool to avoid resource exhaustion.
         
         Returns:
             tuple: (screenshot_base64, (width, height))
@@ -67,16 +67,16 @@ class BaseCommenter(ABC):
         browser = await self._get_browser_from_pool()
         
         try:
-            # 创建临时HTML文件
+            # Create a temporary HTML file
             with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8') as f:
                 f.write(html_content)
                 temp_html_path = f.name
             
-            # 加载页面
+            # Load page
             await browser.navigate_to(f"file://{temp_html_path}")
-            await asyncio.sleep(0.5)  # 减少等待时间
+            await asyncio.sleep(0.5)  # Short wait to allow layout
             
-            # 获取页面实际尺寸
+            # Get actual page size
             page_size = await browser.page.evaluate("""() => {
                 return {
                     width: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth),
@@ -84,10 +84,10 @@ class BaseCommenter(ABC):
                 }
             }""")
             
-            # 截图
+            # Take screenshot
             screenshot_base64 = await browser.screenshot()
             
-            # 清理临时文件
+            # Clean up temporary file
             Path(temp_html_path).unlink()
             
             return screenshot_base64, (page_size['width'], page_size['height'])
@@ -97,7 +97,7 @@ class BaseCommenter(ABC):
     
     @abstractmethod
     def _prepare_analysis_inputs(self, storyboard_path: str, html_content: str, website_screenshot: str, width: int, height: int) -> tuple[str, List[str]]:
-        """准备分析输入 - 子类实现具体逻辑
+        """Prepare analysis inputs – subclasses implement concrete logic.
         
         Returns:
             tuple: (prompt, screenshot_inputs)
@@ -105,34 +105,34 @@ class BaseCommenter(ABC):
         pass
     
     async def analyze_single_failure(self, storyboard_path: str, html_content: str, model_name: str = "gpt5") -> str:
-        """分析单个CUA失败轨迹的UI问题
+        """Analyze UI issues for a single failed CUA trajectory.
         
         Args:
-            storyboard_path: storyboard图片路径
-            html_content: 网站HTML内容
-            model_name: 用于分析的模型（gpt5, gpt4o, qwen等）
+            storyboard_path: Path to storyboard image.
+            html_content: Website HTML content.
+            model_name: Model used for analysis (gpt5, gpt4o, qwen, etc.).
             
         Returns:
-            str: 该轨迹失败的UI设计问题分析
+            str: Analysis of UI design issues that caused the failure.
         """
         try:
-            # 检查storyboard文件是否存在
+            # Check storyboard presence
             if not Path(storyboard_path).exists():
                 return "Storyboard image not found - cannot analyze failure"
             
-            # 获取网站截图用于对比
+            # Capture website screenshot for comparison
             website_screenshot, (width, height) = await self._safe_capture_screenshot(html_content)
             
-            # 由子类准备具体的分析输入
+            # Let subclass prepare concrete analysis inputs
             prompt, screenshot_inputs = self._prepare_analysis_inputs(
                 storyboard_path, html_content, website_screenshot, width, height
             )
             
-            # 使用配置的模型进行分析（通常使用VLM如GPT-5或GPT-4o）
+            # Use configured model for analysis (typically VLM such as GPT-5 or GPT-4o)
             max_retries = 5
             for attempt in range(max_retries):
                 try:
-                    # 使用指定的模型进行视觉分析
+                    # Run visual analysis with the resolved model
                     actual_model = self._get_actual_model_name(model_name)
                     response = await self.model_client.call_commenter(actual_model, prompt, screenshot_inputs)
                     if response and len(response.strip()) > 30:

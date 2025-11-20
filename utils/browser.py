@@ -3,9 +3,10 @@ import json
 from typing import Dict, Any, List, Optional
 from playwright.async_api import async_playwright
 
+
 class BrowserController:
     def __init__(self, headless: bool = True, width: int = 1280, height: int = 720):
-        """简化的浏览器控制器"""
+        """Minimal browser controller for AUI experiments."""
         self.headless = headless
         self.width = width
         self.height = height
@@ -14,7 +15,7 @@ class BrowserController:
         self.page = None
         
     async def start(self):
-        """启动浏览器"""
+        """Launch browser."""
         self.playwright = await async_playwright().start()
         self.browser = await self.playwright.chromium.launch(
             headless=self.headless,
@@ -26,45 +27,45 @@ class BrowserController:
         self.page = await context.new_page()
         
     async def close(self):
-        """关闭浏览器"""
+        """Close browser and stop Playwright."""
         if self.browser:
             await self.browser.close()
         if self.playwright:
             await self.playwright.stop()
     
     async def navigate_to(self, url: str):
-        """导航到指定URL"""
+        """Navigate to the given URL."""
         await self.page.goto(url, wait_until='domcontentloaded', timeout=60000)
     
     async def screenshot(self, path: Optional[str] = None, full_page: bool = True) -> str:
-        """截图 - 支持全页面或视口截图"""
+        """Capture screenshot (full page or viewport)."""
         if path:
             await self.page.screenshot(path=path, full_page=full_page)
             return path
         else:
-            # 返回base64编码的截图
+            # Return screenshot as base64-encoded string
             screenshot_bytes = await self.page.screenshot(full_page=full_page)
             import base64
             return base64.b64encode(screenshot_bytes).decode()
     
     async def viewport_screenshot(self, path: Optional[str] = None) -> str:
-        """视口截图 - CUA专用"""
+        """Capture viewport-only screenshot (used by CUA)."""
         return await self.screenshot(path, full_page=False)
     
     async def click_at_coordinates(self, x: int, y: int):
-        """在指定坐标点击"""
+        """Click at the given coordinates."""
         await self.page.mouse.click(x, y)
         await asyncio.sleep(0.5)
         return {"success": True, "message": "Clicked"}
     
     async def type_text(self, text: str):
-        """在当前焦点输入文本"""
+        """Type text into the current focused element."""
         await self.page.keyboard.type(text)
         await asyncio.sleep(0.5)
         return {"success": True, "message": f"Typed: {text}"}
     
     async def scroll(self, direction: str = "down"):
-        """滚动页面"""
+        """Scroll the page up or down."""
         if direction.lower() == "up":
             await self.page.evaluate("window.scrollBy(0, -500)")
         else:
@@ -73,14 +74,14 @@ class BrowserController:
         return {"success": True, "message": f"Scrolled {direction}"}
 
     async def scroll_by(self, delta_x: int = 0, delta_y: int = 0):
-        """按像素精确滚动页面，支持水平和垂直方向"""
+        """Scroll by pixels, supporting horizontal and vertical movement."""
         # Use native wheel to avoid evaluate arg mismatch issues
         await self.page.mouse.wheel(delta_x, delta_y)
         await asyncio.sleep(0.5)
         return {"success": True, "message": f"Scrolled by dx={delta_x}, dy={delta_y}"}
 
     async def scroll_to_coordinates(self, x: int, y: int, direction: str = "down", pixels: int = 500):
-        """在指定坐标位置滚动"""
+        """Scroll anchored at a given coordinate."""
         scroll_delta = -pixels if direction.lower() == "up" else pixels
         # Move to anchor, then wheel with deltaY
         await self.page.mouse.move(x, y)
@@ -88,19 +89,19 @@ class BrowserController:
         await asyncio.sleep(0.5)
     
     async def double_click_at_coordinates(self, x: int, y: int):
-        """在指定坐标双击"""
+        """Double-click at the given coordinates."""
         await self.page.mouse.dblclick(x, y)
         await asyncio.sleep(0.5)
         return {"success": True, "message": "Double clicked"}
     
     async def right_click_at_coordinates(self, x: int, y: int):
-        """在指定坐标右击"""
+        """Right-click at the given coordinates."""
         await self.page.mouse.click(x, y, button='right')
         await asyncio.sleep(0.5)
         return {"success": True, "message": "Right clicked"}
     
     async def move_to_coordinates(self, x: int, y: int):
-        """移动鼠标到指定坐标"""
+        """Move mouse to the given coordinates."""
         await self.page.mouse.move(x, y)
         await asyncio.sleep(0.5)
         return {"success": True, "message": "Mouse moved"}
@@ -146,21 +147,21 @@ class BrowserController:
         return key_mapping.get(lk, key)
 
     async def press_keys(self, keys: list):
-        """按下键盘组合键"""
+        """Press a combination of keys."""
         if not keys:
             return {"success": False, "error": "No keys provided"}
         
         # Map all key names to Playwright-compatible names
         mapped_keys = [self._map_key_name(key) for key in keys]
         
-        # 按下所有修饰键
+        # Press all modifier keys first
         for key in mapped_keys[:-1]:
             await self.page.keyboard.down(key)
         
-        # 按下最后一个键
+        # Press the last key
         await self.page.keyboard.press(mapped_keys[-1])
         
-        # 释放修饰键
+        # Release modifier keys
         for key in reversed(mapped_keys[:-1]):
             await self.page.keyboard.up(key)
         
@@ -168,27 +169,27 @@ class BrowserController:
         return {"success": True, "message": f"Pressed keys: {' + '.join(keys)}"}
     
     async def drag_to_coordinates(self, x: int, y: int):
-        """拖拽到指定坐标(需要先有鼠标按下状态)"""
+        """Drag to the given coordinates (mouse must already be down)."""
         await self.page.mouse.move(x, y)
         await self.page.mouse.up()
         await asyncio.sleep(0.5)
         return {"success": True, "message": "Dragged to coordinates"}
 
     async def mouse_down_at(self, x: int, y: int):
-        """在指定坐标按下鼠标左键"""
+        """Press mouse left button at given coordinates."""
         await self.page.mouse.move(x, y)
         await self.page.mouse.down()
         await asyncio.sleep(0.2)
         return {"success": True, "message": "Mouse down"}
 
     async def mouse_up(self):
-        """释放鼠标左键"""
+        """Release mouse left button."""
         await self.page.mouse.up()
         await asyncio.sleep(0.2)
         return {"success": True, "message": "Mouse up"}
 
     async def drag_from_to(self, x1: int, y1: int, x2: int, y2: int):
-        """从(x1,y1)按下并拖拽到(x2,y2)然后释放"""
+        """Press at (x1, y1), drag to (x2, y2), then release."""
         await self.page.mouse.move(x1, y1)
         await self.page.mouse.down()
         await self.page.mouse.move(x2, y2)
@@ -197,7 +198,7 @@ class BrowserController:
         return {"success": True, "message": f"Dragged from ({x1},{y1}) to ({x2},{y2})"}
     
     async def inject_state_monitor_script(self):
-        """注入状态监控脚本"""
+        """Inject state-monitoring script into the page."""
         script = """
         window.AUIStateMonitor = {
             getState: function() {
@@ -222,13 +223,13 @@ class BrowserController:
                     state.__meta_active_element_id = (ae && ae.id) ? ae.id : '';
                 } catch (e) {}
                 
-                // 提取所有有ID的元素的文本内容
+                // Extract text for all elements that have an ID
                 const elementsWithId = document.querySelectorAll('[id]');
                 elementsWithId.forEach(elem => {
                     if (elem.id) {
                         state[elem.id] = elem.textContent.trim();
                         
-                        // 提取输入值
+                        // Extract values for input-like elements
                         if (elem.tagName === 'INPUT' || elem.tagName === 'TEXTAREA' || elem.tagName === 'SELECT') {
                             if (elem.type === 'checkbox' || elem.type === 'radio') {
                                 state[elem.id] = elem.checked;
@@ -237,7 +238,7 @@ class BrowserController:
                             }
                         }
                         
-                        // 记录可见性
+                        // Record visibility
                         try {
                             const cs = getComputedStyle(elem);
                             state[elem.id + '_visible'] = !elem.hidden && cs.display !== 'none' && cs.visibility !== 'hidden' && cs.opacity !== '0';
@@ -245,10 +246,10 @@ class BrowserController:
                             state[elem.id + '_visible'] = !elem.hidden;
                         }
                         
-                        // 记录class和data-*以捕获状态变化
+                        // Record class and data-* attributes to capture state changes
                         try { state[elem.id + '_class'] = elem.className || ''; } catch (e) {}
                         try { state[elem.id + '_data'] = Object.assign({}, elem.dataset || {}); } catch (e) {}
-                        // 记录 aria-* 属性（作为可监测状态）
+                        // Record aria-* attributes as observable state
                         try {
                             const aria = {};
                             if (elem.attributes) {
@@ -261,7 +262,7 @@ class BrowserController:
                             }
                             state[elem.id + '_aria'] = aria;
                         } catch (e) {}
-                        // 记录常见HTML属性用于规则评估（仅选择一小部分以保持简洁）
+                        // Record a small subset of common HTML attributes for rule evaluation
                         try {
                             const attr = {};
                             const names = ['href','src','download','role','type','value'];
@@ -276,7 +277,7 @@ class BrowserController:
                     }
                 });
                 
-                // 额外提取没有ID但有重要class的元素
+                // Additionally collect elements without IDs but with important classes
                 const importantClasses = ['.result', '.output', '.score', '.status', '.message', 
                                         '.timer', '.color-word', '.color-button'];
                 importantClasses.forEach(selector => {
@@ -285,7 +286,7 @@ class BrowserController:
                         const key = selector.replace('.', '') + (index > 0 ? `_${index}` : '');
                         state[key] = elem.textContent.trim();
                         
-                        // 对于输入元素，也提取值
+                        // For input elements, also extract values
                         if (elem.tagName === 'INPUT' || elem.tagName === 'TEXTAREA' || elem.tagName === 'SELECT') {
                             if (elem.type === 'checkbox' || elem.type === 'radio') {
                                 state[key] = elem.checked;
@@ -293,12 +294,12 @@ class BrowserController:
                                 state[key] = elem.value;
                             }
                         }
-                        // 记录class以捕获部分视觉状态
+                        // Record class to capture part of the visual state
                         try { state[key + '_class'] = elem.className || ''; } catch (e) {}
                     });
                 });
                 
-                // 提取通用输入值（作为备用）
+                // Collect generic input values as a backup
                 const inputs = document.querySelectorAll('input, textarea, select');
                 inputs.forEach((input, index) => {
                     if (!input.id) {
@@ -318,16 +319,16 @@ class BrowserController:
         await self.page.evaluate(script)
     
     async def get_page_state(self) -> Dict[str, Any]:
-        """获取页面状态"""
+        """Return current page state from injected monitor."""
         state = await self.page.evaluate("window.AUIStateMonitor.getState()")
         return state
     
     async def get_page_content(self) -> str:
-        """获取页面HTML内容"""
+        """Get full page HTML content."""
         return await self.page.content()
     
     async def get_page_info(self) -> Dict[str, Any]:
-        """获取页面基本信息"""
+        """Get basic page info (URL, title, readyState)."""
         return {
             "url": self.page.url,
             "title": await self.page.title(),

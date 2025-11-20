@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Stage 1: Judge评估初始网站
-使用Judge模型分析初始网站，提取状态规则
+Stage 1: Judge evaluation on initial websites.
+Use the Judge model to analyze initial websites and extract state rules.
 """
 
 import argparse
@@ -18,15 +18,16 @@ from utils.parallel_runner import ParallelRunner
 from agents.judge import Judge
 from utils.constants import DEFAULT_APPS
 
+
 async def judge_website_task(model_name: str, app_name: str, progress_tracker, initial_dir: str = None, **kwargs) -> dict:
-    """单个网站judge任务"""
+    """Single website Judge task."""
     try:
         model_client = ModelClient()
         judge = Judge(model_client)
         
         progress_tracker.update_status(model_name, app_name, "Loading website...")
         
-        # 加载网站HTML
+        # Load website HTML
         if initial_dir:
             website_path = Path(f"initial/{initial_dir}/websites/{app_name}/{model_name}/index.html")
             tasks_path = Path(f"initial/{initial_dir}/tasks/{app_name}/tasks.json")
@@ -47,7 +48,7 @@ async def judge_website_task(model_name: str, app_name: str, progress_tracker, i
         
         progress_tracker.update_status(model_name, app_name, "Loading tasks...")
         
-        # 加载任务
+        # Load tasks
         if not tasks_path.exists():
             return {
                 'success': False,
@@ -63,13 +64,13 @@ async def judge_website_task(model_name: str, app_name: str, progress_tracker, i
         
         progress_tracker.update_status(model_name, app_name, "Analyzing website...")
         
-        # 分析网站和任务 - 单一规则输出（无组件拆分）
+        # Analyze website and tasks – single rules output (no component split)
         analysis_result = await judge.analyze_website_tasks(app_name, html_content, tasks)
         
         if analysis_result['success']:
             progress_tracker.update_status(model_name, app_name, "Saving rules...")
             
-            # 保存规则（单一 rules.json）
+            # Save rules as a single rules.json
             rules_file = judge.save_rules(app_name, model_name, analysis_result, version="initial", v0_dir=initial_dir)
             
             return {
@@ -111,10 +112,10 @@ async def main():
     
     args = parser.parse_args()
     
-    # 解析模型列表
+    # Parse model list
     models = args.models.split(',')
     
-    # 解析应用列表
+    # Parse app list
     if args.apps.lower() == 'all':
         apps = DEFAULT_APPS
     else:
@@ -125,7 +126,7 @@ async def main():
     print(f"Apps: {apps}")
     print(f"Using GPT-5 to analyze websites and extract rules")
     
-    # 验证网站和任务文件存在
+    # Verify that website and task files exist
     missing_files = []
     for model in models:
         for app in apps:
@@ -147,10 +148,10 @@ async def main():
             print(f"  {file}")
         return
     
-    # 创建并行执行器
+    # Create parallel runner
     runner = ParallelRunner(max_concurrent=args.max_concurrent)
     
-    # 运行任务
+    # Run tasks
     summary = await runner.run_parallel_tasks(
         models=models,
         apps=apps,
@@ -159,7 +160,7 @@ async def main():
         initial_dir=args.initial_dir
     )
     
-    # 计算统计信息
+    # Aggregate statistics
     total_supported = 0
     total_tasks = 0
     
@@ -168,7 +169,7 @@ async def main():
             total_supported += result['result'].get('supported_count', 0)
             total_tasks += result['result'].get('total_tasks', 0)
     
-    # 保存总结
+    # Save summary
     detailed_summary = {
         **summary,
         'total_supported_tasks': total_supported,

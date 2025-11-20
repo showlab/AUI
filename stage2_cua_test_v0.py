@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Stage 2: CUA 测试初始网站
-使用 UI‑TARS 7B 在初始网站上执行任务
+Stage 2: CUA test on initial websites.
+Use UI‑TARS 7B to execute tasks on the initial websites.
 """
 
 import argparse
@@ -18,15 +18,16 @@ from utils.parallel_runner import ParallelRunner
 from agents.cua_policy import create_cua_policy
 from utils.constants import DEFAULT_APPS
 
+
 async def cua_test_task(model_name: str, app_name: str, progress_tracker, initial_dir: str = None, cua_model: str = "uitars", **kwargs) -> dict:
-    """单个CUA测试任务"""
+    """Single CUA test task."""
     try:
         model_client = ModelClient()
         cua_policy = create_cua_policy(model_client, cua_model_name=cua_model, max_steps=20)
         
         progress_tracker.update_status(model_name, app_name, "Loading rules...")
         
-        # 加载规则
+        # Load rules
         if initial_dir:
             rules_path = Path(f"initial/{initial_dir}/tasks/{app_name}/states/{model_name}/rules.json")
             website_path = Path(f"initial/{initial_dir}/websites/{app_name}/{model_name}/index.html")
@@ -44,7 +45,7 @@ async def cua_test_task(model_name: str, app_name: str, progress_tracker, initia
         with open(rules_path, 'r', encoding='utf-8') as f:
             rules_data = json.load(f)
         
-        # 获取支持的任务
+        # Get supported tasks
         supported_tasks = rules_data.get('analysis', {}).get('supported_tasks', [])
         
         if not supported_tasks:
@@ -60,14 +61,14 @@ async def cua_test_task(model_name: str, app_name: str, progress_tracker, initia
         
         progress_tracker.update_status(model_name, app_name, f"Testing {len(supported_tasks)} tasks...")
         
-        # 网站URL
+        # Website URL
         website_url = f"file://{website_path.absolute()}"
         
-        # 执行任务
+        # Execute tasks
         task_results = []
         completed_count = 0
         
-        # 加载任务描述映射
+        # Load task description mapping
         if initial_dir:
             tasks_file = f"initial/{initial_dir}/tasks/{app_name}/tasks.json"
             trajectories_dir = Path(f"initial/{initial_dir}/tasks/{app_name}/initial_cua_results/{model_name}/{cua_model}/trajectories")
@@ -79,7 +80,7 @@ async def cua_test_task(model_name: str, app_name: str, progress_tracker, initia
             tasks_data = json.load(f)
         task_map = {t['id']: t['description'] for t in tasks_data['tasks']}
         
-        # 创建保存轨迹的目录
+        # Create directory to save trajectories
         trajectories_dir.mkdir(parents=True, exist_ok=True)
         
         for i, task_info in enumerate(supported_tasks):
@@ -92,10 +93,10 @@ async def cua_test_task(model_name: str, app_name: str, progress_tracker, initia
                 f"Task {i+1}/{len(supported_tasks)}: {task_description[:30]}..."
             )
             
-            # 为每个任务创建单独的轨迹目录
+            # Create a separate trajectory directory for each task
             task_trajectory_dir = trajectories_dir / f"task_{i+1}"
             
-            # 清理旧轨迹文件以防止污染
+            # Clean old trajectory files to avoid contamination
             if task_trajectory_dir.exists():
                 for old_file in task_trajectory_dir.glob("step_*.png"):
                     old_file.unlink()
@@ -104,7 +105,7 @@ async def cua_test_task(model_name: str, app_name: str, progress_tracker, initia
             
             task_trajectory_dir.mkdir(parents=True, exist_ok=True)
             
-            # 执行任务
+            # Execute task
             result = await cua_policy.execute_task(
                 app_name=app_name,
                 model_name=model_name,
@@ -133,7 +134,7 @@ async def cua_test_task(model_name: str, app_name: str, progress_tracker, initia
             if result.get('completed', False):
                 completed_count += 1
         
-        # 保存结果
+        # Save aggregated results
         results_data = {
             'app_name': app_name,
             'model_name': model_name,
@@ -187,11 +188,11 @@ async def main():
     
     args = parser.parse_args()
     
-    # 解析模型列表
+    # Parse model list
     models = args.models.split(',')
     cua_models = args.cua_models.split(',')
     
-    # 解析应用列表
+    # Parse app list
     if args.apps.lower() == 'all':
         apps = DEFAULT_APPS
     else:
@@ -202,7 +203,7 @@ async def main():
     print(f"Apps: {apps}")
     print(f"CUA models: {cua_models}")
     
-    # 验证必要文件存在
+    # Verify required files exist
     missing_files = []
     for model in models:
         for app in apps:
@@ -224,10 +225,10 @@ async def main():
             print(f"  {file}")
         return
     
-    # 创建并行执行器
+    # Create parallel runner
     runner = ParallelRunner(max_concurrent=args.max_concurrent)
     
-    # 为每个CUA模型运行任务
+    # Run tasks for each CUA model
     all_results = []
     for cua_model in cua_models:
         print(f"\n🤖 Testing with CUA model: {cua_model}")
@@ -244,7 +245,7 @@ async def main():
             'summary': summary
         })
     
-    # 计算统计信息 (跨所有CUA模型)
+    # Compute statistics across all CUA models
     total_completed = 0
     total_tested = 0
     
@@ -254,7 +255,7 @@ async def main():
                 total_completed += result['result'].get('completed_tasks', 0)
                 total_tested += result['result'].get('total_tasks', 0)
     
-    # 保存总结 (包含所有CUA模型结果)
+    # Save summary (including results from all CUA models)
     detailed_summary = {
         'cua_models': cua_models,
         'all_results': all_results,

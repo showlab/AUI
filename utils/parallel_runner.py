@@ -6,7 +6,7 @@ from .progress_tracker import ProgressTracker
 
 class ParallelRunner:
     def __init__(self, max_concurrent: int = 5, api_max_concurrent: int = None, local_max_concurrent: int = None):
-        """并行任务执行器"""
+        """Parallel task runner."""
         self.max_concurrent = max_concurrent
         self.semaphore = asyncio.Semaphore(max_concurrent)
         
@@ -23,16 +23,16 @@ class ParallelRunner:
                                 stage_name: str,
                                 valid_combinations: Optional[List[tuple]] = None,
                                 **kwargs) -> Dict[str, Any]:
-        """并行运行模型×应用的任务矩阵"""
+        """Run a matrix of model × app tasks in parallel."""
         
-        # 创建进度跟踪器
+        # Create progress tracker
         progress_tracker = ProgressTracker(stage_name, models, apps)
         
-        # 创建所有任务
+        # Create all tasks
         tasks = []
         for model_name in models:
             for app_name in apps:
-                # 如果指定了valid_combinations，只处理有效的组合
+                # If valid_combinations is provided, only schedule allowed pairs
                 if valid_combinations is not None:
                     if (model_name, app_name) not in valid_combinations:
                         continue
@@ -45,10 +45,10 @@ class ParallelRunner:
                 )
                 tasks.append((model_name, app_name, task))
         
-        # 启动进度显示
+        # Start progress display
         progress_task = asyncio.create_task(progress_tracker.display_loop())
         
-        # 等待所有任务完成
+        # Wait for all tasks to complete
         results = []
         for model_name, app_name, task in tasks:
             result = await task
@@ -58,11 +58,11 @@ class ParallelRunner:
                 'result': result
             })
         
-        # 停止进度显示
+        # Stop progress display loop
         progress_tracker.stop()
         await progress_task
         
-        # 收集错误信息
+        # Collect error information
         all_errors = progress_tracker.get_all_errors()
         successful_count = len([r for r in results if r['result'].get('success')])
         failed_count = len(results) - successful_count
@@ -81,7 +81,7 @@ class ParallelRunner:
         return summary
     
     def _get_model_semaphore(self, model_name: str):
-        """统一使用默认信号量，避免隐式回退与隐藏配置问题"""
+        """Always use the default semaphore to avoid hidden concurrency fallbacks."""
         return self.semaphore
     
     async def _run_single_task(self, 
@@ -90,20 +90,20 @@ class ParallelRunner:
                               app_name: str,
                               progress_tracker: ProgressTracker,
                               **kwargs) -> Dict[str, Any]:
-        """运行单个任务"""
+        """Run a single task."""
         semaphore = self._get_model_semaphore(model_name)
         
         async with semaphore:
             progress_tracker.update_status(model_name, app_name, "🚀 Starting...")
             
             try:
-                # 执行实际任务
+                # Execute the actual task
                 if asyncio.iscoroutinefunction(task_func):
                     result = await task_func(model_name, app_name, progress_tracker, **kwargs)
                 else:
                     result = task_func(model_name, app_name, progress_tracker, **kwargs)
                 
-                # 根据任务结果更新状态
+                # Update status based on task result
                 if result.get('success'):
                     progress_tracker.update_status(model_name, app_name, "✅ Done")
                 else:
@@ -117,19 +117,19 @@ class ParallelRunner:
                 return result
                 
             except Exception as e:
-                # 获取完整错误信息
+                # Capture full error information
                 import traceback
                 full_error = traceback.format_exc()
                 error_summary = str(e)
                 
-                # 网格显示完整错误信息
+                # Show full error information in grid
                 short_error = f"❌ Failed: {error_summary}"
                 progress_tracker.update_status(
                     model_name, app_name, short_error, 
                     error_detail=f"{error_summary}\n\nFull traceback:\n{full_error}"
                 )
                 
-                # 返回错误结果而不是抛出异常，保持程序继续运行
+                # Return error result instead of raising to keep runner alive
                 return {
                     'error': error_summary,
                     'full_error': full_error,
@@ -144,7 +144,7 @@ class ParallelRunner:
                                  app_name: str, 
                                  data: Dict[str, Any],
                                  base_dir: Optional[str] = None):
-        """保存增量进度"""
+        """Save incremental progress to disk."""
         if base_dir:
             progress_dir = Path(base_dir) / "progress" / stage_name
         else:
@@ -153,12 +153,12 @@ class ParallelRunner:
         
         progress_dir.mkdir(parents=True, exist_ok=True)
         
-        # 保存任务级别的进度
+        # Save per-task progress
         task_file = progress_dir / f"{model_name}_{app_name}.json"
         with open(task_file, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
         
-        # 更新阶段级别的汇总
+        # Update stage-level summary
         summary_file = progress_dir / "summary.json"
         if summary_file.exists():
             with open(summary_file, 'r', encoding='utf-8') as f:
@@ -167,10 +167,10 @@ class ParallelRunner:
             summary = {'completed_tasks': []}
         
         task_id = f"{model_name}_{app_name}"
-        # 移除旧记录
+        # Remove any existing record for this task
         summary['completed_tasks'] = [t for t in summary['completed_tasks'] if t != task_id]
         
-        # 添加新记录（包括错误信息）
+        # Add new record (including error details if present)
         if data.get('error'):
             summary['completed_tasks'].append({
                 'task_id': task_id,
