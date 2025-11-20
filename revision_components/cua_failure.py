@@ -32,11 +32,11 @@ class CuaFailureRevision(RevisionComponent):
         # Cache helpers and naming variants
         from utils.cache_paths import (
             comment_cache_dir as _ccd,
-            v1_cache_dir as _v1d,
+            revised_cache_dir as _revised_d,
             commenter_variant_from_instance as _cvfi,
         )
         self._comment_cache_dir = _ccd
-        self._v1_cache_dir = _v1d
+        self._revised_cache_dir = _revised_d
         self._revision_variant = revision_variant or 'cua'
         self._commenter_variant = (commenter_variant or _cvfi(commenter))
 
@@ -46,7 +46,7 @@ class CuaFailureRevision(RevisionComponent):
         failed_tasks = context.get('failed_tasks', [])
         if not failed_tasks:
             # Generate destylized revised website even without failures
-            result = await self.coder.generate_v1_website(
+            result = await self.coder.generate_revised_website(
                 model_name=model_name,
                 app_name=app_name,
                 v0_html=v0_html,

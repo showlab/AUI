@@ -13,8 +13,8 @@ from .cua_failure_transform import (
     combine_failure_analyses,
     generate_all_comments,
     generate_all_comments_batch,
-    compute_v0_signature,
-    compute_legacy_v0_signature,
+    compute_initial_signature,
+    compute_legacy_initial_signature,
 )
 
 
@@ -76,11 +76,11 @@ async def process_model_batch(comp, model_name: str, app_batch_data: List[Dict[s
             app_analyses = []
             combined_analysis = None
 
-        v1_cache_dir = comp._v1_cache_dir(comp._base_dir, v0_dir, comp._revision_variant, model_name, app_name_l)
+        v1_cache_dir = comp._revised_cache_dir(comp._base_dir, v0_dir, comp._revision_variant, model_name, app_name_l)
         v1_html_path = v1_cache_dir / "index.html"
         v1_meta_path = v1_cache_dir / "meta.json"
-        v0_sig = compute_v0_signature(comp, app_name_l, model_name, v0_html_l, v0_dir)
-        legacy_sig = compute_legacy_v0_signature(comp, app_name_l, model_name, v0_html_l, v0_dir)
+        v0_sig = compute_initial_signature(comp, app_name_l, model_name, v0_html_l, v0_dir)
+        legacy_sig = compute_legacy_initial_signature(comp, app_name_l, model_name, v0_html_l, v0_dir)
 
         if (not force_v1) and v1_html_path.exists() and v1_meta_path.exists():
             try:
@@ -105,7 +105,7 @@ async def process_model_batch(comp, model_name: str, app_batch_data: List[Dict[s
 
         try:
             if failed_tasks_l:
-                result = await comp.coder.generate_v1_website(
+                result = await comp.coder.generate_revised_website(
                     model_name=model_name,
                     app_name=app_name_l,
                     v0_html=v0_html_l,
@@ -155,7 +155,7 @@ async def process_model_batch(comp, model_name: str, app_batch_data: List[Dict[s
                 result['destylized'] = destylized
                 result['v0_signature'] = v0_sig
             else:
-                result = await comp.coder.generate_v1_website(
+                result = await comp.coder.generate_revised_website(
                     model_name=model_name,
                     app_name=app_name_l,
                     v0_html=v0_html_l,
@@ -228,8 +228,8 @@ async def generate_revised_version(comp, model_name: str, app_name: str, v0_html
 
     if progress_tracker:
         progress_tracker.update_status(model_name, app_name, f"✏️ Stage 2: Generating revised website...")
-        progress_tracker.add_timing_info(model_name, app_name, f"Starting coder.generate_v1_website call")
-    result = await comp.coder.generate_v1_website(
+    progress_tracker.add_timing_info(model_name, app_name, f"Starting coder.generate_revised_website call")
+    result = await comp.coder.generate_revised_website(
         model_name=model_name,
         app_name=app_name,
         v0_html=v0_html,

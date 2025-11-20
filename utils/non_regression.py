@@ -27,7 +27,7 @@ def extract_contract(v0_rules_path: Path, v0_html: str) -> Dict[str, Any]:
 
     - keep_selectors: list of #ids referenced by supported rules
     - keep_text_contains: list of {selector, text} from `contains` rules
-    - keep_api: function names and generic event tokens observed in V0 (static scan)
+    - keep_api: function names and generic event tokens observed in initial (static scan)
     - notes: generic constraints about initial state / viewport
     """
     keep_selectors: List[str] = []
@@ -101,7 +101,7 @@ def format_contract_prompt(contract: Dict[str, Any]) -> str:
     )
 
 
-def validate_v1(v1_html: str, contract: Dict[str, Any]) -> Dict[str, Any]:
+def validate_revised(v1_html: str, contract: Dict[str, Any]) -> Dict[str, Any]:
     """Static validation of revised HTML against the minimal contract.
 
     Checks:

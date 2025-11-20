@@ -21,7 +21,7 @@ from agents.cua_policy import create_cua_policy
 from utils.constants import DEFAULT_APPS
 
 async def cua_test_v1_task(model_name: str, app_name: str, progress_tracker, experiment_name: str = "exp1", run_key: str = None, v0_dir: str = None, cua_model: str = "uitars", **kwargs) -> dict:
-    """单个v1网站CUA测试任务"""
+    """单个修订版网站 CUA 测试任务"""
     try:
         model_client = ModelClient()
         cua_policy = create_cua_policy(model_client, cua_model_name=cua_model, max_steps=20)
@@ -58,10 +58,10 @@ async def cua_test_v1_task(model_name: str, app_name: str, progress_tracker, exp
         
         progress_tracker.update_status(model_name, app_name, f"Testing {len(supported_tasks)} revised tasks...")
         
-        # 构建修订版网站 URL（路径保持 v1_website 以兼容现有结构）
-        v1_website_path = Path(f"experiments/{experiment_name}/runs/{run_key}/stage3_0/{app_name}/{model_name}/v1_website/index.html").absolute()
+        # 构建修订版网站 URL（路径使用 revised_website）
+        revised_website_path = Path(f"experiments/{experiment_name}/runs/{run_key}/stage3_0/{app_name}/{model_name}/revised_website/index.html").absolute()
         
-        website_url = f"file://{v1_website_path}"
+        website_url = f"file://{revised_website_path}"
         
         # 执行任务
         task_results = []
@@ -69,7 +69,7 @@ async def cua_test_v1_task(model_name: str, app_name: str, progress_tracker, exp
         
         # 加载任务描述映射
         if v0_dir:
-            tasks_file = f"v0/{v0_dir}/tasks/{app_name}/tasks.json"
+            tasks_file = f"initial/{v0_dir}/tasks/{app_name}/tasks.json"
         else:
             tasks_file = f"tasks/{app_name}/tasks.json"
         with open(tasks_file) as f:
@@ -142,11 +142,11 @@ async def cua_test_v1_task(model_name: str, app_name: str, progress_tracker, exp
             if result.get('completed', False):
                 completed_count += 1
         
-        # 加载v0结果进行比较
+        # 加载initial结果进行比较
         if v0_dir:
-            v0_results_path = Path(f"v0/{v0_dir}/tasks/{app_name}/v0_cua_results/{model_name}/{cua_model}/results.json")
+            v0_results_path = Path(f"initial/{v0_dir}/tasks/{app_name}/initial_cua_results/{model_name}/{cua_model}/results.json")
         else:
-            v0_results_path = Path(f"tasks/{app_name}/v0_cua_results/{model_name}/{cua_model}/results.json")
+            v0_results_path = Path(f"tasks/{app_name}/initial_cua_results/{model_name}/{cua_model}/results.json")
         v0_completed = 0
         v0_total = 0
         
@@ -212,8 +212,8 @@ async def main():
                        help='Commenter variant to reconstruct run_key')
     parser.add_argument('--max-concurrent', type=int, default=20,
                        help='Maximum concurrent tasks (limited due to browser resources)')
-    parser.add_argument('--v0-dir', type=str, default=None,
-                       help='Initial data directory name (stored under v0/[dir])')
+    parser.add_argument('--initial-dir', type=str, default=None,
+                       help='Initial data directory name (stored under initial/[dir])')
     parser.add_argument('--cua-models', type=str, default='uitars',
                        help='Comma-separated list of CUA models (e.g., uitars,operator)')
     
@@ -230,7 +230,7 @@ async def main():
     
     # 处理 run_key
     revision_type = args.revision_type
-    run_key = build_run_key(revision_type, args.commenter, args.v0_dir)
+    run_key = build_run_key(revision_type, args.commenter, args.initial_dir)
     rk_short = short_run_key(run_key)
     
     # 检查实验目录结构
@@ -257,15 +257,15 @@ async def main():
     for model in models:
         for app in apps:
             # 检查 run_key 路径
-            v1_website_path = Path(f"experiments/{args.experiment}/runs/{run_key}/stage3_0/{app}/{model}/v1_website/index.html")
+            revised_website_path = Path(f"experiments/{args.experiment}/runs/{run_key}/stage3_0/{app}/{model}/revised_website/index.html")
             v1_rules_path = Path(f"experiments/{args.experiment}/runs/{run_key}/stage3_1/{app}/{model}/rules.json")
             
-            if v1_website_path.exists() and v1_rules_path.exists():
+            if revised_website_path.exists() and v1_rules_path.exists():
                 valid_combinations.append((model, app))
             else:
                 missing_files = []
-                if not v1_website_path.exists():
-                    missing_files.append(f"Revised website: {v1_website_path}")
+                if not revised_website_path.exists():
+                    missing_files.append(f"Revised website: {revised_website_path}")
                 if not v1_rules_path.exists():
                     missing_files.append(f"Revised rules: {v1_rules_path}")
                 skipped_combinations.append((model, app, missing_files))
@@ -303,7 +303,7 @@ async def main():
             experiment_name=args.experiment,
             run_key=run_key,
             valid_combinations=valid_combinations,
-            v0_dir=args.v0_dir,
+            v0_dir=args.initial_dir,
             cua_model=cua_model
         )
         all_results.append({
@@ -312,8 +312,8 @@ async def main():
         })
     
     # 计算统计信息 (跨所有 CUA 模型)
-    total_v0_completed = 0
-    total_v1_completed = 0
+    total_initial_completed = 0
+    total_revised_completed = 0
     total_improvement = 0
     total_tested = 0
     
@@ -321,8 +321,8 @@ async def main():
         for result in cua_result['summary']['results']:
             if result['result'].get('success'):
                 result_data = result['result']
-                total_v0_completed += result_data.get('v0_completed', 0)
-                total_v1_completed += result_data.get('v1_completed', 0)
+                total_initial_completed += result_data.get('v0_completed', 0)
+                total_revised_completed += result_data.get('v1_completed', 0)
                 total_improvement += result_data.get('improvement', 0)
                 total_tested += result_data.get('total_tasks', 0)
     
@@ -332,12 +332,12 @@ async def main():
         'all_results': all_results,
         'experiment_name': args.experiment,
         'revision_type': revision_type,
-        'total_v0_completed': total_v0_completed,
-        'total_v1_completed': total_v1_completed,
+        'total_initial_completed': total_initial_completed,
+        'total_revised_completed': total_revised_completed,
         'total_improvement': total_improvement,
         'total_tested_tasks': total_tested,
-        'v0_success_rate': total_v0_completed / total_tested if total_tested > 0 else 0,
-        'v1_success_rate': total_v1_completed / total_tested if total_tested > 0 else 0
+        'initial_success_rate': total_initial_completed / total_tested if total_tested > 0 else 0,
+        'revised_success_rate': total_revised_completed / total_tested if total_tested > 0 else 0
     }
     
     # 保存本地总结
@@ -380,20 +380,20 @@ async def main():
                 
                 if model_key not in model_stats:
                     model_stats[model_key] = {
-                        'v0_completed': 0, 'v1_completed': 0, 'improvement': 0, 'total': 0, 'apps': []
+                        'initial_completed': 0, 'revised_completed': 0, 'improvement': 0, 'total': 0, 'apps': []
                     }
-                model_stats[model_key]['v0_completed'] += v0_completed
-                model_stats[model_key]['v1_completed'] += v1_completed
+                model_stats[model_key]['initial_completed'] += v0_completed
+                model_stats[model_key]['revised_completed'] += v1_completed
                 model_stats[model_key]['improvement'] += improvement
                 model_stats[model_key]['total'] += total
                 model_stats[model_key]['apps'].append({
                     'app': app,
-                    'v0_completed': v0_completed,
-                    'v1_completed': v1_completed,
+                    'initial_completed': v0_completed,
+                    'revised_completed': v1_completed,
                     'improvement': improvement,
                     'total': total,
-                    'v0_success_rate': v0_completed / total if total > 0 else 0,
-                    'v1_success_rate': v1_completed / total if total > 0 else 0
+                    'initial_success_rate': v0_completed / total if total > 0 else 0,
+                    'revised_success_rate': v1_completed / total if total > 0 else 0
                 })
                 
                 if app not in app_stats:
@@ -401,24 +401,24 @@ async def main():
                 app_stats[app]['models'].append({
                     'model': model,
                     'cua_model': cua_model,
-                    'v0_completed': v0_completed,
-                    'v1_completed': v1_completed,
+                    'initial_completed': v0_completed,
+                    'revised_completed': v1_completed,
                     'improvement': improvement,
                     'total': total,
-                    'v0_success_rate': v0_completed / total if total > 0 else 0,
-                    'v1_success_rate': v1_completed / total if total > 0 else 0
+                    'initial_success_rate': v0_completed / total if total > 0 else 0,
+                    'revised_success_rate': v1_completed / total if total > 0 else 0
                 })
     
     # Save model comparison
     model_comparison = {
         'overview': {
             model_key: {
-                'total_v0_completed': stats['v0_completed'],
-                'total_v1_completed': stats['v1_completed'],
+                'total_initial_completed': stats['initial_completed'],
+                'total_revised_completed': stats['revised_completed'],
                 'total_improvement': stats['improvement'],
                 'total_tested': stats['total'],
-                'v0_success_rate': stats['v0_completed'] / stats['total'] if stats['total'] > 0 else 0,
-                'v1_success_rate': stats['v1_completed'] / stats['total'] if stats['total'] > 0 else 0,
+                'initial_success_rate': stats['initial_completed'] / stats['total'] if stats['total'] > 0 else 0,
+                'revised_success_rate': stats['revised_completed'] / stats['total'] if stats['total'] > 0 else 0,
                 'num_apps': len(stats['apps'])
             } for model_key, stats in model_stats.items()
         },
@@ -435,12 +435,12 @@ async def main():
             'model': model_key,
             'experiment': args.experiment,
             'summary': {
-                'total_v0_completed': stats['v0_completed'],
-                'total_v1_completed': stats['v1_completed'],
+                'total_v0_completed': stats['initial_completed'],
+                'total_v1_completed': stats['revised_completed'],
                 'total_improvement': stats['improvement'],
                 'total_tested': stats['total'],
-                'v0_success_rate': stats['v0_completed'] / stats['total'] if stats['total'] > 0 else 0,
-                'v1_success_rate': stats['v1_completed'] / stats['total'] if stats['total'] > 0 else 0,
+                'v0_success_rate': stats['initial_completed'] / stats['total'] if stats['total'] > 0 else 0,
+                'v1_success_rate': stats['revised_completed'] / stats['total'] if stats['total'] > 0 else 0,
                 'num_apps_tested': len(stats['apps'])
             },
             'apps': stats['apps']
@@ -454,11 +454,11 @@ async def main():
     total_tasks = sum(cua_result['summary']['total_tasks'] for cua_result in all_results)
     print(f"✅ Successful tests: {total_successful}/{total_tasks}")
     if total_tested > 0:
-        print(f"🎯 Initial completed: {total_v0_completed}/{total_tested} ({total_v0_completed/total_tested*100:.1f}%)")
-        print(f"🎯 Revised completed: {total_v1_completed}/{total_tested} ({total_v1_completed/total_tested*100:.1f}%)")
+        print(f"🎯 Initial completed: {total_initial_completed}/{total_tested} ({total_initial_completed/total_tested*100:.1f}%)")
+        print(f"🎯 Revised completed: {total_revised_completed}/{total_tested} ({total_revised_completed/total_tested*100:.1f}%)")
     else:
-        print(f"🎯 Initial completed: {total_v0_completed}/0 (0.0%)")
-        print(f"🎯 Revised completed: {total_v1_completed}/0 (0.0%)")
+        print(f"🎯 Initial completed: {total_initial_completed}/0 (0.0%)")
+        print(f"🎯 Revised completed: {total_revised_completed}/0 (0.0%)")
     print(f"📈 Improvement: +{total_improvement} tasks")
     print(f"📁 Summary saved to: {summary_path}")
     

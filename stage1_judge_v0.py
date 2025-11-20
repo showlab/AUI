@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Stage 1: Judge评估v0网站
-使用Judge模型分析v0网站，提取状态规则
+Stage 1: Judge评估初始网站
+使用Judge模型分析初始网站，提取状态规则
 """
 
 import argparse
@@ -18,7 +18,7 @@ from utils.parallel_runner import ParallelRunner
 from agents.judge import Judge
 from utils.constants import DEFAULT_APPS
 
-async def judge_website_task(model_name: str, app_name: str, progress_tracker, v0_dir: str = None, **kwargs) -> dict:
+async def judge_website_task(model_name: str, app_name: str, progress_tracker, initial_dir: str = None, **kwargs) -> dict:
     """单个网站judge任务"""
     try:
         model_client = ModelClient()
@@ -27,9 +27,9 @@ async def judge_website_task(model_name: str, app_name: str, progress_tracker, v
         progress_tracker.update_status(model_name, app_name, "Loading website...")
         
         # 加载网站HTML
-        if v0_dir:
-            website_path = Path(f"v0/{v0_dir}/websites/{app_name}/{model_name}/index.html")
-            tasks_path = Path(f"v0/{v0_dir}/tasks/{app_name}/tasks.json")
+        if initial_dir:
+            website_path = Path(f"initial/{initial_dir}/websites/{app_name}/{model_name}/index.html")
+            tasks_path = Path(f"initial/{initial_dir}/tasks/{app_name}/tasks.json")
         else:
             website_path = Path(f"websites/{app_name}/{model_name}/index.html")
             tasks_path = Path(f"tasks/{app_name}/tasks.json")
@@ -70,7 +70,7 @@ async def judge_website_task(model_name: str, app_name: str, progress_tracker, v
             progress_tracker.update_status(model_name, app_name, "Saving rules...")
             
             # 保存规则（单一 rules.json）
-            rules_file = judge.save_rules(app_name, model_name, analysis_result, version="v0", v0_dir=v0_dir)
+            rules_file = judge.save_rules(app_name, model_name, analysis_result, version="initial", v0_dir=initial_dir)
             
             return {
                 'success': True,
@@ -106,8 +106,8 @@ async def main():
                        help='Comma-separated list of apps or "all" for all 52 apps')
     parser.add_argument('--max-concurrent', type=int, default=10,
                        help='Maximum concurrent tasks (limited due to judge model API)')
-    parser.add_argument('--v0-dir', type=str, default=None,
-                       help='Initial data directory name (stored under v0/[dir])')
+    parser.add_argument('--initial-dir', type=str, default=None,
+                       help='Initial data directory name (stored under initial/[dir])')
     
     args = parser.parse_args()
     
@@ -129,9 +129,9 @@ async def main():
     missing_files = []
     for model in models:
         for app in apps:
-            if args.v0_dir:
-                website_path = Path(f"v0/{args.v0_dir}/websites/{app}/{model}/index.html")
-                tasks_path = Path(f"v0/{args.v0_dir}/tasks/{app}/tasks.json")
+            if args.initial_dir:
+                website_path = Path(f"initial/{args.initial_dir}/websites/{app}/{model}/index.html")
+                tasks_path = Path(f"initial/{args.initial_dir}/tasks/{app}/tasks.json")
             else:
                 website_path = Path(f"websites/{app}/{model}/index.html")
                 tasks_path = Path(f"tasks/{app}/tasks.json")
@@ -156,7 +156,7 @@ async def main():
         apps=apps,
         task_func=judge_website_task,
         stage_name="Stage 1: Judge Initial Websites",
-        v0_dir=args.v0_dir
+        initial_dir=args.initial_dir
     )
     
     # 计算统计信息
@@ -177,14 +177,14 @@ async def main():
     }
     
     base = Path(__file__).resolve().parent
-    summary_path = base / "progress" / "global_summaries" / "summaries" / "stage1_judge_v0_summary.json"
+    summary_path = base / "progress" / "global_summaries" / "summaries" / "stage1_judge_initial_summary.json"
     summary_path.parent.mkdir(parents=True, exist_ok=True)
     
     with open(summary_path, 'w', encoding='utf-8') as f:
         json.dump(detailed_summary, f, indent=2, ensure_ascii=False)
     
     # Generate detailed evaluation output
-    eval_dir = base / "progress" / "global_summaries" / "evaluations" / "stage1_judge_v0_eval"
+    eval_dir = base / "progress" / "global_summaries" / "evaluations" / "stage1_judge_initial_eval"
     eval_dir.mkdir(parents=True, exist_ok=True)
     
     # Model comparison analysis

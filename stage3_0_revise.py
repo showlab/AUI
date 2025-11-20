@@ -16,7 +16,7 @@ REPO_ROOT = THIS_DIR.parents[1]
 sys.path.append(str(THIS_DIR))
 
 from utils.logging_utils import ts_print
-from utils.non_regression import extract_contract, format_contract_prompt, validate_v1, save_json
+from utils.non_regression import extract_contract, format_contract_prompt, validate_revised, save_json
 from utils.model_client import ModelClient
 from utils.parallel_runner import ParallelRunner
 from agents.coder import Coder
@@ -26,7 +26,7 @@ from agents.commenter_screenshot_only import CommenterScreenshotOnly
 from revision_components.factory import RevisionComponentFactory
 from utils.cache_paths import commenter_variant_from_instance
 from utils.run_key import build_run_key, short_run_key
-from revision_components.revise_runner import save_v1_website as _save_v1_website, build_variant_name as _generate_variant_name
+from revision_components.revise_runner import build_variant_name as _generate_variant_name
 from utils.constants import DEFAULT_APPS
 
 async def revise_model_batch_task(model_name: str, app_name: str, progress_tracker, 
@@ -98,7 +98,7 @@ async def revise_model_batch_task(model_name: str, app_name: str, progress_track
             if app_data:
                 # Build non-regression contract per app
                 if v0_dir:
-                    rules_path = Path(f"v0/{v0_dir}/tasks/{app_name}/states/{model_name}/rules.json")
+                    rules_path = Path(f"initial/{v0_dir}/tasks/{app_name}/states/{model_name}/rules.json")
                 else:
                     rules_path = Path(f"tasks/{app_name}/states/{model_name}/rules.json")
                 try:
@@ -192,7 +192,7 @@ async def revise_model_batch_task(model_name: str, app_name: str, progress_track
                     'destylized': result.get('destylized'),
                     'generated_at': __import__('datetime').datetime.now().isoformat()
                 }
-                v1_path = _save_v1_website(
+                v1_path = _save_revised_website(
                     result['html_content'], app_name, model_name,
                     experiment_name, run_key, meta
                 )
@@ -202,7 +202,7 @@ async def revise_model_batch_task(model_name: str, app_name: str, progress_track
                     contract = contract_pkg.get('contract', {})
                     contract_dir = Path(f"experiments/{experiment_name}/runs/{run_key}/stage3_0/{app_name}/{model_name}/non_regression")
                     save_json(contract_dir / "contract.json", contract)
-                    violations = validate_v1(result['html_content'], contract)
+                    violations = validate_revised(result['html_content'], contract)
                     save_json(contract_dir / "violations.json", violations)
                     progress_tracker.add_timing_info(model_name, app_name, f"Non-regression valid={violations.get('valid', False)}")
                 except Exception as e:
@@ -225,12 +225,12 @@ async def _load_app_data(model_name: str, app_name: str, revision_type: str, v0_
     try:
         # Load initial website and context paths
         if v0_dir:
-            v0_website_path = THIS_DIR / "v0" / v0_dir / "websites" / app_name / model_name / "index.html"
-            cua_results_path = THIS_DIR / "v0" / v0_dir / "tasks" / app_name / "v0_cua_results" / model_name / source_cua_model / "results.json"
-            judge_results_path = THIS_DIR / "v0" / v0_dir / "tasks" / app_name / "states" / model_name / "rules.json"
+            v0_website_path = THIS_DIR / "initial" / v0_dir / "websites" / app_name / model_name / "index.html"
+            cua_results_path = THIS_DIR / "initial" / v0_dir / "tasks" / app_name / "initial_cua_results" / model_name / source_cua_model / "results.json"
+            judge_results_path = THIS_DIR / "initial" / v0_dir / "tasks" / app_name / "states" / model_name / "rules.json"
         else:
             v0_website_path = Path(f"websites/{app_name}/{model_name}/index.html")
-            cua_results_path = Path(f"tasks/{app_name}/v0_cua_results/{model_name}/{source_cua_model}/results.json")
+            cua_results_path = Path(f"tasks/{app_name}/initial_cua_results/{model_name}/{source_cua_model}/results.json")
             judge_results_path = Path(f"tasks/{app_name}/states/{model_name}/rules.json")
         
         # Load initial website HTML
@@ -253,10 +253,20 @@ async def _load_app_data(model_name: str, app_name: str, revision_type: str, v0_
                     # Extract failed tasks from task_results where completed=false
                     for task_result in cua_results.get('task_results', []):
                         if not task_result.get('completed', False):
+                            t_index = task_result.get('task_index', 0)
+                            # Derive trajectory directory for this failed task (for storyboard generation)
+                            if v0_dir:
+                                trajectory_dir = (THIS_DIR / "initial" / v0_dir / "tasks" / app_name /
+                                                  "initial_cua_results" / model_name / source_cua_model /
+                                                  "trajectories" / f"task_{t_index}")
+                            else:
+                                trajectory_dir = (Path(f"tasks/{app_name}/initial_cua_results/{model_name}/"
+                                                       f"{source_cua_model}/trajectories/task_{t_index}"))
                             failed_tasks.append({
-                                'task_index': task_result.get('task_index', 0),
+                                'task_index': t_index,
                                 'description': task_result.get('task_description', ''),
-                                'steps': task_result.get('steps', 0)
+                                'steps': task_result.get('steps', 0),
+                                'trajectory_dir': str(trajectory_dir)
                             })
         
         if revision_type in ['unsupported', 'integrated']:
@@ -289,12 +299,12 @@ async def _process_single_app(model_name: str, app_name: str, revision_component
         
         # Load initial website and context data
         if v0_dir:
-            v0_website_path = THIS_DIR / "v0" / v0_dir / "websites" / app_name / model_name / "index.html"
-            cua_results_path = THIS_DIR / "v0" / v0_dir / "tasks" / app_name / "v0_cua_results" / model_name / source_cua_model / "results.json"
-            judge_results_path = THIS_DIR / "v0" / v0_dir / "tasks" / app_name / "states" / model_name / "rules.json"
+            v0_website_path = THIS_DIR / "initial" / v0_dir / "websites" / app_name / model_name / "index.html"
+            cua_results_path = THIS_DIR / "initial" / v0_dir / "tasks" / app_name / "initial_cua_results" / model_name / source_cua_model / "results.json"
+            judge_results_path = THIS_DIR / "initial" / v0_dir / "tasks" / app_name / "states" / model_name / "rules.json"
         else:
             v0_website_path = Path(f"websites/{app_name}/{model_name}/index.html")
-            cua_results_path = Path(f"tasks/{app_name}/v0_cua_results/{model_name}/{source_cua_model}/results.json")
+            cua_results_path = Path(f"tasks/{app_name}/initial_cua_results/{model_name}/{source_cua_model}/results.json")
             judge_results_path = Path(f"tasks/{app_name}/states/{model_name}/rules.json")
             
         if not v0_website_path.exists():
@@ -388,14 +398,14 @@ async def _process_single_app(model_name: str, app_name: str, revision_component
                 'destylized': result.get('destylized'),
                 'generated_at': __import__('datetime').datetime.now().isoformat()
             }
-            v1_website_path = _save_v1_website(
+            revised_website_path = _save_revised_website(
                 result['html_content'], app_name, model_name, experiment_name, variant_name, meta
             )
             # Save contract and validate revised
             try:
                 contract_dir = Path(f"experiments/{experiment_name}/evaluations/{variant_name}/non_regression/{app_name}/{model_name}")
                 save_json(contract_dir / "contract.json", contract)
-                violations = validate_v1(result['html_content'], contract)
+                violations = validate_revised(result['html_content'], contract)
                 save_json(contract_dir / "violations.json", violations)
                 progress_tracker.add_timing_info(model_name, app_name, f"Non-regression valid={violations.get('valid', False)}")
             except Exception as e:
@@ -403,7 +413,7 @@ async def _process_single_app(model_name: str, app_name: str, revision_component
             
             return {
                 'success': True,
-                'v1_website_path': v1_website_path,
+                'revised_website_path': revised_website_path,
                 'revision_type': revision_type,
                 'variant_name': variant_name,
                 'destylized': destylized,
@@ -546,18 +556,18 @@ def _generate_variant_name(revision_type: str, destylized: bool) -> str:
         return revision_type
     return f"{revision_type}_destylized" if destylized else revision_type
 
-def _save_v1_website(html_content: str, app_name: str, model_name: str,
-                     experiment_name: str, run_key: str, meta: dict = None) -> str:
-    """Save revised website under runs/[run_key]/stage3_0 (keeps v1_website path for compatibility).
+def _save_revised_website(html_content: str, app_name: str, model_name: str,
+                          experiment_name: str, run_key: str, meta: dict = None) -> str:
+    """Save revised website under runs/[run_key]/stage3_0 (uses revised_website path).
 
     Clean the entire app/model leaf to avoid stale artifacts (e.g., storyboard),
-    then recreate v1_website/ and write index.html (+ optional meta.json).
+    then recreate revised_website/ and write index.html (+ optional meta.json).
     """
     from shutil import rmtree
     website_root = Path(f"experiments/{experiment_name}/runs/{run_key}/stage3_0/{app_name}/{model_name}")
     if website_root.exists():
         rmtree(website_root)
-    website_dir = website_root / "v1_website"
+    website_dir = website_root / "revised_website"
     website_dir.mkdir(parents=True, exist_ok=True)
     website_path = website_dir / "index.html"
     with open(website_path, 'w', encoding='utf-8') as f:
@@ -588,14 +598,14 @@ async def main():
                        help='Maximum concurrent tasks')
     parser.add_argument('--commenter-concurrent', type=int, default=10,
                        help='Maximum concurrent commenter calls')
-    parser.add_argument('--v0-dir', type=str, default=None,
-                       help='Initial data directory name (stored under v0/[dir])')
+    parser.add_argument('--initial-dir', type=str, default=None,
+                       help='Initial data directory name (stored under initial/[dir])')
     parser.add_argument('--source-cua-model', type=str, default='uitars',
                        help='CUA model whose initial run failures are used as revision input (default: uitars)')
     parser.add_argument('--force-comments', action='store_true',
                        help='Force re-generate commenter analyses (ignore cached results)')
-    parser.add_argument('--force-v1', action='store_true',
-                       help='Force re-generate revised websites (ignore cached v1)')
+    parser.add_argument('--force-revised', action='store_true',
+                       help='Force re-generate revised websites (ignore cached revised)')
     
     args = parser.parse_args()
 
@@ -630,20 +640,20 @@ async def main():
     
     for app in apps:
         for model in models:
-            if args.v0_dir:
-                v0_website_path = Path(f"v0/{args.v0_dir}/websites/{app}/{model}/index.html")
-                cua_results_path = Path(f"v0/{args.v0_dir}/tasks/{app}/v0_cua_results/{model}/{args.source_cua_model}/results.json")
-                judge_results_path = Path(f"v0/{args.v0_dir}/tasks/{app}/states/{model}/rules.json")
+            if args.initial_dir:
+                v0_website_path = Path(f"initial/{args.initial_dir}/websites/{app}/{model}/index.html")
+                cua_results_path = Path(f"initial/{args.initial_dir}/tasks/{app}/initial_cua_results/{model}/{args.source_cua_model}/results.json")
+                judge_results_path = Path(f"initial/{args.initial_dir}/tasks/{app}/states/{model}/rules.json")
             else:
                 v0_website_path = Path(f"websites/{app}/{model}/index.html")
-                cua_results_path = Path(f"tasks/{app}/v0_cua_results/{model}/{args.source_cua_model}/results.json")
+                cua_results_path = Path(f"tasks/{app}/initial_cua_results/{model}/{args.source_cua_model}/results.json")
                 judge_results_path = Path(f"tasks/{app}/states/{model}/rules.json")
                 
             missing_files = []
             
             # Always need initial website
             if not v0_website_path.exists():
-                missing_files.append(f"V0 website: {v0_website_path}")
+                missing_files.append(f"Initial website: {v0_website_path}")
             
             # Check revision-type specific requirements
             # For CUA-based revisions, allow running even without initial CUA results;
@@ -705,7 +715,7 @@ async def main():
         model_app_groups[model].append(app)
     
     # Build run key for this configuration
-    run_key = build_run_key(args.revision_type, args.commenter, args.v0_dir)
+    run_key = build_run_key(args.revision_type, args.commenter, args.initial_dir)
     rk_short = short_run_key(run_key)
 
     ts_print(f"🔄 Batch processing: {list(model_app_groups.keys())} models")
@@ -725,10 +735,10 @@ async def main():
         experiment_name=args.experiment,
         revision_type=args.revision_type,
         destylized=args.destylized,
-        v0_dir=args.v0_dir,
+        v0_dir=args.initial_dir,
         commenter_concurrent=args.commenter_concurrent,
         force_comments=args.force_comments,
-        force_v1=args.force_v1,
+        force_v1=args.force_revised,
         source_cua_model=args.source_cua_model,
         commenter=args.commenter,
         run_key=run_key

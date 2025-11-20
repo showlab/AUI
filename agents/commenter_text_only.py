@@ -9,7 +9,7 @@ class CommenterTextOnly(BaseCommenter):
     def _load_task_info(self, app_name: str, task_id: int, v0_dir: str = None) -> Tuple[str, str]:
         """从tasks.json加载任务信息"""
         if v0_dir:
-            tasks_path = Path(f"v0/{v0_dir}/tasks/{app_name}/tasks.json")
+            tasks_path = Path(f"initial/{v0_dir}/tasks/{app_name}/tasks.json")
         else:
             tasks_path = Path(f"tasks/{app_name}/tasks.json")
             
@@ -81,7 +81,7 @@ class CommenterTextOnly(BaseCommenter):
                 app_name = path_parts[i + 1]
             elif part.startswith("task_"):
                 task_id = int(part.split("_")[1])
-            elif part == "v0" and i + 1 < len(path_parts):
+            elif part == "initial" and i + 1 < len(path_parts):
                 v0_dir = path_parts[i + 1]
         
         if not app_name or task_id is None:

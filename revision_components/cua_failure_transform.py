@@ -11,7 +11,7 @@ from typing import Dict, Any, List
 from pathlib import Path
 
 
-def compute_v0_signature(comp, app_name: str, model_name: str, v0_html: str, v0_dir: str = None) -> str:
+def compute_initial_signature(comp, app_name: str, model_name: str, v0_html: str, v0_dir: str = None) -> str:
     h = hashlib.sha256()
     scope = v0_dir if v0_dir else "default"
     h.update(scope.encode('utf-8'))
@@ -21,7 +21,7 @@ def compute_v0_signature(comp, app_name: str, model_name: str, v0_html: str, v0_
     return h.hexdigest()
 
 
-def compute_legacy_v0_signature(comp, app_name: str, model_name: str, v0_html: str, v0_dir: str = None) -> str:
+def compute_legacy_initial_signature(comp, app_name: str, model_name: str, v0_html: str, v0_dir: str = None) -> str:
     h = hashlib.sha256()
     h.update(app_name.encode('utf-8'))
     h.update(model_name.encode('utf-8'))
@@ -37,15 +37,26 @@ async def generate_single_comment(comp, app_name: str, model_name: str, task_ind
     try:
         from utils.storyboard_generator import generate_failure_storyboard
         storyboard_start = time.time()
-        storyboard_result = await generate_failure_storyboard(
-            app_name=app_name,
-            model_name=model_name,
-            task_index=task_index,
-            task_description=task_description,
-            expected_outcome=expected_outcome,
-            trajectory_dir=trajectory_dir,
-            v0_dir=v0_dir
-        )
+        # trajectory_dir may be provided by caller; if missing, derive from initial layout
+        if trajectory_dir is None:
+            # Best-effort derivation matching Stage 2 directory structure
+            base_dir = comp._base_dir
+            scope = v0_dir if v0_dir else "default"
+            # Default to uitars as source CUA model when not specified explicitly
+            trajectory_dir = (base_dir / "initial" / scope / "tasks" / app_name /
+                              "initial_cua_results" / model_name / "uitars" /
+                              "trajectories" / f"task_{task_index}")
+        else:
+            trajectory_dir = Path(trajectory_dir)
+            storyboard_result = await generate_failure_storyboard(
+                app_name=app_name,
+                model_name=model_name,
+                task_index=task_index,
+                task_description=task_description,
+                expected_outcome=expected_outcome,
+                trajectory_dir=trajectory_dir,
+                v0_dir=v0_dir
+            )
         storyboard_time = time.time() - storyboard_start
         if not storyboard_result:
             return f"FAILED: storyboard_failed task {task_index}"
@@ -85,7 +96,7 @@ async def generate_single_comment(comp, app_name: str, model_name: str, task_ind
 
 async def load_task_descriptions(comp, app_name: str, v0_dir: str = None) -> Dict[int, Dict[str, Any]]:
     if v0_dir:
-        tasks_file = comp._base_dir / "v0" / v0_dir / "tasks" / app_name / "tasks.json"
+        tasks_file = comp._base_dir / "initial" / v0_dir / "tasks" / app_name / "tasks.json"
     else:
         tasks_file = Path(f"tasks/{app_name}/tasks.json")
     task_descriptions = {}
@@ -126,7 +137,7 @@ async def generate_all_comments(comp, app_name: str, model_name: str,
         progress_tracker.add_timing_info(model_name, app_name, f"Stage 1: Started {len(failed_tasks)} comment tasks")
     task_descriptions = await load_task_descriptions(comp, app_name, v0_dir)
     cache_scope = v0_dir if v0_dir else "default"
-    cache_base = comp._base_dir / "v0" / cache_scope / "comments" / comp._commenter_variant
+    cache_base = comp._base_dir / "initial" / cache_scope / "comments" / comp._commenter_variant
 
     comment_tasks = []
     valid_analyses = []
@@ -203,7 +214,7 @@ async def generate_all_comments_batch(comp, model_name: str, all_failed_tasks: L
         app_descriptions[app_name] = await load_task_descriptions(comp, app_name, v0_dir)
 
     cache_scope = v0_dir if v0_dir else "default"
-    cache_base = comp._base_dir / "v0" / cache_scope / "comments" / comp._commenter_variant
+    cache_base = comp._base_dir / "initial" / cache_scope / "comments" / comp._commenter_variant
 
     if progress_tracker:
         msg = f"🚀 Creating {len(all_failed_tasks)} comment tasks..."
@@ -219,9 +230,9 @@ async def generate_all_comments_batch(comp, model_name: str, all_failed_tasks: L
 
     try:
         from pathlib import Path as _P
-        results_root = (comp._base_dir / "v0" / v0_dir / "tasks") if v0_dir else _P("tasks")
+        results_root = (comp._base_dir / "initial" / v0_dir / "tasks") if v0_dir else _P("tasks")
         for app_name in unique_apps:
-            res_path = results_root / app_name / 'v0_cua_results' / model_name / 'results.json'
+            res_path = results_root / app_name / 'initial_cua_results' / model_name / 'results.json'
             if not res_path.exists():
                 continue
             try:
@@ -285,6 +296,7 @@ async def generate_all_comments_batch(comp, model_name: str, all_failed_tasks: L
                     task_index=task_index,
                     task_description=task.get('description', 'Unknown task'),
                     expected_outcome=task_desc.get('expected_outcome', 'Unknown outcome'),
+                    trajectory_dir=task.get('trajectory_dir'),
                     v0_html=v0_html,
                     v0_dir=v0_dir,
                     commenter_model=model_name,

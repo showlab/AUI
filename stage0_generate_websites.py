@@ -17,7 +17,7 @@ from utils.parallel_runner import ParallelRunner
 from agents.coder import Coder
 from utils.constants import DEFAULT_APPS
 
-async def generate_website_task(model_name: str, app_name: str, progress_tracker, v0_dir: str = "websites", **kwargs) -> dict:
+async def generate_website_task(model_name: str, app_name: str, progress_tracker, initial_dir: str = "websites", **kwargs) -> dict:
     """单个网站生成任务"""
     model_client = ModelClient()
     coder = Coder(model_client)
@@ -29,13 +29,16 @@ async def generate_website_task(model_name: str, app_name: str, progress_tracker
     
     progress_tracker.update_status(model_name, app_name, "✏️ Generating website...")
     
-    # 生成网站
-    html_content = await coder.generate_v0_website(model_name, app_name, instruction)
+    # 生成网站（对GPT-5系列启用streaming，进度输出由Coder负责）
+    html_content = await coder.generate_initial_website(
+        model_name, app_name, instruction,
+        progress_tracker=progress_tracker
+    )
     
     progress_tracker.update_status(model_name, app_name, "💾 Saving website...")
     
     # 保存网站
-    website_path = coder.save_website(html_content, app_name, model_name, version="v0", base_dir=v0_dir)
+    website_path = coder.save_website(html_content, app_name, model_name, phase="initial", base_dir=initial_dir)
     
     return {
         'website_path': website_path,
@@ -52,8 +55,8 @@ async def main():
                        help='Comma-separated list of apps or "all" for all 52 apps')
     parser.add_argument('--max-concurrent', type=int, default=5,
                        help='Maximum concurrent tasks')
-    parser.add_argument('--v0-dir', type=str, required=True,
-                       help='Initial data directory name (stored under v0/)')
+    parser.add_argument('--initial-dir', type=str, required=True,
+                       help='Initial data directory name (stored under initial/)')
     
     args = parser.parse_args()
     
@@ -75,7 +78,7 @@ async def main():
     runner = ParallelRunner(max_concurrent=args.max_concurrent)
     
     # 创建v0目录结构
-    v0_base_path = f"v0/{args.v0_dir}/websites"
+    v0_base_path = f"initial/{args.initial_dir}/websites"
     
     # 运行任务
     summary = await runner.run_parallel_tasks(
@@ -83,7 +86,7 @@ async def main():
         apps=apps,
         task_func=generate_website_task,
         stage_name="Stage 0: Generate Initial Websites",
-        v0_dir=v0_base_path
+        initial_dir=v0_base_path
     )
     
     # 保存总结（包括详细错误信息）

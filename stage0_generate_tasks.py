@@ -38,7 +38,7 @@ def build_json_format_example(app_name: str, app_tags: list) -> str:
 
 
 
-async def generate_tasks_for_app(model_name: str, app_name: str, progress_tracker, v0_dir: str = "tasks", **kwargs) -> dict:
+async def generate_tasks_for_app(model_name: str, app_name: str, progress_tracker, initial_dir: str = "tasks", **kwargs) -> dict:
     """为单个应用生成任务（并行任务函数）"""
     model_client = ModelClient()
     
@@ -111,7 +111,7 @@ async def generate_tasks_for_app(model_name: str, app_name: str, progress_tracke
     progress_tracker.update_status(model_name, app_name, "💾 Saving tasks...")
     
     # 保存任务到文件
-    tasks_file = save_tasks(app_name, tasks, app_tags, base_dir=v0_dir)
+    tasks_file = save_tasks(app_name, tasks, app_tags, base_dir=initial_dir)
     
     return {
         'success': True,
@@ -146,8 +146,8 @@ async def main():
     parser = argparse.ArgumentParser(description='Generate tasks for apps')
     parser.add_argument('--apps', type=str, required=True,
                        help='Comma-separated list of apps or "all" for all 52 apps')
-    parser.add_argument('--v0-dir', type=str, required=True,
-                       help='Initial data directory name (stored under v0/)')
+    parser.add_argument('--initial-dir', type=str, required=True,
+                       help='Initial data directory name (stored under initial/)')
     
     args = parser.parse_args()
     
@@ -162,8 +162,8 @@ async def main():
     print(f"Using GPT-5 to generate 30 tasks per app with tag-based philosophy")
     print(f"Running {len(apps)} apps in parallel\n")
     
-    # 创建v0目录结构  
-    v0_base_path = f"v0/{args.v0_dir}/tasks"
+    # 创建initial目录结构  
+    v0_base_path = f"initial/{args.initial_dir}/tasks"
     
     # 使用ParallelRunner并行生成任务
     runner = ParallelRunner(max_concurrent=5)  # GPT-5 only, no model parallelization needed
@@ -174,7 +174,7 @@ async def main():
         apps=apps,
         task_func=generate_tasks_for_app,
         stage_name="Stage 0: Generate Tasks",
-        v0_dir=v0_base_path
+        initial_dir=v0_base_path
     )
     
     # 统计结果

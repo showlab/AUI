@@ -19,7 +19,10 @@ class ModelClient:
     # 移除Azure限流与配额逻辑；直接调用
         
     def _load_config(self) -> Dict[str, Any]:
-        """加载并处理模型配置（严格要求配置文件存在且可解析）"""
+        """加载并处理模型配置（严格要求配置文件存在且可解析）
+        
+        - 支持对所有形如 ${VARNAME} 的字符串做环境变量替换
+        """
         import yaml
         config_path = 'configs/models.yaml'
         if not os.path.exists(config_path):
@@ -28,14 +31,16 @@ class ModelClient:
             file_config = yaml.safe_load(f)
         if not isinstance(file_config, dict) or 'models' not in file_config:
             raise ValueError("Invalid models.yaml: missing 'models' key")
-        # 环境变量替换（provider 由配置显式提供）
-        models = {}
+        models: Dict[str, Dict[str, Any]] = {}
         for model_name, model_config in file_config.get('models', {}).items():
-            api_key = model_config.get('api_key', '')
-            if isinstance(api_key, str) and api_key.startswith('${') and api_key.endswith('}'):
-                env_var = api_key[2:-1]
-                model_config['api_key'] = os.getenv(env_var)
-            models[model_name] = model_config
+            resolved: Dict[str, Any] = {}
+            for k, v in model_config.items():
+                if isinstance(v, str) and v.startswith('${') and v.endswith('}'):
+                    env_var = v[2:-1]
+                    resolved[k] = os.getenv(env_var)
+                else:
+                    resolved[k] = v
+            models[model_name] = resolved
         return {'models': models}
     
     def _check_environment_variables(self):
@@ -49,6 +54,7 @@ class ModelClient:
                     missing_vars.append(f"OPENAI_API_KEY (for {model_name})")
                 elif model_config['provider'] == 'azure_openai':
                     missing_vars.append(f"AZURE_OPENAI_API_KEY (for {model_name})")
+                # gemini 使用GCP项目认证，这里不强制检查
         
         if missing_vars:
             raise ValueError(f"Missing environment variables: {', '.join(missing_vars)}")
@@ -56,21 +62,48 @@ class ModelClient:
     def _get_client(self, model_name: str):
         """获取模型客户端"""
         model_config = self.config['models'][model_name]
-        api_key = model_config['api_key']
+        provider = model_config['provider']
         
-        if model_config['provider'] == 'azure_openai':
+        if provider == 'azure_openai':
             return AzureOpenAI(
                 api_version=model_config.get('api_version', '2024-12-01-preview'),
                 azure_endpoint=model_config['azure_endpoint'],
-                api_key=api_key
+                api_key=model_config['api_key'],
             )
-        elif model_config['provider'] == 'local':
+        if provider == 'local':
             return OpenAI(
                 base_url=model_config['base_url'],
-                api_key=api_key
+                api_key=model_config['api_key'],
             )
-        else:  # openai
-            return OpenAI(api_key=api_key)
+        if provider == 'gemini':
+            import google.genai as genai  # type: ignore
+            project = model_config.get('project')
+            location = model_config.get('location', 'global')
+            return genai.Client(vertexai=True, project=project, location=location)
+        # openai
+        return OpenAI(api_key=model_config['api_key'])
+    
+    def _build_openai_messages(self, prompt: str, images: Optional[List[str]] = None) -> List[Dict[str, Any]]:
+        """构建OpenAI兼容的messages结构（文本+可选图像）"""
+        if not images:
+            return [{"role": "user", "content": prompt}]
+        content: List[Dict[str, Any]] = [{"type": "text", "text": prompt}]
+        for img_path in images:
+            if img_path.startswith("data:image"):
+                base64_image = img_path
+            elif (("/" in img_path or "\\" in img_path) and
+                  not img_path.startswith(("iVBOR", "/9j", "UklG")) and
+                  len(img_path) < 1000):
+                with open(img_path, "rb") as f:
+                    base64_data = base64.b64encode(f.read()).decode()
+                base64_image = f"data:image/png;base64,{base64_data}"
+            else:
+                base64_image = f"data:image/png;base64,{img_path}"
+            content.append({
+                "type": "image_url",
+                "image_url": {"url": base64_image}
+            })
+        return [{"role": "user", "content": content}]
     
     def _is_rate_limit_error(self, error: Exception) -> bool:
         """检查是否为429错误"""
@@ -172,82 +205,76 @@ class ModelClient:
         
         client = self._get_client(model_name)
         model_config = self.config['models'][model_name]
+        provider = model_config.get('provider')
         
-        # 本地模型使用无限重试，云端模型使用有限重试
-        is_local = model_config.get('provider') == 'local'
+        is_local = provider == 'local'
         max_retries = float('inf') if is_local else 5
         
-        # 构建消息
-        if images:
-            content = [{"type": "text", "text": prompt}]
-            for img_path in images:
-                if img_path.startswith("data:image"):
-                    # 已经是完整的data URL格式
-                    base64_image = img_path
-                elif (("/" in img_path or "\\" in img_path) and 
-                      not img_path.startswith(("iVBOR", "/9j", "UklG")) and
-                      len(img_path) < 1000):
-                    # 文件路径格式 - 需要同时满足：
-                    # 1. 包含路径分隔符
-                    # 2. 不以常见图片格式的base64开头 (PNG: iVBOR, JPEG: /9j, WEBP: UklG)
-                    # 3. 长度合理(文件路径通常不会超过1000字符)
-                    with open(img_path, "rb") as f:
-                        base64_data = base64.b64encode(f.read()).decode()
-                    base64_image = f"data:image/png;base64,{base64_data}"
-                else:
-                    # 纯base64字符串（来自browser.screenshot()）
-                    base64_image = f"data:image/png;base64,{img_path}"
-                content.append({
-                    "type": "image_url",
-                    "image_url": {"url": base64_image}
-                })
-            messages = [{"role": "user", "content": content}]
-        else:
-            messages = [{"role": "user", "content": prompt}]
-        
-        # 重试机制
         attempt = 0
         while True:
             try:
-                # 在事件循环中运行同步的API调用
                 def _make_request():
-                    # Azure OpenAI vs generic OpenAI-compatible providers
-                    if model_config['provider'] == 'azure_openai':
+                    # Gemini 3 通过 google-genai 接口（支持文本+截图）
+                    if provider == 'gemini':
+                        from google.genai import types  # type: ignore
+                        parts: List[Any] = [types.Part(text=prompt)]
+                        if images:
+                            for img in images:
+                                mime = "image/png"
+                                data_str = img
+                                if img.startswith("data:image"):
+                                    try:
+                                        header, data_str = img.split(",", 1)
+                                        mime = header.split(";")[0].split(":", 1)[1] or "image/png"
+                                    except Exception:
+                                        mime = "image/png"
+                                image_bytes = base64.b64decode(data_str)
+                                parts.append(types.Part.from_bytes(data=image_bytes, mime_type=mime))
+                        thinking_level = types.ThinkingLevel.HIGH if temperature >= 0.5 else types.ThinkingLevel.LOW
+                        cfg = types.GenerateContentConfig(
+                            thinking_config=types.ThinkingConfig(thinking_level=thinking_level)
+                        )
+                        resp = client.models.generate_content(
+                            model=model_config.get('model'),
+                            contents=parts,
+                            config=cfg,
+                        )
+                        return resp.text or ""
+                    
+                    # Azure OpenAI vs OpenAI-compatible providers
+                    if provider == 'azure_openai':
                         model_type = model_config.get('type', '').lower()
                         max_tokens = model_config.get('max_tokens', 16384)
                         if 'o1' in model_type or 'gpt-5' in model_type:
                             return azure_chat(
                                 client,
                                 model_config['deployment'],
-                                messages,
+                                self._build_openai_messages(prompt, images),
                                 max_completion_tokens=max_tokens,
                                 temperature=None,
                             )
-                        else:
-                            return azure_chat(
-                                client,
-                                model_config['deployment'],
-                                messages,
-                                max_completion_tokens=max_tokens,
-                                temperature=temperature,
-                            )
-                    else:
-                        model_identifier = model_config.get('model', model_config.get('deployment'))
-                        max_tokens = model_config.get('max_tokens', 16384)
-                        return openai_chat(
+                        return azure_chat(
                             client,
-                            model_identifier,
-                            messages,
+                            model_config['deployment'],
+                            self._build_openai_messages(prompt, images),
+                            max_completion_tokens=max_tokens,
                             temperature=temperature,
-                            max_tokens=max_tokens,
                         )
+                    
+                    # local / openai providers via generic OpenAI-compatible endpoint
+                    model_identifier = model_config.get('model', model_config.get('deployment'))
+                    max_tokens = model_config.get('max_tokens', 16384)
+                    return openai_chat(
+                        client,
+                        model_identifier,
+                        self._build_openai_messages(prompt, images),
+                        temperature=temperature,
+                        max_tokens=max_tokens,
+                    )
                 
-                # 异步执行网络请求（无额外限流）
-                import asyncio
                 loop = asyncio.get_event_loop()
                 response_content = await loop.run_in_executor(None, _make_request)
                 
-                # 调试：对于本地模型，如果返回内容很短，记录详细信息
                 if is_local and response_content and len(response_content) < 10:
                     ts_print(f"🔍 {model_name} returned short response ({len(response_content)} chars): {repr(response_content)}")
                 
@@ -256,7 +283,6 @@ class ModelClient:
             except Exception as e:
                 attempt += 1
                 
-                # 本地模型：所有错误都重试（无限重试）
                 if is_local:
                     error_msg = str(e)[:100]
                     retry_delay = min(2 + attempt * 0.5, 10)
@@ -266,13 +292,11 @@ class ModelClient:
                     await asyncio.sleep(retry_delay)
                     continue
                 
-                # 云端模型：只在429错误时重试，有限次数
                 if self._is_rate_limit_error(e) and attempt <= max_retries:
                     ts_print(f"⏸️ Rate limit (429), retrying in 2s (attempt {attempt}/{max_retries + 1})")
                     await asyncio.sleep(2)
                     continue
                 
-                # 其他错误或重试耗尽，直接抛出
                 raise e
     
     async def call_operator_model(self, prompt: str, screenshot: Optional[str] = None) -> str:
@@ -445,34 +469,39 @@ class ModelClient:
     
     async def call_coder(self, model_name: str, prompt: str, *, verbosity: str = None, reasoning_effort: str = None, stream_callback: Optional[Callable[[str], None]] = None) -> str:
         """调用代码生成模型
-        - 支持可选的verbosity与reasoning_effort（仅GPT-5有效）
+        - 支持可选的verbosity与reasoning_effort（GPT-5 系列有效）
         """
-        if model_name == 'gpt5':
+        if model_name in ('gpt5', 'gpt5.1'):
             v = verbosity if verbosity else "low"
             r = reasoning_effort if reasoning_effort else "low"
             return await self.call_model_with_gpt5_params(
                 model_name, prompt, temperature=0.7, verbosity=v, reasoning_effort=r,
                 stream_callback=stream_callback
             )
-        else:
-            return await self.call_model(model_name, prompt, temperature=0.7)
+        return await self.call_model(model_name, prompt, temperature=0.7)
     
     async def call_judge(self, prompt: str, images: Optional[List[str]] = None) -> str:
-        """调用judge模型 - 始终使用GPT-5"""
-        return await self.call_model('gpt5', prompt, images, temperature=0.3)
+        """调用judge模型 - 使用GPT-5.1"""
+        return await self.call_model('gpt5.1', prompt, images, temperature=0.3)
     
     async def call_task_generator(self, prompt: str) -> str:
-        """调用任务生成模型"""
-        return await self.call_model('gpt5', prompt, temperature=0.3)
+        """调用任务生成模型 - 使用GPT-5.1"""
+        return await self.call_model('gpt5.1', prompt, temperature=0.3)
     
     async def call_commenter(self, model_name: str, prompt: str, images: List[str]) -> str:
         """调用commenter模型进行版本选择 - 针对简短分析任务优化"""
-        # 对于GPT-5，使用minimal reasoning effort和low verbosity来加速
+        # GPT-5 commenter: low reasoning_effort; GPT-5.1 commenter: none
         if model_name == 'gpt5':
-            return await self.call_model_with_gpt5_params(model_name, prompt, images, 
-                                                        temperature=0.3, verbosity="low", reasoning_effort="minimal")
-        else:
-            return await self.call_model(model_name, prompt, images, temperature=0.3)
+            return await self.call_model_with_gpt5_params(
+                model_name, prompt, images,
+                temperature=0.3, verbosity="low", reasoning_effort="low"
+            )
+        if model_name == 'gpt5.1':
+            return await self.call_model_with_gpt5_params(
+                model_name, prompt, images,
+                temperature=0.3, verbosity="low", reasoning_effort="none"
+            )
+        return await self.call_model(model_name, prompt, images, temperature=0.3)
     
     async def call_cua_model(self, model_name: str, prompt: str, images: Optional[List[str]] = None) -> str:
         """调用CUA模型（UI-TARS或operator）"""

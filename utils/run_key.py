@@ -1,21 +1,19 @@
 from hashlib import sha1
 
 
-def _slug_v0(v0_dir: str) -> str:
-    if not v0_dir:
+def _slug_initial(initial_dir: str) -> str:
+    if not initial_dir:
         return "default"
-    # Keep it simple and deterministic
-    return str(v0_dir).replace("/", "_").replace(" ", "-")
+    return str(initial_dir).replace("/", "_").replace(" ", "-")
 
 
-def build_run_key(revision_type: str, commenter: str, v0_dir: str) -> str:
+def build_run_key(revision_type: str, commenter: str, initial_dir: str) -> str:
     """Deterministic namespace key for a Stage 3 configuration.
 
-    Format: rev-<revision_type>__commenter-<commenter>__v0-<v0_slug>
+    Format: rev-<revision_type>__commenter-<commenter>__initial-<slug>
     """
-    return f"rev-{revision_type}__commenter-{commenter}__v0-{_slug_v0(v0_dir)}"
+    return f"rev-{revision_type}__commenter-{commenter}__initial-{_slug_initial(initial_dir)}"
 
 
 def short_run_key(run_key: str) -> str:
     return sha1(run_key.encode("utf-8")).hexdigest()[:8]
-

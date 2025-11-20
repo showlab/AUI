@@ -15,12 +15,11 @@ def commenter_variant_from_instance(commenter) -> str:
     return cls_name.lower()
 
 
-def comment_cache_dir(base_dir: Path, v0_dir: str, commenter_variant: str, model: str, app: str) -> Path:
-    scope = v0_dir if v0_dir else 'default'
-    return base_dir / 'v0' / scope / 'comments' / commenter_variant / model / app
+def comment_cache_dir(base_dir: Path, initial_dir: str, commenter_variant: str, model: str, app: str) -> Path:
+    scope = initial_dir if initial_dir else 'default'
+    return base_dir / 'initial' / scope / 'comments' / commenter_variant / model / app
 
 
-def v1_cache_dir(base_dir: Path, v0_dir: str, revision_variant: str, model: str, app: str) -> Path:
-    scope = v0_dir if v0_dir else 'default'
-    return base_dir / 'progress' / 'stage3_v1' / scope / revision_variant / model / app
-
+def revised_cache_dir(base_dir: Path, initial_dir: str, revision_variant: str, model: str, app: str) -> Path:
+    scope = initial_dir if initial_dir else 'default'
+    return base_dir / 'progress' / 'stage3_revised' / scope / revision_variant / model / app

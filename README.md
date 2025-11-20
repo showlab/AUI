@@ -1,24 +1,23 @@
-# AUI: Computer-Use Agents as Judges for Automatic GUI Design
+# Computer-Use Agents as Judges for Generative User Interface
 
-<p align="right">
+<!-- <p align="right">
   <b>English</b>
-</p>
+</p> -->
 
-<p align="center">
+<!-- <p align="center">
   <b>AUI: Computer-Use Agents as Judges for Automatic GUI Design</b><br>
   Apps → Tasks from Agents → CUA Execution → Code Fix by Agents → Revised Apps
-</p>
+</p> -->
 
 <p align="center">
-  <a href="#-overview">📘 Overview</a> &nbsp; | &nbsp;
-  <a href="#-quick-start">🚀 Quick Start</a> &nbsp; | &nbsp;
-  <a href="#-data-layout">🗂️ Data</a> &nbsp; | &nbsp;
-  <a href="#-metrics--components">📏 Metrics</a>
+  <a href="#overview">📘 Overview</a> &nbsp; | &nbsp;
+  <a href="#quick-start">🚀 Quick Start</a> &nbsp; | &nbsp;
+  <a href="#data-layout">🗂️ Data Layout</a> &nbsp; | &nbsp;
+  <a href="#metrics-components">📏 Metrics & Components</a>
   <br>
-  <a href="https://huggingface.co/">🤗 Hugging Face</a> &nbsp; | &nbsp;
-  <a href="https://arxiv.org/">📄 Paper</a> &nbsp; | &nbsp;
-  <a href="https://showlab.github.io/">🌐 Project Website</a> &nbsp; | &nbsp;
-  <a href="https://x.com/">💬 X (Twitter)</a>
+  <a href="https://huggingface.co/spaces/showlab/AUI">🤗 Hugging Face</a> &nbsp; | &nbsp;
+  <a href="https://arxiv.org/abs/2511.15567">📄 Paper</a> &nbsp; | &nbsp;
+  <a href="https://showlab.github.io/AUI">🌐 Project Website</a> &nbsp; | &nbsp;
 </p>
 
 ---
@@ -29,19 +28,20 @@
 ---
 
 ### Table of Contents
-- [📘 Overview](#-overview)
-- [🚀 Quick Start](#-quick-start)
+- [📘 Overview](#overview)
+- [🚀 Quick Start](#quick-start)
   - [1. Requirements](#1-requirements)
   - [2. Configure Models](#2-configure-models)
   - [3. Run Pipeline (Stage 0 → 3)](#3-run-pipeline-stage-0--3)
-- [🗂️ Data Layout](#-data-layout)
+- [🗂️ Data Layout](#data-layout)
 - [🏗️ Project Organization](#️-project-organization)
-- [📏 Metrics & Components](#-metrics--components)
+- [📏 Metrics & Components](#metrics-components)
 - [🧭 Notes & Principles](#-notes--principles)
 - [🙏 Acknowledgements](#-acknowledgements)
 
 ---
 
+<a id="overview"></a>
 ## 📘 Overview
 AUI is a framework for evaluating agent‑generated web apps end to end.
 
@@ -59,6 +59,7 @@ Principles:
 
 ---
 
+<a id="quick-start"></a>
 ## 🚀 Quick Start
 Run the following commands from this directory (the one containing the stage scripts).
 
@@ -191,6 +192,7 @@ python stage3_2_cua_test_v1.py \
 
 ---
 
+<a id="data-layout"></a>
 ## 🗂️ Data Layout
 Initial (one‑time prep & eval)
 ```
@@ -219,6 +221,7 @@ Global and experiment summaries live under `progress/`.
 
 ---
 
+<a id="metrics-components"></a>
 ## 📏 Metrics & Components
 - Metric 1 (Stage 1): judge extracts task–state rules on initial websites; score = #tasks with valid rules.
 - Metric 2 (Stage 2): CUA executes supported tasks only; oracle eval is rule‑based, no VLM fallback.

@@ -8,6 +8,15 @@ models:
     api_key: ${AZURE_OPENAI_API_KEY}
     max_tokens: 16384
   
+  gpt5.1:
+    provider: azure_openai
+    type: gpt-5.1
+    deployment: gpt-5.1
+    azure_endpoint: ${AZURE_OPENAI_ENDPOINT}
+    api_version: 2025-03-01-preview
+    api_key: ${AZURE_OPENAI_API_KEY}
+    max_tokens: 16384
+  
   qwen:
     provider: local
     model: Qwen/Qwen3-Coder-30B-A3B-Instruct
@@ -45,3 +54,9 @@ models:
     model: Qwen/Qwen2.5-VL-72B-Instruct
     base_url: http://localhost:8000/v1
     api_key: dummy
+
+  gemini3:
+    provider: gemini
+    model: gemini-3-pro-preview
+    project: ${GEMINI_PROJECT_ID}
+    location: global

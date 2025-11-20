@@ -513,11 +513,11 @@ Include all six fields for each task."""
         
         return False
     
-    def save_rules(self, app_name: str, model_name: str, rules: Dict[str, Any], version: str = "v0", v0_dir: str = None):
+    def save_rules(self, app_name: str, model_name: str, rules: Dict[str, Any], version: str = "initial", v0_dir: str = None):
         """保存规则到文件"""
-        if version == "v0":
+        if version == "initial":
             if v0_dir:
-                rules_dir = Path(f"v0/{v0_dir}/tasks/{app_name}/states/{model_name}")
+                rules_dir = Path(f"initial/{v0_dir}/tasks/{app_name}/states/{model_name}")
             else:
                 rules_dir = Path(f"tasks/{app_name}/states/{model_name}")
         else:
@@ -525,7 +525,7 @@ Include all six fields for each task."""
         
         rules_dir.mkdir(parents=True, exist_ok=True)
         
-        rules_file = rules_dir / ("rules.json" if version == "v0" else "v1_rules.json")
+        rules_file = rules_dir / ("rules.json" if version == "initial" else "revised_rules.json")
         with open(rules_file, 'w', encoding='utf-8') as f:
             json.dump(rules, f, indent=2, ensure_ascii=False)
         

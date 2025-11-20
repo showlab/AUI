@@ -8,10 +8,10 @@ from pathlib import Path
 import json
 
 
-def save_v1_website(html_content: str, app_name: str, model_name: str,
-                    experiment_name: str, run_key: str, meta: Dict[str, Any]) -> str:
-    """Save revised website under runs/[run_key]/stage3_0 (keeps v1_website path for compatibility)."""
-    website_dir = Path(f"experiments/{experiment_name}/runs/{run_key}/stage3_0/{app_name}/{model_name}/v1_website")
+def save_revised_website(html_content: str, app_name: str, model_name: str,
+                         experiment_name: str, run_key: str, meta: Dict[str, Any]) -> str:
+    """Save revised website under runs/[run_key]/stage3_0 (uses revised_website path)."""
+    website_dir = Path(f"experiments/{experiment_name}/runs/{run_key}/stage3_0/{app_name}/{model_name}/revised_website")
     website_dir.mkdir(parents=True, exist_ok=True)
     website_path = website_dir / 'index.html'
     with open(website_path, 'w', encoding='utf-8') as f:

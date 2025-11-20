@@ -173,7 +173,7 @@ class UnsupportedTasksRevision(RevisionComponent):
     async def _load_unsupported_tasks(self, model_name: str, app_name: str, v0_dir: str = None) -> List[Dict[str, Any]]:
         """Load unsupported tasks from Stage 1 judge results"""
         if v0_dir:
-            rules_path = Path(f"v0/{v0_dir}/tasks/{app_name}/states/{model_name}/rules.json")
+            rules_path = Path(f"initial/{v0_dir}/tasks/{app_name}/states/{model_name}/rules.json")
         else:
             rules_path = Path(f"tasks/{app_name}/states/{model_name}/rules.json")
         
@@ -197,7 +197,7 @@ class UnsupportedTasksRevision(RevisionComponent):
     async def _load_task_descriptions(self, app_name: str, v0_dir: str = None) -> Dict[int, Dict[str, Any]]:
         """Load task descriptions for context"""
         if v0_dir:
-            tasks_file = Path(f"v0/{v0_dir}/tasks/{app_name}/tasks.json")
+            tasks_file = Path(f"initial/{v0_dir}/tasks/{app_name}/tasks.json")
         else:
             tasks_file = Path(f"tasks/{app_name}/tasks.json")
         task_descriptions = {}

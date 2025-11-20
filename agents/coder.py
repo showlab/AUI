@@ -14,16 +14,54 @@ class Coder:
         """代码生成Agent"""
         self.model_client = model_client
         
-    async def generate_v0_website(self, model_name: str, app_name: str, instruction: str) -> str:
-        """生成初始网站"""
-        
+    async def generate_initial_website(self, model_name: str, app_name: str, instruction: str,
+                                      progress_tracker: Optional[Any] = None,
+                                      verbosity: Optional[str] = None,
+                                      reasoning_effort: Optional[str] = None) -> str:
+        """生成初始网站（对GPT-5系列启用streaming并打印进度）"""
         prompt = build_coder_v0_prompt(instruction)
 
-        response = await self.model_client.call_coder(model_name, prompt)
+        # 对 GPT-5 / GPT-5.1 启用 streaming 以便实时进度输出
+        if model_name in ('gpt5', 'gpt5.1'):
+            stream_chars = {'n': 0}
+            last_log = {'t': time.time()}
+
+            def _stream_cb(piece: str):
+                try:
+                    stream_chars['n'] += len(piece or '')
+                    now = time.time()
+                    if progress_tracker and (now - last_log['t'] >= 5 or stream_chars['n'] < 40):
+                        last_log['t'] = now
+                        try:
+                            progress_tracker.add_timing_info(
+                                model_name, app_name,
+                                f"{app_name}: 📝 streaming {stream_chars['n']} chars"
+                            )
+                        except Exception:
+                            pass
+                except Exception:
+                    pass
+
+            v = verbosity if verbosity else "low"
+            # GPT-5.1 默认关闭 reasoning effort 以减速；GPT-5 保持低开销
+            if model_name == 'gpt5.1':
+                r = reasoning_effort if reasoning_effort else "none"
+            else:
+                r = reasoning_effort if reasoning_effort else "low"
+
+            response = await self.model_client.call_coder(
+                model_name, prompt,
+                verbosity=v,
+                reasoning_effort=r,
+                stream_callback=_stream_cb
+            )
+        else:
+            response = await self.model_client.call_coder(model_name, prompt)
+
         html_content = self._extract_html_from_response(response)
         return html_content
     
-    async def generate_v1_website(self, model_name: str, app_name: str, 
+    async def generate_revised_website(self, model_name: str, app_name: str, 
                            v0_html: str, failed_tasks: List[Dict[str, Any]], 
                            failure_analysis: str = None, apply_destylization: bool = False,
                            v0_dir: str = None, progress_tracker: Optional[Any] = None,
@@ -34,7 +72,7 @@ class Coder:
         
         # Load task descriptions for context
         if v0_dir:
-            tasks_file = Path(f"v0/{v0_dir}/tasks/{app_name}/tasks.json")
+            tasks_file = Path(f"initial/{v0_dir}/tasks/{app_name}/tasks.json")
         else:
             tasks_file = Path(f"tasks/{app_name}/tasks.json")
         task_descriptions = {}
@@ -101,7 +139,7 @@ class Coder:
                     apply_destylization=bool(apply_destylization),
                 )
                 
-                # Streaming support for GPT-5 to surface liveness
+                # Streaming support for GPT-5 系列 to surface liveness
                 stream_chars = {'n': 0}
                 last_log = {'t': time.time()}
 
@@ -115,7 +153,6 @@ class Coder:
                                 model_name, "BATCH",
                                 f"{app_name}: 📝 streaming {stream_chars['n']} chars"
                             )
-                            # Also surface per-app streaming status in the grid
                             try:
                                 progress_tracker.update_status(
                                     model_name, app_name,
@@ -126,8 +163,15 @@ class Coder:
                     except Exception:
                         pass
 
-                # Pass optional verbosity/reasoning_effort for GPT-5 when provided
-                if model_name == 'gpt5':
+                # GPT-5 与 GPT-5.1 均使用 streaming；5.1 默认 reasoning_effort=none
+                if model_name == 'gpt5.1':
+                    response = await self.model_client.call_coder(
+                        model_name, prompt,
+                        verbosity=(verbosity or "high"),
+                        reasoning_effort=(reasoning_effort or "none"),
+                        stream_callback=_stream_cb
+                    )
+                elif model_name == 'gpt5':
                     response = await self.model_client.call_coder(
                         model_name, prompt,
                         verbosity=(verbosity or "high"),
@@ -400,12 +444,12 @@ Reason Unsupported: {task.get('reason', 'Unknown reason')}
             config = yaml.safe_load(f)
             return config.get('prompt', '')
     
-    def save_website(self, html_content: str, app_name: str, model_name: str, version: str = "v0", base_dir: str = "websites") -> str:
+    def save_website(self, html_content: str, app_name: str, model_name: str, phase: str = "initial", base_dir: str = "websites") -> str:
         """保存网站文件"""
-        if version == "v0":
+        if phase == "initial":
             website_dir = Path(f"{base_dir}/{app_name}/{model_name}")
-        else:  # v1
-            website_dir = Path(f"experiments/{version}/{app_name}/{model_name}/v1_website")
+        else:  # revised
+            website_dir = Path(f"experiments/{phase}/{app_name}/{model_name}/revised_website")
         
         website_dir.mkdir(parents=True, exist_ok=True)
         

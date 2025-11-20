@@ -18,7 +18,7 @@ from utils.parallel_runner import ParallelRunner
 from agents.cua_policy import create_cua_policy
 from utils.constants import DEFAULT_APPS
 
-async def cua_test_task(model_name: str, app_name: str, progress_tracker, v0_dir: str = None, cua_model: str = "uitars", **kwargs) -> dict:
+async def cua_test_task(model_name: str, app_name: str, progress_tracker, initial_dir: str = None, cua_model: str = "uitars", **kwargs) -> dict:
     """单个CUA测试任务"""
     try:
         model_client = ModelClient()
@@ -27,9 +27,9 @@ async def cua_test_task(model_name: str, app_name: str, progress_tracker, v0_dir
         progress_tracker.update_status(model_name, app_name, "Loading rules...")
         
         # 加载规则
-        if v0_dir:
-            rules_path = Path(f"v0/{v0_dir}/tasks/{app_name}/states/{model_name}/rules.json")
-            website_path = Path(f"v0/{v0_dir}/websites/{app_name}/{model_name}/index.html")
+        if initial_dir:
+            rules_path = Path(f"initial/{initial_dir}/tasks/{app_name}/states/{model_name}/rules.json")
+            website_path = Path(f"initial/{initial_dir}/websites/{app_name}/{model_name}/index.html")
         else:
             rules_path = Path(f"tasks/{app_name}/states/{model_name}/rules.json")
             website_path = Path(f"websites/{app_name}/{model_name}/index.html")
@@ -68,12 +68,12 @@ async def cua_test_task(model_name: str, app_name: str, progress_tracker, v0_dir
         completed_count = 0
         
         # 加载任务描述映射
-        if v0_dir:
-            tasks_file = f"v0/{v0_dir}/tasks/{app_name}/tasks.json"
-            trajectories_dir = Path(f"v0/{v0_dir}/tasks/{app_name}/v0_cua_results/{model_name}/{cua_model}/trajectories")
+        if initial_dir:
+            tasks_file = f"initial/{initial_dir}/tasks/{app_name}/tasks.json"
+            trajectories_dir = Path(f"initial/{initial_dir}/tasks/{app_name}/initial_cua_results/{model_name}/{cua_model}/trajectories")
         else:
             tasks_file = f"tasks/{app_name}/tasks.json"
-            trajectories_dir = Path(f"tasks/{app_name}/v0_cua_results/{model_name}/{cua_model}/trajectories")
+            trajectories_dir = Path(f"tasks/{app_name}/initial_cua_results/{model_name}/{cua_model}/trajectories")
             
         with open(tasks_file) as f:
             tasks_data = json.load(f)
@@ -144,10 +144,10 @@ async def cua_test_task(model_name: str, app_name: str, progress_tracker, v0_dir
             'task_results': task_results
         }
         
-        if v0_dir:
-            results_dir = Path(f"v0/{v0_dir}/tasks/{app_name}/v0_cua_results/{model_name}/{cua_model}")
+        if initial_dir:
+            results_dir = Path(f"initial/{initial_dir}/tasks/{app_name}/initial_cua_results/{model_name}/{cua_model}")
         else:
-            results_dir = Path(f"tasks/{app_name}/v0_cua_results/{model_name}/{cua_model}")
+            results_dir = Path(f"tasks/{app_name}/initial_cua_results/{model_name}/{cua_model}")
         results_dir.mkdir(parents=True, exist_ok=True)
         
         results_file = results_dir / "results.json"
@@ -180,8 +180,8 @@ async def main():
                        help='Comma-separated list of apps or "all" for all 52 apps')
     parser.add_argument('--max-concurrent', type=int, default=20,
                        help='Maximum concurrent tasks (limited due to browser resources)')
-    parser.add_argument('--v0-dir', type=str, default=None,
-                       help='Initial data directory name (stored under v0/[dir])')
+    parser.add_argument('--initial-dir', type=str, default=None,
+                       help='Initial data directory name (stored under initial/[dir])')
     parser.add_argument('--cua-models', type=str, default='uitars',
                        help='Comma-separated list of CUA models (e.g., uitars,operator)')
     
@@ -206,9 +206,9 @@ async def main():
     missing_files = []
     for model in models:
         for app in apps:
-            if args.v0_dir:
-                website_path = Path(f"v0/{args.v0_dir}/websites/{app}/{model}/index.html")
-                rules_path = Path(f"v0/{args.v0_dir}/tasks/{app}/states/{model}/rules.json")
+            if args.initial_dir:
+                website_path = Path(f"initial/{args.initial_dir}/websites/{app}/{model}/index.html")
+                rules_path = Path(f"initial/{args.initial_dir}/tasks/{app}/states/{model}/rules.json")
             else:
                 website_path = Path(f"websites/{app}/{model}/index.html")
                 rules_path = Path(f"tasks/{app}/states/{model}/rules.json")
@@ -235,7 +235,7 @@ async def main():
             models=models,
             apps=apps,
             task_func=cua_test_task,
-            v0_dir=args.v0_dir,
+            initial_dir=args.initial_dir,
             cua_model=cua_model,
             stage_name=f"Stage 2: CUA Test Initial Websites ({cua_model})"
         )
@@ -264,14 +264,14 @@ async def main():
     }
     
     base = Path(__file__).resolve().parent
-    summary_path = base / "progress" / "global_summaries" / "summaries" / "stage2_cua_test_v0_summary.json"
+    summary_path = base / "progress" / "global_summaries" / "summaries" / "stage2_cua_test_initial_summary.json"
     summary_path.parent.mkdir(parents=True, exist_ok=True)
     
     with open(summary_path, 'w', encoding='utf-8') as f:
         json.dump(detailed_summary, f, indent=2, ensure_ascii=False)
     
     # Generate detailed evaluation output
-    eval_dir = base / "progress" / "global_summaries" / "evaluations" / "stage2_cua_test_v0_eval"
+    eval_dir = base / "progress" / "global_summaries" / "evaluations" / "stage2_cua_test_initial_eval"
     eval_dir.mkdir(parents=True, exist_ok=True)
     
     # Model comparison analysis

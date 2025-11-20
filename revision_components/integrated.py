@@ -46,7 +46,7 @@ class IntegratedRevision(RevisionComponent):
             context: Dict containing both 'failed_tasks' and optionally 'unsupported_tasks'
             mcts: Ignored (removed in new design)
             destylized: Apply destylization
-            v0_dir: Initial data directory name (stored under v0/[dir])
+            v0_dir: Initial data directory name (stored under initial/[dir])
         """
         import time
         
@@ -160,7 +160,7 @@ These tasks require additional UI elements, JavaScript functionality, or structu
             combined_analysis = "No specific failure analysis available"
         
         # Generate revision using existing coder method with combined analysis
-        result = await self.coder.generate_v1_website(
+        result = await self.coder.generate_revised_website(
             model_name=model_name,
             app_name=app_name,
             v0_html=v0_html,

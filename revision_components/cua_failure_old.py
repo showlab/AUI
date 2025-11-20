@@ -60,7 +60,7 @@ class CuaFailureRevision(RevisionComponent):
             v0_dir=v0_dir
         )
         
-        result = await self.coder.generate_v1_website(
+        result = await self.coder.generate_revised_website(
             model_name=model_name,
             app_name=app_name,
             v0_html=v0_html,
@@ -95,7 +95,7 @@ class CuaFailureRevision(RevisionComponent):
         # Generate 3 versions with same prompt but different temperature/attempts
         for i in range(3):
             start_time = time.time()
-            result = await self.coder.generate_v1_website(
+            result = await self.coder.generate_revised_website(
                 model_name=model_name,
                 app_name=app_name,
                 v0_html=v0_html,

@@ -30,7 +30,7 @@ class RevisionComponent(ABC):
             context: Component-specific context data
             mcts: Whether to generate 3 versions and select best (only for CUA)
             destylized: Whether to apply destylization (only for CUA)
-            v0_dir: Initial data directory name (stored under v0/[dir])
+            v0_dir: Initial data directory name (stored under initial/[dir])
             
         Returns:
             Dict with success, html_content, and metadata
