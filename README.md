@@ -12,13 +12,12 @@
 <p align="center">
   <a href="#-overview">📘 Overview</a> &nbsp; | &nbsp;
   <a href="#-quick-start">🚀 Quick Start</a> &nbsp; | &nbsp;
-  <a href="#-data-layout">🗂️ Data</a> &nbsp; | &nbsp;
-  <a href="#-metrics--components">📏 Metrics</a>
+  <a href="#-data-layout">🗂️ Data Layout</a> &nbsp; | &nbsp;
+  <a href="#-metrics--components">📏 Metrics & Components</a>
   <br>
-  <a href="https://huggingface.co/">🤗 Hugging Face</a> &nbsp; | &nbsp;
-  <a href="https://arxiv.org/">📄 Paper</a> &nbsp; | &nbsp;
-  <a href="https://showlab.github.io/">🌐 Project Website</a> &nbsp; | &nbsp;
-  <a href="https://x.com/">💬 X (Twitter)</a>
+  <a href="https://huggingface.co/spaces/showlab/AUI">🤗 Hugging Face</a> &nbsp; | &nbsp;
+  <a href="https://arxiv.org/abs/2511.15567">📄 Paper</a> &nbsp; | &nbsp;
+  <a href="https://showlab.github.io/AUI">🌐 Project Website</a> &nbsp; | &nbsp;
 </p>
 
 ---
