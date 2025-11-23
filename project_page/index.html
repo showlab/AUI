@@ -127,12 +127,16 @@
         <div class="column is-four-fifths">
           <h2 class="title">AUI-Gym Gallery</h2>
           <p class="caption">
-            52 apps &times; 3 coder models. Hover to preview initial vs revised UI, click to open the full HTML demo.
+            Agent-native UI snapshots across coder models. Use the arrows to switch between apps; each view shows GPT-5, Qwen3-Coder-30B, and GPT-4o.
           </p>
-          <div class="aui-gallery-model-menu">
-            <button type="button" class="button aui-gallery-model-button" data-model="gpt5">GPT-5</button>
-            <button type="button" class="button aui-gallery-model-button" data-model="qwen">Qwen3-Coder-30B</button>
-            <button type="button" class="button aui-gallery-model-button" data-model="gpt4o">GPT-4o</button>
+          <div class="aui-gallery-app-header">
+            <button type="button" class="button aui-gallery-nav-button" id="aui-gallery-prev">
+              &larr; Prev app
+            </button>
+            <div class="aui-gallery-app-title" id="aui-gallery-app-title"></div>
+            <button type="button" class="button aui-gallery-nav-button" id="aui-gallery-next">
+              Next app &rarr;
+            </button>
           </div>
         </div>
       </div>
@@ -231,74 +235,15 @@
         qwen: "Qwen3-Coder-30B",
         gpt4o: "GPT-4o"
       };
-      const modelApps = {
-        gpt5: [
-          "kinetic-typography-studio",
-          "esports-tournament-landing-page",
-          "espresso",
-          "regex-lab",
-          "csv-to-charts",
-          "online-course-landing-page",
-          "music-theory-trainer",
-          "openai-fm-inspired",
-          "qr-code-generator",
-          "artisan-csa",
-          "holiday-card-for-kids",
-          "virtual-drum-kit",
-          "nonprofit-impact-report",
-          "camping-gear-checklist",
-          "case-study-landing-page",
-          "company-acronym-list",
-          "festival-lights-show",
-          "employee-skills-matrix",
-          "podcast-homepage",
-          "product-launch-page"
-        ],
-        qwen: [
-          "esports-tournament-landing-page",
-          "artisan-csa",
-          "tic-tac-toe-game",
-          "kinetic-typography-studio",
-          "espresso",
-          "audio-step-sequencer",
-          "micro-habit-tracker",
-          "holiday-card-for-kids",
-          "company-acronym-list",
-          "online-course-landing-page",
-          "pomodoro",
-          "brutalist-dev-landing-page",
-          "csv-to-charts",
-          "tea-dunkability",
-          "asteroid-game",
-          "nonprofit-impact-report",
-          "regex-lab",
-          "festival-lights-show",
-          "tiny-kanban",
-          "customer-journey-flow"
-        ],
-        gpt4o: [
-          "brutalist-dev-landing-page",
-          "artisan-csa",
-          "audio-step-sequencer",
-          "esports-tournament-landing-page",
-          "regex-lab",
-          "trivia-quiz-game",
-          "language-learning-flashcards",
-          "asteroid-game",
-          "micro-habit-tracker",
-          "pomodoro",
-          "tea-dunkability",
-          "company-acronym-list",
-          "interactive-world-clock",
-          "event-feedback",
-          "farewell-message-board",
-          "kinetic-typography-studio",
-          "fun-game",
-          "virtual-drum-kit",
-          "tiny-kanban",
-          "festival-lights-show"
-        ]
-      };
+      // Apps where all three coder models have v0 + v1 websites and thumbs.
+      const apps = [
+        "artisan-csa",
+        "company-acronym-list",
+        "esports-tournament-landing-page",
+        "festival-lights-show",
+        "kinetic-typography-studio",
+        "regex-lab"
+      ];
 
       function titleCaseApp(slug) {
         return slug
@@ -311,7 +256,9 @@
 
       var grid = document.getElementById("aui-gallery-grid");
       var overlaysRoot = document.getElementById("aui-gallery-overlays");
-      var modelButtons = document.querySelectorAll(".aui-gallery-model-button");
+      var appTitleEl = document.getElementById("aui-gallery-app-title");
+      var prevBtn = document.getElementById("aui-gallery-prev");
+      var nextBtn = document.getElementById("aui-gallery-next");
       if (!grid || !overlaysRoot) return;
 
       function ensureOverlay(model, app, overlayId, v0Path, v1Path) {
@@ -356,13 +303,16 @@
         overlaysRoot.appendChild(overlay);
       }
 
-      function renderGalleryForModel(model) {
+      function renderApp(app) {
         grid.innerHTML = "";
-        var appsForModel = modelApps[model] || [];
-        appsForModel.forEach(function (app) {
-          var overlayId = "aui-gallery-" + model + "-" + app;
-          var appTitle = titleCaseApp(app);
+        var appTitle = titleCaseApp(app);
+        if (appTitleEl) {
+          appTitleEl.textContent = appTitle;
+        }
+
+        models.forEach(function (model) {
           var modelLabel = modelLabels[model] || model;
+          var overlayId = "aui-gallery-" + model + "-" + app;
 
           var card = document.createElement("a");
           card.className = "aui-gallery-card-link";
@@ -395,10 +345,10 @@
             "</div>" +
             '<div class="aui-gallery-card-meta">' +
             '<div class="aui-gallery-card-title">' +
-            appTitle +
+            modelLabel +
             "</div>" +
             '<div class="aui-gallery-card-subtitle">' +
-            modelLabel +
+            appTitle +
             "</div>" +
             "</div>" +
             "</div>";
@@ -412,33 +362,28 @@
         });
       }
 
-      var currentModel = models[0];
+      var currentIndex = 0;
 
-      function setActiveModel(model) {
-        currentModel = model;
-        renderGalleryForModel(model);
-        modelButtons.forEach(function (btn) {
-          var m = btn.getAttribute("data-model");
-          if (m === model) {
-            btn.classList.add("is-active");
-          } else {
-            btn.classList.remove("is-active");
-          }
+      function setActiveApp(index) {
+        if (!apps.length) return;
+        if (index < 0) index = apps.length - 1;
+        if (index >= apps.length) index = 0;
+        currentIndex = index;
+        renderApp(apps[currentIndex]);
+      }
+
+      if (prevBtn) {
+        prevBtn.addEventListener("click", function () {
+          setActiveApp(currentIndex - 1);
+        });
+      }
+      if (nextBtn) {
+        nextBtn.addEventListener("click", function () {
+          setActiveApp(currentIndex + 1);
         });
       }
 
-      if (modelButtons.length) {
-        modelButtons.forEach(function (btn) {
-          btn.addEventListener("click", function () {
-            var m = btn.getAttribute("data-model");
-            if (m && m !== currentModel) {
-              setActiveModel(m);
-            }
-          });
-        });
-      }
-
-      setActiveModel(currentModel);
+      setActiveApp(currentIndex);
     })();
   </script>
 
