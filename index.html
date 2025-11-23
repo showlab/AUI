@@ -29,7 +29,7 @@
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
 </head>
 
-<body>
+<body class="theme-human">
   <section class="hero">
     <div class="container is-max-desktop">
       <div class="columns is-centered has-text-centered">
@@ -97,6 +97,10 @@
                 </a>
               </span>
             </div>
+            <div class="aui-theme-toggle">
+              <button type="button" class="button aui-theme-button is-active" data-theme="human">For human</button>
+              <button type="button" class="button aui-theme-button" data-theme="agent">For agent</button>
+            </div>
           </div>
         </div>
       </div>
@@ -154,27 +158,23 @@
             <br>
             Each screenshot shows initial vs agent-optimized UI across four coder models (GPT-5, Qwen3-Coder-30B, GPT-4o, Gemini-3-Pro).
           </p>
-          <div class="aui-gallery-mode-toggle">
-            <button type="button" class="button aui-gallery-mode-button is-active" data-mode="human">
-              For Human
-            </button>
-            <button type="button" class="button aui-gallery-mode-button" data-mode="agent">
-              For Agent
-            </button>
-          </div>
           <div class="aui-gallery-app-title" id="aui-gallery-app-title"></div>
         </div>
       </div>
       <div class="columns is-centered">
-        <div class="column is-four-fifths aui-gallery-grid-row">
-          <button type="button" class="button aui-gallery-nav-side" id="aui-gallery-prev">
-            &larr;
-          </button>
-          <div id="aui-gallery-grid" class="aui-gallery-grid"></div>
-          <button type="button" class="button aui-gallery-nav-side" id="aui-gallery-next">
-            &rarr;
-          </button>
-          <div id="aui-gallery-task-box" class="aui-gallery-qa-box"></div>
+        <div class="column is-four-fifths">
+          <div class="aui-gallery-main-row">
+            <button type="button" class="button aui-gallery-arrow" id="aui-gallery-prev" aria-label="Previous app">
+              &larr;
+            </button>
+            <div>
+              <div id="aui-gallery-grid" class="aui-gallery-grid"></div>
+              <div id="aui-gallery-task-box" class="aui-gallery-qa-box"></div>
+            </div>
+            <button type="button" class="button aui-gallery-arrow" id="aui-gallery-next" aria-label="Next app">
+              &rarr;
+            </button>
+          </div>
           <div id="aui-gallery-overlays"></div>
         </div>
       </div>
@@ -291,6 +291,26 @@
   </footer>
   <script>
     (function () {
+      var bodyEl = document.body;
+      var themeButtons = document.querySelectorAll(".aui-theme-toggle .aui-theme-button");
+      if (themeButtons.length && bodyEl) {
+        themeButtons.forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var theme = btn.getAttribute("data-theme") || "human";
+            if (theme === "agent") {
+              bodyEl.classList.add("theme-agent");
+              bodyEl.classList.remove("theme-human");
+            } else {
+              bodyEl.classList.add("theme-human");
+              bodyEl.classList.remove("theme-agent");
+            }
+            themeButtons.forEach(function (b) {
+              b.classList.toggle("is-active", b === btn);
+            });
+          });
+        });
+      }
+
       const models = ["gpt5", "qwen", "gpt4o", "gemini3"];
       const modelLabels = {
         gpt5: "GPT-5",

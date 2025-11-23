@@ -5,6 +5,58 @@ body {
   color: #0f172a;
 }
 
+body.theme-agent {
+  font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  background: #020617;
+  color: #e5e7eb;
+}
+
+body.theme-agent .hero,
+body.theme-agent .section,
+body.theme-agent .footer {
+  background-color: #020617 !important;
+  color: #e5e7eb;
+}
+
+body.theme-agent .title,
+body.theme-agent .subtitle,
+body.theme-agent h1,
+body.theme-agent h2,
+body.theme-agent h3,
+body.theme-agent h4,
+body.theme-agent h5,
+body.theme-agent h6 {
+  color: #e5e7eb !important;
+}
+
+body.theme-agent .button {
+  background-color: transparent !important;
+  color: #e5e7eb !important;
+  border-radius: 0 !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: none;
+}
+
+body.theme-agent .table {
+  background: #020617;
+  color: #e5e7eb;
+  box-shadow: none;
+}
+
+body.theme-agent .table thead th {
+  background: #020617;
+  color: #e5e7eb;
+}
+
+body.theme-agent .table tbody tr:nth-child(even) {
+  background: #020617;
+}
+
+body.theme-agent .table tbody tr:hover {
+  background: #111827;
+}
+
 a {
   color: #2563eb;
   text-decoration: none;
@@ -214,20 +266,6 @@ h6 {
   margin-top: 3rem;
 }
 
-.aui-gallery-mode-toggle {
-  margin: 1rem 0 0.75rem;
-  display: inline-flex;
-  gap: 0.5rem;
-}
-
-.aui-gallery-mode-button {
-  min-width: 7rem;
-}
-
-.aui-gallery-app-header {
-  margin: 1.5rem 0 0.5rem;
-}
-
 .aui-gallery-app-title {
   font-family: 'Courier New', Courier, monospace;
   font-weight: bold;
@@ -245,17 +283,11 @@ h6 {
   margin: 0 auto;
 }
 
-.aui-gallery-grid-row {
+.aui-gallery-main-row {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   column-gap: 0.75rem;
-}
-
-.aui-gallery-nav-side {
-  min-width: 2.5rem;
-  padding-left: 0;
-  padding-right: 0;
 }
 
 .aui-gallery-card-link {
@@ -333,6 +365,17 @@ h6 {
   color: #9ca3af;
 }
 
+.aui-gallery-arrow {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px !important;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
 .aui-gallery-qa-box {
   margin-top: 1.25rem;
   text-align: left;
@@ -365,6 +408,16 @@ h6 {
   color: #198754;
   font-weight: 700;
   margin-right: 6px;
+}
+
+.aui-theme-toggle {
+  margin-top: 0.75rem;
+  display: inline-flex;
+  gap: 0.5rem;
+}
+
+.aui-theme-button {
+  min-width: 7rem;
 }
 
 .aui-gallery-overlay {
