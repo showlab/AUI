@@ -1,37 +1,27 @@
-# Agent for UI
-
-<!-- <p align="center">
-  <b>AUI: Computer-Use Agents as Judges for Automatic GUI Design</b><br>
-  Apps → Tasks from Agents → CUA Execution → Code Fix by Agents → Revised Apps
-</p> -->
+# Computer-Use Agents for Generative UI
 
 <p align="center">
-  <a href="https://huggingface.co/spaces/showlab/AUI">🤗 Hugging Face</a> &nbsp; | &nbsp;
   <a href="https://arxiv.org/abs/2511.15567">📄 Paper</a> &nbsp; | &nbsp;
-  <a href="https://showlab.github.io/AUI">🌐 Project Website</a>
+  <a href="https://huggingface.co/spaces/showlab/AUI">🤗 Demo</a> &nbsp; | &nbsp;
+  <a href="https://showlab.github.io/AUI">🌐 Project</a>
 </p>
 
 ---
 
 ## 🔥 Update
-- [x] [2025.11.20] HuggingFace Demo is released.
+- [x] [2025.11.20] Huggingface Demo is released.
 - [x] [2025.11.19] Arxiv paper is released.
 - [x] [2025.10.30] Code is released.
 
 ---
 
 <a id="overview"></a>
-## 📘 Overview
+## 📖 TL;DR
 
-Overview of the **Coder-CUA** in Collaboration framework. The process begins with the
-**Coder as Designer**, which initializes and iteratively revises the UI based on queries and feedback. In
-parallel, the **CUA as Judge** executes task-driven navigation within the testing environment, generating trajectories and error logs to evaluate task solvability. A verifier ensures functional correctness,
-while feedback from CUA navigation informs subsequent UI revisions. This collaboration yields a
-finalized **agent-centric UI** optimized for both functionality and execution success.
+Can Computer-Use Agents offer feedback to assist Coders to Generate UI?
 
 <div align="center">
-  <img src="assets/workflow.png" width="100%" alt="AUI Framework"/>
-  <p><i>Overview of the Coder-CUA in Collaboration framework</i></p>
+  <img src="assets/teaser" width="100%" alt=""/>
 </div>
 
 **Pipeline:**
