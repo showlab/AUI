@@ -121,6 +121,30 @@
     </div>
   </section>
 
+  <section class="section aui-gallery-section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title">AUI-Gym Gallery</h2>
+          <p class="caption">
+            52 apps &times; 3 coder models. Hover to preview initial vs revised UI, click to open the full HTML demo.
+          </p>
+          <div class="aui-gallery-model-menu">
+            <button type="button" class="button aui-gallery-model-button" data-model="gpt5">GPT-5</button>
+            <button type="button" class="button aui-gallery-model-button" data-model="qwen">Qwen3-Coder-30B</button>
+            <button type="button" class="button aui-gallery-model-button" data-model="gpt4o">GPT-4o</button>
+          </div>
+        </div>
+      </div>
+      <div class="columns is-centered">
+        <div class="column is-four-fifths">
+          <div id="aui-gallery-grid" class="aui-gallery-grid"></div>
+          <div id="aui-gallery-overlays"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="section">
     <div class="container is-max-desktop">
       <div class="columns is-centered has-text-centered">
@@ -199,6 +223,224 @@
       </div>
     </div>
   </footer>
+  <script>
+    (function () {
+      const models = ["gpt5", "qwen", "gpt4o"];
+      const modelLabels = {
+        gpt5: "GPT-5",
+        qwen: "Qwen3-Coder-30B",
+        gpt4o: "GPT-4o"
+      };
+      const modelApps = {
+        gpt5: [
+          "kinetic-typography-studio",
+          "esports-tournament-landing-page",
+          "espresso",
+          "regex-lab",
+          "csv-to-charts",
+          "online-course-landing-page",
+          "music-theory-trainer",
+          "openai-fm-inspired",
+          "qr-code-generator",
+          "artisan-csa",
+          "holiday-card-for-kids",
+          "virtual-drum-kit",
+          "nonprofit-impact-report",
+          "camping-gear-checklist",
+          "case-study-landing-page",
+          "company-acronym-list",
+          "festival-lights-show",
+          "employee-skills-matrix",
+          "podcast-homepage",
+          "product-launch-page"
+        ],
+        qwen: [
+          "esports-tournament-landing-page",
+          "artisan-csa",
+          "tic-tac-toe-game",
+          "kinetic-typography-studio",
+          "espresso",
+          "audio-step-sequencer",
+          "micro-habit-tracker",
+          "holiday-card-for-kids",
+          "company-acronym-list",
+          "online-course-landing-page",
+          "pomodoro",
+          "brutalist-dev-landing-page",
+          "csv-to-charts",
+          "tea-dunkability",
+          "asteroid-game",
+          "nonprofit-impact-report",
+          "regex-lab",
+          "festival-lights-show",
+          "tiny-kanban",
+          "customer-journey-flow"
+        ],
+        gpt4o: [
+          "brutalist-dev-landing-page",
+          "artisan-csa",
+          "audio-step-sequencer",
+          "esports-tournament-landing-page",
+          "regex-lab",
+          "trivia-quiz-game",
+          "language-learning-flashcards",
+          "asteroid-game",
+          "micro-habit-tracker",
+          "pomodoro",
+          "tea-dunkability",
+          "company-acronym-list",
+          "interactive-world-clock",
+          "event-feedback",
+          "farewell-message-board",
+          "kinetic-typography-studio",
+          "fun-game",
+          "virtual-drum-kit",
+          "tiny-kanban",
+          "festival-lights-show"
+        ]
+      };
+
+      function titleCaseApp(slug) {
+        return slug
+          .split("-")
+          .map(function (p) {
+            return p.charAt(0).toUpperCase() + p.slice(1);
+          })
+          .join(" ");
+      }
+
+      var grid = document.getElementById("aui-gallery-grid");
+      var overlaysRoot = document.getElementById("aui-gallery-overlays");
+      var modelButtons = document.querySelectorAll(".aui-gallery-model-button");
+      if (!grid || !overlaysRoot) return;
+
+      function ensureOverlay(model, app, overlayId, v0Path, v1Path) {
+        if (document.getElementById(overlayId)) {
+          return;
+        }
+        var overlay = document.createElement("div");
+        overlay.id = overlayId;
+        overlay.className = "aui-gallery-overlay";
+        overlay.innerHTML =
+          '<div class="aui-gallery-overlay-backdrop"></div>' +
+          '<div class="aui-gallery-overlay-content">' +
+          '<a href="#" class="aui-gallery-overlay-close" aria-label="Close overlay">&times;</a>' +
+          '<input type="radio" id="' +
+          overlayId +
+          '-initial" name="' +
+          overlayId +
+          '-view" class="aui-gallery-toggle-input aui-gallery-toggle-input-initial" checked />' +
+          '<input type="radio" id="' +
+          overlayId +
+          '-revised" name="' +
+          overlayId +
+          '-view" class="aui-gallery-toggle-input aui-gallery-toggle-input-revised" />' +
+          '<div class="aui-gallery-toggle-bar">' +
+          '<span class="aui-gallery-toggle-label-prefix">View</span>' +
+          '<label for="' +
+          overlayId +
+          '-initial" class="aui-gallery-toggle-label aui-gallery-toggle-label-initial">Initial</label>' +
+          '<label for="' +
+          overlayId +
+          '-revised" class="aui-gallery-toggle-label aui-gallery-toggle-label-revised">Revised</label>' +
+          "</div>" +
+          '<div class="aui-gallery-frame-wrapper">' +
+          '<iframe class="aui-gallery-frame aui-gallery-frame-initial" src="' +
+          v0Path +
+          '" loading="lazy"></iframe>' +
+          '<iframe class="aui-gallery-frame aui-gallery-frame-revised" src="' +
+          v1Path +
+          '" loading="lazy"></iframe>' +
+          "</div>" +
+          "</div>";
+        overlaysRoot.appendChild(overlay);
+      }
+
+      function renderGalleryForModel(model) {
+        grid.innerHTML = "";
+        var appsForModel = modelApps[model] || [];
+        appsForModel.forEach(function (app) {
+          var overlayId = "aui-gallery-" + model + "-" + app;
+          var appTitle = titleCaseApp(app);
+          var modelLabel = modelLabels[model] || model;
+
+          var card = document.createElement("a");
+          card.className = "aui-gallery-card-link";
+          card.href = "#" + overlayId;
+          card.innerHTML =
+            '<div class="aui-gallery-card" data-app="' +
+            appTitle +
+            '" data-model="' +
+            modelLabel +
+            '">' +
+            '<div class="aui-gallery-thumb-wrapper">' +
+            '<img class="aui-gallery-thumb aui-thumb-v0" src="gallery/thumbs/' +
+            model +
+            "/" +
+            app +
+            '/v0.jpg" alt="' +
+            appTitle +
+            ' initial (' +
+            modelLabel +
+            ')" loading="lazy" />' +
+            '<img class="aui-gallery-thumb aui-thumb-v1" src="gallery/thumbs/' +
+            model +
+            "/" +
+            app +
+            '/v1.jpg" alt="' +
+            appTitle +
+            ' revised (' +
+            modelLabel +
+            ')" loading="lazy" />' +
+            "</div>" +
+            '<div class="aui-gallery-card-meta">' +
+            '<div class="aui-gallery-card-title">' +
+            appTitle +
+            "</div>" +
+            '<div class="aui-gallery-card-subtitle">' +
+            modelLabel +
+            "</div>" +
+            "</div>" +
+            "</div>";
+          grid.appendChild(card);
+
+          var v0Path =
+            "gallery/v0/" + app + "/" + model + "/index.html";
+          var v1Path =
+            "gallery/v1/" + app + "/" + model + "/v1_website/index.html";
+          ensureOverlay(model, app, overlayId, v0Path, v1Path);
+        });
+      }
+
+      var currentModel = models[0];
+
+      function setActiveModel(model) {
+        currentModel = model;
+        renderGalleryForModel(model);
+        modelButtons.forEach(function (btn) {
+          var m = btn.getAttribute("data-model");
+          if (m === model) {
+            btn.classList.add("is-active");
+          } else {
+            btn.classList.remove("is-active");
+          }
+        });
+      }
+
+      if (modelButtons.length) {
+        modelButtons.forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var m = btn.getAttribute("data-model");
+            if (m && m !== currentModel) {
+              setActiveModel(m);
+            }
+          });
+        });
+      }
+
+      setActiveModel(currentModel);
+    })();
+  </script>
 
 </body>
 
