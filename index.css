@@ -466,7 +466,7 @@ body.mode-agent .aui-gallery-thumb-wrapper {
 .aui-mode-switch-slider {
   position: absolute;
   inset: 0;
-  background: #ef4444;
+  background: linear-gradient(90deg, #ef4444 0%, #ef4444 50%, #22c55e 50%, #22c55e 100%);
   border-radius: 999px;
   border: 2px solid #0f172a;
   transition: background 0.2s ease;
