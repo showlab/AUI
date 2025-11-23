@@ -34,7 +34,6 @@
       <div class="columns is-centered has-text-centered">
         <div class="column is-four-fifths">
           <div class="title-header">
-            <img class="logo" src="figures/AUI_logo.png" alt="AUI logo">
             <h1 class="title publication-title is-bold">
               <span>Computer-Use Agents as Judges for Generative User Interface</span>
             </h1>
@@ -76,26 +75,22 @@
           <div class="column has-text-centered">
             <div class="publication-links">
               <span class="link-block">
-                <a class="button is-normal is-rounded is-dark" href="https://arxiv.org/pdf/2511.15567" target="_blank">
-                  <i class="button-icon far fa-paper-plane"></i>
+                <a class="button is-normal is-rounded is-dark" href="https://arxiv.org/abs/2511.15567" target="_blank">
                   <span>Paper</span>
                 </a>
               </span>
               <span class="link-block">
                 <a class="button is-normal is-rounded is-dark" href="https://github.com/showlab/AUI" target="_blank">
-                  <i class="button-icon fa-brands fa-github"></i>
                   <span>Code</span>
                 </a>
               </span>
               <span class="link-block">
                 <a class="button is-normal is-rounded is-dark" href="https://github.com/showlab/AUI" target="_blank">
-                  <i class="button-icon fa-regular fa-compass"></i>
                   <span>Benchmark</span>
                 </a>
               </span>
               <span class="link-block">
                 <a class="button is-normal is-rounded is-dark" href="#citation">
-                  <i class="button-icon fa-regular fa-bookmark"></i>
                   <span>BibTeX</span>
                 </a>
               </span>
@@ -112,7 +107,14 @@
         <div class="column is-four-fifths">
           <h2 class="title">Abstract</h2>
           <div class="content has-text-justified">
-            <p>Computer-Use Agents (CUA) are becoming increasingly capable of autonomously operating digital environments through Graphical User Interfaces (GUI). Yet, most GUI remain designed primarily for humans—prioritizing aesthetics and usability—forcing agents to adopt human-oriented behaviors that are unnecessary for efficient task execution. At the same time, rapid advances in coding-oriented language models (Coder) have transformed automatic GUI design. This raises a fundamental question: <em>Can CUA as judges to assist Coder for automatic GUI design</em>? To investigate, we introduce <strong>AUI-Gym</strong>, a benchmark for Automatic GUI development spanning 52 applications across diverse domains. Using language models, we synthesize 1560 tasks that simulate real-world scenarios. To ensure task reliability, we further develop a verifier that programmatically checks whether each task is executable within its environment. Building on this, we propose a <strong>Coder-CUA in Collaboration</strong> framework: the Coder acts as Designer, generating and revising websites, while the CUA serves as Judge, evaluating functionality and refining designs. Success is measured not by visual appearance, but by task solvability and CUA navigation success rate. To turn CUA feedback into usable guidance, we design a <strong>CUA Dashboard</strong> that compresses multi-step navigation histories into concise visual summaries, offering interpretable guidance for iterative redesign. By positioning agents as both designers and judges, our framework shifts interface design toward agent-native efficiency and reliability. Our work takes a step toward shifting agents from passive use toward active participation in digital environments. Our code and dataset are available at <a href="https://github.com/showlab/AUI" target="_blank">https://github.com/showlab/AUI</a>.</p>
+            <p>
+              We propose a framework where Computer-Use Agents (CUA) act as judges to assist Coders in automatic GUI design. 
+              We introduce <strong>AUI-Gym</strong>, a benchmark of 52 applications with 1560 tasks. 
+              In our <strong>Coder-CUA Collaboration</strong>, the CUA evaluates interface functionality and solvability to guide the Coder's design refinements. 
+              We also provide a <strong>CUA Dashboard</strong> to visualize navigation histories for iterative improvement. 
+              This approach shifts interface design toward agent-native efficiency and reliability.
+              Our code and dataset are available at <a href="https://github.com/showlab/AUI" target="_blank">https://github.com/showlab/AUI</a>.
+            </p>
           </div>
         </div>
       </div>
@@ -181,7 +183,7 @@
         </div>
       </div>
       <div class="columns is-centered">
-        <pre><code>@inproceedings{lin2025aui,<br>  title={Computer-Use Agents as Judges for Automatic GUI Design},<br>  author={Lin, Kevin Qinghong and Hu, Siyuan and Li, Linjie and Yang, Zhengyuan and Wang, Lijuan and Torr, Philip and Shou, Mike Zheng},<br>  booktitle={NeurIPS 2025 Workshop on Agents},<br>  year={2025}<br>}</code></pre>
+        <pre><code>@misc{lin2025computeruse,<br>      title={Computer-Use Agents as Judges for Generative User Interface}, <br>      author={Kevin Qinghong Lin and Siyuan Hu and Linjie Li and Zhengyuan Yang and Lijuan Wang and Philip Torr and Mike Zheng Shou},<br>      year={2025},<br>      eprint={2511.15567},<br>      archivePrefix={arXiv},<br>      primaryClass={cs.CV},<br>      url={https://arxiv.org/abs/2511.15567}, <br>}</code></pre>
       </div>
     </div>
   </section>
