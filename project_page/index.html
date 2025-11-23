@@ -26,6 +26,7 @@
 
   <script async src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/js/all.min.js"></script>
   <script async src="vendor/image-zoom.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
 </head>
 
 <body>
@@ -55,7 +56,7 @@
               <a href="https://www.microsoft.com/en-us/research/people/lijuanw/" target="_blank">Lijuan Wang</a><sup>3</sup>,
             </span>
             <span class="author-block">
-              <a href="https://www.robots.ox.ac.uk/~phst/" target="_blank">Philip Torr</a><sup>1</sup>,
+              <a href="https://scholar.google.com/citations?user=kPxa2w0AAAAJ&hl=en" target="_blank">Philip Torr</a><sup>1</sup>,
             </span>
             <span class="author-block">
               <a href="https://sites.google.com/view/showlab" target="_blank">Mike Zheng Shou</a><sup>2</sup>
@@ -105,17 +106,38 @@
     <div class="container is-max-desktop">
       <div class="columns is-centered has-text-centered">
         <div class="column is-four-fifths">
-          <h2 class="title">Abstract</h2>
+          <h2 class="title">📖 TL;DR</h2>
           <div class="content has-text-justified">
+            <p>
+              Can <strong>Computer-Use Agents</strong> offer feedback to assist <strong>Coders</strong> to Generate UI?
+            </p>
+          </div>
+        <figure class="image">
+          <img src="figures/teaser.png" alt="AUI Framework" data-zoom-image />
+          <figcaption class="has-text-grey mt-2">
+            <b>👨‍💻Humans Collaboration <i>vs.</i> 🤖️Coder-CUA Collaboration.</b> <br> <b>Left:</b> Most GUIs are designed by humans and optimized for user experience (e.g. aesthetics), forcing trained agents to adapt to human-oriented behaviors. <b>Right:</b> Our Coder-CUA Collaboration framework leverages Coder as Designer and CUA as Judge together, enabling more reliable task execution and improved usability for agents.
+          </figcaption>
+        </figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title">🔧 How does it work?</h2>
+          <div class="content has-text-justified is-size-6">
             <p>
               We propose a framework where Computer-Use Agents (CUA) act as judges to assist Coders in automatic GUI design. 
               We introduce <strong>AUI-Gym</strong>, a benchmark of 52 applications with 1560 tasks. 
               In our <strong>Coder-CUA Collaboration</strong>, the CUA evaluates interface functionality and solvability to guide the Coder's design refinements. 
               We also provide a <strong>CUA Dashboard</strong> to visualize navigation histories for iterative improvement. 
               This approach shifts interface design toward agent-native efficiency and reliability.
-              Our code and dataset are available at <a href="https://github.com/showlab/AUI" target="_blank">https://github.com/showlab/AUI</a>.
             </p>
           </div>
+          <img src="figures/workflow.png" alt="AUI Framework" data-zoom-image />
         </div>
       </div>
     </div>
@@ -125,9 +147,11 @@
     <div class="container is-max-desktop">
       <div class="columns is-centered has-text-centered">
         <div class="column is-four-fifths">
-          <h2 class="title">AUI-Gym Gallery</h2>
+          <h2 class="title">🎬 Qualitative Examples</h2>
           <p class="caption">
-            Agent-native UI snapshots across coder models. Use the arrows to switch between apps; each view shows GPT-5, Qwen3-Coder-30B, and GPT-4o.
+            We introduce <strong>AUI-Gym</strong>, a benchmark of 52 applications with 1560 tasks. 
+            <br>
+            Each snapshot shows initial vs agent-optimized UI across three coder models (GPT-5, Qwen3-Coder-30B, GPT-4o). Use the arrows to switch apps.
           </p>
           <div class="aui-gallery-app-header">
             <button type="button" class="button aui-gallery-nav-button" id="aui-gallery-prev">
@@ -143,6 +167,7 @@
       <div class="columns is-centered">
         <div class="column is-four-fifths">
           <div id="aui-gallery-grid" class="aui-gallery-grid"></div>
+          <div id="aui-gallery-task-box" class="aui-gallery-qa-box"></div>
           <div id="aui-gallery-overlays"></div>
         </div>
       </div>
@@ -153,50 +178,80 @@
     <div class="container is-max-desktop">
       <div class="columns is-centered has-text-centered">
         <div class="column is-four-fifths">
-          <h2 class="title">What is AUI?</h2>
-          <img class="teaser-image" src="figures/teaser.png" alt="AUI Teaser" data-zoom-image />
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="container is-max-desktop">
-      <div class="columns is-centered has-text-centered">
-        <div class="column is-four-fifths">
-          <h2 class="title">Coder&ndash;CUA Collaboration</h2>
-          <img src="figures/workflow.png" alt="AUI Framework" data-zoom-image />
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="container is-max-desktop">
-      <div class="columns is-centered has-text-centered">
-        <div class="column is-four-fifths">
-          <h3 class="title">Agent-Centric Revisions</h3>
-        </div>
-      </div>
-      <div class="columns is-centered has-text-centered">
-        <div class="column is-two-fifths">
-          <img src="figures/coder_revision.png" alt="Coder Refinement" data-zoom-image />
-          <div class="caption">Coder as Designer: extend functionality from CUA feedback.</div>
-        </div>
-        <div class="column is-two-fifths">
-          <img src="figures/cua_revision.png" alt="CUA Refinement" data-zoom-image />
-          <div class="caption">CUA as Judge: surface usability bottlenecks for agents.</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="container is-max-desktop">
-      <div class="columns is-centered has-text-centered">
-        <div class="column is-four-fifths">
-          <h2 class="title">CUA Dashboard</h2>
-          <img src="figures/dashboard.png" alt="CUA Dashboard" data-zoom-image />
+          <h2 class="title">📊 New UI improve Success Rate</h2>
+          <div class="content has-text-justified">
+            <p>
+              We evaluate our framework using <b>Function Completeness Rate (FC)</b> and <b>CUA Success Rate (SR)</b>. The results demonstrate that our Coder-CUA collaboration significantly improves both metrics compared to the baseline, especially for stronger models like GPT-5 and Gemini-3-Pro.
+            </p>
+          </div>
+          <div class="table-container">
+            <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
+              <thead>
+                <tr>
+                  <th rowspan="2" style="vertical-align: middle;">Coder</th>
+                  <th rowspan="2" style="vertical-align: middle;">Method</th>
+                  <th colspan="2" class="has-text-centered">Overall Performance</th>
+                </tr>
+                <tr>
+                  <th class="has-text-centered">Func. Completeness (%)</th>
+                  <th class="has-text-centered">CUA Success Rate (%)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td rowspan="2" style="vertical-align: middle;">GPT-5</td>
+                  <td>Baseline</td>
+                  <td class="has-text-centered">67.9</td>
+                  <td class="has-text-centered">24.5</td>
+                </tr>
+                <tr style="font-weight: bold; background-color: #e6fffa;">
+                  <td>+ Ours</td>
+                  <td class="has-text-centered">81.5</td>
+                  <td class="has-text-centered">26.0</td>
+                </tr>
+                <tr>
+                  <td rowspan="2" style="vertical-align: middle;">Qwen3-Coder-30B</td>
+                  <td>Baseline</td>
+                  <td class="has-text-centered">42.1</td>
+                  <td class="has-text-centered">7.3</td>
+                </tr>
+                <tr style="font-weight: bold; background-color: #e6fffa;">
+                  <td>+ Ours</td>
+                  <td class="has-text-centered">60.1</td>
+                  <td class="has-text-centered">19.0</td>
+                </tr>
+                <tr>
+                  <td rowspan="2" style="vertical-align: middle;">GPT-4o</td>
+                  <td>Baseline</td>
+                  <td class="has-text-centered">36.3</td>
+                  <td class="has-text-centered">8.8</td>
+                </tr>
+                <tr style="font-weight: bold; background-color: #e6fffa;">
+                  <td>+ Ours</td>
+                  <td class="has-text-centered">43.1</td>
+                  <td class="has-text-centered">16.1</td>
+                </tr>
+                <tr>
+                  <td rowspan="2" style="vertical-align: middle;">Gemini-3-Pro</td>
+                  <td>Baseline</td>
+                  <td class="has-text-centered">71.7</td>
+                  <td class="has-text-centered">35.8</td>
+                </tr>
+                <tr style="font-weight: bold; background-color: #e6fffa;">
+                  <td>+ Ours</td>
+                  <td class="has-text-centered">72.5</td>
+                  <td class="has-text-centered">47.0</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="aui-leaderboard-bars">
+            <div class="aui-leaderboard-toggle">
+              <button type="button" data-metric="fc" class="is-active">Function Completeness</button>
+              <button type="button" data-metric="sr">CUA Success Rate</button>
+            </div>
+            <div id="aui-leaderboard-chart" class="aui-leaderboard-chart"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -206,12 +261,12 @@
     <div class="container is-max-desktop">
       <div class="columns is-centered has-text-centered">
         <div class="column is-four-fifths">
-          <h3 class="title">Citation</h3>
+          <h3 class="title">🎓Citation</h3>
           <div class="caption">Please kindly cite our paper if you find this project helpful.</div>
         </div>
       </div>
       <div class="columns is-centered">
-        <pre><code>@misc{lin2025computeruse,<br>      title={Computer-Use Agents as Judges for Generative User Interface}, <br>      author={Kevin Qinghong Lin and Siyuan Hu and Linjie Li and Zhengyuan Yang and Lijuan Wang and Philip Torr and Mike Zheng Shou},<br>      year={2025},<br>      eprint={2511.15567},<br>      archivePrefix={arXiv},<br>      primaryClass={cs.CV},<br>      url={https://arxiv.org/abs/2511.15567}, <br>}</code></pre>
+        <pre><code>@misc{lin2025aui,<br>      title={Computer-Use Agents as Judges for Generative User Interface}, <br>      author={Kevin Qinghong Lin and Siyuan Hu and Linjie Li and Zhengyuan Yang and Lijuan Wang and Philip Torr and Mike Zheng Shou},<br>      year={2025},<br>      eprint={2511.15567},<br>      archivePrefix={arXiv},<br>      primaryClass={cs.CV},<br>      url={https://arxiv.org/abs/2511.15567}, <br>}</code></pre>
       </div>
     </div>
   </section>
@@ -235,7 +290,7 @@
         qwen: "Qwen3-Coder-30B",
         gpt4o: "GPT-4o"
       };
-      // Apps where all three coder models have v0 + v1 websites and thumbs.
+      // Apps where all three coder models have non-trivial v0 + v1 websites and thumbs.
       const apps = [
         "artisan-csa",
         "company-acronym-list",
@@ -259,6 +314,7 @@
       var appTitleEl = document.getElementById("aui-gallery-app-title");
       var prevBtn = document.getElementById("aui-gallery-prev");
       var nextBtn = document.getElementById("aui-gallery-next");
+      var taskBox = document.getElementById("aui-gallery-task-box");
       if (!grid || !overlaysRoot) return;
 
       function ensureOverlay(model, app, overlayId, v0Path, v1Path) {
@@ -301,6 +357,48 @@
           "</div>" +
           "</div>";
         overlaysRoot.appendChild(overlay);
+      }
+
+      function loadTaskPrompt(app) {
+        if (!taskBox) return;
+        fetch("gallery/tasks/" + app + ".yaml")
+          .then(function (resp) {
+            return resp.text();
+          })
+          .then(function (text) {
+            var lines = text.split(/\r?\n/);
+            var inPrompt = false;
+            var promptLines = [];
+            for (var i = 0; i < lines.length; i++) {
+              var line = lines[i];
+              var trimmed = line.trim();
+              if (!inPrompt) {
+                if (trimmed === "prompt: |" || trimmed === "prompt:|") {
+                  inPrompt = true;
+                }
+              } else {
+                if (trimmed && !line.startsWith(" ") && !line.startsWith("\t")) {
+                  break;
+                }
+                var stripped = line.replace(/^\s*/, "");
+                promptLines.push(stripped);
+              }
+            }
+            var promptText = promptLines.join("\n").trim();
+            if (!promptText) {
+              taskBox.innerHTML = "";
+              return;
+            }
+            var safe = promptText
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;");
+            taskBox.innerHTML =
+              '<div class="aui-gallery-qa-question"><span class="aui-gallery-qa-qtag">Task</span></div>' +
+              '<div class="aui-gallery-qa-answer">' +
+              safe +
+              "</div>";
+          });
       }
 
       function renderApp(app) {
@@ -347,9 +445,6 @@
             '<div class="aui-gallery-card-title">' +
             modelLabel +
             "</div>" +
-            '<div class="aui-gallery-card-subtitle">' +
-            appTitle +
-            "</div>" +
             "</div>" +
             "</div>";
           grid.appendChild(card);
@@ -369,7 +464,10 @@
         if (index < 0) index = apps.length - 1;
         if (index >= apps.length) index = 0;
         currentIndex = index;
-        renderApp(apps[currentIndex]);
+        var app = apps[currentIndex];
+        renderApp(app);
+
+        loadTaskPrompt(app);
       }
 
       if (prevBtn) {
@@ -384,6 +482,167 @@
       }
 
       setActiveApp(currentIndex);
+
+      // Leaderboard interactive bar chart (ECharts, VCode-style)
+      var chartRoot = document.getElementById("aui-leaderboard-chart");
+      var metricToggleButtons = document.querySelectorAll(
+        ".aui-leaderboard-toggle button"
+      );
+      if (!chartRoot || typeof echarts === "undefined") return;
+
+      var leaderboardData = [
+        {
+          coder: "GPT-5",
+          baseline: { fc: 67.9, sr: 24.5 },
+          ours: { fc: 81.5, sr: 26.0 },
+        },
+        {
+          coder: "Qwen3-Coder-30B",
+          baseline: { fc: 42.1, sr: 7.3 },
+          ours: { fc: 60.1, sr: 19.0 },
+        },
+        {
+          coder: "GPT-4o",
+          baseline: { fc: 36.3, sr: 8.8 },
+          ours: { fc: 43.1, sr: 16.1 },
+        },
+        {
+          coder: "Gemini-3-Pro",
+          baseline: { fc: 71.7, sr: 35.8 },
+          ours: { fc: 72.5, sr: 47.0 },
+        },
+      ];
+
+      var baseTooltipStyle = {
+        backgroundColor: "rgba(255,255,255,0.95)",
+        borderColor: "#ccc",
+        borderWidth: 1,
+        textStyle: { color: "#333" },
+        padding: [10, 15],
+      };
+
+      var chart = echarts.init(chartRoot);
+      var currentMetric = "fc";
+
+      function buildOption(metric) {
+        var coderNames = leaderboardData.map(function (row) {
+          return row.coder;
+        });
+        var baselineVals = leaderboardData.map(function (row) {
+          return row.baseline[metric];
+        });
+        var oursVals = leaderboardData.map(function (row) {
+          return row.ours[metric];
+        });
+        var titleText =
+          metric === "fc"
+            ? "Function Completeness (%)"
+            : "CUA Success Rate (%)";
+
+        return {
+          title: {
+            text: titleText,
+            left: "center",
+            textStyle: { fontWeight: "bold", fontSize: 15 },
+          },
+          tooltip: {
+            trigger: "item",
+            ...baseTooltipStyle,
+            formatter: function (p) {
+              var row = leaderboardData[p.dataIndex];
+              var label = p.seriesName;
+              var value = p.value;
+              return (
+                "<b>" +
+                row.coder +
+                "</b><br/>" +
+                label +
+                ": " +
+                value.toFixed(1) +
+                "%"
+              );
+            },
+          },
+          legend: {
+            data: ["Baseline", "+ Ours"],
+            top: 30,
+          },
+          grid: {
+            containLabel: true,
+            left: 40,
+            right: 20,
+            bottom: 40,
+            top: 70,
+          },
+          xAxis: {
+            type: "category",
+            data: coderNames,
+            axisLabel: {
+              interval: 0,
+              rotate: 0,
+              align: "center",
+              fontSize: 10,
+            },
+          },
+          yAxis: {
+            type: "value",
+            name: "Score (%)",
+            nameTextStyle: { fontSize: 12 },
+            axisLabel: { fontSize: 10 },
+            splitLine: {
+              lineStyle: { color: "#e9e9e9", type: "dashed" },
+            },
+            max: 100,
+          },
+          series: [
+            {
+              name: "Baseline",
+              type: "bar",
+              barWidth: "30%",
+              data: baselineVals,
+              itemStyle: { color: "#cbd5f5" },
+            },
+            {
+              name: "+ Ours",
+              type: "bar",
+              barWidth: "30%",
+              data: oursVals,
+              itemStyle: { color: "#2563eb" },
+              label: {
+                show: true,
+                position: "top",
+                fontWeight: "bold",
+                fontSize: 11,
+                formatter: function (p) {
+                  return p.value.toFixed(1);
+                },
+              },
+            },
+          ],
+        };
+      }
+
+      function renderLeaderboard(metric) {
+        chart.setOption(buildOption(metric), true);
+      }
+
+      window.addEventListener("resize", function () {
+        chart.resize();
+      });
+
+      metricToggleButtons.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var metric = btn.getAttribute("data-metric");
+          if (!metric || metric === currentMetric) return;
+          currentMetric = metric;
+          metricToggleButtons.forEach(function (b) {
+            b.classList.toggle("is-active", b === btn);
+          });
+          renderLeaderboard(currentMetric);
+        });
+      });
+
+      renderLeaderboard(currentMetric);
     })();
   </script>
 

@@ -1,60 +1,66 @@
 body {
-  font-family: 'Courier New', Courier, monospace; /* Command line feel */
-  background-color: #FFFFFF;
-  color: #000000;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Segoe UI", sans-serif;
+  background: linear-gradient(to bottom, #f9fafb, #e0f2fe);
+  color: #0f172a;
 }
 
 a {
-  color: #0000AA;
-  text-decoration: underline;
+  color: #2563eb;
+  text-decoration: none;
 }
 
 a:hover {
-  color: #FFFFFF;
-  background-color: #000000;
+  text-decoration: underline;
 }
 
-/* Override Bulma titles */
-.title, .subtitle {
-  color: #000000 !important;
-  font-family: 'Courier New', Courier, monospace;
+/* Headings closer to VCode style */
+.title,
+.subtitle {
+  color: #0f172a !important;
+  font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  color: #000000 !important;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #0f172a !important;
 }
 
 /* Sections */
-.hero, .section, .footer {
-  background-color: #FFFFFF !important;
-  color: #000000;
+.hero,
+.section,
+.footer {
+  background-color: transparent !important;
+  color: inherit;
 }
 
-/* Buttons - Command Line Style */
+/* Buttons - VCode style */
 .button {
-  background-color: #FFFFFF !important;
-  color: #000000 !important;
-  border: 2px solid #000000 !important;
-  border-radius: 0 !important; /* Square */
-  box-shadow: 5px 5px 0px #000000; /* Solid shadow */
-  font-family: 'Courier New', Courier, monospace;
-  font-weight: bold;
-  transition: all 0.1s;
+  background-color: #111827 !important;
+  color: #f9fafb !important;
+  border-radius: 999px !important;
+  border: none !important;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.35);
+  font-family: inherit;
+  font-weight: 600;
+  transition: transform 0.12s ease, box-shadow 0.12s ease,
+    background-color 0.12s ease;
 }
 
 .button:hover {
-  transform: translate(2px, 2px);
-  box-shadow: 3px 3px 0px #000000;
+  transform: translateY(-1px);
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.45);
+  background-color: #020617 !important;
 }
 
 .button:active {
-  transform: translate(5px, 5px);
-  box-shadow: 0px 0px 0px #000000;
-}
-
-/* Remove rounded corners globally just in case */
-* {
-  border-radius: 0 !important;
+  transform: translateY(0);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.35);
 }
 
 /* Specific Layout Adjustments */
@@ -113,10 +119,97 @@ h1, h2, h3, h4, h5, h6 {
   font-style: italic;
 }
 
+.table {
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+  overflow: hidden;
+}
+
+.table thead th {
+  background: #0f172a;
+  color: #e5e7eb;
+  font-weight: 600;
+  border: none;
+}
+
+.table tbody tr {
+  background: #ffffff;
+}
+
+.table tbody tr:nth-child(even) {
+  background: #f9fafb;
+}
+
+.table tbody tr:hover {
+  background: #eff6ff;
+}
+
+.table td,
+.table th {
+  border: none !important;
+}
+
+/* Leaderboard bar chart */
+.aui-leaderboard-bars {
+  margin-top: 1.5rem;
+}
+
+.aui-leaderboard-toggle {
+  display: inline-flex;
+  border-radius: 999px;
+  background: #e5e7eb;
+  padding: 2px;
+  margin-bottom: 0.75rem;
+}
+
+.aui-leaderboard-toggle button {
+  border: none;
+  background: transparent;
+  padding: 0.3rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 999px;
+  cursor: pointer;
+  color: #4b5563;
+}
+
+.aui-leaderboard-toggle button.is-active {
+  background: #111827;
+  color: #f9fafb;
+}
+
+.aui-leaderboard-chart {
+  width: 100%;
+  height: 260px;
+}
+
+.aui-leader-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.aui-leader-row-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #4b5563;
+}
+
+.aui-leader-row-bars,
+.aui-leader-bar-track,
+.aui-leader-bar-fill-baseline,
+.aui-leader-bar-fill-ours {
+  /* kept for compatibility; no longer used once ECharts is mounted */
+}
+
 .teaser-image, img {
   width: 100%;
   height: auto;
-  border: 2px solid #000000; /* Add border to images */
+  border: none;
 }
 
 /* AUI gallery (flat grid, VCode-style cards on top of command-line theme) */
@@ -170,6 +263,7 @@ h1, h2, h3, h4, h5, h6 {
   flex-direction: column;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border-radius: 0.75rem;
 }
 
 .aui-gallery-card:hover {
@@ -212,7 +306,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .aui-gallery-card-meta {
-  padding: 0.6rem 0.9rem 0.7rem;
+  padding: 0.4rem 0.75rem 0.5rem;
   border-top: 1px solid rgba(30, 64, 175, 0.6);
 }
 
@@ -225,6 +319,41 @@ h1, h2, h3, h4, h5, h6 {
 .aui-gallery-card-subtitle {
   font-size: 0.8rem;
   color: #9ca3af;
+}
+
+/* QA-style task box under gallery (VCode-inspired) */
+.aui-gallery-qa-box {
+  margin-top: 1.25rem;
+  text-align: left;
+  background-color: #f8f9fa;
+  padding: 12px 18px;
+  border-radius: 8px;
+  border-left: 4px solid #0d6efd;
+}
+
+.aui-gallery-qa-question {
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.aui-gallery-qa-answer {
+  color: #4b5563;
+  font-size: 0.9rem;
+  white-space: pre-line;
+  line-height: 1.5;
+}
+
+.aui-gallery-qa-qtag {
+  color: #dc3545;
+  font-weight: 700;
+  margin-right: 6px;
+}
+
+.aui-gallery-qa-atag {
+  color: #198754;
+  font-weight: 700;
+  margin-right: 6px;
 }
 
 .aui-gallery-overlay {
