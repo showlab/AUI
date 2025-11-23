@@ -55,6 +55,7 @@
             <span class="author-block">
               <a href="https://www.microsoft.com/en-us/research/people/lijuanw/" target="_blank">Lijuan Wang</a><sup>3</sup>,
             </span>
+            <br>
             <span class="author-block">
               <a href="https://scholar.google.com/citations?user=kPxa2w0AAAAJ&hl=en" target="_blank">Philip Torr</a><sup>1</sup>,
             </span>
@@ -130,11 +131,11 @@
           <h2 class="title">🔧 How does it work?</h2>
           <div class="content has-text-justified is-size-6">
             <p>
-              We propose a framework where Computer-Use Agents (CUA) act as judges to assist Coders in automatic GUI design. 
-              We introduce <strong>AUI-Gym</strong>, a benchmark of 52 applications with 1560 tasks. 
-              In our <strong>Coder-CUA Collaboration</strong>, the CUA evaluates interface functionality and solvability to guide the Coder's design refinements. 
-              We also provide a <strong>CUA Dashboard</strong> to visualize navigation histories for iterative improvement. 
-              This approach shifts interface design toward agent-native efficiency and reliability.
+              Overview of the Coder-CUA in Collaboration framework. The process begins with the
+              Coder as Designer, which initializes and iteratively revises the UI based on queries and feedback. In
+              parallel, the CUA as Judge executes task-driven navigation within the testing environment, generating trajectories and error logs to evaluate task solvability. A verifier ensures functional correctness,
+              while feedback from CUA navigation informs subsequent UI revisions. This collaboration yields a
+              finalized agent-centric UI optimized for both functionality and execution success.
             </p>
           </div>
           <img src="figures/workflow.png" alt="AUI Framework" data-zoom-image />
@@ -151,7 +152,7 @@
           <p class="caption">
             We introduce <strong>AUI-Gym</strong>, a benchmark of 52 applications with 1560 tasks. 
             <br>
-            Each snapshot shows initial vs agent-optimized UI across three coder models (GPT-5, Qwen3-Coder-30B, GPT-4o, Gemini-3-Pro). Use the arrows to switch apps.
+            Each screenshot shows initial vs agent-optimized UI across four coder models (GPT-5, Qwen3-Coder-30B, GPT-4o, Gemini-3-Pro).
           </p>
           <div class="aui-gallery-app-header">
             <button type="button" class="button aui-gallery-nav-button" id="aui-gallery-prev">
