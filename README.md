@@ -87,7 +87,6 @@ Run the following commands from the project root directory.
   export AZURE_OPENAI_API_KEY="YOUR_KEY"
   ```
 
-### 3. Run Pipeline (Stage 0 → 3)
 ### 3. Run Pipeline
 
 For normal usage, you only need the single entrypoint `run.py` from the repo root:
@@ -103,7 +102,96 @@ cd betterui_release
   --cua-models uitars
 ```
 
-This command sequentially runs Stage 0 → Stage 3. Advanced users can inspect and invoke the individual stage scripts under `src/` (e.g., `src/stage0_generate_websites.py`, `src/stage1_judge_v0.py`, etc.) if they need fine-grained control.
+This command sequentially runs Stage 0 → Stage 3. Advanced users who want full control over each stage can expand the section below to see the individual commands.
+
+<details>
+<summary><strong>Show individual Stage 0–3 commands</strong></summary>
+
+**1) Generate Initial Websites** (3 coder models × 52 apps)
+```bash
+python stage0_generate_websites.py \
+  --models gpt5,qwen,gpt4o \
+  --apps all \
+  --v0-dir full_52_apps
+```
+
+**2) Generate Tasks** (30 tasks per app via GPT-5)
+```bash
+python stage0_generate_tasks.py \
+  --apps all \
+  --v0-dir full_52_apps
+```
+
+**3) Metric 1: Judge Initial Websites** (Task Solvability)
+```bash
+python stage1_judge_v0.py \
+  --models gpt5,qwen,gpt4o \
+  --apps all \
+  --v0-dir full_52_apps
+```
+
+**4) Metric 2: CUA Navigation Test** (Initial)
+```bash
+python stage2_cua_test_v0.py \
+  --models gpt5,qwen,gpt4o \
+  --apps all \
+  --v0-dir full_52_apps \
+  --cua-models uitars
+```
+
+**5) Stage 3: Iterative Refinement** (Choose a revision strategy)
+
+*   **Option A: CUA Revision** (Fix based on navigation failures)
+    ```bash
+    python stage3_0_revise.py \
+      --experiment exp_cua_fix \
+      --models gpt5,qwen,gpt4o \
+      --apps all \
+      --revision-type cua \
+      --v0-dir full_52_apps
+    ```
+
+*   **Option B: Unsupported Task Revision** (Fix based on missing features)
+    ```bash
+    python stage3_0_revise.py \
+      --experiment exp_func_fix \
+      --models gpt5,qwen,gpt4o \
+      --apps all \
+      --revision-type unsupported \
+      --v0-dir full_52_apps
+    ```
+
+*   **Option C: Integrated Revision** (Combine both – Recommended)
+    ```bash
+    python stage3_0_revise.py \
+      --experiment exp_integrated \
+      --models gpt5,qwen,gpt4o \
+      --apps all \
+      --revision-type integrated \
+      --v0-dir full_52_apps
+    ```
+
+**6) Re-evaluate Revised Websites**
+```bash
+# Re-Judge Task Solvability
+python stage3_1_judge_v1.py \
+  --experiment exp_integrated \
+  --models gpt5,qwen,gpt4o \
+  --apps all \
+  --revision-type integrated \
+  --v0-dir full_52_apps
+
+# Re-Run CUA Navigation Test
+python stage3_2_cua_test_v1.py \
+  --experiment exp_integrated \
+  --models gpt5,qwen,gpt4o \
+  --apps all \
+  --revision-type integrated \
+  --cua-models uitars \
+  --v0-dir full_52_apps
+```
+
+</details>
 
 ---
 
