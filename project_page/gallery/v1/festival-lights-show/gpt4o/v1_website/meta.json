@@ -1,9 +1,0 @@
-{
-  "model": "gpt4o",
-  "app": "festival-lights-show",
-  "variant": "integrated",
-  "v0_signature": null,
-  "analyzed_failures": null,
-  "destylized": null,
-  "generated_at": "2025-09-23T19:29:16.415015"
-}

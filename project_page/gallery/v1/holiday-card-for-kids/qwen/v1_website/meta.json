@@ -1,9 +1,0 @@
-{
-  "model": "qwen",
-  "app": "holiday-card-for-kids",
-  "variant": "integrated",
-  "v0_signature": null,
-  "analyzed_failures": null,
-  "destylized": true,
-  "generated_at": "2025-09-23T02:55:23.771062"
-}

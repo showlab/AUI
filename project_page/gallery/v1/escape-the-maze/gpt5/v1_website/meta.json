@@ -1,9 +1,0 @@
-{
-  "model": "gpt5",
-  "app": "escape-the-maze",
-  "variant": "integrated",
-  "v0_signature": null,
-  "analyzed_failures": null,
-  "destylized": true,
-  "generated_at": "2025-09-23T01:00:31.091530"
-}
