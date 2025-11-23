@@ -134,6 +134,8 @@ a:hover {
 .title,
 .subtitle {
   color: #0f172a !important;
+  font-family: "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Monaco,
+    Consolas, "Courier New", monospace !important;
   font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas,
     "Liberation Mono", "Courier New", monospace;
 }
