@@ -220,6 +220,82 @@
     </div>
   </section>
 
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title">Experimental Results</h2>
+          <div class="content has-text-justified">
+            <p>
+              We evaluate our framework using <b>Function Completeness Rate (FC)</b> and <b>CUA Success Rate (SR)</b> across 52 applications. The results demonstrate that our Coder-CUA collaboration significantly improves both metrics compared to the baseline, especially for stronger models like GPT-5 and Gemini-3-Pro.
+            </p>
+          </div>
+          <div class="table-container">
+            <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
+              <thead>
+                <tr>
+                  <th rowspan="2" style="vertical-align: middle;">Coder</th>
+                  <th rowspan="2" style="vertical-align: middle;">Method</th>
+                  <th colspan="2" class="has-text-centered">Overall Performance</th>
+                </tr>
+                <tr>
+                  <th class="has-text-centered">Func. Completeness (%)</th>
+                  <th class="has-text-centered">CUA Success Rate (%)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td rowspan="2" style="vertical-align: middle;">GPT-5</td>
+                  <td>Baseline</td>
+                  <td class="has-text-centered">67.9</td>
+                  <td class="has-text-centered">24.5</td>
+                </tr>
+                <tr style="font-weight: bold; background-color: #e6fffa;">
+                  <td>+ Integrated</td>
+                  <td class="has-text-centered">81.5</td>
+                  <td class="has-text-centered">26.0</td>
+                </tr>
+                <tr>
+                  <td rowspan="2" style="vertical-align: middle;">Qwen3-Coder-30B</td>
+                  <td>Baseline</td>
+                  <td class="has-text-centered">42.1</td>
+                  <td class="has-text-centered">7.3</td>
+                </tr>
+                <tr style="font-weight: bold; background-color: #e6fffa;">
+                  <td>+ Integrated</td>
+                  <td class="has-text-centered">60.1</td>
+                  <td class="has-text-centered">19.0</td>
+                </tr>
+                <tr>
+                  <td rowspan="2" style="vertical-align: middle;">GPT-4o</td>
+                  <td>Baseline</td>
+                  <td class="has-text-centered">36.3</td>
+                  <td class="has-text-centered">8.8</td>
+                </tr>
+                <tr style="font-weight: bold; background-color: #e6fffa;">
+                  <td>+ Integrated</td>
+                  <td class="has-text-centered">43.1</td>
+                  <td class="has-text-centered">16.1</td>
+                </tr>
+                <tr>
+                  <td rowspan="2" style="vertical-align: middle;">Gemini-3-Pro</td>
+                  <td>Baseline</td>
+                  <td class="has-text-centered">71.7</td>
+                  <td class="has-text-centered">35.8</td>
+                </tr>
+                <tr style="font-weight: bold; background-color: #e6fffa;">
+                  <td>+ Integrated</td>
+                  <td class="has-text-centered">72.5</td>
+                  <td class="has-text-centered">47.0</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="section" id="citation">
     <div class="container is-max-desktop">
       <div class="columns is-centered has-text-centered">
