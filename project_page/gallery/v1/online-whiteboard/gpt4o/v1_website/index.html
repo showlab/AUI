@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enhanced Online Whiteboard</title>
+  <style>
+    /* General Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
+      color: #000000;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    #toolbar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #333;
+      color: white;
+      padding: 10px;
+    }
+
+    #toolbar button, #toolbar select, #toolbar input[type="color"] {
+      background-color: #555;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      margin: 0 5px;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    #toolbar button:hover, #toolbar select:hover, #toolbar input[type="color"]:hover {
+      background-color: #777;
+    }
+
+    #toolbar button.active {
+      background-color: #007BFF;
+    }
+
+    #toolbar select {
+      cursor: pointer;
+    }
+
+    #toolbar input[type="color"] {
+      height: 35px;
+      padding: 0;
+    }
+
+    #canvas-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f0f0f0;
+      position: relative;
+    }
+
+    canvas {
+      border: 2px solid #000;
+      background-color: white;
+      cursor: crosshair;
+    }
+
+    #status-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #333;
+      color: white;
+      padding: 10px;
+    }
+
+    #status-bar span {
+      margin: 0 10px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 1280px) {
+      #toolbar button, #toolbar select {
+        font-size: 12px;
+        padding: 8px 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="toolbar">
+    <button id="draw-tool" class="active" title="Draw on the canvas">Draw</button>
+    <button id="erase-tool" title="Erase parts of the canvas">Erase</button>
+    <button id="clear-canvas" title="Clear the entire canvas">Clear</button>
+    <button id="save-image" title="Save the canvas as an image">Save</button>
+    <select id="brush-size" title="Select brush size">
+      <option value="2">2 px</option>
+      <option value="5" selected>5 px</option>
+      <option value="10">10 px</option>
+      <option value="20">20 px</option>
+    </select>
+    <input type="color" id="color-picker" title="Pick a drawing color" value="#000000">
+  </div>
+  <div id="canvas-container">
+    <canvas id="whiteboard" width="1280" height="720"></canvas>
+  </div>
+  <div id="status-bar">
+    <span id="tool-status">Current Tool: Draw</span>
+    <span id="brush-status">Brush Size: 5 px</span>
+    <span id="color-status">Color: #000000</span>
+    <span id="save-status">Save Status: Not Saved</span>
+  </div>
+
+  <script>
+    // DOM Elements
+    const canvas = document.getElementById('whiteboard');
+    const ctx = canvas.getContext('2d');
+    const drawToolButton = document.getElementById('draw-tool');
+    const eraseToolButton = document.getElementById('erase-tool');
+    const clearCanvasButton = document.getElementById('clear-canvas');
+    const saveImageButton = document.getElementById('save-image');
+    const brushSizeSelect = document.getElementById('brush-size');
+    const colorPicker = document.getElementById('color-picker');
+    const toolStatus = document.getElementById('tool-status');
+    const brushStatus = document.getElementById('brush-status');
+    const colorStatus = document.getElementById('color-status');
+    const saveStatus = document.getElementById('save-status');
+
+    // State Variables
+    let drawing = false;
+    let currentTool = 'draw';
+    let brushSize = 5;
+    let currentColor = '#000000';
+    let lastX = 0;
+    let lastY = 0;
+
+    // Set up canvas for drawing
+    ctx.lineWidth = brushSize;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = currentColor;
+
+    // Event Listeners
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+
+    drawToolButton.addEventListener('click', () => setTool('draw'));
+    eraseToolButton.addEventListener('click', () => setTool('erase'));
+    clearCanvasButton.addEventListener('click', clearCanvas);
+    saveImageButton.addEventListener('click', saveImage);
+    brushSizeSelect.addEventListener('change', changeBrushSize);
+    colorPicker.addEventListener('input', changeColor);
+
+    // Functions
+    function startDrawing(e) {
+      drawing = true;
+      [lastX, lastY] = [e.offsetX, e.offsetY];
+    }
+
+    function draw(e) {
+      if (!drawing) return;
+
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(e.offsetX, e.offsetY);
+      ctx.stroke();
+
+      [lastX, lastY] = [e.offsetX, e.offsetY];
+    }
+
+    function stopDrawing() {
+      drawing = false;
+      ctx.beginPath(); // Reset path
+    }
+
+    function setTool(tool) {
+      currentTool = tool;
+
+      if (tool === 'draw') {
+        ctx.strokeStyle = currentColor;
+        ctx.globalCompositeOperation = 'source-over';
+        drawToolButton.classList.add('active');
+        eraseToolButton.classList.remove('active');
+        toolStatus.textContent = 'Current Tool: Draw';
+      } else if (tool === 'erase') {
+        ctx.strokeStyle = 'white';
+        ctx.globalCompositeOperation = 'destination-out';
+        eraseToolButton.classList.add('active');
+        drawToolButton.classList.remove('active');
+        toolStatus.textContent = 'Current Tool: Erase';
+      }
+    }
+
+    function clearCanvas() {
+      if (confirm('Are you sure you want to clear the canvas?')) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    function saveImage() {
+      const link = document.createElement('a');
+      link.download = 'whiteboard.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      saveStatus.textContent = 'Save Status: Saved';
+    }
+
+    function changeBrushSize() {
+      brushSize = parseInt(brushSizeSelect.value, 10);
+      ctx.lineWidth = brushSize;
+      brushStatus.textContent = `Brush Size: ${brushSize} px`;
+    }
+
+    function changeColor() {
+      currentColor = colorPicker.value;
+      if (currentTool === 'draw') {
+        ctx.strokeStyle = currentColor;
+      }
+      colorStatus.textContent = `Color: ${currentColor}`;
+    }
+  </script>
+</body>
+</html>

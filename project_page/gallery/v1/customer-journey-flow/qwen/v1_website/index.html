@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Journey Flow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #ffffff;
+            color: #000000;
+            min-height: 100vh;
+            padding: 20px;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #000000;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #333333;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .toolbar {
+            background: #ffffff;
+            border: 1px solid #cccccc;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: 1px solid #333333;
+            background: #ffffff;
+            color: #000000;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background: #f0f0f0;
+        }
+
+        .btn-primary {
+            background: #000000;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: #333333;
+        }
+
+        .canvas-container {
+            background: #ffffff;
+            border: 1px solid #cccccc;
+            padding: 20px;
+            min-height: 500px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #journeyCanvas {
+            width: 100%;
+            height: 500px;
+            background: #f8f9fa;
+            border: 1px solid #dddddd;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stage {
+            position: absolute;
+            min-width: 180px;
+            min-height: 80px;
+            background: #ffffff;
+            border: 2px solid #000000;
+            padding: 15px;
+            cursor: move;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .stage:hover {
+            border-color: #333333;
+        }
+
+        .stage-header {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            color: #000000;
+        }
+
+        .stage-content {
+            font-size: 0.85rem;
+            color: #333333;
+            line-height: 1.4;
+        }
+
+        .connection {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .connection-line {
+            stroke: #000000;
+            stroke-width: 2;
+        }
+
+        .connection-label {
+            fill: #000000;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .control-btn {
+            width: 30px;
+            height: 30px;
+            background: #000000;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-btn:hover {
+            background: #333333;
+        }
+
+        .instructions {
+            background: #ffffff;
+            border: 1px solid #cccccc;
+            padding: 20px;
+        }
+
+        .instructions h2 {
+            color: #000000;
+            margin-bottom: 15px;
+        }
+
+        .instructions ul {
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .dragging {
+            opacity: 0.7;
+            z-index: 100;
+        }
+
+        .connecting {
+            z-index: 20;
+        }
+
+        .connection-mode {
+            background: #000000 !important;
+            color: #ffffff !important;
+        }
+
+        .connection-mode:hover {
+            background: #333333 !important;
+        }
+
+        @media (max-width: 768px) {
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+        /* Hidden elements for SVG definitions */
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 20px;
+            height: 20px;
+            background: #ff0000;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .delete-btn:hover {
+            background: #cc0000;
+        }
+
+        .export-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 4px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            border: 1px solid #cccccc;
+            font-family: monospace;
+            resize: vertical;
+        }
+
+        .status-indicator {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .connection-delete-btn {
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            width: 20px;
+            height: 20px;
+            background: #ff0000;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .connection-delete-btn:hover {
+            background: #cc0000;
+        }
+
+        .connection-label-edit {
+            position: absolute;
+            bottom: -25px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 10px;
+            color: #000000;
+            cursor: pointer;
+        }
+
+        .connection-label-edit:hover {
+            text-decoration: underline;
+        }
+
+        .stage-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            z-index: 200;
+            border: 1px dashed #000000;
+        }
+
+        .stage-input input, .stage-input textarea {
+            width: 90%;
+            margin: 5px 0;
+            padding: 5px;
+            border: 1px solid #cccccc;
+        }
+
+        .stage-input-buttons {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .stage-input-buttons button {
+            padding: 5px 10px;
+            border: 1px solid #333333;
+            background: #ffffff;
+            cursor: pointer;
+        }
+
+        .stage-input-buttons button:hover {
+            background: #f0f0f0;
+        }
+
+        .stage-input-buttons button.primary {
+            background: #000000;
+            color: #ffffff;
+        }
+
+        .stage-input-buttons button.primary:hover {
+            background: #333333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 id="appTitle">Customer Journey Flow</h1>
+            <p class="subtitle">Visualize and customize your customer's journey from awareness to purchase</p>
+        </header>
+
+        <div class="app-container">
+            <div class="toolbar">
+                <div>
+                    <button id="addStageBtn" class="btn btn-primary">
+                        <span>+</span> Add New Stage
+                    </button>
+                    <button id="resetBtn" class="btn">
+                        Reset Flow
+                    </button>
+                </div>
+                <div>
+                    <button id="connectBtn" class="btn">
+                        Connect Stages
+                    </button>
+                    <button id="clearConnectionsBtn" class="btn">
+                        Clear Connections
+                    </button>
+                    <button id="exportBtn" class="btn">
+                        Export Flow
+                    </button>
+                    <button id="importBtn" class="btn">
+                        Import Flow
+                    </button>
+                </div>
+            </div>
+
+            <div class="canvas-container">
+                <div id="journeyCanvas"></div>
+                <div class="controls">
+                    <button id="connectBtnControl" class="control-btn" title="Connect Stages">→</button>
+                    <button id="clearConnectionsBtnControl" class="control-btn" title="Clear Connections">×</button>
+                </div>
+            </div>
+
+            <div class="instructions">
+                <h2>How to Use</h2>
+                <ul>
+                    <li><strong>Add stages:</strong> Click "Add New Stage" to create new journey steps</li>
+                    <li><strong>Move stages:</strong> Drag and drop stages to reposition them</li>
+                    <li><strong>Create connections:</strong> Click the arrow button, then select two stages to connect</li>
+                    <li><strong>Edit stages:</strong> Double-click any stage to edit its content</li>
+                    <li><strong>Delete stages:</strong> Hover over a stage and click the red X button</li>
+                    <li><strong>Export/Import:</strong> Use the Export and Import buttons to save/load flows</li>
+                    <li><strong>Connection Labels:</strong> Click on a connection to edit its label</li>
+                    <li><strong>Delete Connections:</strong> Hover over a connection and click the red X button</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Export/Import -->
+    <div id="exportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Export Flow</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <textarea id="exportTextarea" readonly></textarea>
+            <div class="export-controls">
+                <button id="copyToClipboardBtn" class="btn">Copy to Clipboard</button>
+                <button id="downloadJsonBtn" class="btn">Download JSON</button>
+            </div>
+            <div id="exportStatus" class="status-indicator hidden"></div>
+        </div>
+    </div>
+
+    <div id="importModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Import Flow</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <textarea id="importTextarea" placeholder="Paste exported JSON here..."></textarea>
+            <div class="export-controls">
+                <button id="importJsonBtn" class="btn">Import Flow</button>
+            </div>
+            <div id="importStatus" class="status-indicator hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const canvas = document.getElementById('journeyCanvas');
+            const addStageBtn = document.getElementById('addStageBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const connectBtn = document.getElementById('connectBtn');
+            const clearConnectionsBtn = document.getElementById('clearConnectionsBtn');
+            const exportBtn = document.getElementById('exportBtn');
+            const importBtn = document.getElementById('importBtn');
+            const connectBtnControl = document.getElementById('connectBtnControl');
+            const clearConnectionsBtnControl = document.getElementById('clearConnectionsBtnControl');
+            
+            // Modal Elements
+            const exportModal = document.getElementById('exportModal');
+            const importModal = document.getElementById('importModal');
+            const exportTextarea = document.getElementById('exportTextarea');
+            const importTextarea = document.getElementById('importTextarea');
+            const copyToClipboardBtn = document.getElementById('copyToClipboardBtn');
+            const downloadJsonBtn = document.getElementById('downloadJsonBtn');
+            const importJsonBtn = document.getElementById('importJsonBtn');
+            const closeButtons = document.querySelectorAll('.close-modal');
+            const exportStatus = document.getElementById('exportStatus');
+            const importStatus = document.getElementById('importStatus');
+
+            // State management
+            let stages = [];
+            let connections = [];
+            let selectedStages = [];
+            let isConnecting = false;
+            let nextId = 1;
+            let stageEditing = null;
+            let connectionEditing = null;
+
+            // Initialize SVG for connections
+            const svgNS = "http://www.w3.org/2000/svg";
+            const svg = document.createElementNS(svgNS, "svg");
+            svg.setAttribute("width", "100%");
+            svg.setAttribute("height", "100%");
+            canvas.appendChild(svg);
+
+            // Arrow marker definition
+            const defs = document.createElementNS(svgNS, "defs");
+            const marker = document.createElementNS(svgNS, "marker");
+            marker.setAttribute("id", "arrowhead");
+            marker.setAttribute("markerWidth", "10");
+            marker.setAttribute("markerHeight", "7");
+            marker.setAttribute("refX", "0");
+            marker.setAttribute("refY", "3.5");
+            marker.setAttribute("orient", "auto");
+            
+            const polygon = document.createElementNS(svgNS, "polygon");
+            polygon.setAttribute("points", "0 0, 10 3.5, 0 7");
+            polygon.setAttribute("fill", "#000000");
+            
+            marker.appendChild(polygon);
+            defs.appendChild(marker);
+            svg.appendChild(defs);
+
+            // Stage templates
+            const stageTemplates = [
+                { title: "Awareness", content: "Customer discovers product/service" },
+                { title: "Interest", content: "Customer shows interest in details" },
+                { title: "Consideration", content: "Customer evaluates options" },
+                { title: "Purchase", content: "Customer makes purchase decision" },
+                { title: "Retention", content: "Customer continues engagement" }
+            ];
+
+            // Initialize with sample stages
+            function init() {
+                resetFlow();
+                render();
+            }
+
+            // Add a new stage
+            function addStage(title = "New Stage", content = "Stage description") {
+                const stage = {
+                    id: nextId++,
+                    title: title,
+                    content: content,
+                    x: Math.random() * 300 + 50,
+                    y: Math.random() * 300 + 50
+                };
+                stages.push(stage);
+                render();
+            }
+
+            // Remove a stage
+            function removeStage(id) {
+                stages = stages.filter(stage => stage.id !== id);
+                connections = connections.filter(conn => 
+                    conn.from !== id && conn.to !== id
+                );
+                render();
+            }
+
+            // Update stage content
+            function updateStage(id, title, content) {
+                const stage = stages.find(s => s.id === id);
+                if (stage) {
+                    stage.title = title.trim();
+                    stage.content = content.trim();
+                    render();
+                }
+            }
+
+            // Connect two stages
+            function connectStages(fromId, toId) {
+                // Prevent self-connections
+                if (fromId === toId) return;
+                
+                // Check if connection already exists
+                const existing = connections.find(conn => 
+                    conn.from === fromId && conn.to === toId
+                );
+                if (!existing) {
+                    connections.push({
+                        from: fromId,
+                        to: toId,
+                        label: "Next"
+                    });
+                    render();
+                }
+            }
+
+            // Clear all connections
+            function clearConnections() {
+                connections = [];
+                render();
+            }
+
+            // Reset flow to initial state
+            function resetFlow() {
+                stages = [];
+                connections = [];
+                selectedStages = [];
+                isConnecting = false;
+                nextId = 1;
+                
+                // Add initial stages
+                stageTemplates.forEach(template => {
+                    addStage(template.title, template.content);
+                });
+            }
+
+            // Export flow to JSON
+            function exportFlow() {
+                const flowData = {
+                    stages: stages.map(stage => ({
+                        id: stage.id,
+                        title: stage.title,
+                        content: stage.content,
+                        x: stage.x,
+                        y: stage.y
+                    })),
+                    connections: connections.map(conn => ({
+                        from: conn.from,
+                        to: conn.to,
+                        label: conn.label
+                    }))
+                };
+                
+                const jsonString = JSON.stringify(flowData, null, 2);
+                exportTextarea.value = jsonString;
+                
+                // Show modal
+                exportModal.style.display = 'flex';
+                exportStatus.classList.add('hidden');
+            }
+
+            // Import flow from JSON
+            function importFlow(jsonString) {
+                try {
+                    const flowData = JSON.parse(jsonString);
+                    
+                    // Validate structure
+                    if (!Array.isArray(flowData.stages) || !Array.isArray(flowData.connections)) {
+                        throw new Error('Invalid JSON structure');
+                    }
+                    
+                    // Clear current flow
+                    resetFlow();
+                    
+                    // Load stages
+                    flowData.stages.forEach(stage => {
+                        addStage(stage.title, stage.content);
+                        const addedStage = stages[stages.length - 1];
+                        addedStage.x = stage.x;
+                        addedStage.y = stage.y;
+                    });
+                    
+                    // Load connections
+                    flowData.connections.forEach(conn => {
+                        // Verify that both stages exist before connecting
+                        if (stages.some(s => s.id === conn.from) && 
+                            stages.some(s => s.id === conn.to)) {
+                            connectStages(conn.from, conn.to);
+                            
+                            // Update label if needed
+                            const connection = connections.find(c => 
+                                c.from === conn.from && c.to === conn.to
+                            );
+                            if (connection) {
+                                connection.label = conn.label || "Next";
+                            }
+                        }
+                    });
+                    
+                    render();
+                    showStatus(importStatus, 'Flow imported successfully!', 'success');
+                } catch (error) {
+                    console.error('Import error:', error);
+                    showStatus(importStatus, 'Error importing flow: ' + error.message, 'error');
+                }
+            }
+
+            // Copy to clipboard
+            function copyToClipboard() {
+                exportTextarea.select();
+                document.execCommand('copy');
+                showStatus(exportStatus, 'Copied to clipboard!', 'success');
+            }
+
+            // Download JSON file
+            function downloadJson() {
+                const dataStr = exportTextarea.value;
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                
+                const exportFileDefaultName = 'customer-journey-flow.json';
+                
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+                
+                showStatus(exportStatus, 'Downloaded JSON file!', 'success');
+            }
+
+            // Show status message
+            function showStatus(element, message, type) {
+                element.textContent = message;
+                element.className = 'status-indicator ' + type;
+                element.classList.remove('hidden');
+                
+                // Auto-hide after 3 seconds
+                setTimeout(() => {
+                    element.classList.add('hidden');
+                }, 3000);
+            }
+
+            // Render all elements
+            function render() {
+                // Clear canvas
+                while (canvas.firstChild) {
+                    if (canvas.firstChild !== svg) {
+                        canvas.removeChild(canvas.firstChild);
+                    }
+                }
+
+                // Render connections
+                connections.forEach(conn => {
+                    const fromStage = stages.find(s => s.id === conn.from);
+                    const toStage = stages.find(s => s.id === conn.to);
+                    
+                    if (fromStage && toStage) {
+                        const line = document.createElementNS(svgNS, "line");
+                        line.setAttribute("x1", fromStage.x + 90);
+                        line.setAttribute("y1", fromStage.y + 40);
+                        line.setAttribute("x2", toStage.x + 90);
+                        line.setAttribute("y2", toStage.y + 40);
+                        line.setAttribute("class", "connection-line");
+                        
+                        const label = document.createElementNS(svgNS, "text");
+                        label.setAttribute("x", (fromStage.x + toStage.x) / 2 + 90);
+                        label.setAttribute("y", (fromStage.y + toStage.y) / 2 + 40);
+                        label.setAttribute("class", "connection-label");
+                        label.textContent = conn.label;
+                        
+                        // Add delete button for connection
+                        const deleteBtn = document.createElementNS(svgNS, "circle");
+                        deleteBtn.setAttribute("cx", (fromStage.x + toStage.x) / 2 + 90);
+                        deleteBtn.setAttribute("cy", (fromStage.y + toStage.y) / 2 + 40);
+                        deleteBtn.setAttribute("r", 8);
+                        deleteBtn.setAttribute("fill", "#ff0000");
+                        deleteBtn.setAttribute("class", "connection-delete-btn");
+                        deleteBtn.setAttribute("data-from", conn.from);
+                        deleteBtn.setAttribute("data-to", conn.to);
+                        
+                        svg.appendChild(line);
+                        svg.appendChild(label);
+                        svg.appendChild(deleteBtn);
+                    }
+                });
+
+                // Render stages
+                stages.forEach(stage => {
+                    const stageElement = document.createElement('div');
+                    stageElement.className = 'stage';
+                    stageElement.id = `stage-${stage.id}`;
+                    stageElement.style.left = `${stage.x}px`;
+                    stageElement.style.top = `${stage.y}px`;
+                    
+                    stageElement.innerHTML = `
+                        <div class="stage-header">${stage.title}</div>
+                        <div class="stage-content">${stage.content}</div>
+                        <button class="delete-btn" data-id="${stage.id}">×</button>
+                    `;
+                    
+                    // Add drag functionality
+                    makeDraggable(stageElement, stage.id);
+                    
+                    // Add double-click to edit
+                    stageElement.addEventListener('dblclick', () => {
+                        // Show input overlay instead of prompt
+                        showStageInput(stage.id);
+                    });
+                    
+                    // Add delete button event
+                    const deleteBtn = stageElement.querySelector('.delete-btn');
+                    deleteBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        removeStage(stage.id);
+                    });
+                    
+                    canvas.appendChild(stageElement);
+                });
+            }
+
+            // Show stage input overlay
+            function showStageInput(stageId) {
+                const stage = stages.find(s => s.id === stageId);
+                if (!stage) return;
+                
+                // Remove any existing input overlays
+                const existingInput = document.querySelector('.stage-input');
+                if (existingInput) {
+                    existingInput.remove();
+                }
+                
+                const stageElement = document.getElementById(`stage-${stageId}`);
+                const inputOverlay = document.createElement('div');
+                inputOverlay.className = 'stage-input';
+                inputOverlay.innerHTML = `
+                    <input type="text" id="stage-title-${stageId}" value="${stage.title}">
+                    <textarea id="stage-content-${stageId}">${stage.content}</textarea>
+                    <div class="stage-input-buttons">
+                        <button class="btn primary" id="save-stage-${stageId}">Save</button>
+                        <button class="btn" id="cancel-stage-${stageId}">Cancel</button>
+                    </div>
+                `;
+                
+                stageElement.appendChild(inputOverlay);
+                
+                // Add event listeners
+                document.getElementById(`save-stage-${stageId}`).addEventListener('click', () => {
+                    const title = document.getElementById(`stage-title-${stageId}`).value;
+                    const content = document.getElementById(`stage-content-${stageId}`).value;
+                    updateStage(stageId, title, content);
+                    inputOverlay.remove();
+                });
+                
+                document.getElementById(`cancel-stage-${stageId}`).addEventListener('click', () => {
+                    inputOverlay.remove();
+                });
+            }
+
+            // Make element draggable
+            function makeDraggable(element, id) {
+                let isDragging = false;
+                let offsetX, offsetY;
+
+                element.addEventListener('mousedown', (e) => {
+                    if (e.target.classList.contains('delete-btn')) return;
+                    
+                    isDragging = true;
+                    offsetX = e.clientX - element.getBoundingClientRect().left;
+                    offsetY = e.clientY - element.getBoundingClientRect().top;
+                    element.classList.add('dragging');
+                    element.style.zIndex = '100';
+                    
+                    // Bring to front
+                    const parent = element.parentElement;
+                    parent.appendChild(element);
+                });
+
+                document.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+                    
+                    const rect = canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left - offsetX;
+                    const y = e.clientY - rect.top - offsetY;
+                    
+                    // Constrain to canvas bounds
+                    const boundedX = Math.max(0, Math.min(x, canvas.offsetWidth - element.offsetWidth));
+                    const boundedY = Math.max(0, Math.min(y, canvas.offsetHeight - element.offsetHeight));
+                    
+                    element.style.left = `${boundedX}px`;
+                    element.style.top = `${boundedY}px`;
+                    
+                    // Update stage position
+                    const stage = stages.find(s => s.id === id);
+                    if (stage) {
+                        stage.x = boundedX;
+                        stage.y = boundedY;
+                    }
+                });
+
+                document.addEventListener('mouseup', () => {
+                    isDragging = false;
+                    element.classList.remove('dragging');
+                    element.style.zIndex = '';
+                });
+            }
+
+            // Event Listeners
+            addStageBtn.addEventListener('click', () => {
+                addStage();
+            });
+
+            resetBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to reset the entire flow?')) {
+                    resetFlow();
+                }
+            });
+
+            connectBtn.addEventListener('click', () => {
+                toggleConnectionMode();
+            });
+
+            connectBtnControl.addEventListener('click', () => {
+                toggleConnectionMode();
+            });
+
+            clearConnectionsBtn.addEventListener('click', () => {
+                clearConnections();
+            });
+
+            clearConnectionsBtnControl.addEventListener('click', () => {
+                clearConnections();
+            });
+
+            exportBtn.addEventListener('click', () => {
+                exportFlow();
+            });
+
+            importBtn.addEventListener('click', () => {
+                importModal.style.display = 'flex';
+                importStatus.classList.add('hidden');
+            });
+
+            // Close modals
+            closeButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    exportModal.style.display = 'none';
+                    importModal.style.display = 'none';
+                });
+            });
+
+            // Close modals when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === exportModal) {
+                    exportModal.style.display = 'none';
+                }
+                if (e.target === importModal) {
+                    importModal.style.display = 'none';
+                }
+            });
+
+            // Export actions
+            copyToClipboardBtn.addEventListener('click', copyToClipboard);
+            downloadJsonBtn.addEventListener('click', downloadJson);
+            importJsonBtn.addEventListener('click', () => {
+                const jsonText = importTextarea.value;
+                if (jsonText.trim()) {
+                    importFlow(jsonText);
+                } else {
+                    showStatus(importStatus, 'Please enter JSON data to import', 'error');
+                }
+            });
+
+            // Handle connection selection
+            canvas.addEventListener('click', (e) => {
+                if (!isConnecting) return;
+                
+                // Check if we're clicking on a connection delete button
+                if (e.target.classList.contains('connection-delete-btn')) {
+                    const fromId = parseInt(e.target.getAttribute('data-from'));
+                    const toId = parseInt(e.target.getAttribute('data-to'));
+                    removeConnection(fromId, toId);
+                    return;
+                }
+                
+                // Check if we're clicking on a connection label
+                if (e.target.classList.contains('connection-label')) {
+                    // Find the connection associated with this label
+                    const conn = connections.find(c => 
+                        c.from === parseInt(e.target.getAttribute('data-from')) &&
+                        c.to === parseInt(e.target.getAttribute('data-to'))
+                    );
+                    if (conn) {
+                        const newLabel = prompt('Edit connection label:', conn.label);
+                        if (newLabel !== null) {
+                            conn.label = newLabel;
+                            render();
+                        }
+                    }
+                    return;
+                }
+                
+                const clickedElement = e.target.closest('.stage');
+                if (clickedElement) {
+                    const stageId = parseInt(clickedElement.id.split('-')[1]);
+                    
+                    if (selectedStages.length === 0) {
+                        selectedStages.push(stageId);
+                    } else if (selectedStages.length === 1) {
+                        if (selectedStages[0] !== stageId) {
+                            connectStages(selectedStages[0], stageId);
+                        }
+                        selectedStages = [];
+                        toggleConnectionMode();
+                    }
+                }
+            });
+
+            // Handle connection delete
+            function removeConnection(fromId, toId) {
+                connections = connections.filter(conn => 
+                    !(conn.from === fromId && conn.to === toId)
+                );
+                render();
+            }
+
+            // Toggle connection mode
+            function toggleConnectionMode() {
+                isConnecting = !isConnecting;
+                connectBtn.classList.toggle('connection-mode', isConnecting);
+                connectBtnControl.classList.toggle('connection-mode', isConnecting);
+                
+                if (isConnecting) {
+                    selectedStages = [];
+                } else {
+                    connectBtn.textContent = 'Connect Stages';
+                    connectBtnControl.textContent = '→';
+                }
+            }
+
+            // Initialize the app
+            init();
+        });
+    </script>
+</body>
+</html>

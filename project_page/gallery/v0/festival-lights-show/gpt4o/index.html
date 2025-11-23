@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Festival Lights Show</title>
+  <style>
+    /* General Styles */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #1a1a2e, #16213e);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2.5rem;
+      text-align: center;
+      color: #ffcc00;
+      text-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00;
+    }
+
+    .controls {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .controls label {
+      font-size: 1rem;
+      margin-bottom: 5px;
+    }
+
+    .controls select, .controls input {
+      padding: 10px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 5px;
+      outline: none;
+    }
+
+    .controls button {
+      background-color: #ff5733;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .controls button:hover {
+      background-color: #c70039;
+    }
+
+    .light-show {
+      margin-top: 30px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      width: 80%;
+      max-width: 600px;
+    }
+
+    .light {
+      width: 100%;
+      padding-top: 100%;
+      position: relative;
+      background-color: #444;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #000;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .light.active {
+      box-shadow: 0 0 20px 5px;
+    }
+
+    @media (max-width: 768px) {
+      .light-show {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Festival Lights Show</h1>
+
+  <div class="controls">
+    <div>
+      <label for="color-picker">Choose Light Color:</label>
+      <input type="color" id="color-picker" value="#ffcc00">
+    </div>
+
+    <div>
+      <label for="pattern-select">Select Pattern:</label>
+      <select id="pattern-select">
+        <option value="random">Random</option>
+        <option value="wave">Wave</option>
+        <option value="pulse">Pulse</option>
+      </select>
+    </div>
+
+    <div>
+      <button id="start-show">Start Show</button>
+      <button id="stop-show">Stop Show</button>
+    </div>
+  </div>
+
+  <div class="light-show" id="light-show">
+    <!-- Lights will be dynamically generated -->
+  </div>
+
+  <script>
+    // JavaScript for Festival Lights Show
+    const lightShowContainer = document.getElementById('light-show');
+    const colorPicker = document.getElementById('color-picker');
+    const patternSelect = document.getElementById('pattern-select');
+    const startShowButton = document.getElementById('start-show');
+    const stopShowButton = document.getElementById('stop-show');
+
+    let lights = [];
+    let intervalId = null;
+
+    // Generate lights dynamically
+    function createLights() {
+      for (let i = 0; i < 25; i++) {
+        const light = document.createElement('div');
+        light.classList.add('light');
+        lightShowContainer.appendChild(light);
+        lights.push(light);
+      }
+    }
+
+    // Clear all lights
+    function clearLights() {
+      lights.forEach(light => {
+        light.style.backgroundColor = '#444';
+        light.classList.remove('active');
+      });
+    }
+
+    // Random pattern
+    function randomPattern() {
+      clearLights();
+      const randomIndex = Math.floor(Math.random() * lights.length);
+      lights[randomIndex].style.backgroundColor = colorPicker.value;
+      lights[randomIndex].classList.add('active');
+    }
+
+    // Wave pattern
+    let waveIndex = 0;
+    function wavePattern() {
+      clearLights();
+      lights[waveIndex].style.backgroundColor = colorPicker.value;
+      lights[waveIndex].classList.add('active');
+      waveIndex = (waveIndex + 1) % lights.length;
+    }
+
+    // Pulse pattern
+    let pulseState = false;
+    function pulsePattern() {
+      pulseState = !pulseState;
+      lights.forEach(light => {
+        light.style.backgroundColor = pulseState ? colorPicker.value : '#444';
+        if (pulseState) {
+          light.classList.add('active');
+        } else {
+          light.classList.remove('active');
+        }
+      });
+    }
+
+    // Start the light show
+    function startShow() {
+      const selectedPattern = patternSelect.value;
+      if (intervalId) clearInterval(intervalId);
+
+      if (selectedPattern === 'random') {
+        intervalId = setInterval(randomPattern, 500);
+      } else if (selectedPattern === 'wave') {
+        intervalId = setInterval(wavePattern, 300);
+      } else if (selectedPattern === 'pulse') {
+        intervalId = setInterval(pulsePattern, 700);
+      }
+    }
+
+    // Stop the light show
+    function stopShow() {
+      if (intervalId) clearInterval(intervalId);
+      clearLights();
+    }
+
+    // Event listeners
+    startShowButton.addEventListener('click', startShow);
+    stopShowButton.addEventListener('click', stopShow);
+
+    // Initialize the app
+    createLights();
+  </script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Skills Matrix</title>
+  <style>
+    /* General Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      background-color: #f4f4f9;
+      color: #333;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .skills-matrix {
+      display: grid;
+      grid-template-columns: 1fr 3fr;
+      gap: 20px;
+    }
+
+    .skills-list,
+    .employee-grid {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .skills-list h2,
+    .employee-grid h2 {
+      margin-bottom: 15px;
+      font-size: 1.2rem;
+      color: #555;
+    }
+
+    .skills-list ul {
+      list-style: none;
+    }
+
+    .skills-list ul li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .skills-list ul li button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .skills-list ul li button:hover {
+      background-color: #0056b3;
+    }
+
+    .employee-grid table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .employee-grid table th,
+    .employee-grid table td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .employee-grid table th {
+      background-color: #f8f9fa;
+    }
+
+    .proficiency-select {
+      width: 100%;
+      padding: 5px;
+    }
+
+    @media (max-width: 768px) {
+      .skills-matrix {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Employee Skills Matrix</h1>
+    <div class="skills-matrix">
+      <!-- Skills List -->
+      <div class="skills-list">
+        <h2>Skills</h2>
+        <ul id="skills-list">
+          <li>
+            <span>JavaScript</span>
+            <button id="add-skill-btn">Add</button>
+          </li>
+          <li>
+            <span>HTML</span>
+            <button>Add</button>
+          </li>
+          <li>
+            <span>CSS</span>
+            <button>Add</button>
+          </li>
+        </ul>
+      </div>
+      <!-- Employee Grid -->

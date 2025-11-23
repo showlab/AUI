@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Feedback Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #ffffff;
+      color: #000000;
+    }
+
+    header {
+      background-color: #007bff;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      font-size: 1.5em;
+    }
+
+    .container {
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .ai-summary {
+      background-color: #f1f1f1;
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin-bottom: 20px;
+      position: relative;
+      border-radius: 5px;
+    }
+
+    .ai-summary button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: #ff4d4d;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+
+    .ai-summary button:hover {
+      background-color: #e60000;
+    }
+
+    .search-bar-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .search-bar {
+      flex-grow: 1;
+      margin-right: 10px;
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding: 10px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .search-bar button {
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .search-bar button:hover {
+      background-color: #0056b3;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border: 1px solid #ddd;
+      word-wrap: break-word;
+    }
+
+    th {
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+
+    th.sort-asc::after {
+      content: " ▲";
+    }
+
+    th.sort-desc::after {
+      content: " ▼";
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      background-color: #007bff;
+      z-index: 1;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .pagination button {
+      padding: 10px 15px;
+      margin: 0 5px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .pagination button:hover {
+      background-color: #0056b3;
+    }
+
+    .pagination button.disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <header>Event Feedback Dashboard</header>
+  <div class="container">
+    <div class="ai-summary" id="ai-summary">
+      <button id="close-summary">Close</button>
+      <p><strong>AI Summary:</strong> The majority of participants rated the events positively, with constructive feedback emphasizing better time management and more interactive sessions.</p>
+    </div>
+
+    <div class="search-bar-container">
+      <div class="search-bar">
+        <input type="text" id="search-bar" placeholder="Type to filter feedback...">
+      </div>
+      <button id="clear-search">Clear</button>
+    </div>
+
+    <table id="feedback-table">
+      <thead>
+        <tr class="sticky-header">
+          <th data-column="date">Date</th>
+          <th data-column="event">Event Name</th>
+          <th data-column="participant">Participant Name</th>
+          <th data-column="rating">Rating</th>
+          <th data-column="feedback">Feedback</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Rows will be populated dynamically -->
+      </tbody>
+    </table>
+
+    <div class="pagination" id="pagination">
+      <button id="prev-page" class="disabled">Previous</button>
+      <span id="current-page">1</span> / <span id="total-pages">1</span>
+      <button id="next-page">Next</button>
+    </div>
+  </div>
+
+  <script>
+    const sampleData = Array.from({ length: 30 }, (_, i) => ({
+      date: new Date(2023, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
+      event: `Event ${Math.floor(Math.random() * 10) + 1}`,
+      participant: `Participant ${i + 1}`,
+      rating: Math.floor(Math.random() * 5) + 1,
+      feedback: `This is a sample feedback message for event ${Math.floor(Math.random() * 10) + 1}. It provides detailed insights and suggestions for improvement.`
+    }));
+
+    const tableBody = document.querySelector('#feedback-table tbody');
+    const searchBar = document.querySelector('#search-bar');
+    const pagination = document.querySelector('#pagination');
+    const prevPageButton = document.querySelector('#prev-page');
+    const nextPageButton = document.querySelector('#next-page');
+    const currentPageSpan = document.querySelector('#current-page');
+    const totalPagesSpan = document.querySelector('#total-pages');
+    const clearSearchButton = document.querySelector('#clear-search');
+    const aiSummary = document.querySelector('#ai-summary');
+    const closeSummaryButton = document.querySelector('#close-summary');
+
+    let currentData = [...sampleData];
+    let currentPage = 1;
+    const rowsPerPage = 15;
+
+    function paginateData(data, page) {
+      const start = (page - 1) * rowsPerPage;
+      const end = page * rowsPerPage;
+      return data.slice(start, end);
+    }
+
+    function updatePagination(data) {
+      const totalPages = Math.ceil(data.length / rowsPerPage);
+      totalPagesSpan.textContent = totalPages;
+      currentPageSpan.textContent = currentPage;
+
+      prevPageButton.classList.toggle('disabled', currentPage === 1);
+      nextPageButton.classList.toggle('disabled', currentPage === totalPages);
+    }
+
+    function populateTable(data) {
+      tableBody.innerHTML = '';
+      const paginatedData = paginateData(data, currentPage);
+      paginatedData.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${row.date}</td>
+          <td>${row.event}</td>
+          <td>${row.participant}</td>
+          <td>${row.rating}</td>
+          <td>${row.feedback}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+      updatePagination(data);
+    }
+
+    function filterTable(keyword) {
+      const filteredData = sampleData.filter(row =>
+        Object.values(row).some(value => value.toString().toLowerCase().includes(keyword.toLowerCase()))
+      );
+      currentData = filteredData;
+      currentPage = 1;
+      populateTable(filteredData);
+    }
+
+    searchBar.addEventListener('input', e => filterTable(e.target.value));
+    clearSearchButton.addEventListener('click', () => {
+      searchBar.value = '';
+      currentData = [...sampleData];
+      currentPage = 1;
+      populateTable(sampleData);
+    });
+
+    prevPageButton.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        populateTable(currentData);
+      }
+    });
+
+    nextPageButton.addEventListener('click', () => {
+      if (currentPage < Math.ceil(currentData.length / rowsPerPage)) {
+        currentPage++;
+        populateTable(currentData);
+      }
+    });
+
+    closeSummaryButton.addEventListener('click', () => {
+      aiSummary.style.display = 'none';
+    });
+
+    populateTable(sampleData);
+  </script>
+</body>
+</html>

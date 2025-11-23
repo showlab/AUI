@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fun Game</title>
+  <style>
+    /* General Styles */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
+      color: #000000;
+      overflow: hidden;
+    }
+
+    #game-container {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    /* Buttons and Overlays */
+    #start-btn, #retry-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 12px 24px;
+      font-size: 18px;
+      background-color: #000000;
+      color: #ffffff;
+      border: none;
+      cursor: pointer;
+      display: none;
+    }
+
+    #start-btn:hover, #retry-btn:hover {
+      background-color: #333333;
+    }
+
+    #game-over-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      display: none;
+    }
+
+    #instructions {
+      position: absolute;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #ffffff;
+      color: #000000;
+      padding: 12px 24px;
+      font-size: 16px;
+      border: 1px solid #000000;
+      z-index: 5;
+      display: none;
+    }
+
+    /* Scoreboard */
+    #score-board {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 20px;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: #ffffff;
+      padding: 10px;
+      border-radius: 4px;
+      z-index: 2;
+    }
+
+    #score-board span {
+      font-weight: bold;
+    }
+
+    #high-score {
+      margin-top: 5px;
+      font-size: 16px;
+    }
+
+    /* Loading Indicator */
+    #loading-spinner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 18px;
+      color: #000000;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="game-canvas"></canvas>
+    <div id="score-board">
+      <div>Current Score: <span id="score">0</span></div>
+      <div>High Score: <span id="high-score-value">0</span></div>
+    </div>
+    <div id="loading-spinner">Loading...</div>
+    <div id="instructions">Press Space to Jump. Avoid Obstacles!</div>
+    <button id="start-btn">Start Game</button>
+    <button id="retry-btn">Retry</button>
+    <div id="game-over-overlay">
+      <div>Game Over</div>
+      <div>Your Score: <span id="final-score">0</span></div>
+      <div>High Score: <span id="final-high-score">0</span></div>
+      <button id="retry-btn-overlay">Retry</button>
+    </div>
+  </div>
+
+  <script>
+    // Game variables
+    const canvas = document.getElementById('game-canvas');
+    const ctx = canvas.getContext('2d');
+    const startButton = document.getElementById('start-btn');
+    const retryButton = document.getElementById('retry-btn');
+    const retryOverlayButton = document.getElementById('retry-btn-overlay');
+    const scoreDisplay = document.getElementById('score');
+    const highScoreDisplay = document.getElementById('high-score-value');
+    const finalScoreDisplay = document.getElementById('final-score');
+    const finalHighScoreDisplay = document.getElementById('final-high-score');
+    const gameOverOverlay = document.getElementById('game-over-overlay');
+    const instructions = document.getElementById('instructions');
+    const loadingSpinner = document.getElementById('loading-spinner');
+
+    let gameRunning = false;
+    let score = 0;
+    let highScore = 0;
+    let speed = 5;
+    let obstacles = [];
+    let player = { x: 100, y: 600, width: 50, height: 50, vy: 0, jumping: false };
+    const gravity = 0.5;
+
+    canvas.width = 1280;
+    canvas.height = 720;
+
+    // Preload assets
+    const jumpSound = new Audio('https://www.soundjay.com/button/beep-07.wav');
+    const crashSound = new Audio('https://www.soundjay.com/button/beep-10.wav');
+
+    // Game loop
+    function gameLoop() {
+      if (!gameRunning) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw player
+      ctx.fillStyle = 'yellow';
+      ctx.fillRect(player.x, player.y, player.width, player.height);
+
+      // Draw obstacles
+      ctx.fillStyle = 'red';
+      obstacles.forEach(obstacle => {
+        obstacle.x -= speed;
+        ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+      });
+
+      // Remove off-screen obstacles
+      obstacles = obstacles.filter(obstacle => obstacle.x + obstacle.width > 0);
+
+      // Add new obstacles
+      if (Math.random() < 0.02) {
+        obstacles.push({ x: canvas.width, y: 650, width: 50, height: 50 });
+      }
+
+      // Handle player jumping
+      if (player.jumping) {
+        player.vy += gravity;
+        player.y += player.vy;
+
+        if (player.y >= 600) {
+          player.y = 600;
+          player.jumping = false;
+        }
+      }
+
+      // Check collisions
+      obstacles.forEach(obstacle => {
+        if (
+          player.x < obstacle.x + obstacle.width &&
+          player.x + player.width > obstacle.x &&
+          player.y < obstacle.y + obstacle.height &&
+          player.y + player.height > obstacle.y
+        ) {
+          crashSound.play();
+          endGame();
+        }
+      });
+
+      // Update score
+      score++;
+      scoreDisplay.textContent = score;
+
+      // Increase speed over time
+      if (score % 500 === 0) speed += 0.5;
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Start game
+    function startGame() {
+      instructions.style.display = 'none';
+      startButton.style.display = 'none';
+      gameRunning = true;
+      score = 0;
+      speed = 5;
+      obstacles = [];
+      player.jumping = false;
+      player.y = 600;
+      gameLoop();
+    }
+
+    // End game
+    function endGame() {
+      gameRunning = false;
+      gameOverOverlay.style.display = 'flex';
+      finalScoreDisplay.textContent = score;
+      if (score > highScore) {
+        highScore = score;
+        highScoreDisplay.textContent = highScore;
+      }
+      finalHighScoreDisplay.textContent = highScore;
+    }
+
+    // Retry game
+    function retryGame() {
+      gameOverOverlay.style.display = 'none';
+      startGame();
+    }
+
+    // Handle jump
+    function jump() {
+      if (!player.jumping) {
+        player.jumping = true;
+        player.vy = -10;
+        jumpSound.play();
+      }
+    }
+
+    // Event listeners
+    window.addEventListener('keydown', event => {
+      if (event.code === 'Space') jump();
+    });
+
+    startButton.addEventListener('click', startGame);
+    retryButton.addEventListener('click', retryGame);
+    retryOverlayButton.addEventListener('click', retryGame);
+
+    // Initialize the game
+    loadingSpinner.style.display = 'none';
+    startButton.style.display = 'block';
+    instructions.style.display = 'block';
+  </script>
+</body>
+</html>

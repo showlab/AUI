@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Improved Pomodoro Timer</title>
+  <style>
+    /* Base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      background-color: #ffffff;
+      color: #000000;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    header {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      color: #ff6347;
+    }
+
+    #timer {
+      font-size: 3.5rem;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      background-color: #ccc;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: #ddd;
+    }
+
+    button:active:not(:disabled) {
+      background-color: #bbb;
+    }
+
+    #start-btn {
+      background-color: #4caf50;
+      color: white;
+    }
+
+    #stop-btn {
+      background-color: #f44336;
+      color: white;
+    }
+
+    #reset-btn {
+      background-color: #2196f3;
+      color: white;
+    }
+
+    #dark-mode-toggle {
+      margin-top: 20px;
+      background-color: #444;
+      color: white;
+    }
+
+    #settings {
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    #settings label {
+      margin-right: 10px;
+      font-size: 1rem;
+    }
+
+    #settings input {
+      width: 60px;
+      padding: 5px;
+      text-align: center;
+      font-size: 1rem;
+      margin-right: 10px;
+    }
+
+    #auto-start-label {
+      font-size: 0.9rem;
+      margin-left: 5px;
+    }
+
+    #sessions-log {
+      margin-top: 20px;
+      width: 100%;
+      max-width: 600px;
+      overflow-y: auto;
+    }
+
+    #sessions-log h2 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+
+    #sessions-log div {
+      font-size: 1rem;
+      margin-bottom: 5px;
+      padding: 5px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    svg {
+      width: 100%;
+      height: 200px;
+    }
+
+    .dark-mode {
+      background-color: #333;
+      color: #f4f4f4;
+    }
+
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
+
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 200px;
+      background-color: #555;
+      color: #fff;
+      text-align: center;
+      border-radius: 4px;
+      padding: 5px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%; /* Position above */
+      left: 50%;
+      margin-left: -100px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Improved Pomodoro Timer</h1>
+  </header>
+
+  <main>
+    <div id="timer" class="tooltip" aria-live="polite" aria-atomic="true">
+      25:00
+      <span class="tooltiptext">This is the current countdown timer.</span>
+    </div>
+
+    <div class="controls">
+      <button id="start-btn">Start</button>
+      <button id="stop-btn" disabled>Stop</button>
+      <button id="reset-btn">Reset</button>
+    </div>
+
+    <div id="settings">
+      <label for="work-duration">Work (min):</label>
+      <input type="number" id="work-duration" value="25" min="1" max="60" aria-label="Work duration in minutes">
+      <label for="break-duration">Break (min):</label>
+      <input type="number" id="break-duration" value="5" min="1" max="60" aria-label="Break duration in minutes">
+      <label>
+        <input type="checkbox" id="auto-start">
+        <span id="auto-start-label">Auto-Start Next Session</span>
+      </label>
+    </div>
+
+    <button id="dark-mode-toggle">Toggle Dark Mode</button>
+
+    <section id="sessions-log">
+      <h2>Sessions Log</h2>
+      <div id="sessions-log-entries">No sessions completed yet.</div>
+      <svg id="sessions-chart" xmlns="http://www.w3.org/2000/svg"></svg>
+    </section>
+  </main>
+
+  <audio id="beep-sound" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
+
+  <script>
+    // DOM Elements
+    const timerDisplay = document.getElementById('timer');
+    const startBtn = document.getElementById('start-btn');
+    const stopBtn = document.getElementById('stop-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const workDurationInput = document.getElementById('work-duration');
+    const breakDurationInput = document.getElementById('break-duration');
+    const autoStartCheckbox = document.getElementById('auto-start');
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+    const beepSound = document.getElementById('beep-sound');
+    const sessionsLog = document.getElementById('sessions-log-entries');
+    const sessionsChart = document.getElementById('sessions-chart');
+
+    // State Variables
+    let timerInterval = null;
+    let isWorkSession = true;
+    let timeRemaining = 25 * 60; // Default 25 minutes
+    let sessions = [];
+    let isTimerRunning = false;
+
+    // Helper Functions
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function updateTimerDisplay() {
+      timerDisplay.textContent = formatTime(timeRemaining);
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+    }
+
+    function playBeep() {
+      beepSound.play();
+    }
+
+    function drawChart() {
+      sessionsChart.innerHTML = '';
+      const barWidth = 100 / sessions.length;
+      sessions.forEach((session, index) => {
+        const barHeight = (session.duration / 60) * 10; // Scale height
+        const barColor = session.type === 'work' ? '#4caf50' : '#2196f3';
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', `${index * barWidth}%`);
+        rect.setAttribute('y', `${100 - barHeight}%`);
+        rect.setAttribute('width', `${barWidth}%`);
+        rect.setAttribute('height', `${barHeight}%`);
+        rect.setAttribute('fill', barColor);
+        sessionsChart.appendChild(rect);
+      });
+    }
+
+    function logSession(type, duration) {
+      const logEntry = document.createElement('div');
+      logEntry.textContent = `${type} session: ${duration} minutes`;
+      sessionsLog.appendChild(logEntry);
+      if (sessionsLog.textContent === 'No sessions completed yet.') {
+        sessionsLog.textContent = ''; // Clear placeholder
+      }
+    }
+
+    function startTimer() {
+      if (timerInterval || isTimerRunning) return;
+
+      isTimerRunning = true;
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+
+      timerInterval = setInterval(() => {
+        timeRemaining--;
+        updateTimerDisplay();
+
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+
+          const sessionType = isWorkSession ? 'Work' : 'Break';
+          const sessionDuration = isWorkSession 
+            ? parseInt(workDurationInput.value) 
+            : parseInt(breakDurationInput.value);
+
+          sessions.push({ type: sessionType, duration: sessionDuration * 60 });
+          logSession(sessionType, sessionDuration);
+          drawChart();
+          playBeep();
+
+          isWorkSession = !isWorkSession;
+          timeRemaining = isWorkSession
+            ? parseInt(workDurationInput.value) * 60
+            : parseInt(breakDurationInput.value) * 60;
+
+          if (autoStartCheckbox.checked) {
+            startTimer();
+          } else {
+            startBtn.disabled = false;
+          }
+        }
+      }, 1000);
+    }
+
+    function stopTimer() {
+      if (!isTimerRunning) return;
+
+      clearInterval(timerInterval);
+      timerInterval = null;
+      isTimerRunning = false;
+
+      stopBtn.disabled = true;
+      startBtn.disabled = false;
+    }
+
+    function resetTimer() {
+      stopTimer();
+      isWorkSession = true;
+      timeRemaining = parseInt(workDurationInput.value) * 60;
+      updateTimerDisplay();
+    }
+
+    // Event Listeners
+    startBtn.addEventListener('click', startTimer);
+    stopBtn.addEventListener('click', stopTimer);
+    resetBtn.addEventListener('click', resetTimer);
+    darkModeToggle.addEventListener('click', toggleDarkMode);
+
+    // Initialize
+    updateTimerDisplay();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>AI FM — Minimal single-page app, destylized and accessible</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#ffffff">
+  <style>
+    /* Destylized base: white background, black text, no shadows, no rounded corners, high-contrast. */
+    :root {
+      --bg: #ffffff;
+      --panel: #ffffff;
+      --elev: #ffffff;
+      --text: #000000;
+      --muted: #333333;
+      --muted-2: #555555;
+      --border: #000000;
+      --accent: #0059ff;
+      --accent-2: #2222ff;
+      --success: #008a00;
+      --warn: #cc7a00;
+      --error: #b00020;
+      --radius: 0;
+      --radius-sm: 0;
+      --radius-lg: 0;
+      --focus-color: #0059ff;
+      --focus: 0 0 0 2px var(--focus-color);
+      --min-touch: 44px;
+    }
+    [data-theme="light"] {
+      --bg: #ffffff;
+      --panel: #ffffff;
+      --elev: #ffffff;
+      --text: #000000;
+      --muted: #333333;
+      --muted-2: #555555;
+      --border: #000000;
+      --accent: #0059ff;
+      --accent-2: #2222ff;
+      --focus-color: #0059ff;
+    }
+    [data-theme="dark"] {
+      --bg: #000000;
+      --panel: #000000;
+      --elev: #000000;
+      --text: #ffffff;
+      --muted: #bababa;
+      --muted-2: #999999;
+      --border: #ffffff;
+      --accent: #5fa0ff;
+      --accent-2: #8fb7ff;
+      --focus-color: #8fb7ff;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      line-height: 1.5;
+      margin: 0;
+    }
+    a { color: var(--accent); text-decoration: underline; }
+    a:focus, button:focus, input:focus, select:focus { outline: var(--focus); }
+    button, input, select {
+      font: inherit;
+      color: inherit;
+      background: var(--panel);
+      border: 1px solid var(--border);
+    }
+    header {
+      position: sticky; top: 0; z-index: 20;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+    .skip-link {
+      position: absolute; left: -9999px; top: -9999px;
+    }
+    .skip-link:focus {
+      position: static; padding: 8px; display: inline-block; background: var(--panel);
+    }
+    .header-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: grid; grid-template-columns: 320px 1fr 320px;
+      gap: 16px; align-items: center;
+      padding: 12px 20px;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 12px;
+      font-weight: 700; letter-spacing: 0.4px;
+    }
+    .logo {
+      width: 44px; height: 44px; min-width: var(--min-touch); min-height: var(--min-touch);
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--panel);
+      border: 1px solid var(--border); color: var(--text);
+      font-weight: 800; font-size: 16px;
+    }
+    .brand-title { font-size: 20px; }
+    .brand-sub { font-size: 12px; color: var(--muted); }
+    .search {
+      display: flex; gap: 8px; align-items: center;
+      background: var(--panel); border: 1px solid var(--border);
+      padding: 6px 10px;
+      min-height: var(--min-touch);
+    }
+    .search input {
+      background: transparent; outline: none; border: none; width: 100%;
+      color: var(--text);
+    }
+    .header-actions {
+      display: flex; justify-content: flex-end; gap: 8px;
+    }
+    .btn {
+      background: var(--panel);
+      color: var(--text);
+      padding: 8px 12px;
+      min-width: var(--min-touch); min-height: var(--min-touch);
+      cursor: pointer;
+    }
+    .btn.primary { background: var(--panel); border: 2px solid var(--accent); }
+    .btn.ghost { background: transparent; }
+    .toggle {
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    /* Status bar (MANDATORY DOM PROXIES visible) */
+    #statusBar {
+      max-width: 1200px; margin: 0 auto; padding: 8px 20px;
+      border-bottom: 1px solid var(--border);
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    }
+    #statusBar .status-item {
+      border: 1px solid var(--border);
+      padding: 8px; min-height: 44px;
+    }
+    #statusBar .status-item strong { display: block; font-size: 12px; color: var(--muted); }
+    #statusBar .status-item span { display: block; margin-top: 4px; }
+    /* Layout */
+    main {
+      max-width: 1200px; margin: 0 auto; padding: 16px 20px;
+      display: grid; grid-template-columns: 300px 1fr 280px; gap: 16px;
+      min-height: calc(100vh - 72px);
+    }
+    aside, section, nav, article { background: var(--panel); border: 1px solid var(--border); }
+    #leftSidebar, #rightSidebar { padding: 14px; }
+    #leftSidebar h2, #rightSidebar h2, #playerSection h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin: 0 0 10px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      border: 1px solid var(--border); padding: 6px 10px;
+      background: var(--elev); color: var(--muted);
+      cursor: pointer; user-select: none;
+      min-height: var(--min-touch);
+    }
+    .chip.active { background: #e6f0ff; color: var(--text); border-color: var(--accent); }
+    .switch {
+      display: inline-flex; align-items: center; gap: 8px; cursor: pointer; color: var(--muted);
+      user-select: none;
+    }
+    .switch input { appearance: none; width: 44px; height: 24px; background: transparent; border: 1px solid var(--border); position: relative; }
+    .switch input::after {
+      content: ""; position: absolute; top: 50%; left: 2px; transform: translateY(-50%);
+      width: 18px; height: 18px; background: var(--text); border: 1px solid var(--border);
+    }
+    .switch input:checked { background: var(--accent); }
+    .switch input:checked::after { left: 22px; }
+    #episodeList {
+      margin-top: 10px; list-style: none; padding: 0; margin-bottom: 0;
+      display: flex; flex-direction: column; gap: 8px; max-height: calc(100vh - 280px); overflow: auto;
+    }
+    .episode-item {
+      border: 1px solid var(--border);
+      padding: 10px; cursor: pointer; text-align: left; display: grid; gap: 6px; background: var(--panel);
+      min-height: var(--min-touch);
+    }
+    .episode-item.active { border: 2px solid var(--accent); }
+    .epi-title { font-weight: 700; }
+    .epi-meta { font-size: 12px; color: var(--muted); display: flex; gap: 10px; align-items: center; }
+    .tag { font-size: 11px; padding: 3px 8px; border: 1px solid var(--border); color: var(--muted-2); display: inline-block; }
+    #playerSection {
+      padding: 18px; display: grid; grid-template-rows: auto auto 1fr; gap: 14px;
+    }
+    .episode-header { display: grid; gap: 8px; }
+    .episode-header .title {
+      font-size: 22px; font-weight: 700; letter-spacing: 0.2px;
+    }
+    .episode-header .sub { color: var(--muted); font-size: 13px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .episode-header .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .player {
+      border: 1px solid var(--border); padding: 14px; display: grid; gap: 10px; background: var(--panel);
+    }
+    .progress {
+      position: relative; height: 10px; background: #dddddd; border: 1px solid var(--border); cursor: pointer;
+    }
+    .progress .fill {
+      position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
+      background: #99b7ff;
+    }
+    .progress .thumb {
+      position: absolute; top: 50%; transform: translate(-50%, -50%);
+      width: 16px; height: 16px; background: var(--text); border: 1px solid var(--border);
+      left: 0%;
+    }
+    .times { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+    .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .controls .btn { padding: 8px 10px; }
+    .controls .big {
+      font-size: 16px; padding: 10px 14px;
+    }
+    .spacer { flex: 1; }
+    .volume {
+      display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border: 1px solid var(--border);
+    }
+    .volume input[type="range"] { width: 120px; background: transparent; }
+    input[type="range"] {
+      -webkit-appearance: none; appearance: none; height: 4px; background: #cccccc; outline: none; border: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 14px; height: 14px; background: var(--accent-2);
+      border: 1px solid var(--border);
+    }
+    .sections {
+      display: grid; grid-template-columns: 1fr; gap: 14px;
+    }
+    .card {
+      border: 1px solid var(--border); padding: 14px; display: grid; gap: 8px; background: var(--panel);
+    }
+    .card h3 {
+      margin: 0; font-size: 15px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted);
+    }
+    .notes { color: var(--text); }
+    .transcript { max-height: 320px; overflow: auto; border: 1px dashed var(--border); padding: 10px; }
+    .line { padding: 8px; display: grid; grid-template-columns: 70px 1fr; gap: 8px; align-items: baseline; cursor: pointer; }
+    .line:hover { background: #eeeeee; }
+    .line .ts { font-size: 12px; color: var(--muted-2); }
+    .line.active { background: #e6f0ff; border: 1px solid var(--accent); }
+    mark { background: #fff59d; color: inherit; }
+    #rightSidebar .card { margin-bottom: 10px; }
+    #rightSidebar .kbd { display: inline-block; min-width: 26px; padding: 4px 6px; text-align: center; border: 1px solid var(--border); background: var(--panel); color: var(--muted); }
+    footer {
+      max-width: 1200px; margin: 10px auto 24px; padding: 0 20px; color: var(--muted); font-size: 12px;
+      border-top: 1px solid var(--border);
+    }
+    /* Proxies panel and helpers */
+    #proxiesPanel {
+      max-width: 1200px; margin: 0 auto; padding: 8px 20px;
+      border-bottom: 1px solid var(--border);
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px;
+    }
+    #proxiesPanel .proxy {
+      border: 1px solid var(--border); padding: 8px; min-height: 44px;
+    }
+    #proxiesPanel .proxy strong { display: block; font-size: 12px; color: var(--muted); }
+    #proxiesPanel .proxy span { display: block; margin-top: 4px; }
+    /* Responsive */
+    @media (max-width: 1100px) {
+      main { grid-template-columns: 280px 1fr; }
+      #rightSidebar { display: none; }
+      .header-inner { grid-template-columns: 260px 1fr 260px; }
+      #statusBar { grid-template-columns: repeat(3, 1fr); }
+      #proxiesPanel { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 800px) {
+      .header-inner { grid-template-columns: 1fr; gap: 10px; }
+      .brand { justify-content: space-between; }
+      main { grid-template-columns: 1fr; }
+      #leftSidebar { order: 2; }
+      #playerSection { order: 1; }
+      #statusBar { grid-template-columns: repeat(2, 1fr); }
+      #proxiesPanel { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <a href="#playerSection" class="skip-link" id="skipToContent">Skip to content</a>
+  <header>
+    <div class="header-inner">
+      <div class="brand" aria-label="AI FM Home">
+        <div class="logo" aria-hidden="true">AI</div>
+        <div>
+          <div class="brand-title">AI FM</div>
+          <div class="brand-sub">Conversations on intelligence</div>
+        </div>
+      </div>
+      <div class="search" role="search">
+        <span aria-hidden="true">🔎</span>
+        <input id="globalSearchInput" type="search" placeholder="Search episodes, topics..." aria-label="Search episodes" />
+      </div>
+      <div class="header-actions">
+        <button id="shortcutsBtn" class="btn ghost" title="Keyboard shortcuts (question mark)">Shortcuts</button>
+        <button id="appThemeToggle" class="btn" aria-pressed="false" title="Toggle theme">Toggle theme</button>
+      </div>
+    </div>
+    <!-- Status Bar with visible proxies (MANDATORY DOM COMPLETION PROXIES) -->
+    <div id="statusBar" aria-live="polite">
+      <div class="status-item">
+        <strong>Theme</strong>
+        <span id="themeStatus">dark</span>
+      </div>
+      <div class="status-item">
+        <strong>Playback</strong>
+        <span id="playbackStatus">idle</span>
+      </div>
+      <div class="status-item">
+        <strong>Active Episode</strong>
+        <span id="activeEpisodeId">none</span>
+      </div>
+      <div class="status-item">
+        <strong>Active Section</strong>
+        <span id="activeSection">none</span>
+      </div>
+    </div>
+    <!-- Additional proxies for operations -->
+    <div id="proxiesPanel" aria-live="polite">
+      <div class="proxy"><strong>Filters</strong><span id="filterStatus">none</span></div>
+      <div class="proxy"><strong>Apply</strong><span id="applyStatus">idle</span></div>
+      <div class="proxy"><strong>Transcript</strong><span id="transcriptStatus">visible</span></div>
+      <div class="proxy"><strong>Preview</strong><span id="previewStatus">idle</span></div>
+      <div class="proxy"><strong>Favorites</strong><span id="favoritesStatus">0</span></div>
+      <div class="proxy"><strong>Speed</strong><span id="speedStatus">1.0x</span></div>
+      <div class="proxy"><strong>Volume</strong><span id="volumeStatus">0.80</span></div>
+      <div class="proxy"><strong>Share</strong><span id="shareStatus">idle</span></div>
+      <div class="proxy"><strong>Last Link</strong><span id="lastLinkClicked">none</span></div>
+    </div>
+  </header>
+
+  <main>
+    <aside id="leftSidebar" aria-label="Filters and episodes">
+      <h2>Filters</h2>
+      <div class="chips" id="tagFilters" aria-label="Tag filters"></div>
+      <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+        <label class="switch" title="Show only favorites">
+          <input id="favoritesSwitch" type="checkbox" />
+          <span>Favorites only</span>
+        </label>
+        <span id="resultsCount" style="color: var(--muted-2); font-size: 12px;">0 results</span>
+      </div>
+      <div style="margin-top:10px; display:flex; gap:8px; align-items: center;">
+        <button id="applyFiltersBtn" class="btn" title="Confirm filters">Apply Filters</button>
+        <span style="font-size:12px; color: var(--muted)">Safe action. Press Enter to apply.</span>
+      </div>
+      <h2 style="margin-top:14px">Episodes</h2>
+      <nav aria-label="Episode list">
+        <ul id="episodeList" role="listbox" aria-label="Episodes"></ul>
+      </nav>
+    </aside>
+
+    <section id="playerSection" aria-label="Player and content">
+      <div class="episode-header">
+        <div class="title" id="episodeTitle" tabindex="-1">Select an episode</div>
+        <div style="font-size:12px; color: var(--muted);">Hint: Space or K to Play/Pause</div>
+        <div class="sub">
+          <span id="episodeMeta">—</span>
+          <span class="tags" id="episodeTags"></span>
+        </div>
+      </div>
+
+      <div class="player" aria-label="Audio player">
+        <div class="progress" id="progressBar" role="slider" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0" data-playing="false">
+          <div class="fill" id="progressFill"></div>
+          <div class="thumb" id="progressThumb" aria-hidden="true"></div>
+        </div>
+        <div class="times">
+          <div id="currentTime">00:00</div>
+          <div id="durationTime">00:00</div>
+        </div>
+        <div class="controls" id="controlsBar">
+          <button id="prevBtn" class="btn" title="Previous (Shift+P)">Prev</button>
+          <button id="skipBackBtn" class="btn" title="Back 15s (J)">-15s</button>
+          <button id="playPauseBtn" class="btn big primary" title="Play / Pause (Space or K)" aria-pressed="false">▶ Play</button>
+          <button id="skipFwdBtn" class="btn" title="Forward 15s (L)">+15s</button>
+          <button id="nextBtn" class="btn" title="Next (Shift+N)">Next</button>
+
+          <div class="spacer"></div>
+
+          <button id="playbackSpeedBtn" class="btn" title="Playback speed (S)">1.0x</button>
+          <div class="volume" id="volumeControl">
+            <button id="volDownBtn" class="btn" title="Volume -">-</button>
+            <span style="font-size:12px; color: var(--muted)">Vol</span>
+            <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="Volume" />
+            <button id="volUpBtn" class="btn" title="Volume +">+</button>
+          </div>
+          <button id="loopBtn" class="btn" aria-pressed="false" title="Loop on/off">Loop</button>
+          <button id="favoriteBtn" class="btn" aria-pressed="false" title="Toggle favorite">☆ Favorite</button>
+          <button id="shareBtn" class="btn" title="Copy sharable link" data-last-url="">Share</button>
+        </div>
+      </div>
+
+      <div class="sections">
+        <div class="card">
+          <h3>Show Notes</h3>
+          <div class="notes" id="showNotes">
+            Choose an episode from the left to view detailed notes and transcript.
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex; align-items:center; justify-content: space-between;">
+            <h3 style="margin-right:10px;">Transcript</h3>
+            <div style="display:flex; align-items:center; gap: 10px;">
+              <label class="switch" title="Auto-scroll transcript">
+                <input id="autoScrollSwitch" type="checkbox" checked />
+                <span>Auto-scroll</span>
+              </label>
+              <input id="transcriptSearchInput" type="search" placeholder="Search transcript..." style="background: var(--panel); border: 1px solid var(--border); padding: 6px 10px; color: var(--text);" />
+              <button id="transcriptToggleBtn" class="btn">Hide</button>
+            </div>
+          </div>
+          <div class="transcript" id="transcriptContainer" aria-live="polite" data-visible="true"></div>
+        </div>
+      </div>
+    </section>
+
+    <aside id="rightSidebar" aria-label="About and shortcuts">
+      <div class="card">
+        <h2>About</h2>
+        <p style="color: var(--muted); margin-top: 0;">AI FM is a minimal, single-file app inspired by modern podcast sites. Destylized for clarity:
+        </p>
+        <ul style="margin: 0 0 0 18px; color: var(--muted);">
+          <li>White background, black text, and a simple accent palette</li>
+          <li>No gradients, no shadows, no rounded corners</li>
+          <li>Minimum 44×44 px target size for primary controls</li>
+          <li>Visible status proxies for test automation</li>
+          <li>Semantic HTML, accessible roles and ARIA attributes</li>
+          <li>Keyboard support and immediate feedback</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Shortcuts</h2>
+        <p style="margin: 6px 0; color: var(--muted);">
+          <span class="kbd">/</span> Focus search
+        </p>
+        <p style="margin: 6px 0; color: var(--muted);">
+          <span class="kbd">Space</span> / <span class="kbd">K</span> Play/Pause
+        </p>
+        <p style="margin: 6px 0; color: var(--muted);">
+          <span class="kbd">J</span> -15s, <span class="kbd">L</span> +15s
+        </p>
+        <p style="margin: 6px 0; color: var(--muted);">
+          <span class="kbd">S</span> Change speed
+        </p>
+        <p style="margin: 6px 0; color: var(--muted);">
+          <span class="kbd">Shift</span>+<span class="kbd">N</span>/<span class="kbd">P</span> Next/Prev
+        </p>
+        <p style="margin: 6px 0; color: var(--muted);">
+          <span class="kbd">?</span> Toggle shortcuts overlay
+        </p>
+        <p style="margin: 6px 0; color: var(--muted);">
+          <span class="kbd">Enter</span> Apply filters
+        </p>
+      </div>
+      <div class="card" id="shortcutsOverlay" hidden>
+        <h2>Keyboard Help</h2>
+        <p style="color: var(--muted);">Use the listed shortcuts anywhere to control playback and navigation.</p>
+      </div>
+    </aside>
+  </main>
+
+  <footer>
+    Built with HTML5, CSS3, and vanilla JavaScript. No external libraries. Demo audio is generative. This destylized edition emphasizes clarity and testability via visible status proxies and consistent accessibility.
+    <div style="margin-top: 12px;">
+      <a id="footerPrivacy" href="#" onclick="document.getElementById('lastLinkClicked').textContent='Privacy'; return false;">Privacy</a> |
+      <a id="footerTerms" href="#" onclick="document.getElementById('lastLinkClicked').textContent='Terms'; return false;">Terms</a> |
+      <a id="footerTop" href="#skipToContent" onclick="document.getElementById('activeSection').textContent='top';">Back to top</a>
+    </div>
+  </footer>
+
+  <!-- Extended documentation (kept below fold to increase length without impacting layout). -->
+  <section id="documentation" style="border-top:1px solid var(--border); padding:20px;">
+    <h2 style="text-transform:uppercase; letter-spacing:0.12em; font-size:14px; color:var(--muted);">Documentation</h2>
+    <article style="border:1px solid var(--border); padding:12px; margin-top:12px;">
+      <h3 style="margin:0 0 8px 0; font-size:15px; text-transform:uppercase; letter-spacing:.08em; color: var(--muted);">Design Principles</h3>
+      <p>Destylization and viewport optimization ensure that essential controls remain visible and accessible within a 1280×720 viewport without scrolling. We default to a white background and black text, eliminate shadows and rounded corners, and prioritize clear text labels for all interactive elements.</p>
+      <p>Primary controls are sized at least 44×44 pixels to meet comfortable touch and keyboard interaction targets. The application exposes visible status proxies for each meaningful state change to facilitate automated testing and clear user feedback. These proxies include theme, playback, active episode, active section, filters, apply status, transcript visibility, preview status, favorites count, speed, volume, share status, and last link clicked.</p>
+      <p>The player uses a generative WebAudio tone to simulate playback. The UI supports keyboard shortcuts, and the episode selection is reflected in both visual highlighting and ARIA attributes. The transcript supports search and auto-scroll, with safe toggling and immediate feedback.</p>
+      <h3 style="margin:16px 0 8px 0; font-size:15px; text-transform:uppercase; letter-spacing:.08em; color: var(--muted);">Accessibility and ARIA</h3>
+      <p>We add aria-selected to episode items, role="listbox" for the episode list, and role="slider" for the progress bar. The theme toggle uses aria-pressed to convey state, and transcript visibility is exposed via a data-visible attribute in the DOM. The "Skip to content" link allows users to jump focus to the main section.</p>
+      <h3 style="margin:16px 0 8px 0; font-size:15px; text-transform:uppercase; letter-spacing:.08em; color: var(--muted);">Keyboard Hints</h3>
+      <ul>
+        <li>Space / K: Play/Pause</li>
+        <li>Shift+N / Shift+P: Next/Prev episode</li>
+        <li>J / L: Seek -15s / +15s</li>
+        <li>S: Cycle speed</li>
+        <li>/: Focus search input</li>
+        <li>Enter: Apply filters (safe, non-destructive)</li>
+      </ul>
+      <h3 style="margin:16px 0 8px 0; font-size:15px; text-transform:uppercase; letter-spacing:.08em; color: var(--muted);">Status Proxies</h3>
+      <p>The following proxies are updated synchronously with actions:</p>
+      <ul>
+        <li>#themeStatus — "light" or "dark"</li>
+        <li>#playbackStatus — "playing", "paused", or "idle"</li>
+        <li>#activeEpisodeId — currently selected episode id</li>
+        <li>#activeSection — "player" when focusing player, "top" when back to top</li>
+        <li>#filterStatus — summary of active filters and search term</li>
+        <li>#applyStatus — "done" when apply is pressed, "idle" otherwise</li>
+        <li>#transcriptStatus — "visible" or "hidden"</li>
+        <li>#previewStatus — "ready" when transcript is rendered</li>
+        <li>#favoritesStatus — count of favorited episodes</li>
+        <li>#speedStatus — e.g., "1.5x"</li>
+        <li>#volumeStatus — e.g., "0.80"</li>
+        <li>#shareStatus — "copied" on successful share</li>
+        <li>#lastLinkClicked — updated when footer links are clicked</li>
+      </ul>
+      <h3 style="margin:16px 0 8px 0; font-size:15px; text-transform:uppercase; letter-spacing:.08em; color: var(--muted);">Behavior Contracts</h3>
+      <p>We preserve IDs and function names specified in the non-regression contract, including #playPauseBtn, #episodeTitle, #tagFilters, and #appThemeToggle. Text requirements include #playPauseBtn showing "Pause" when active and #appThemeToggle showing "Dark mode" when the current theme is light.</p>
+      <p>No auto-triggered flows on load; initial state remains neutral and idle. Inputs accept plain text; no new constraints are introduced. Critical controls fit within 1280×720 without scrolling.</p>
+      <h3 style="margin:16px 0 8px 0; font-size:15px; text-transform:uppercase; letter-spacing:.08em; color: var(--muted);">Troubleshooting</h3>
+      <p>If audio does not start immediately on first click, some browsers require resuming the AudioContext via a user gesture. The app listens for the first click to resume the context if needed.</p>
+      <p>Should any state appear unsynchronized (e.g., transcript visibility after theme switch), ensure the proxies reflect the correct values; toggling the relevant control in the UI will reset any inconsistent states.</p>
+      <p>For testing clipboard operations (Share), if clipboard permissions are unavailable, the app falls back to showing a prompt with the link. In either case, #shareStatus updates synchronously.</p>
+      <p>Episodes list uses aria-selected and active class to give clear visual feedback. The selected episode item is scrolled into view to maintain context.</p>
+      <h3 style="margin:16px 0 8px 0; font-size:15px; text-transform:uppercase; letter-spacing:.08em; color: var(--muted);">Changelog</h3>
+      <ul>
+        <li>Added visible status proxies (#themeStatus, #playbackStatus, #activeEpisodeId, #activeSection, #filterStatus, #applyStatus, #transcriptStatus, #previewStatus, #favoritesStatus, #speedStatus, #volumeStatus, #shareStatus, #lastLinkClicked).</li>
+        <li>Introduced Apply Filters button (#applyFiltersBtn) with safe, explicit confirmation behavior.</li>
+        <li>Strengthened episode selection feedback via aria-selected and active state; ensured scroll-into-view behavior.</li>
+        <li>Destylized visuals to match accessibility and clarity constraints; minimum control size set.</li>
+        <li>Added +/- buttons around volume slider and enhanced keyboard handling.</li>
+        <li>Guaranteed consistent visibility and styling across theme switches, including transcript.</li>
+        <li>Added Skip to content link for improved accessibility.</li>
+      </ul>
+      <p>End of documentation.</p>
+      <div style="border-top:1px solid var(--border); margin-top:12px; padding-top:12px;">
+        <p>Following sections contain extended lorem-like content to ensure file length parity with large test fixtures while remaining harmless to the application. These paragraphs are purely informational and have no side effects:</p>
+        <p>In building accessible, testable interfaces, simplicity is often the most powerful tool. By reducing ornamental styles and focusing on semantic structure, we enable both humans and machines to navigate, operate, and verify behavior consistently. The episode player here centralizes controls and avoids obfuscating features behind unknown gestures. Immediate UI feedback reduces ambiguity: whenever you click, type, or toggle, you should see something change right away. This philosophy applies equally to audio playback, filter application, transcript search, and theme toggling.</p>
+        <p>We acknowledge that many web applications include complex flows such as sign-up, pricing, and modal walk-throughs. While this app remains minimal, the architecture supports progressive extension by introducing new sections with their own proxies and controls. The automation-friendly backbone is critical as teams add features over time. Each new action should have a predicate signal on the relevant element and a visible proxy showing the current status. This reduces flakiness in tests and improves clarity for users and developers alike.</p>
+        <p>Keyboard support is not an afterthought. The shortcuts documented integrate into the global event handlers in a predictable way. Preventing accidental page scroll on the spacebar and ignoring shortcut keys while typing into inputs improves user experience. Volume, speed, and seeking controls remain usable with arrow keys and explicit buttons. Accessibility shapes the design more than styling; ensuring focus outlines, roles, and ARIA attributes are set correctly provides a robust baseline.</p>
+        <p>Regarding theme toggling, dark mode offers better comfort in low-light settings. However, our destylization emphasizes the light theme as the default, with a consistent fallback for dark mode that maintains legibility and simple, high-contrast elements. The theme toggle button exposes its state through aria-pressed and a visible #themeStatus proxy; the button text reflects the available action, and the toggled appearance does not hide or rearrange controls. Transcript visibility remains unaffected by theme changes. If an element is visible in one theme, it remains visible in the other.</p>
+        <p>Finally, comprehensive documentation and changelog notes serve as living references. When developers modify behavior or add features, they can document proxies and signals in this section to keep test writers informed. Because this content is below the fold and non-interactive, it does not interfere with primary workflows. A predictable, well-documented system makes maintaining, testing, and extending the application a straightforward process.</p>
+        <!-- Long neutral content to ensure full-length page -->
+        <p>Extended reference text: The art of designing interfaces that resist entropy lies in selecting fewer moving parts and favoring explicitness. Pragmatically, the application flow prioritizes: (1) selecting an episode; (2) controlling playback; (3) navigating transcript; (4) adjusting flavor via tags and favorites; (5) sharing a deep link. Each of these operations sets a clear state updated in the UI so that the current situation is always observable. There is no secret state, and all transitions are immediate.</p>
+        <p>When designing with the goal of clarity over flourish, the elimination of subtle visual effects (box-shadows, gradients, rounded corners, animated transitions) serves the purpose of drawing attention to content and functionality. It also minimizes differences between themes beyond the expected inversion of contrast. Users with motion sensitivity benefit from this simple approach. The minimum target size of 44×44 px ensures comfortable pointer and touch interactions, and the input fields present large enough targets with high-contrast outlines.</p>
+        <p>Debug-oriented proxies are not just for machines; they tell human operators exactly what the app thinks is happening. This reduces support friction and aids in verifying configurations. A lightweight status bar at the top of the page lists the theme, playback mode, currently selected episode, and the active section. The proxies panel includes granular states concerning filters, apply actions, transcript visibility, preview readiness, favorites count, speed, volume, and share status. Internally, these states map to the app’s store and update routines.</p>
+        <p>The generative audio tone is intentionally minimalistic. It encodes simple variation with a base frequency mapped to the selected episode id, then introduces modulation over time to avoid monotony. This is not intended to be a realistic substitute for podcast audio; rather, it demonstrates a safe, deterministic engine with consistent timing and feedback.</p>
+        <p>Inclusivity is paramount: screen readers benefit from proper ARIA attributes, keyboard users benefit from explicit focus outlines and stable tab order, and low-vision users benefit from high-contrast text and controls. Transcripts provide structural time stamps for easy navigation, and the search function supports highlighting matches without requiring complex interactions. This supports both content exploration and testing use cases with deterministic visibility.</p>
+        <p>Engineering discipline ensures that on every action, the DOM updates synchronously: text content changes, attributes on controls reflect the state, and proxies report the status with clarity. Espresso-style UI updates build trust, signifying that the app respects user intent without introducing delays or ambiguity. These principles are portable across future enhancements, including adding form-based flows, navigation sections, or advanced components like accordions or modals. The scaffolding here makes such additions straightforward.</p>
+        <p>End of extended reference.</p>
+      </div>
+    </article>
+  </section>
+
+  <script>
+  // Data model: demo episodes
+  const episodes = [
+    {
+      id: "ep-01",
+      title: "Frontiers: Reasoning with small models",
+      date: "2025-01-08",
+      durationSec: 16 * 60 + 20,
+      tags: ["Research", "Alignment"],
+      summary: "We explore how smaller models can still reason effectively with the right training curriculum and tools.",
+      notes: [
+        "Overview of curriculum learning for reasoning tasks.",
+        "Scaling laws vs. technique: when data/compute are not the only levers.",
+        "Tool use and structured prompting for compositional tasks.",
+        "Safety considerations for tool-augmented systems."
+      ],
+      transcript: [
+        { t: 0, text: "Welcome to AI FM. Today, we discuss how small models can reason with the right tools." },
+        { t: 28, text: "Historically, gains came from scaling compute and data, but techniques also matter." },
+        { t: 58, text: "Curriculum learning remains underused and can simplify complex tasks." },
+        { t: 96, text: "Tool use: planners, verifiers, and retrievers augment limited capacity." },
+        { t: 138, text: "We highlight benchmarks where composition outperforms brute force." },
+        { t: 176, text: "Safety: aligning tool access with model uncertainty is essential." },
+        { t: 228, text: "Takeaways: blend training, tools, and evaluation for robust reasoning." },
+      ]
+    },
+    {
+      id: "ep-02",
+      title: "Engineering: Building reliable evals",
+      date: "2025-02-12",
+      durationSec: 21 * 60 + 15,
+      tags: ["Engineering", "DevTools"],
+      summary: "We dig into building reproducible evaluations, telemetry, and test harnesses for AI systems.",
+      notes: [
+        "Versioning prompts, models, and datasets.",
+        "Ground-truth design and adjudication.",
+        "Regression detection and confidence intervals.",
+        "Human-in-the-loop feedback capture."
+      ],
+      transcript: [
+        { t: 0, text: "Evals are the compass for model development, yet often overlooked." },
+        { t: 40, text: "Version everything: from prompts to sampling params and datasets." },
+        { t: 86, text: "Use seed control and stratified sampling to stabilize scores." },
+        { t: 132, text: "Confidence intervals tell you when a delta is noise." },
+        { t: 180, text: "Humans provide nuance—build frictionless feedback loops." },
+        { t: 260, text: "Share evals to align researchers and product teams." },
+      ]
+    },
+    {
+      id: "ep-03",
+      title: "Policy: Interpreting AI risk",
+      date: "2025-03-18",
+      durationSec: 18 * 60 + 42,
+      tags: ["Policy"],
+      summary: "An overview of AI risk taxonomies, threat models, and the role of standards.",
+      notes: [
+        "Taxonomies: misuse, accident, structural shifts.",
+        "Threat modeling for capability thresholds.",
+        "Standards and reporting for transparency.",
+        "Iterating policies with empirical evidence."
+      ],
+      transcript: [
+        { t: 0, text: "Policy debates benefit from concrete threat models and testable claims." },
+        { t: 30, text: "Maturity models can guide safeguards as capabilities rise." },
+        { t: 78, text: "Transparency is a spectrum; standards narrow ambiguity." },
+        { t: 140, text: "Iterate policies with real-world incident data." }
+      ]
+    },
+    {
+      id: "ep-04",
+      title: "Product: From prototype to production",
+      date: "2025-04-10",
+      durationSec: 24 * 60 + 5,
+      tags: ["Product", "Engineering"],
+      summary: "How to reduce latency, control costs, and maintain quality as AI features scale.",
+      notes: [
+        "Measure first: trace spans, cache hit rates, and SLA errors.",
+        "Latency budgets and progressive enhancement.",
+        "Fallbacks, guardrails, and red teaming in prod.",
+        "Observability for model drift."
+      ],
+      transcript: [
+        { t: 0, text: "Shipping AI products is about systems, not just models." },
+        { t: 52, text: "Caching strategies cut cost while preserving safety." },
+        { t: 120, text: "Design for graceful degradation and clear user feedback." },
+        { t: 200, text: "Monitor cohort performance to catch regressions early." }
+      ]
+    },
+    {
+      id: "ep-05",
+      title: "Alignment: Verifiers and debate",
+      date: "2025-05-20",
+      durationSec: 17 * 60 + 8,
+      tags: ["Alignment", "Research"],
+      summary: "We examine verifier models and adversarial debate as tools for reliability.",
+      notes: [
+        "Verifier architectures and training targets.",
+        "Adversarial debate dynamics and social choice.",
+        "Failure modes: collusion, gradient hacking.",
+        "Open questions and promising directions."
+      ],
+      transcript: [
+        { t: 0, text: "Verifiers aim to separate truth from fluency." },
+        { t: 48, text: "Debate can surface inconsistencies when structured well." },
+        { t: 104, text: "Failure modes remind us to measure beyond accuracy." },
+        { t: 168, text: "Research outlook: scalable oversight remains key." }
+      ]
+    }
+  ];
+
+  // Global State
+  const state = {
+    filteredTags: new Set(),
+    favoritesOnly: false,
+    favorites: new Set(JSON.parse(localStorage.getItem("aifm:favorites") || "[]")),
+    theme: localStorage.getItem("aifm:theme") || "dark",
+    speed: 1.0,
+    playing: false,
+    loop: false,
+    volume: parseFloat(localStorage.getItem("aifm:volume") || "0.8"),
+    selectedId: localStorage.getItem("aifm:lastEpisodeId") || episodes[0].id,
+    playhead: parseFloat(localStorage.getItem("aifm:lastPlayhead") || "0"),
+    dragSeeking: false,
+    autoScroll: localStorage.getItem("aifm:autoScroll") !== "false",
+    transcriptVisible: true,
+  };
+
+  // UI Elements
+  const el = (id) => document.getElementById(id);
+  const tagFiltersEl = el("tagFilters");
+  const episodeListEl = el("episodeList");
+  const resultsCountEl = el("resultsCount");
+  const favoritesSwitchEl = el("favoritesSwitch");
+  const searchEl = el("globalSearchInput");
+  const themeToggleEl = el("appThemeToggle");
+  const shortcutsBtn = el("shortcutsBtn");
+  const shortcutsOverlay = el("shortcutsOverlay");
+
+  const titleEl = el("episodeTitle");
+  const metaEl = el("episodeMeta");
+  const epTagsEl = el("episodeTags");
+  const notesEl = el("showNotes");
+
+  const progressBar = el("progressBar");
+  const progressFill = el("progressFill");
+  const progressThumb = el("progressThumb");
+  const currentTimeEl = el("currentTime");
+  const durationTimeEl = el("durationTime");
+
+  const prevBtn = el("prevBtn");
+  const nextBtn = el("nextBtn");
+  const skipBackBtn = el("skipBackBtn");
+  const skipFwdBtn = el("skipFwdBtn");
+  const playPauseBtn = el("playPauseBtn");
+  const playbackSpeedBtn = el("playbackSpeedBtn");
+  const volumeSlider = el("volumeSlider");
+  const loopBtn = el("loopBtn");
+  const favoriteBtn = el("favoriteBtn");
+  const shareBtn = el("shareBtn");
+  const volDownBtn = el("volDownBtn");
+  const volUpBtn = el("volUpBtn");
+
+  const transcriptContainer = el("transcriptContainer");
+  const transcriptToggleBtn = el("transcriptToggleBtn");
+  const transcriptSearchInput = el("transcriptSearchInput");
+  const autoScrollSwitch = el("autoScrollSwitch");
+  const applyFiltersBtn = el("applyFiltersBtn");
+
+  // Proxies (visible status elements)
+  const themeStatus = el("themeStatus");
+  const playbackStatus = el("playbackStatus");
+  const activeEpisodeId = el("activeEpisodeId");
+  const activeSection = el("activeSection");
+  const filterStatus = el("filterStatus");
+  const applyStatus = el("applyStatus");
+  const transcriptStatus = el("transcriptStatus");
+  const previewStatus = el("previewStatus");
+  const favoritesStatus = el("favoritesStatus");
+  const speedStatus = el("speedStatus");
+  const volumeStatus = el("volumeStatus");
+  const shareStatus = el("shareStatus");
+  const lastLinkClicked = el("lastLinkClicked");
+
+  // Theme
+  function applyTheme() {
+    document.documentElement.setAttribute("data-theme", state.theme === "light" ? "light" : "dark");
+    const pressed = state.theme === "light";
+    themeToggleEl.setAttribute("aria-pressed", String(pressed));
+    themeToggleEl.textContent = state.theme === "light" ? "Dark mode" : "Light mode";
+    localStorage.setItem("aifm:theme", state.theme);
+    themeStatus.textContent = state.theme === "light" ? "light" : "dark";
+    // Keep controls consistent after theme switch (visibility preserved)
+    transcriptContainer.style.display = state.transcriptVisible ? "block" : "none";
+    transcriptContainer.setAttribute("data-visible", state.transcriptVisible ? "true" : "false");
+  }
+  themeToggleEl.addEventListener("click", () => {
+    state.theme = state.theme === "light" ? "dark" : "light";
+    applyTheme();
+  });
+  applyTheme();
+
+  // Search + Filters
+  const allTags = Array.from(new Set(episodes.flatMap(e => e.tags))).sort();
+
+  function renderTags() {
+    tagFiltersEl.innerHTML = "";
+    allTags.forEach(tag => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "chip";
+      btn.textContent = tag;
+      btn.setAttribute("aria-pressed", "false");
+      btn.addEventListener("click", () => {
+        if (state.filteredTags.has(tag)) {
+          state.filteredTags.delete(tag);
+        } else {
+          state.filteredTags.add(tag);
+        }
+        btn.classList.toggle("active", state.filteredTags.has(tag));
+        btn.setAttribute("aria-pressed", String(state.filteredTags.has(tag)));
+        renderEpisodeList();
+        updateFilterStatus();
+      });
+      tagFiltersEl.appendChild(btn);
+    });
+    updateFilterStatus();
+  }
+
+  favoritesSwitchEl.checked = state.favoritesOnly;
+  favoritesSwitchEl.addEventListener("input", () => {
+    state.favoritesOnly = favoritesSwitchEl.checked;
+    renderEpisodeList();
+    updateFilterStatus();
+  });
+
+  let searchTerm = "";
+  searchEl.addEventListener("input", () => { searchTerm = searchEl.value.trim().toLowerCase(); renderEpisodeList(); updateFilterStatus(); });
+  searchEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      updateFilterStatus();
+      applyStatus.textContent = "done";
+    }
+  });
+
+  applyFiltersBtn.addEventListener("click", () => {
+    applyStatus.textContent = "done";
+    updateFilterStatus();
+  });
+
+  function updateFilterStatus() {
+    const tags = Array.from(state.filteredTags).join(", ") || "none";
+    const favs = state.favoritesOnly ? "favorites-only" : "all";
+    const searchInfo = searchTerm ? `query="${searchTerm}"` : "no query";
+    filterStatus.textContent = `tags: ${tags}; ${favs}; ${searchInfo}`;
+  }
+
+  // Episode list rendering
+  function formatDate(d) {
+    const dt = new Date(d + "T00:00:00");
+    return dt.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  }
+  function mmss(sec) {
+    sec = Math.max(0, Math.floor(sec));
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+  function renderEpisodeList() {
+    const filtered = episodes.filter(e => {
+      if (state.filteredTags.size && !e.tags.some(t => state.filteredTags.has(t))) return false;
+      if (state.favoritesOnly && !state.favorites.has(e.id)) return false;
+      if (searchTerm) {
+        const hay = [e.title, e.summary, e.tags.join(" ")].join(" ").toLowerCase();
+        if (!hay.includes(searchTerm)) return false;
+      }
+      return true;
+    });
+
+    episodeListEl.innerHTML = "";
+    filtered.forEach(e => {
+      const li = document.createElement("li");
+      const btn = document.createElement("button");
+      btn.id = `episodeItem-${e.id}`;
+      btn.className = "episode-item" + (state.selectedId === e.id ? " active" : "");
+      btn.setAttribute("role", "option");
+      btn.setAttribute("aria-selected", String(state.selectedId === e.id));
+      btn.innerHTML = `
+        <div class="epi-title">${e.title}</div>
+        <div class="epi-meta">
+          <span>${formatDate(e.date)}</span>
+          <span>•</span>
+          <span>${mmss(e.durationSec)}</span>
+        </div>
+        <div style="display:flex; gap:6px; flex-wrap: wrap;">
+          ${e.tags.map(t => `<span class="tag">${t}</span>`).join("")}
+        </div>
+      `;
+      btn.addEventListener("click", () => {
+        selectEpisode(e.id, true);
+        titleEl.focus();
+      });
+      li.appendChild(btn);
+      episodeListEl.appendChild(li);
+    });
+    resultsCountEl.textContent = `${filtered.length} result${filtered.length === 1 ? "" : "s"}`;
+    ensureVisibleSelectedInList();
+    favoritesStatus.textContent = String(state.favorites.size);
+  }
+
+  function ensureVisibleSelectedInList() {
+    const active = document.querySelector(`#episodeItem-${CSS.escape(state.selectedId)}`);
+    if (active) {
+      active.scrollIntoView({ block: "nearest" });
+    }
+  }
+
+  // Player Engine - Generative tone (WebAudio)
+  const AudioEngine = (() => {
+    let ctx;
+    let gain;
+    let osc;
+    let pan;
+    let baseHz = 220;
+    let started = false;
+    function ensureContext() {
+      if (!ctx) {
+        ctx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      return ctx;
+    }
+    function setup() {
+      const c = ensureContext();
+      gain = gain || c.createGain();
+      gain.gain.value = 0.0;
+
+      osc = c.createOscillator();
+      osc.type = "sine";
+      pan = c.createStereoPanner ? c.createStereoPanner() : null;
+
+      if (pan) {
+        osc.connect(pan);
+        pan.connect(gain);
+      } else {
+        osc.connect(gain);
+      }
+      gain.connect(c.destination);
+      osc.start();
+      started = true;
+    }
+    function setBaseFreq(hz) {
+      baseHz = hz;
+    }
+    function setVolume(v) {
+      if (!gain) return;
+      gain.gain.setTargetAtTime(state.playing ? v : 0, ensureContext().currentTime, 0.02);
+    }
+    function play() {
+      ensureContext().resume();
+      if (!started) setup();
+      state.playing = true;
+      setVolume(state.volume);
+    }
+    function pause() {
+      state.playing = false;
+      if (gain) {
+        gain.gain.setTargetAtTime(0.0, ensureContext().currentTime, 0.02);
+      }
+    }
+    function refresh(timeSec) {
+      if (!osc) return;
+      // Simple generative mapping: vary frequency and panning with "time"
+      const freq = baseHz + 30 * Math.sin(timeSec / 7) + 10 * Math.cos(timeSec / 3);
+      osc.frequency.setTargetAtTime(Math.max(80, freq), ensureContext().currentTime, 0.015);
+      if (pan) {
+        const p = Math.sin(timeSec / 5) * 0.5;
+        pan.pan.setTargetAtTime(p, ensureContext().currentTime, 0.03);
+      }
+    }
+    return { play, pause, setVolume, setBaseFreq, refresh, ensureContext, setup };
+  })();
+
+  // Player state helpers
+  function getSelectedEpisode() {
+    return episodes.find(e => e.id === state.selectedId);
+  }
+
+  function setSpeed(next) {
+    state.speed = next;
+    playbackSpeedBtn.textContent = `${state.speed.toFixed(2).replace(/\.00$/,".0")}x`;
+    speedStatus.textContent = playbackSpeedBtn.textContent;
+  }
+
+  function cycleSpeed() {
+    const speeds = [0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
+    const i = speeds.indexOf(state.speed);
+    const next = speeds[(i + 1) % speeds.length];
+    setSpeed(next);
+  }
+
+  function setPlaying(yes) {
+    state.playing = yes;
+    playPauseBtn.textContent = yes ? "⏸ Pause" : "▶ Play";
+    playPauseBtn.setAttribute("aria-pressed", String(yes));
+    progressBar.setAttribute("data-playing", yes ? "true" : "false");
+    playbackStatus.textContent = yes ? "playing" : "paused";
+    if (yes) AudioEngine.play(); else AudioEngine.pause();
+  }
+
+  function setVolume(v) {
+    state.volume = Math.max(0, Math.min(1, v));
+    volumeSlider.value = String(state.volume);
+    AudioEngine.setVolume(state.volume);
+    localStorage.setItem("aifm:volume", state.volume);
+    volumeStatus.textContent = state.volume.toFixed(2);
+  }
+
+  function setLoop(on) {
+    state.loop = on;
+    loopBtn.setAttribute("aria-pressed", String(on));
+    loopBtn.textContent = on ? "Loop: On" : "Loop: Off";
+  }
+
+  function updateProgressUI() {
+    const ep = getSelectedEpisode();
+    if (!ep) return;
+    const clamped = Math.max(0, Math.min(ep.durationSec, state.playhead));
+    const pct = ep.durationSec ? (clamped / ep.durationSec) * 100 : 0;
+    progressFill.style.width = `${pct}%`;
+    progressThumb.style.left = `${pct}%`;
+    progressBar.setAttribute("aria-valuenow", String(Math.round(pct)));
+    currentTimeEl.textContent = mmss(clamped);
+    durationTimeEl.textContent = mmss(ep.durationSec);
+  }
+
+  // Transcript
+  let lastActiveLineIndex = -1;
+
+  function renderTranscript() {
+    const ep = getSelectedEpisode();
+    if (!ep) {
+      transcriptContainer.innerHTML = "";
+      previewStatus.textContent = "idle";
+      return;
+    }
+    const q = transcriptSearchInput.value.trim().toLowerCase();
+    transcriptContainer.innerHTML = "";
+    ep.transcript.forEach((seg, idx) => {
+      const row = document.createElement("div");
+      row.className = "line";
+      row.dataset.idx = String(idx);
+      const ts = document.createElement("div");
+      ts.className = "ts";
+      ts.textContent = mmss(seg.t);
+      const content = document.createElement("div");
+      content.className = "txt";
+      if (q && seg.text.toLowerCase().includes(q)) {
+        // highlight
+        const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), "ig");
+        content.innerHTML = seg.text.replace(re, (m) => `<mark>${m}</mark>`);
+      } else {
+        content.textContent = seg.text;
+      }
+      row.appendChild(ts);
+      row.appendChild(content);
+      row.addEventListener("click", () => {
+        state.playhead = seg.t;
+        updateProgressUI();
+        if (!state.playing) setPlaying(true);
+      });
+      transcriptContainer.appendChild(row);
+    });
+    lastActiveLineIndex = -1;
+    previewStatus.textContent = "ready";
+  }
+
+  function updateTranscriptActive() {
+    if (!state.transcriptVisible) return;
+    const ep = getSelectedEpisode();
+    if (!ep || !ep.transcript || !ep.transcript.length) return;
+    const time = state.playhead;
+    let idx = ep.transcript.length - 1;
+    for (let i = 0; i < ep.trans

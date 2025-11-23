@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiny Kanban</title>
+    <style>
+        :root {
+            --todo-bg: #e3f2fd;
+            --doing-bg: #fff3e0;
+            --done-bg: #e8f5e9;
+            --todo-border: #2196f3;
+            --doing-border: #ff9800;
+            --done-border: #4caf50;
+            --priority-high: #f44336;
+            --priority-medium: #ff9800;
+            --priority-low: #4caf50;
+            --text-dark: #333;
+            --text-light: #fff;
+            --border-radius: 0px;
+            --shadow: none;
+            --transition: none;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #ffffff;
+            color: #000000;
+            padding: 20px;
+            min-height: 100vh;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #000000;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #333333;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .search-container {
+            position: relative;
+            flex-grow: 1;
+            max-width: 400px;
+        }
+
+        #search-input {
+            width: 100%;
+            padding: 12px 20px 12px 45px;
+            border: 1px solid #000000;
+            border-radius: 0px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        #search-input:focus {
+            outline: 2px solid #000000;
+            border-color: #000000;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #333333;
+        }
+
+        .add-card-btn {
+            background-color: #000000;
+            color: white;
+            border: 1px solid #000000;
+            padding: 12px 25px;
+            border-radius: 0px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: none;
+        }
+
+        .add-card-btn:hover {
+            background-color: #333333;
+        }
+
+        .kanban-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .column {
+            background-color: white;
+            border: 1px solid #000000;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 500px;
+        }
+
+        .column-header {
+            padding: 15px 20px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #000000;
+        }
+
+        .todo .column-header {
+            background-color: var(--todo-bg);
+        }
+
+        .doing .column-header {
+            background-color: var(--doing-bg);
+        }
+
+        .done .column-header {
+            background-color: var(--done-bg);
+        }
+
+        .card-count {
+            background-color: #f0f0f0;
+            padding: 2px 10px;
+            font-size: 0.9rem;
+        }
+
+        .cards-container {
+            padding: 20px;
+            flex-grow: 1;
+            overflow-y: auto;
+            min-height: 400px;
+        }
+
+        .card {
+            background-color: white;
+            border: 1px solid #cccccc;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: grab;
+            transition: var(--transition);
+            border-left: 4px solid;
+            position: relative;
+            min-height: 80px;
+        }
+
+        .card:hover {
+            border-color: #000000;
+        }
+
+        .card:active {
+            cursor: grabbing;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            word-break: break-word;
+        }
+
+        .priority-badge {
+            padding: 3px 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .priority-high {
+            background-color: var(--priority-high);
+            color: white;
+        }
+
+        .priority-medium {
+            background-color: var(--priority-medium);
+            color: white;
+        }
+
+        .priority-low {
+            background-color: var(--priority-low);
+            color: white;
+        }
+
+        .card-body {
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .assignee {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #333333;
+        }
+
+        .assignee-avatar {
+            width: 24px;
+            height: 24px;
+            background-color: #3498db;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            margin-right: 8px;
+            border: 1px solid #000000;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: var(--transition);
+            font-size: 1.2rem;
+        }
+
+        .delete-btn:hover {
+            opacity: 1;
+        }
+
+        .wip-limit {
+            text-align: center;
+            padding: 10px;
+            font-size: 0.9rem;
+            color: #333333;
+            background-color: #f0f0f0;
+            border-top: 1px solid #000000;
+        }
+
+        .wip-warning {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px 20px;
+            color: #95a5a6;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .kanban-board {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-container {
+                max-width: 100%;
+            }
+        }
+
+        /* Drag and drop styles */
+        .dragging {
+            opacity: 0.5;
+            transform: scale(0.98);
+        }
+
+        .drag-over {
+            background-color: #e3f2fd;
+        }
+
+        .drag-over-top {
+            border-top: 2px dashed #000000;
+        }
+
+        .drag-over-bottom {
+            border-bottom: 2px dashed #000000;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #ffffff;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #000000;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 0px;
+        }
+
+        .close {
+            color: #000000;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #000000;
+            border-radius: 0px;
+            font-size: 1rem;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: 1px solid #000000;
+            background-color: #000000;
+            color: white;
+            cursor: pointer;
+            border-radius: 0px;
+            font-size: 1rem;
+        }
+
+        .btn-cancel {
+            background-color: #f0f0f0;
+            color: #000000;
+        }
+
+        .btn:hover {
+            background-color: #333333;
+        }
+
+        .btn-cancel:hover {
+            background-color: #e0e0e0;
+        }
+
+        .confirmation-message {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 0px;
+            text-align: center;
+        }
+
+        .success-message {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #4caf50;
+        }
+
+        .error-message {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #f44336;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #000000;
+            color: #ffffff;
+            text-align: center;
+            border-radius: 0px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .context-menu {
+            position: absolute;
+            background-color: #ffffff;
+            border: 1px solid #000000;
+            border-radius: 0px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1001;
+            display: none;
+        }
+
+        .context-menu-item {
+            padding: 8px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .context-menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .context-menu-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .edit-form {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 0px;
+        }
+
+        .edit-form.active {
+            display: block;
+        }
+
+        .edit-form .form-group {
+            margin-bottom: 10px;
+        }
+
+        .edit-form .form-group input,
+        .edit-form .form-group select,
+        .edit-form .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #000000;
+            border-radius: 0px;
+            font-size: 0.9rem;
+        }
+
+        .edit-form .modal-buttons {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 id="app-title">Tiny Kanban</h1>
+            <p class="subtitle">Daily Standup Workflow</p>
+        </header>
+
+        <div class="controls">
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-input" placeholder="Search tasks..." autocomplete="off">
+            </div>
+            <button id="add-card-btn" class="add-card-btn">+ Add Task</button>
+        </div>
+
+        <div id="confirmation-message" class="confirmation-message"></div>
+
+        <div class="kanban-board" id="kanban-board">
+            <!-- Columns will be generated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Add Task Modal -->
+    <div id="add-task-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add New Task</h2>
+            <div class="form-group">
+                <label for="task-title">Title:</label>
+                <input type="text" id="task-title" required>
+            </div>
+            <div class="form-group">
+                <label for="task-description">Description:</label>
+                <textarea id="task-description" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="task-assignee">Assignee:</label>
+                <input type="text" id="task-assignee" value="Unassigned">
+            </div>
+            <div class="form-group">
+                <label for="task-priority">Priority:</label>
+                <select id="task-priority">
+                    <option value="high">High</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="low">Low</option>
+                </select>
+            </div>
+            <div class="modal-buttons">
+                <button id="cancel-add-btn" class="btn btn-cancel">Cancel</button>
+                <button id="save-task-btn" class="btn">Save Task</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Task Modal -->
+    <div id="edit-task-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Edit Task</h2>
+            <input type="hidden" id="edit-task-id">
+            <div class="form-group">
+                <label for="edit-task-title">Title:</label>
+                <input type="text" id="edit-task-title" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-task-description">Description:</label>
+                <textarea id="edit-task-description" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="edit-task-assignee">Assignee:</label>
+                <input type="text" id="edit-task-assignee">
+            </div>
+            <div class="form-group">
+                <label for="edit-task-priority">Priority:</label>
+                <select id="edit-task-priority">
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                </select>
+            </div>
+            <div class="modal-buttons">
+                <button id="cancel-edit-btn" class="btn btn-cancel">Cancel</button>
+                <button id="save-edit-btn" class="btn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div id="context-menu" class="context-menu"></div>
+
+    <script>
+        // Sample data
+        const initialData = [
+            {
+                id: '1',
+                title: 'Design Homepage',
+                description: 'Create wireframes and mockups for homepage layout',
+                status: 'todo',
+                priority: 'high',
+                assignee: 'Alex'
+            },
+            {
+                id: '2',
+                title: 'Implement Auth System',
+                description: 'Set up authentication with JWT tokens',
+                status: 'doing',
+                priority: 'medium',
+                assignee: 'Sam'
+            },
+            {
+                id: '3',
+                title: 'Fix Mobile Responsiveness',
+                description: 'Ensure all components work on mobile devices',
+                status: 'doing',
+                priority: 'high',
+                assignee: 'Taylor'
+            },
+            {
+                id: '4',
+                title: 'Write API Documentation',
+                description: 'Document all endpoints with examples',
+                status: 'done',
+                priority: 'low',
+                assignee: 'Jordan'
+            },
+            {
+                id: '5',
+                title: 'Setup CI/CD Pipeline',
+                description: 'Configure automated testing and deployment',
+                status: 'todo',
+                priority: 'medium',
+                assignee: 'Casey'
+            }
+        ];
+
+        // DOM Elements
+        const kanbanBoard = document.getElementById('kanban-board');
+        const searchInput = document.getElementById('search-input');
+        const addCardBtn = document.getElementById('add-card-btn');
+        const addTaskModal = document.getElementById('add-task-modal');
+        const editTaskModal = document.getElementById('edit-task-modal');
+        const closeModalButtons = document.querySelectorAll('.close');
+        const cancelAddBtn = document.getElementById('cancel-add-btn');
+        const saveTaskBtn = document.getElementById('save-task-btn');
+        const cancelEditBtn = document.getElementById('cancel-edit-btn');
+        const saveEditBtn = document.getElementById('save-edit-btn');
+        const confirmationMessage = document.getElementById('confirmation-message');
+        const contextMenu = document.getElementById('context-menu');
+
+        // State
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || initialData;
+        let draggedElement = null;
+        let contextMenuTarget = null;
+
+        // Column configuration
+        const columns = [
+            { id: 'todo', title: 'To Do', wipLimit: 5 },
+            { id: 'doing', title: 'Doing', wipLimit: 3 },
+            { id: 'done', title: 'Done', wipLimit: null }
+        ];
+
+        // Initialize the app
+        function init() {
+            renderKanbanBoard();
+            setupEventListeners();
+            updateWipLimits();
+            setupContextMenu();
+        }
+
+        // Render the entire Kanban board
+        function renderKanbanBoard() {
+            kanbanBoard.innerHTML = '';
+            
+            columns.forEach(column => {
+                const columnEl = createColumn(column);
+                kanbanBoard.appendChild(columnEl);
+            });
+        }
+
+        // Create a column element
+        function createColumn(columnConfig) {
+            const column = document.createElement('div');
+            column.className = `column ${columnConfig.id}`;
+            column.id = `column-${columnConfig.id}`;
+            column.dataset.status = columnConfig.id;
+            
+            const header = document.createElement('div');
+            header.className = 'column-header';
+            header.innerHTML = `
+                <span>${columnConfig.title}</span>
+                <span class="card-count">${getTasksByStatus(columnConfig.id).length}</span>
+            `;
+            
+            const wipLimitEl = document.createElement('div');
+            wipLimitEl.className = 'wip-limit';
+            if (columnConfig.wipLimit) {
+                wipLimitEl.textContent = `WIP Limit: ${columnConfig.wipLimit}`;
+            }
+            
+            const cardsContainer = document.createElement('div');
+            cardsContainer.className = 'cards-container';
+            cardsContainer.id = `cards-container-${columnConfig.id}`;
+            
+            // Add drag events to container
+            cardsContainer.addEventListener('dragover', handleDragOver);
+            cardsContainer.addEventListener('dragenter', handleDragEnter);
+            cardsContainer.addEventListener('dragleave', handleDragLeave);
+            cardsContainer.addEventListener('drop', handleDrop);
+            
+            column.appendChild(header);
+            column.appendChild(wipLimitEl);
+            column.appendChild(cardsContainer);
+            
+            // Add existing tasks to this column
+            getTasksByStatus(columnConfig.id).forEach(task => {
+                const card = createTaskCard(task);
+                cardsContainer.appendChild(card);
+            });
+            
+            return column;
+        }
+
+        // Get tasks by status
+        function getTasksByStatus(status) {
+            return tasks.filter(task => task.status === status);
+        }
+
+        // Create a task card element
+        function createTaskCard(task) {
+            const card = document.createElement('div');
+            card.className = `card priority-${task.priority}`;
+            card.draggable = true;
+            card.dataset.id = task.id;
+            card.dataset.status = task.status;
+            
+            // Generate assignee avatar initials
+            const initials = task.assignee.split(' ').map(n => n[0]).join('').toUpperCase();
+            
+            card.innerHTML = `
+                <div class="card-header">
+                    <div class="card-title">${task.title}</div>
+                    <div class="priority-badge priority-${task.priority}">${task.priority}</div>
+                </div>
+                <div class="card-body">${task.description}</div>
+                <div class="assignee">
+                    <div class="assignee-avatar">${initials}</div>
+                    ${task.assignee}
+                </div>
+                <button class="delete-btn" data-id="${task.id}">×</button>
+            `;
+            
+            // Add drag events
+            card.addEventListener('dragstart', handleDragStart);
+            card.addEventListener('dragend', handleDragEnd);
+            card.addEventListener('contextmenu', handleCardContextMenu);
+            
+            return card;
+        }
+
+        // Event Listeners
+        function setupEventListeners() {
+            // Search functionality
+            searchInput.addEventListener('input', handleSearch);
+            
+            // Add new card
+            addCardBtn.addEventListener('click', showAddTaskModal);
+            
+            // Modal close buttons
+            closeModalButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    addTaskModal.style.display = 'none';
+                    editTaskModal.style.display = 'none';
+                    contextMenu.style.display = 'none';
+                });
+            });
+            
+            // Cancel buttons
+            cancelAddBtn.addEventListener('click', () => {
+                addTaskModal.style.display = 'none';
+            });
+            
+            cancelEditBtn.addEventListener('click', () => {
+                editTaskModal.style.display = 'none';
+            });
+            
+            // Save buttons
+            saveTaskBtn.addEventListener('click', saveNewTask);
+            saveEditBtn.addEventListener('click', saveEditedTask);
+            
+            // Close modals when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === addTaskModal) {
+                    addTaskModal.style.display = 'none';
+                }
+                if (e.target === editTaskModal) {
+                    editTaskModal.style.display = 'none';
+                }
+                if (e.target === contextMenu) {
+                    contextMenu.style.display = 'none';
+                }
+            });
+            
+            // Delete buttons
+            kanbanBoard.addEventListener('click', (e) => {
+                if (e.target.classList.contains('delete-btn') || 
+                    e.target.closest('.delete-btn')) {
+                    const taskId = e.target.closest('.delete-btn').dataset.id;
+                    deleteTask(taskId);
+                }
+            });
+            
+            // Add task via enter key in modal
+            document.getElementById('task-title').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    saveNewTask();
+                }
+            });
+        }
+
+        // Setup context menu
+        function setupContextMenu() {
+            document.addEventListener('contextmenu', (e) => {
+                if (e.target.classList.contains('card')) {
+                    e.preventDefault();
+                    contextMenuTarget = e.target;
+                    contextMenu.style.display = 'block';
+                    contextMenu.style.left = e.pageX + 'px';
+                    contextMenu.style.top = e.pageY + 'px';
+                    
+                    // Clear previous items
+                    contextMenu.innerHTML = '';
+                    
+                    // Add menu items
+                    const editItem = document.createElement('div');
+                    editItem.className = 'context-menu-item';
+                    editItem.textContent = 'Edit Task';
+                    editItem.addEventListener('click', () => {
+                        openEditTaskModal(contextMenuTarget.dataset.id);
+                        contextMenu.style.display = 'none';
+                    });
+                    contextMenu.appendChild(editItem);
+                    
+                    const deleteItem = document.createElement('div');
+                    deleteItem.className = 'context-menu-item';
+                    deleteItem.textContent = 'Delete Task';
+                    deleteItem.addEventListener('click', () => {
+                        deleteTask(contextMenuTarget.dataset.id);
+                        contextMenu.style.display = 'none';
+                    });
+                    contextMenu.appendChild(deleteItem);
+                } else {
+                    contextMenu.style.display = 'none';
+                }
+            });
+            
+            document.addEventListener('click', () => {
+                contextMenu.style.display = 'none';
+            });
+        }
+
+        // Handle drag start
+        function handleDragStart(e) {
+            draggedElement = this;
+            setTimeout(() => this.classList.add('dragging'), 0);
+            e.dataTransfer.setData('text/plain', this.dataset.id);
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        // Handle drag end
+        function handleDragEnd() {
+            this.classList.remove('dragging');
+            draggedElement = null;
+        }
+
+        // Handle drag over
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        // Handle drag enter
+        function handleDragEnter(e) {
+            e.preventDefault();
+            const container = e.currentTarget;
+            const rect = container.getBoundingClientRect();
+            const offset = rect.height / 3;
+            
+            if (e.clientY - rect.top < offset) {
+                container.classList.add('drag-over-top');
+            } else if (rect.bottom - e.clientY < offset) {
+                container.classList.add('drag-over-bottom');
+            } else {
+                container.classList.add('drag-over');
+            }
+        }
+
+        // Handle drag leave
+        function handleDragLeave(e) {
+            const container = e.currentTarget;
+            container.classList.remove('drag-over', 'drag-over-top', 'drag-over-bottom');
+        }
+
+        // Handle drop
+        function handleDrop(e) {
+            e.preventDefault();
+            const container = e.currentTarget;
+            container.classList.remove('drag-over', 'drag-over-top', 'drag-over-bottom');
+            
+            const taskId = e.dataTransfer.getData('text/plain');
+            const targetColumn = container.parentElement;
+            const targetStatus = targetColumn.dataset.status || targetColumn.id.replace('column-', '');
+            
+            // Check WIP limit
+            const currentTasks = getTasksByStatus(targetStatus);
+            const wipLimit = columns.find(c => c.id === targetStatus)?.wipLimit;
+            
+            if (wipLimit && currentTasks.length >= wipLimit) {
+                showMessage(`Cannot move task: WIP limit of ${wipLimit} reached for "${targetStatus}"`, 'error');
+                return;
+            }
+            
+            // Update task status
+            updateTaskStatus(taskId, targetStatus);
+            showMessage('Task moved successfully!', 'success');
+        }
+
+        // Handle search
+        function handleSearch() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const cards = document.querySelectorAll('.card');
+            
+            cards.forEach(card => {
+                const title = card.querySelector('.card-title').textContent.toLowerCase();
+                const description = card.querySelector('.card-body').textContent.toLowerCase();
+                
+                if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Show add task modal
+        function showAddTaskModal() {
+            // Reset form
+            document.getElementById('task-title').value = '';
+            document.getElementById('task-description').value = '';
+            document.getElementById('task-assignee').value = 'Unassigned';
+            document.getElementById('task-priority').value = 'medium';
+            
+            addTaskModal.style.display = 'block';
+            document.getElementById('task-title').focus();
+        }
+
+        // Save new task from modal
+        function saveNewTask() {
+            const title = document.getElementById('task-title').value.trim();
+            const description = document.getElementById('task-description').value.trim();
+            const assignee = document.getElementById('task-assignee').value.trim() || 'Unassigned';
+            const priority = document.getElementById('task-priority').value;
+            
+            if (!title || !description) {
+                showMessage('Title and description are required!', 'error');
+                return;
+            }
+            
+            const newTask = {
+                id: Date.now().toString(),
+                title,
+                description,
+                status: 'todo',
+                priority,
+                assignee
+            };
+            
+            addTask(newTask);
+            addTaskModal.style.display = 'none';
+            showMessage('Task added successfully!', 'success');
+        }
+
+        // Open edit task modal
+        function openEditTaskModal(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            document.getElementById('edit-task-id').value = task.id;
+            document.getElementById('edit-task-title').value = task.title;
+            document.getElementById('edit-task-description').value = task.description;
+            document.getElementById('edit-task-assignee').value = task.assignee;
+            document.getElementById('edit-task-priority').value = task.priority;
+            
+            editTaskModal.style.display = 'block';
+        }
+
+        // Save edited task
+        function saveEditedTask() {
+            const taskId = document.getElementById('edit-task-id').value;
+            const title = document.getElementById('edit-task-title').value.trim();
+            const description = document.getElementById('edit-task-description').value.trim();
+            const assignee = document.getElementById('edit-task-assignee').value.trim() || 'Unassigned';
+            const priority = document.getElementById('edit-task-priority').value;
+            
+            if (!title || !description) {
+                showMessage('Title and description are required!', 'error');
+                return;
+            }
+            
+            const taskIndex = tasks.findIndex(t => t.id === taskId);
+            if (taskIndex !== -1) {
+                tasks[taskIndex] = {
+                    ...tasks[taskIndex],
+                    title,
+                    description,
+                    assignee,
+                    priority
+                };
+                saveTasks();
+                renderKanbanBoard();
+                updateWipLimits();
+                editTaskModal.style.display = 'none';
+                showMessage('Task updated successfully!', 'success');
+            }
+        }
+
+        // Add a new task
+        function addTask(task) {
+            tasks.push(task);
+            saveTasks();
+            renderKanbanBoard();
+            updateWipLimits();
+        }
+
+        // Update task status
+        function updateTaskStatus(taskId, newStatus) {
+            const taskIndex = tasks.findIndex(t => t.id === taskId);
+            if (taskIndex !== -1) {
+                tasks[taskIndex].status = newStatus;
+                saveTasks();
+                renderKanbanBoard();
+                updateWipLimits();
+            }
+        }
+
+        // Delete a task
+        function deleteTask(taskId) {
+            if (confirm('Are you sure you want to delete this task?')) {
+                tasks = tasks.filter(task => task.id !== taskId);
+                saveTasks();
+                renderKanbanBoard();
+                updateWipLimits();
+                showMessage('Task deleted successfully!', 'success');
+            }
+        }
+
+        // Save tasks to localStorage
+        function saveTasks() {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        // Update WIP limit indicators
+        function updateWipLimits() {
+            columns.forEach(column => {
+                const wipLimit = column.wipLimit;
+                if (!wipLimit) return;
+                
+                const count = getTasksByStatus(column.id).length;
+                const wipElement = document.querySelector(`#column-${column.id} .wip-limit`);
+                
+                if (wipElement) {
+                    if (count > wipLimit) {
+                        wipElement.classList.add('wip-warning');
+                        wipElement.textContent = `⚠️ WIP Limit Exceeded (${count}/${wipLimit})`;
+                    } else {
+                        wipElement.classList.remove('wip-warning');
+                        wipElement.textContent = `WIP Limit: ${wipLimit}`;
+                    }
+                }
+                
+                // Update card count
+                const countElement = document.querySelector(`#column-${column.id} .card-count`);
+                if (countElement) {
+                    countElement.textContent = count;
+                }
+            });
+        }
+
+        // Show message
+        function showMessage(message, type) {
+            confirmationMessage.textContent = message;
+            confirmationMessage.className = `confirmation-message ${type}-message`;
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                confirmationMessage.textContent = '';
+                confirmationMessage.className = 'confirmation-message';
+            }, 3000);
+        }
+
+        // Handle card context menu
+        function handleCardContextMenu(e) {
+            e.preventDefault();
+            contextMenuTarget = this;
+            contextMenu.style.display = 'block';
+            contextMenu.style.left = e.pageX + 'px';
+            contextMenu.style.top = e.pageY + 'px';
+            
+            // Clear previous items
+            contextMenu.innerHTML = '';
+            
+            // Add menu items
+            const editItem = document.createElement('div');
+            editItem.className = 'context-menu-item';
+            editItem.textContent = 'Edit Task';
+            editItem.addEventListener('click', () => {
+                openEditTaskModal(contextMenuTarget.dataset.id);
+                contextMenu.style.display = 'none';
+            });
+            contextMenu.appendChild(editItem);
+            
+            const deleteItem = document.createElement('div');
+            deleteItem.className = 'context-menu-item';
+            deleteItem.textContent = 'Delete Task';
+            deleteItem.addEventListener('click', () => {
+                deleteTask(contextMenuTarget.dataset.id);
+                contextMenu.style.display = 'none';
+            });
+            contextMenu.appendChild(deleteItem);
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

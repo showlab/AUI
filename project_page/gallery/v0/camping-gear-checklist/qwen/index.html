@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camping Gear Checklist</title>
+    <style>
+        :root {
+            --primary-color: #2e7d32;
+            --secondary-color: #4caf50;
+            --accent-color: #8bc34a;
+            --light-color: #f1f8e9;
+            --dark-color: #1b5e20;
+            --text-color: #333;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a237e 0%, #311b92 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--box-shadow);
+        }
+
+        .card-title {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent-color);
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        button {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button:hover {
+            background: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-add {
+            background: var(--accent-color);
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+        }
+
+        .btn-save {
+            background: var(--dark-color);
+            margin-top: 10px;
+        }
+
+        .gear-list {
+            list-style: none;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .gear-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: var(--light-color);
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--secondary-color);
+            transition: transform 0.2s;
+        }
+
+        .gear-item:hover {
+            transform: translateX(5px);
+        }
+
+        .gear-item.completed {
+            opacity: 0.7;
+            border-left-color: #9e9e9e;
+        }
+
+        .gear-item.completed .item-name {
+            text-decoration: line-through;
+        }
+
+        .item-checkbox {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .item-name {
+            flex-grow: 1;
+            font-size: 1.1rem;
+        }
+
+        .item-weight {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-right: 15px;
+        }
+
+        .delete-btn {
+            background: #f44336;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            background: var(--light-color);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-top: 20px;
+            font-weight: 600;
+        }
+
+        .weight-display {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+
+        .save-section {
+            margin-top: 30px;
+        }
+
+        .saved-lists {
+            margin-top: 20px;
+        }
+
+        .saved-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: var(--light-color);
+            margin-bottom: 10px;
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .list-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .load-btn {
+            background: var(--secondary-color);
+            padding: 8px 12px;
+            font-size: 0.9rem;
+        }
+
+        .delete-list-btn {
+            background: #f44336;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #757575;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            margin-top: 30px;
+            opacity: 0.8;
+        }
+
+        /* Scrollbar styling */
+        .gear-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .gear-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .gear-list::-webkit-scrollbar-thumb {
+            background: var(--secondary-color);
+            border-radius: 4px;
+        }
+
+        .gear-list::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 id="app-title">🏕️ Camping Gear Checklist</h1>
+            <p class="subtitle">Plan your camping trip with our gear tracking tool</p>
+        </header>
+
+        <main class="app-container">
+            <section class="card">
+                <h2 class="card-title">Add New Gear Item</h2>
+                <div class="form-group">
+                    <label for="item-name">Gear Item Name</label>
+                    <input type="text" id="item-name" placeholder="e.g., Tent, Sleeping Bag">
+                </div>
+                
+                <div class="form-group">
+                    <label for="item-weight">Weight (lbs)</label>
+                    <input type="number" id="item-weight" placeholder="Enter weight" min="0" step="0.1">
+                </div>
+                
+                <div class="form-group">
+                    <label for="item-category">Category</label>
+                    <select id="item-category">
+                        <option value="shelter">Shelter</option>
+                        <option value="sleeping">Sleeping Gear</option>
+                        <option value="cooking">Cooking Equipment</option>
+                        <option value="lighting">Lighting</option>
+                        <option value="clothing">Clothing</option>
+                        <option value="tools">Tools & Misc</option>
+                    </select>
+                </div>
+                
+                <button id="add-item-btn" class="btn-add">➕ Add to Checklist</button>
+            </section>
+
+            <section class="card">
+                <h2 class="card-title">Your Gear List</h2>
+                <ul id="gear-list" class="gear-list">
+                    <!-- Items will be added here dynamically -->
+                    <li class="empty-state">
+                        <div>🎒</div>
+                        <p>No gear items added yet</p>
+                        <p>Add some items to get started!</p>
+                    </li>
+                </ul>
+                
+                <div class="stats">
+                    <span>Total Weight:</span>
+                    <span id="total-weight" class="weight-display">0.0 lbs</span>
+                </div>
+                
+                <div class="save-section">
+                    <button id="save-list-btn" class="btn-save">💾 Save Current List</button>
+                    
+                    <div class="saved-lists">
+                        <h3>Saved Lists</h3>
+                        <div id="saved-lists-container">
+                            <!-- Saved lists will appear here -->
+                            <p class="empty-state">No saved lists yet</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Camping Gear Checklist &copy; 2023 | Plan your adventures responsibly</p>
+        </footer>
+    </div>
+
+    <script>
+        // App state
+        const state = {
+            gearItems: [],
+            savedLists: JSON.parse(localStorage.getItem('campingLists')) || [],
+            currentListName: ''
+        };
+
+        // DOM Elements
+        const itemNameInput = document.getElementById('item-name');
+        const itemWeightInput = document.getElementById('item-weight');
+        const itemCategorySelect = document.getElementById('item-category');
+        const addItemBtn = document.getElementById('add-item-btn');
+        const gearListElement = document.getElementById('gear-list');
+        const totalWeightElement = document.getElementById('total-weight');
+        const saveListBtn = document.getElementById('save-list-btn');
+        const savedListsContainer = document.getElementById('saved-lists-container');
+
+        // Initialize the app
+        function init() {
+            renderGearList();
+            updateTotalWeight();
+            renderSavedLists();
+            
+            // Event listeners
+            addItemBtn.addEventListener('click', addItem);
+            saveListBtn.addEventListener('click', saveCurrentList);
+            
+            // Allow adding items with Enter key
+            itemNameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addItem();
+            });
+            
+            itemWeightInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addItem();
+            });
+        }
+
+        // Add new gear item
+        function addItem() {
+            const name = itemNameInput.value.trim();
+            const weight = parseFloat(itemWeightInput.value);
+            const category = itemCategorySelect.value;
+
+            if (!name) {
+                alert('Please enter a gear item name');
+                return;
+            }
+
+            if (isNaN(weight) || weight <= 0) {
+                alert('Please enter a valid weight');
+                return;
+            }
+
+            const newItem = {
+                id: Date.now(),
+                name,
+                weight,
+                category,
+                completed: false
+            };
+
+            state.gearItems.push(newItem);
+            renderGearList();
+            updateTotalWeight();
+            
+            // Clear inputs
+            itemNameInput.value = '';
+            itemWeightInput.value = '';
+            itemCategorySelect.value = 'shelter';
+            itemNameInput.focus();
+        }
+
+        // Toggle item completion status
+        function toggleItemCompletion(id) {
+            const item = state.gearItems.find(item => item.id === id);
+            if (item) {
+                item.completed = !item.completed;
+                renderGearList();
+                updateTotalWeight();
+            }
+        }
+
+        // Delete an item
+        function deleteItem(id) {
+            state.gearItems = state.gearItems.filter(item => item.id !== id);
+            renderGearList();
+            updateTotalWeight();
+        }
+
+        // Render the gear list
+        function renderGearList() {
+            if (state.gearItems.length === 0) {
+                gearListElement.innerHTML = `
+                    <li class="empty-state">
+                        <div>🎒</div>
+                        <p>No gear items added yet</p>
+                        <p>Add some items to get started!</p>
+                    </li>
+                `;
+                return;
+            }
+
+            gearListElement.innerHTML = '';
+            
+            state.gearItems.forEach(item => {
+                const li = document.createElement('li');
+                li.className = `gear-item ${item.completed ? 'completed' : ''}`;
+                li.innerHTML = `
+                    <input type="checkbox" class="item-checkbox" ${item.completed ? 'checked' : ''} 
+                           onchange="toggleItemCompletion(${item.id})" id="item-${item.id}">
+                    <label for="item-${item.id}" class="item-name">${item.name}</label>
+                    <span class="item-weight">${item.weight.toFixed(1)} lbs</span>
+                    <button class="delete-btn" onclick="deleteItem(${item.id})">🗑️</button>
+                `;
+                gearListElement.appendChild(li);
+            });
+        }
+
+        // Update total weight display
+        function updateTotalWeight() {
+            const totalWeight = state.gearItems.reduce((sum, item) => sum + item.weight, 0);
+            totalWeightElement.textContent = `${totalWeight.toFixed(1)} lbs`;
+        }
+
+        // Save current list
+        function saveCurrentList() {
+            if (state.gearItems.length === 0) {
+                alert('Cannot save an empty list!');
+                return;
+            }
+
+            const listName = prompt('Enter a name for this list:', `Trip ${state.savedLists.length + 1}`);
+            
+            if (!listName) return;
+
+            const newList = {
+                id: Date.now(),
+                name: listName,
+                items: [...state.gearItems],
+                date: new Date().toLocaleDateString()
+            };
+
+            state.savedLists.push(newList);
+            localStorage.setItem('campingLists', JSON.stringify(state.savedLists));
+            renderSavedLists();
+            alert(`List "${listName}" saved successfully!`);
+        }
+
+        // Load a saved list
+        function loadSavedList(id) {
+            const list = state.savedLists.find(list => list.id === id);
+            if (list) {
+                state.gearItems = [...list.items];
+                renderGearList();
+                updateTotalWeight();
+                alert(`Loaded list: ${list.name}`);
+            }
+        }
+
+        // Delete a saved list
+        function deleteSavedList(id) {
+            if (confirm('Are you sure you want to delete this list?')) {
+                state.savedLists = state.savedLists.filter(list => list.id !== id);
+                localStorage.setItem('campingLists', JSON.stringify(state.savedLists));
+                renderSavedLists();
+            }
+        }
+
+        // Render saved lists
+        function renderSavedLists() {
+            if (state.savedLists.length === 0) {
+                savedListsContainer.innerHTML = '<p class="empty-state">No saved lists yet</p>';
+                return;
+            }
+
+            savedListsContainer.innerHTML = '';
+            
+            state.savedLists.forEach(list => {
+                const div = document.createElement('div');
+                div.className = 'saved-list-item';
+                div.innerHTML = `
+                    <div>
+                        <strong>${list.name}</strong> (${list.date}) - ${list.items.length} items
+                    </div>
+                    <div class="list-actions">
+                        <button class="load-btn" onclick="loadSavedList(${list.id})">Load</button>
+                        <button class="delete-list-btn" onclick="deleteSavedList(${list.id})">Delete</button>
+                    </div>
+                `;
+                savedListsContainer.appendChild(div);
+            });
+        }
+
+        // Initialize the app when the page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

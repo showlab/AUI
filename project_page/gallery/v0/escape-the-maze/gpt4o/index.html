@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escape the Maze</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: #f4f4f4;
+    }
+
+    h1 {
+      margin: 0;
+      padding: 10px;
+      text-align: center;
+    }
+
+    #game-container {
+      position: relative;
+      width: 600px;
+      height: 600px;
+      background-color: #fff;
+      border: 2px solid #333;
+      display: flex;
+      flex-wrap: wrap;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .cell {
+      width: 60px;
+      height: 60px;
+      box-sizing: border-box;
+      border: 1px solid #ddd;
+    }
+
+    .wall {
+      background-color: #333;
+    }
+
+    .start {
+      background-color: #4caf50;
+    }
+
+    .finish {
+      background-color: #f44336;
+    }
+
+    #player {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      background-color: #2196f3;
+      z-index: 10;
+      transition: transform 0.1s;
+    }
+
+    #info-panel {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    #timer {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    #replay-button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #2196f3;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #replay-button:hover {
+      background-color: #1976d2;
+    }
+  </style>
+</head>
+<body>
+  <h1>Escape the Maze</h1>
+  <div id="game-container"></div>
+  <div id="player"></div>
+  <div id="info-panel">
+    <div id="timer">Time: 0s</div>
+    <button id="replay-button">Replay</button>
+  </div>
+
+  <script>
+    const gameContainer = document.getElementById('game-container');
+    const player = document.getElementById('player');
+    const timerDisplay = document.getElementById('timer');
+    const replayButton = document.getElementById('replay-button');
+
+    const gridSize = 10; // 10x10 grid
+    const cellSize = 60; // Each cell is 60px x 60px
+    let maze = [];
+    let playerPosition = { x: 0, y: 0 };
+    let finishPosition = { x: gridSize - 1, y: gridSize - 1 };
+    let timer = 0;
+    let timerInterval;
+
+    // Generate a random maze
+    function generateMaze() {
+      maze = Array.from({ length: gridSize }, () =>
+        Array.from({ length: gridSize }, () => (Math.random() > 0.7 ? 'wall' : 'empty'))
+      );
+      maze[0][0] = 'start'; // Start position
+      maze[gridSize - 1][gridSize - 1] = 'finish'; // Finish position
+    }
+
+    // Render the maze
+    function renderMaze() {
+      gameContainer.innerHTML = '';
+      maze.forEach((row, y) => {
+        row.forEach((cell, x) => {
+          const cellDiv = document.createElement('div');
+          cellDiv.classList.add('cell');
+          if (cell === 'wall') cellDiv.classList.add('wall');
+          if (cell === 'start') cellDiv.classList.add('start');
+          if (cell === 'finish') cellDiv.classList.add('finish');
+          gameContainer.appendChild(cellDiv);
+        });
+      });
+    }
+
+    // Move the player
+    function movePlayer(dx, dy) {
+      const newX = playerPosition.x + dx;
+      const newY = playerPosition.y + dy;
+
+      // Check boundaries
+      if (newX < 0 || newX >= gridSize || newY < 0 || newY >= gridSize) return;
+
+      // Check for walls
+      if (maze[newY][newX] === 'wall') return;
+
+      // Update player position
+      playerPosition.x = newX;
+      playerPosition.y = newY;
+
+      // Update player element position
+      player.style.transform = `translate(${newX * cellSize}px, ${newY * cellSize}px)`;
+
+      // Check if player reached the finish
+      if (newX === finishPosition.x && newY === finishPosition.y) {
+        clearInterval(timerInterval);
+        alert(`You escaped the maze in ${timer} seconds!`);
+      }
+    }
+
+    // Start the timer
+    function startTimer() {
+      timer = 0;
+      timerDisplay.textContent = `Time: ${timer}s`;
+      timerInterval = setInterval(() => {
+        timer++;
+        timerDisplay.textContent = `Time: ${timer}s`;
+      }, 1000);
+    }
+
+    // Handle keyboard input
+    function handleKeyDown(event) {
+      switch (event.key) {
+        case 'ArrowUp':
+          movePlayer(0, -1);
+          break;
+        case 'ArrowDown':
+          movePlayer(0, 1);
+          break;
+        case 'ArrowLeft':
+          movePlayer(-1, 0);
+          break;
+        case 'ArrowRight':
+          movePlayer(1, 0);
+          break;
+      }
+    }
+
+    // Initialize the game
+    function initGame() {
+      generateMaze();
+      renderMaze();
+      playerPosition = { x: 0, y: 0 };
+      player.style.transform = `translate(0, 0)`;
+      startTimer();
+    }
+
+    // Replay button functionality
+    replayButton.addEventListener('click', () => {
+      clearInterval(timerInterval);
+      initGame();
+    });
+
+    // Start the game on page load
+    window.addEventListener('load', initGame);
+
+    // Listen for keyboard input
+    window.addEventListener('keydown', handleKeyDown);
+  </script>
+</body>
+</html>

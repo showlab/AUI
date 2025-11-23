@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8" />
+  <title>Tea Dunkability Lab</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Simulate tea dunkability for classic biscuits with sliders, animated teacup, crumb graph, and keyboard shortcuts." />
+  <style>
+    :root {
+      --bg: #0d1117;
+      --bg-2: radial-gradient(1200px 700px at 20% 0%, rgba(86, 54, 173, 0.2), transparent 60%),
+               radial-gradient(1200px 700px at 80% 100%, rgba(25, 113, 194, 0.18), transparent 60%),
+               #0d1117;
+      --text: #e6edf3;
+      --muted: #9aa7b2;
+      --accent: #7aa2ff;
+      --accent-2: #b17bfd;
+      --danger: #ff6b6b;
+      --good: #2ecc71;
+      --warning: #ffb020;
+      --card-bg: rgba(255,255,255,0.06);
+      --card-stroke: rgba(255,255,255,0.15);
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --glass-blur: saturate(180%) blur(16px);
+
+      --tea-top: #b5752c;
+      --tea-mid: #8a4b16;
+      --tea-deep: #5c2e0a;
+      --steam-opacity: 0.75;
+      --steam-scale: 1;
+      --steam-speed: 1;
+
+      --control-height: 44px;
+      --radius: 16px;
+    }
+
+    [data-theme="light"] {
+      --bg: #f6f8fa;
+      --bg-2: radial-gradient(1200px 700px at 15% 0%, rgba(173, 191, 255, 0.35), transparent 60%),
+              radial-gradient(1200px 700px at 85% 100%, rgba(194, 227, 255, 0.35), transparent 60%),
+              #f6f8fa;
+      --text: #0b1722;
+      --muted: #4a5b6a;
+      --accent: #2557e0;
+      --accent-2: #7a3deb;
+      --danger: #d53b3b;
+      --good: #1a9b54;
+      --warning: #c27b00;
+      --card-bg: rgba(255,255,255,0.7);
+      --card-stroke: rgba(10,10,10,0.12);
+      --shadow: 0 8px 22px rgba(0,0,0,0.12);
+      --steam-opacity: 0.7;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      background: var(--bg-2);
+      line-height: 1.4;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 24px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    header h1 .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 0 16px rgba(122,162,255,0.7);
+      display: inline-block;
+    }
+
+    /* Dark mode toggle (glass) */
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-stroke);
+      border-radius: 999px;
+      backdrop-filter: var(--glass-blur);
+      box-shadow: var(--shadow);
+      user-select: none;
+    }
+    .toggle input { display: none; }
+    .toggle .knob {
+      width: 52px; height: 28px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02));
+      position: relative;
+      border: 1px solid var(--card-stroke);
+    }
+    .toggle .knob::after {
+      content: "";
+      position: absolute;
+      top: 50%; left: 4px;
+      width: 20px; height: 20px;
+      transform: translate(0, -50%);
+      border-radius: 50%;
+      background: linear-gradient(135deg, #fff, rgba(255,255,255,0.65));
+      box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+      transition: transform 0.25s ease;
+    }
+    .toggle input:checked + .knob::after {
+      transform: translate(24px, -50%);
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    }
+    .toggle label {
+      font-size: 14px;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    main {
+      padding: 12px 24px 24px;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      grid-template-areas:
+        "sim controls"
+        "sim graph";
+      grid-auto-rows: minmax(280px, auto);
+      gap: 18px;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-stroke);
+      border-radius: var(--radius);
+      backdrop-filter: var(--glass-blur);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .sim { grid-area: sim; display: flex; flex-direction: column; gap: 12px; }
+    .controls { grid-area: controls; }
+    .graph { grid-area: graph; }
+
+    /* Teacup Scene */
+    .teacup-scene {
+      position: relative;
+      min-height: 360px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border-radius: calc(var(--radius) - 6px);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.05));
+    }
+
+    .teacup {
+      position: relative;
+      width: 280px;
+      height: 200px;
+      animation: cupFloat 6s ease-in-out infinite;
+    }
+    @keyframes cupFloat {
+      0% { transform: translateY(0) }
+      50% { transform: translateY(-6px) }
+      100% { transform: translateY(0) }
+    }
+
+    .cup-body {
+      position: absolute;
+      bottom: 10px;
+      width: 100%;
+      height: 70%;
+      background: linear-gradient(180deg, #f2f5f7, #dfe6eb);
+      border-bottom-left-radius: 22px;
+      border-bottom-right-radius: 22px;
+      border-top-left-radius: 22px;
+      border-top-right-radius: 22px;
+      border: 2px solid rgba(255,255,255,0.6);
+      box-shadow: inset 0 -12px 24px rgba(0,0,0,0.08), inset 0 2px 6px rgba(255,255,255,0.6);
+      overflow: hidden;
+    }
+    [data-theme="light"] .cup-body {
+      background: linear-gradient(180deg, #ffffff, #eff4f8);
+      border-color: rgba(0,0,0,0.06);
+    }
+
+    .cup-body::before {
+      /* Rim */
+      content: "";
+      position: absolute;
+      top: -10px; left: 50%;
+      width: 88%;
+      height: 20px;
+      transform: translateX(-50%);
+      background: radial-gradient(closest-side, rgba(255,255,255,0.9), rgba(255,255,255,0.2), transparent 65%);
+      border-radius: 50%;
+      filter: blur(0.2px);
+    }
+
+    .tea {
+      position: absolute;
+      top: 16%;
+      left: 50%;
+      width: 82%;
+      height: 70%;
+      transform: translateX(-50%);
+      background: radial-gradient(60% 40% at 50% 8%, rgba(255,255,255,0.35), transparent 50%),
+                  linear-gradient(180deg, var(--tea-top), var(--tea-mid) 55%, var(--tea-deep));
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
+      border-top-left-radius: 50%;
+      border-top-right-radius: 50%;
+      box-shadow: inset 0 -12px 24px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+
+    .tea::after {
+      /* subtle ripple */
+      content: "";
+      position: absolute; left: 50%; top: 8%;
+      width: 60%; height: 24px;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      background: radial-gradient(closest-side, rgba(255,255,255,0.35), rgba(255,255,255,0.05), transparent 70%);
+      opacity: 0.35;
+      animation: ripple 4s ease-in-out infinite;
+    }
+    @keyframes ripple {
+      0% { transform: translateX(-50%) scale(0.95); opacity: 0.35; }
+      60% { transform: translateX(-50%) scale(1); opacity: 0.12; }
+      100% { transform: translateX(-50%) scale(0.95); opacity: 0.35; }
+    }
+
+    .cup-handle {
+      position: absolute;
+      right: -32px;
+      top: 50%;
+      transform: translateY(-20%);
+      width: 72px;
+      height: 72px;
+      border: 10px solid #eef3f7;
+      border-left-color: transparent;
+      border-radius: 50%;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.08);
+    }
+    [data-theme="light"] .cup-handle {
+      border-color: #f7fbff;
+      border-left-color: transparent;
+    }
+
+    /* Steam */
+    .steam {
+      --count: 3;
+      position: absolute;
+      top: 0;
+      width: 280px;
+      height: 160px;
+      pointer-events: none;
+      opacity: var(--steam-opacity);
+      transform: scale(var(--steam-scale));
+    }
+    .steam span {
+      position: absolute;
+      bottom: 0;
+      left: calc(50% - 12px);
+      width: 24px; height: 24px;
+      background: radial-gradient(circle, rgba(255,255,255,0.8), rgba(255,255,255,0.0) 60%);
+      border-radius: 50%;
+      filter: blur(0.5px);
+      animation: steamRise calc(6s/var(--steam-speed)) ease-in infinite;
+    }
+    .steam span:nth-child(2) { left: calc(45% - 12px); animation-delay: -2s; }
+    .steam span:nth-child(3) { left: calc(55% - 10px); width: 20px; height: 20px; animation-delay: -4s; }
+    @keyframes steamRise {
+      0% { transform: translateY(50px) scale(0.7); opacity: 0 }
+      10% { opacity: 0.35 }
+      60% { opacity: 0.25 }
+      100% { transform: translateY(-110px) scale(1.4); opacity: 0 }
+    }
+
+    /* Biscuit sprite (drops when dunking) */
+    .biscuit-sprite {
+      position: absolute;
+      top: -20px;
+      left: calc(50% - 20px);
+      font-size: 28px;
+      opacity: 0;
+      transform: translate(-50%, -80px) scale(0.9);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      pointer-events: none;
+    }
+
+    /* Crumbs layer */
+    .crumbs-layer {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .crumb {
+      position: absolute;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #c69c6d;
+      box-shadow: inset 0 0 1px rgba(0,0,0,0.4);
+      opacity: 0.95;
+      transform: translate(0,0);
+      animation: crumbFall 1200ms ease-out forwards;
+    }
+    .crumb.alt { background: #a17444; }
+    @keyframes crumbFall {
+      0% { opacity: 0; transform: translate(0, -12px) scale(0.7) }
+      15% { opacity: 1 }
+      100% { opacity: 0; transform: translate(var(--dx, 0px), var(--dy, 140px)) rotate(var(--rot, 0deg)) scale(0.9) }
+    }
+
+    /* Controls */
+    .controls h2 {
+      margin: 4px 0 16px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .control {
+      margin-bottom: 14px;
+    }
+    .control label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .value-chip {
+      font-weight: 700;
+      color: var(--text);
+      background: rgba(255,255,255,0.08);
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--card-stroke);
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: var(--control-height);
+      background: transparent;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 8px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      border-radius: 8px;
+      opacity: 0.75;
+    }
+    input[type="range"]::-moz-range-track {
+      height: 8px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      border-radius: 8px;
+      opacity: 0.75;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      margin-top: -8px;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #fff, rgba(255,255,255,0.65));
+      border: 1px solid var(--card-stroke);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+      cursor: pointer;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #fff, rgba(255,255,255,0.65));
+      border: 1px solid var(--card-stroke);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+      cursor: pointer;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sim-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    button {
+      height: 40px;
+      padding: 0 16px;
+      border-radius: 10px;
+      border: 1px solid var(--card-stroke);
+      color: var(--text);
+      background: linear-gradient(135deg, rgba(122,162,255,0.2), rgba(177,123,253,0.18));
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      transition: transform 0.05s ease, filter 0.12s ease, background 0.2s ease;
+    }
+    button:hover { filter: brightness(1.05) }
+    button:active { transform: translateY(1px) }
+    #dunkButton {
+      background: linear-gradient(135deg, rgba(122,162,255,0.35), rgba(177,123,253,0.28));
+    }
+    #resetButton {
+      background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    }
+
+    /* Graph area */
+    .graph h2 {
+      margin: 6px 0 10px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .graph h2::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--card-stroke), transparent);
+      opacity: 0.6;
+    }
+    .graph canvas {
+      display: block;
+      width: 100%;
+      height: 240px;
+      border-radius: 10px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04));
+      border: 1px solid var(--card-stroke);
+    }
+    .risk-readout {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+    .risk-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+    }
+    .risk-bar-container {
+      position: relative;
+      width: 100%;
+      height: 14px;
+      border-radius: 999px;
+      border: 1px solid var(--card-stroke);
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
+    }
+    .risk-bar {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 40%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--good), var(--warning) 55%, var(--danger));
+      transform-origin: left center;
+      transition: transform 0.25s ease;
+    }
+    .risk-text {
+      min-width: 120px;
+      text-align: right;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    /* Keyboard hints */
+    .hints {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      border-top: 1px dashed var(--card-stroke);
+      padding-top: 10px;
+    }
+    kbd {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 6px;
+      border: 1px solid var(--card-stroke);
+      background: rgba(255,255,255,0.08);
+      box-shadow: inset 0 -2px 0 rgba(255,255,255,0.08);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+    }
+
+    footer {
+      color: var(--muted);
+      font-size: 12px;
+      padding: 8px 24px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 1100px) {
+      main {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "sim"
+          "controls"
+          "graph";
+      }
+    }
+  </style>
+</head>
+<body data-theme="dark">
+  <header>
+    <h1>
+      <span class="dot" aria-hidden="true"></span>
+      Tea Dunkability Lab
+    </h1>
+    <div class="toggle" role="switch" aria-label="Toggle dark mode">
+      <input id="darkModeToggle" type="checkbox" aria-checked="true" />
+      <span class="knob"></span>
+      <label for="darkModeToggle" id="themeLabel">Dark</label>
+    </div>
+  </header>
+
+  <main role="main">
+    <section class="card sim" aria-labelledby="simTitle" id="simCard">
+      <h2 id="simTitle" style="position:absolute; left:-9999px; top:-9999px;">Simulation</h2>
+      <div class="teacup-scene" id="teacupScene" aria-live="polite">
+        <div class="teacup" id="teacup" aria-label="Teacup with steaming tea">
+          <div class="cup-body">
+            <div class="tea" id="teaLiquid"></div>
+          </div>
+          <div class="cup-handle"></div>
+        </div>
+        <div class="steam" id="steam" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+        <div class="crumbs-layer" id="crumbsLayer" aria-hidden="true"></div>
+        <div class="biscuit-sprite" id="biscuitSprite" aria-hidden="true">🍪</div>
+      </div>
+      <div class="sim-actions">
+        <button id="dunkButton" aria-label="Dunk biscuit into tea">Dunk!</button>
+        <button id="resetButton" aria-label="Reset controls">Reset</button>
+      </div>
+    </section>
+
+    <section class="card controls" id="controlsCard" aria-labelledby="controlsTitle">
+      <h2 id="controlsTitle">Controls</h2>
+
+      <div class="control">
+        <label for="teaTempSlider">
+          Tea temperature
+          <span class="value-chip" id="teaTempValue">85 °C</span>
+        </label>
+        <input id="teaTempSlider" type="range" min="40" max="100" step="1" value="85" />
+      </div>
+
+      <div class="control">
+        <label for="dunkTimeSlider">
+          Dunk time
+          <span class="value-chip" id="dunkTimeValue">3.0 s</span>
+        </label>
+        <input id="dunkTimeSlider" type="range" min="0" max="8" step="0.1" value="3" />
+      </div>
+
+      <div class="control">
+        <label for="biscuitTypeSlider" class="row">
+          <span>
+            Biscuit type
+          </span>
+          <span class="value-chip" id="biscuitTypeValue">Hobnob 🌾</span>
+        </label>
+        <input id="biscuitTypeSlider" type="range" min="0" max="4" step="1" value="2" />
+      </div>
+
+      <div class="control">
+        <label for="integritySlider">
+          Structural integrity
+          <span class="value-chip" id="integrityValue">0.80</span>
+        </label>
+        <input id="integritySlider" type="range" min="0.3" max="1" step="0.01" value="0.8" />
+      </div>
+
+      <div class="hints" id="shortcutHints">
+        Shortcuts:
+        <div>
+          <kbd>Space</kbd> Dunk • <kbd>T</kbd>/<kbd>Shift+T</kbd> Temp ± •
+          <kbd>D</kbd>/<kbd>Shift+D</kbd> Time ± •
+          <kbd>B</kbd>/<kbd>Shift+B</kbd> Biscuit next/prev •
+          <kbd>I</kbd>/<kbd>Shift+I</kbd> Integrity ± •
+          <kbd>M</kbd> Theme
+        </div>
+      </div>
+    </section>
+
+    <section class="card graph" id="graphCard" aria-labelledby="graphTitle">
+      <h2 id="graphTitle">Crumble‑O‑Meter</h2>
+      <canvas id="crumbleGraph" width="800" height="320" role="img" aria-label="Graph of crumble risk vs dunk time"></canvas>
+      <div class="risk-readout">
+        <div class="risk-bar-wrap">
+          <div class="risk-bar-container" aria-hidden="true">
+            <div class="risk-bar" id="riskBar"></div>
+          </div>
+        </div>
+        <div class="risk-text" id="riskText">Risk: 0%</div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div>Made with glass cards, dark mode, and a dash of steam.</div>
+    <div>Viewport optimized for 1280×720</div>
+  </footer>
+
+  <script>
+    (function(){
+      "use strict";
+
+      // Data model for biscuits
+      const BISCUITS = [
+        { name: "Digestive", emoji: "🍪", absorb: 0.70, baseStrength: 0.60, crumbleSlope: 1.10 },
+        { name: "Rich Tea", emoji: "🫖", absorb: 0.50, baseStrength: 0.40, crumbleSlope: 1.30 },
+        { name: "Hobnob", emoji: "🌾", absorb: 0.90, baseStrength: 0.80, crumbleSlope: 0.90 },
+        { name: "Bourbon", emoji: "🍫", absorb: 0.60, baseStrength: 0.50, crumbleSlope: 1.00 },
+        { name: "Custard Cream", emoji: "🧁", absorb: 0.55, baseStrength: 0.45, crumbleSlope: 1.20 }
+      ];
+
+      const state = {
+        temp: 85,     // °C
+        time: 3,      // seconds
+        biscuitIdx: 2,
+        integrity: 0.8,
+        theme: "dark"
+      };
+
+      // Elements (unique IDs for automation)
+      const el = {
+        themeToggle: document.getElementById("darkModeToggle"),
+        themeLabel: document.getElementById("themeLabel"),
+
+        teaTempSlider: document.getElementById("teaTempSlider"),
+        dunkTimeSlider: document.getElementById("dunkTimeSlider"),
+        biscuitTypeSlider: document.getElementById("biscuitTypeSlider"),
+        integritySlider: document.getElementById("integritySlider"),
+
+        teaTempValue: document.getElementById("teaTempValue"),
+        dunkTimeValue: document.getElementById("dunkTimeValue"),
+        biscuitTypeValue: document.getElementById("biscuitTypeValue"),
+        integrityValue: document.getElementById("integrityValue"),
+
+        dunkButton: document.getElementById("dunkButton"),
+        resetButton: document.getElementById("resetButton"),
+
+        teacup: document.getElementById("teacup"),
+        teaLiquid: document.getElementById("teaLiquid"),
+        steam: document.getElementById("steam"),
+        crumbsLayer: document.getElementById("crumbsLayer"),
+        biscuitSprite: document.getElementById("biscuitSprite"),
+
+        graph: document.getElementById("crumbleGraph"),
+        riskBar: document.getElementById("riskBar"),
+        riskText: document.getElementById("riskText"),
+        root: document.body
+      };
+
+      // Persistent theme
+      const storedTheme = localStorage.getItem("tea-theme");
+      if (storedTheme === "light" || storedTheme === "dark") {
+        state.theme = storedTheme;
+      }
+      applyTheme(state.theme);
+
+      // Initialize sliders display
+      el.teaTempSlider.value = state.temp;
+      el.dunkTimeSlider.value = state.time;
+      el.biscuitTypeSlider.value = state.biscuitIdx;
+      el.integritySlider.value = state.integrity;
+
+      // Update UI with initial state
+      updateAll();
+
+      // Events
+      el.teaTempSlider.addEventListener("input", () => {
+        state.temp = clamp(Number(el.teaTempSlider.value), 40, 100);
+        updateAll();
+      });
+      el.dunkTimeSlider.addEventListener("input", () => {
+        state.time = clamp(Number(el.dunkTimeSlider.value), 0, 8);
+        updateAll({ sprinkleIfOver: true });
+      });
+      el.biscuitTypeSlider.addEventListener("input", () => {
+        state.biscuitIdx = clamp(Math.round(el.biscuitTypeSlider.value), 0, BISCUITS.length - 1);
+        updateAll();
+      });
+      el.integritySlider.addEventListener("input", () => {
+        state.integrity = clamp(Number(el.integritySlider.value), 0.3, 1);
+        updateAll();
+      });
+
+      el.dunkButton.addEventListener("click", doDunk);
+      el.resetButton.addEventListener("click", () => {
+        state.temp = 85;
+        state.time = 3;
+        state.biscuitIdx = 2;
+        state.integrity = 0.8;
+        el.teaTempSlider.value = state.temp;
+        el.dunkTimeSlider.value = state.time;
+        el.biscuitTypeSlider.value = state.biscuitIdx;
+        el.integritySlider.value = state.integrity;
+        updateAll({ clearCrumbs: true });
+      });
+
+      el.themeToggle.addEventListener("change", () => {
+        const next = el.themeToggle.checked ? "dark" : "light"; // checked means dark in our label
+        applyTheme(next);
+      });
+
+      // Keyboard shortcuts
+      window.addEventListener("keydown", (e) => {
+        if (document.activeElement && document.activeElement.tagName === "INPUT" && document.activeElement.type === "range") {
+          // let default slider keys work
+        }
+        const stepT = e.shiftKey ? -1 : 1;
+        const stepD = e.shiftKey ? -0.2 : 0.2;
+        const stepI = e.shiftKey ? -0.05 : 0.05;
+        switch (e.key.toLowerCase()) {
+          case " ":
+            e.preventDefault();
+            doDunk();
+            break;
+          case "t":
+            state.temp = clamp(Math.round(state.temp + stepT), 40, 100);
+            el.teaTempSlider.value = state.temp;
+            updateAll();
+            break;
+          case "d":
+            state.time = clamp(round1(state.time + stepD), 0, 8);
+            el.dunkTimeSlider.value = state.time;
+            updateAll({ sprinkleIfOver: true });
+            break;
+          case "b":
+            state.biscuitIdx = wrapIndex(state.biscuitIdx + (e.shiftKey ? -1 : 1), BISCUITS.length);
+            el.biscuitTypeSlider.value = state.biscuitIdx;
+            updateAll();
+            break;
+          case "i":
+            state.integrity = clamp(round2(state.integrity + stepI), 0.3, 1.0);
+            el.integritySlider.value = state.integrity;
+            updateAll();
+            break;
+          case "m":
+            applyTheme(state.theme === "dark" ? "light" : "dark");
+            break;
+        }
+      });
+
+      // Helpers
+      function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+      function round1(n) { return Math.round(n * 10) / 10; }
+      function round2(n) { return Math.round(n * 100) / 100; }
+      function wrapIndex(i, len) { return (i + len) % len; }
+
+      function biscuit() { return BISCUITS[state.biscuitIdx]; }
+
+      // Crumble risk model
+      function crumbleRiskAt(time) {
+        const b = biscuit();
+        const tNorm = (state.temp - 40) / 60; // 0..1 for 40..100C
+        const rate = b.absorb * (0.7 + 1.6 * clamp(tNorm, 0, 1)); // faster dissolve with heat
+        const strength = clamp(b.baseStrength * state.integrity, 0.12, 1.25);
+        const raw = 1 - Math.exp(-(rate * time) / (0.8 * strength)); // approach 1 with time
+        const prob = Math.pow(clamp(raw, 0, 1), b.crumbleSlope);
+        return clamp(prob, 0, 1);
+      }
+
+      function currentRisk() {
+        return crumbleRiskAt(state.time);
+      }
+
+      function updateAll(opts = {}) {
+        const b = biscuit();
+        el.teaTempValue.textContent = `${state.temp} °C`;
+        el.dunkTimeValue.textContent = `${state.time.toFixed(1)} s`;
+        el.biscuitTypeValue.textContent = `${b.name} ${b.emoji}`;
+        el.integrityValue.textContent = state.integrity.toFixed(2);
+
+        // Tea visual updates: hotter tea => lighter top, more steam
+        const tNorm = clamp((state.temp - 40) / 60, 0, 1);
+        const top = lerpColor([0x8a,0x55,0x28],[0xd1,0x9b,0x5f], tNorm); // dark to lighter amber
+        const mid = lerpColor([0x6a,0x3b,0x14],[0xa1,0x6a,0x33], tNorm);
+        const deep = lerpColor([0x45,0x22,0x0a],[0x7b,0x48,0x1e], tNorm);
+        el.teaLiquid.style.setProperty("--tea-top", top);
+        el.teaLiquid.style.setProperty("--tea-mid", mid);
+        el.teaLiquid.style.setProperty("--tea-deep", deep);
+
+        // Steam intensity/scale/speed from temperature
+        const steamOp = 0.35 + 0.65 * tNorm;
+        const steamScale = 0.9 + 0.25 * tNorm;
+        const steamSpeed = 0.8 + 0.8 * tNorm;
+        el.steam.style.setProperty("--steam-opacity", steamOp.toFixed(2));
+        el.steam.style.setProperty("--steam-scale", steamScale.toFixed(2));
+        el.steam.style.setProperty("--steam-speed", steamSpeed.toFixed(2));
+
+        // Biscuit sprite indicator
+        el.biscuitSprite.textContent = b.emoji;
+
+        // Graph + risk bar
+        drawGraph();
+        const risk = currentRisk();
+        el.riskBar.style.transform = `scaleX(${risk})`;
+        el.riskText.textContent = `Risk: ${(risk*100).toFixed(0)}%`;
+
+        // Sprinkle crumbs if slider dragged into danger
+        if (opts.sprinkleIfOver && risk > 0.75) {
+          sprinkleCrumbs(Math.floor(6 + 16 * risk), { radius: 70, upward: false });
+        }
+
+        if (opts.clearCrumbs) {
+          clearCrumbs();
+        }
+      }
+
+      function lerpColor(rgbA, rgbB, t) {
+        const r = Math.round(rgbA[0] + (rgbB[0]-rgbA[0]) * t);
+        const g = Math.round(rgbA[1] + (rgbB[1]-rgbA[1]) * t);
+        const b = Math.round(rgbA[2] + (rgbB[2]-rgbA[2]) * t);
+        return `rgb(${r}, ${g}, ${b})`;
+      }
+
+      // Graph drawing
+      function drawGraph() {
+        const canvas = el.graph;
+        const ctx = canvas.getContext("2d");
+
+        // Fit to CSS size with DPR for crispness
+        const dpr = window.devicePixelRatio || 1;
+        const cssW = canvas.clientWidth || 800;
+        const cssH = canvas.clientHeight || 320;
+        if (canvas.width !== cssW * dpr || canvas.height !== cssH * dpr) {
+          canvas.width = cssW * dpr;
+          canvas.height = cssH * dpr;
+        }
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, cssW, cssH);
+
+        const padding = { left: 40, right: 18, top: 14, bottom: 26 };
+        const W = cssW - padding.left - padding.right;
+        const H = cssH - padding.top - padding.bottom;
+
+        // Grid
+        ctx.globalAlpha = 0.35;
+        ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue("--card-stroke");
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let i=0;i<=4;i++) {
+          const y = padding.top + (H * i) / 4;
+          ctx.moveTo(padding.left, y);
+          ctx.lineTo(cssW - padding.right, y);
+        }
+        for (let i=0;i<=8;i++) {
+          const x = padding.left + (W * i) / 8;
+          ctx.moveTo(x, padding.top);
+          ctx.lineTo(x, cssH - padding.bottom);
+        }
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+
+        // Axis labels
+        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue("--muted");
+        ctx.font = "12px system-ui, sans-serif";
+        ctx.textAlign = "right";
+        ctx.fillText("100%", padding.left - 6, padding.top + 4);
+        ctx.fillText("0%", padding.left - 6, padding.top + H + 4);
+        ctx.textAlign = "center";
+        ctx.fillText("0s", padding.left, cssH - 6);
+        ctx.fillText("8s", padding.left + W, cssH - 6);
+
+        // Risk curve
+        const samples = 120;
+        ctx.beginPath();
+        for (let i=0;i<=samples;i++) {
+          const t = (8 * i) / samples;
+          const yVal = crumbleRiskAt(t);
+          const x = padding.left + (W * i) / samples;
+          const y = padding.top + (H * (1 - yVal));
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        // Gradient stroke from good to danger
+        const grad = ctx.createLinearGradient(padding.left, padding.top + H, padding.left, padding.top);
+        grad.addColorStop(0, getComputedStyle(document.body).getPropertyValue("--good").trim());
+        grad.addColorStop(0.6, getComputedStyle(document.body).getPropertyValue("--warning").trim());
+        grad.addColorStop(1, getComputedStyle(document.body).getPropertyValue("--danger").trim());
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Current time marker
+        const curX = padding.left + (W * state.time) / 8;
+        const curYValue = crumbleRiskAt(state.time);
+        const curY = padding.top + (H * (1 - curYValue));
+        ctx.strokeStyle = "rgba(255,255,255,0.4)";
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(curX, padding.top);
+        ctx.lineTo(curX, padding.top + H);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Point marker
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(curX, curY, 3, 0, Math.PI*2);
+        ctx.fill();
+      }
+
+      // Dunk animation + crumbs
+      let dunking = false;
+      function doDunk() {
+        if (dunking) return;
+        dunking = true;
+
+        // Animate biscuit sprite drop then fade
+        const sprite = el.biscuitSprite;
+        sprite.style.transition = "none";
+        sprite.style.opacity = "0";
+        sprite.style.transform = "translate(-50%, -120px) scale(0.9)";
+        requestAnimationFrame(() => {
+          sprite.style.transition = "transform 380ms cubic-bezier(.2,.8,.2,1), opacity 240ms ease";
+          sprite.style.opacity = "1";
+          sprite.style.transform = "translate(-50%, 40px) scale(1)";
+
+          // Splash ripple on tea
+          splashRipple();
+
+          // After drop, lift up and fade
+          setTimeout(() => {
+            sprite.style.opacity = "0";
+            sprite.style.transform = "translate(-50%, -120px) scale(0.9)";
+          }, 460);
+        });
+
+        // Crumbs based on risk
+        const risk = currentRisk();
+        const count = risk < 0.25 ? 4 : risk < 0.5 ? 10 : risk < 0.75 ? 18 : 30;
+        if (risk > 0.2) sprinkleCrumbs(count, { radius: 80, upward: false });
+        if (risk > 0.75) {
+          // Extra burst for catastrophic over-dunk
+          setTimeout(() => sprinkleCrumbs(24, { radius: 90, upward: true }), 150);
+        }
+
+        setTimeout(() => { dunking = false; }, 520);
+      }
+
+      function splashRipple() {
+        const tea = el.teaLiquid;
+        const ripple = document.createElement("span");
+        ripple.style.position = "absolute";
+        ripple.style.left = "50%";
+        ripple.style.top = "10%";
+        ripple.style.transform = "translate(-50%, -50%)";
+        ripple.style.width = "10%";
+        ripple.style.height = "10%";
+        ripple.style.borderRadius = "50%";
+        ripple.style.border = "2px solid rgba(255,255,255,0.7)";
+        ripple.style.opacity = "0.9";
+        tea.appendChild(ripple);
+        ripple.animate([
+          { transform: "translate(-50%, -50%) scale(0.4)", opacity: 0.8 },
+          { transform: "translate(-50%, -50%) scale(1.4)", opacity: 0 }
+        ], { duration: 600, easing: "ease-out" }).onfinish = () => {
+          tea.removeChild(ripple);
+        };
+      }
+
+      function sprinkleCrumbs(n, opts = {}) {
+        const rect = el.teacup.getBoundingClientRect();
+        const sceneRect = el.crumbsLayer.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2 - sceneRect.left;
+        const cy = rect.top + rect.height * 0.4 - sceneRect.top;
+        for (let i=0;i<n;i++) {
+          const c = document.createElement("div");
+          c.className = "crumb" + (Math.random() > 0.5 ? " alt": "");
+          const angle = (Math.random() * Math.PI) - Math.PI/2; // spread sideways
+          const radius = (opts.radius || 60) * (0.4 + Math.random());
+          const dx = Math.cos(angle) * radius;
+          const baseDy = Math.sin(angle) * radius + (opts.upward ? -40 : 20);
+          const dy = baseDy + (40 + Math.random()*40);
+          const rot = (Math.random()*120 - 60).toFixed(1) + "deg";
+
+          c.style.left = (cx + (Math.random()*16 - 8)) + "px";
+          c.style.top = (cy + (Math.random()*12 - 6)) + "px";
+          c.style.setProperty("--dx", dx.toFixed(1) + "px");
+          c.style.setProperty("--dy", dy.toFixed(1) + "px");
+          c.style.setProperty("--rot", rot);
+
+          el.crumbsLayer.appendChild(c);
+          // cleanup
+          setTimeout(() => c.remove(), 1400 + Math.random()*400);
+        }
+      }
+
+      function clearCrumbs() {
+        el.crumbsLayer.innerHTML = "";
+      }
+
+      function applyTheme(theme) {
+        state.theme = theme;
+        document.body.setAttribute("data-theme", theme);
+        el.themeToggle.checked = theme === "dark";
+        el.themeLabel.textContent = theme === "dark" ? "Dark" : "Light";
+        localStorage.setItem("tea-theme", theme);
+        // Redraw graph to match theme colors
+        drawGraph();
+      }
+
+      // Initial draw after layout
+      window.addEventListener("load", drawGraph);
+      window.addEventListener("resize", () => {
+        // Debounce
+        clearTimeout(window.__graphRaf);
+        window.__graphRaf = setTimeout(drawGraph, 80);
+      });
+
+    })();
+  </script>
+</body>
+</html>

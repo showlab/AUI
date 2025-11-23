@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+Below is the complete `page.tsx` file for a Next.js single-page web application that implements a 2D space game. This code can be pasted directly into the `app/page.tsx` file of a Next.js app created using `create-next-app`. It uses modern HTML5, CSS3, and vanilla JavaScript for interactivity.
+
+---
+
+### `app/page.tsx`
+
+```tsx
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+
+export default function SpaceGame() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [gameOver, setGameOver] = useState(false);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Game Constants
+    const WIDTH = 1280;
+    const HEIGHT = 720;
+    const SHIP_SIZE = 30;
+    const ASTEROID_COUNT = 5;
+    const BULLET_SPEED = 5;
+    const ASTEROID_SPEED = 2;
+    const AI_SHIP_SPEED = 2;
+
+    // Game State
+    let ship = { x: WIDTH / 2, y: HEIGHT / 2, angle: 0, speed: 0 };
+    let bullets: { x: number; y: number; angle: number }[] = [];
+    let asteroids: { x: number; y: number; size: number }[] = [];
+    let aiShips: { x: number; y: number; angle: number }[] = [];
+    let keys: { [key: string]: boolean } = {};
+    let isGameOver = false;
+
+    // Utility Functions
+    const radians = (deg: number) => (deg * Math.PI) / 180;
+    const random = (min: number, max: number) =>
+      Math.random() * (max - min) + min;
+
+    // Initialize Asteroids
+    for (let i = 0; i < ASTEROID_COUNT; i++) {
+      asteroids.push({
+        x: random(0, WIDTH),
+        y: random(0, HEIGHT),
+        size: random(20, 50),
+      });
+    }
+
+    // Initialize AI Ships
+    for (let i = 0; i < 2; i++) {
+      aiShips.push({
+        x: random(0, WIDTH),
+        y: random(0, HEIGHT),
+        angle: random(0, 360),
+      });
+    }
+
+    // Game Loop
+    const loop = () => {
+      if (isGameOver) return;
+
+      // Clear Canvas
+      ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+      // Update Ship
+      if (keys["ArrowUp"]) ship.speed = 3;
+      else ship.speed = 0;
+
+      if (keys["ArrowLeft"]) ship.angle -= 5;
+      if (keys["ArrowRight"]) ship.angle += 5;
+
+      ship.x += Math.cos(radians(ship.angle)) * ship.speed;
+      ship.y += Math.sin(radians(ship.angle)) * ship.speed;
+
+      // Wrap Ship Around Edges
+      if (ship.x > WIDTH) ship.x = 0;
+      if (ship.x < 0) ship.x = WIDTH;
+      if (ship.y > HEIGHT) ship.y = 0;
+      if (ship.y < 0) ship.y = HEIGHT;
+
+      // Draw Ship
+      ctx.save();
+      ctx.translate(ship.x, ship.y);
+      ctx.rotate(radians(ship.angle));
+      ctx.fillStyle = "white";
+      ctx.beginPath();
+      ctx.moveTo(SHIP_SIZE / 2, 0);
+      ctx.lineTo(-SHIP_SIZE / 2, -SHIP_SIZE / 2);
+      ctx.lineTo(-SHIP_SIZE / 2, SHIP_SIZE / 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+
+      // Update Bullets
+      bullets.forEach((bullet, index) => {
+        bullet.x += Math.cos(radians(bullet.angle)) * BULLET_SPEED;
+        bullet.y += Math.sin(radians(bullet.angle)) * BULLET_SPEED;
+
+        // Remove bullets that go off-screen
+        if (
+          bullet.x < 0 ||
+          bullet.x > WIDTH ||
+          bullet.y < 0 ||
+          bullet.y > HEIGHT
+        ) {
+          bullets.splice(index, 1);
+        }
+
+        // Draw Bullet
+        ctx.fillStyle = "yellow";
+        ctx.beginPath();
+        ctx.arc(bullet.x, bullet.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Update Asteroids
+      asteroids.forEach((asteroid, index) => {
+        asteroid.x += random(-ASTEROID_SPEED, ASTEROID_SPEED);
+        asteroid.y += random(-ASTEROID_SPEED, ASTEROID_SPEED);
+
+        // Wrap Asteroids Around Edges
+        if (asteroid.x > WIDTH) asteroid.x = 0;
+        if (asteroid.x < 0) asteroid.x = WIDTH;
+        if (asteroid.y > HEIGHT) asteroid.y = 0;
+        if (asteroid.y < 0) asteroid.y = HEIGHT;
+
+        // Check Collision with Ship
+        const dist = Math.hypot(ship.x - asteroid.x, ship.y - asteroid.y);
+        if (dist < asteroid.size) {
+          isGameOver = true;
+          setGameOver(true);
+        }
+
+        // Check Collision with Bullets
+        bullets.forEach((bullet, bulletIndex) => {
+          const bulletDist = Math.hypot(
+            bullet.x - asteroid.x,
+            bullet.y - asteroid.y
+          );
+          if (bulletDist < asteroid.size) {
+            asteroids.splice(index, 1);
+            bullets.splice(bulletIndex, 1);
+          }
+        });
+
+        // Draw Asteroid
+        ctx.fillStyle = "gray";
+        ctx.beginPath();
+        ctx.arc(asteroid.x, asteroid.y, asteroid.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Update AI Ships
+      aiShips.forEach((aiShip) => {
+        aiShip.x += Math.cos(radians(aiShip.angle)) * AI_SHIP_SPEED;
+        aiShip.y += Math.sin(radians(aiShip.angle)) * AI_SHIP_SPEED;
+
+        // Wrap AI Ships Around Edges
+        if (aiShip.x > WIDTH) aiShip.x = 0;
+        if (aiShip.x < 0) aiShip.x = WIDTH;
+        if (aiShip.y > HEIGHT) aiShip.y = 0;
+        if (aiShip.y < 0) aiShip.y = HEIGHT;
+
+        // Draw AI Ship
+        ctx.save();
+        ctx.translate(aiShip.x, aiShip.y);
+        ctx.rotate(radians(aiShip.angle));
+        ctx.fillStyle = "red";
+        ctx.beginPath();
+        ctx.moveTo(SHIP_SIZE / 2, 0);
+        ctx.lineTo(-SHIP_SIZE / 2, -SHIP_SIZE / 2);
+        ctx.lineTo(-SHIP_SIZE / 2, SHIP_SIZE / 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      });
+
+      requestAnimationFrame(loop);
+    };
+
+    // Event Listeners
+    const keyDownHandler = (e: KeyboardEvent) => {
+      keys[e.key] = true;
+
+      // Fire Bullet
+      if (e.key === " ") {
+        bullets.push({
+          x: ship.x,
+          y: ship.y,
+          angle: ship.angle,
+        });
+      }
+    };
+
+    const keyUpHandler = (e: KeyboardEvent) => {
+      keys[e.key] = false;
+    };
+
+    window.addEventListener("keydown", keyDownHandler);
+    window.addEventListener("keyup", keyUpHandler);
+
+    // Start Game Loop
+    loop();
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("keydown", keyDownHandler);
+      window.removeEventListener("keyup", keyUpHandler);
+    };
+  }, []);
+
+  return (
+    <div style={{ textAlign: "center", color: "white", background: "black" }}>
+      <h1>2D Space Game</h1>
+      {gameOver && <h2>Game Over! Refresh to Restart</h2>}
+      <canvas
+        ref={canvasRef}
+        width={1280}
+        height={720}
+        style={{ border: "1px solid white" }}
+      ></canvas>
+    </div>
+  );
+}
+```
+
+---
+
+### Instructions to Run:
+
+1. Create a new Next.js app using `npx create-next-app@latest my-space-game`.
+2. Replace the contents of `app/page.tsx` with the code above.
+3. Start the development server with `npm run dev`.
+4. Open `http://localhost:3000` in your browser to play the game.
+
+### Controls:
+- Arrow Up: Move Forward
+- Arrow Left/Right: Rotate Ship
+- Spacebar: Fire Bullets
+
+Enjoy the game! 🚀

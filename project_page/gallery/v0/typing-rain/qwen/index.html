@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Rain</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            color: white;
+        }
+
+        .container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+            width: 90%;
+            max-width: 800px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            letter-spacing: 2px;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin: 5px;
+            min-width: 120px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ffcc00;
+        }
+
+        .game-area {
+            position: relative;
+            width: 90%;
+            max-width: 800px;
+            height: 500px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .word {
+            position: absolute;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+            animation: fall linear forwards;
+            user-select: none;
+        }
+
+        .correct-word {
+            color: #4caf50;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.7);
+        }
+
+        .incorrect-word {
+            color: #f44336;
+            text-shadow: 0 0 10px rgba(244, 67, 54, 0.7);
+        }
+
+        .input-container {
+            margin-top: 30px;
+            width: 90%;
+            max-width: 800px;
+        }
+
+        #typing-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.5rem;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-align: center;
+            outline: none;
+            backdrop-filter: blur(5px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #typing-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #ff6b6b, #ffa502);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .instructions {
+            margin-top: 20px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 800px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        /* Raindrop animations */
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+            }
+        }
+
+        @keyframes raindrop {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.5);
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100vh) scale(1);
+            }
+        }
+
+        .raindrop {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            animation: raindrop 1s linear infinite;
+            z-index: 1;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .stat-box {
+                min-width: 100px;
+                padding: 8px 15px;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+            
+            .game-area {
+                height: 400px;
+            }
+            
+            .word {
+                font-size: 1.4rem;
+            }
+            
+            #typing-input {
+                padding: 12px;
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-header {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .stats-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .stat-box {
+                width: 80%;
+                margin: 5px 0;
+            }
+            
+            .game-area {
+                height: 300px;
+            }
+            
+            .word {
+                font-size: 1.2rem;
+            }
+            
+            button {
+                padding: 10px 15px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="game-header">
+            <h1 id="game-title">Typing Rain</h1>
+            <div class="stats-container">
+                <div class="stat-box">
+                    <div>SCORE</div>
+                    <div id="score-value" class="stat-value">0</div>
+                </div>
+                <div class="stat-box">
+                    <div>ACCURACY</div>
+                    <div id="accuracy-value" class="stat-value">100%</div>
+                </div>
+                <div class="stat-box">
+                    <div>LEVEL</div>
+                    <div id="level-value" class="stat-value">1</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="game-area" id="game-area">
+            <!-- Words will be generated here -->
+        </div>
+
+        <div class="input-container">
+            <input 
+                type="text" 
+                id="typing-input" 
+                placeholder="Start typing the falling words..."
+                autocomplete="off"
+                autofocus
+            >
+        </div>
+
+        <div class="controls">
+            <button id="start-button">Start Game</button>
+            <button id="reset-button">Reset Game</button>
+        </div>
+
+        <div class="instructions">
+            <p>Type the falling words before they reach the bottom! Each correct word gives you points. Accuracy decreases with incorrect attempts.</p>
+        </div>
+    </div>
+
+    <script>
+        // Game constants and variables
+        const WORDS = [
+            "hello", "world", "javascript", "programming", "computer", "keyboard",
+            "screen", "mouse", "browser", "website", "development", "function",
+            "variable", "array", "object", "string", "number", "boolean",
+            "condition", "loop", "algorithm", "debugging", "framework", "library",
+            "frontend", "backend", "database", "server", "client", "api",
+            "responsive", "mobile", "desktop", "design", "interface", "element",
+            "selector", "event", "handler", "animation", "transition", "property",
+            "style", "layout", "position", "margin", "padding", "border"
+        ];
+
+        let gameActive = false;
+        let score = 0;
+        let totalTyped = 0;
+        let correctTyped = 0;
+        let level = 1;
+        let words = [];
+        let wordSpeed = 2000; // milliseconds per word
+        let spawnInterval;
+
+        // DOM Elements
+        const gameArea = document.getElementById('game-area');
+        const scoreValue = document.getElementById('score-value');
+        const accuracyValue = document.getElementById('accuracy-value');
+        const levelValue = document.getElementById('level-value');
+        const typingInput = document.getElementById('typing-input');
+        const startButton = document.getElementById('start-button');
+        const resetButton = document.getElementById('reset-button');
+
+        // Initialize game
+        function initGame() {
+            gameActive = true;
+            score = 0;
+            totalTyped = 0;
+            correctTyped = 0;
+            level = 1;
+            words = [];
+            updateStats();
+            clearWords();
+            typingInput.value = '';
+            typingInput.disabled = false;
+            startButton.textContent = 'Pause Game';
+            startButton.id = 'pause-button';
+            startButton.onclick = pauseGame;
+            
+            // Start spawning words
+            if (spawnInterval) clearInterval(spawnInterval);
+            spawnInterval = setInterval(spawnWord, wordSpeed);
+        }
+
+        // Pause game
+        function pauseGame() {
+            gameActive = false;
+            clearInterval(spawnInterval);
+            typingInput.disabled = true;
+            startButton.textContent = 'Resume Game';
+            startButton.id = 'resume-button';
+            startButton.onclick = resumeGame;
+        }
+
+        // Resume game
+        function resumeGame() {
+            gameActive = true;
+            typingInput.disabled = false;
+            startButton.textContent = 'Pause Game';
+            startButton.id = 'pause-button';
+            startButton.onclick = pauseGame;
+            
+            // Restart spawning words
+            if (spawnInterval) clearInterval(spawnInterval);
+            spawnInterval = setInterval(spawnWord, wordSpeed);
+        }
+
+        // Reset game
+        function resetGame() {
+            pauseGame();
+            clearInterval(spawnInterval);
+            clearWords();
+            typingInput.value = '';
+            initGame();
+        }
+
+        // Clear all words from the game area
+        function clearWords() {
+            gameArea.innerHTML = '';
+        }
+
+        // Spawn a new word
+        function spawnWord() {
+            if (!gameActive) return;
+            
+            const wordElement = document.createElement('div');
+            wordElement.className = 'word';
+            
+            // Select random word
+            const randomWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+            
+            // Set word text
+            wordElement.textContent = randomWord;
+            
+            // Random horizontal position
+            const maxX = gameArea.offsetWidth - 150;
+            const randomX = Math.floor(Math.random() * maxX);
+            
+            // Set initial position
+            wordElement.style.left = `${randomX}px`;
+            wordElement.style.top = '-50px';
+            
+            // Set animation duration based on level
+            const duration = 5 + (level * 0.5);
+            wordElement.style.animationDuration = `${duration}s`;
+            
+            // Store word data
+            const wordData = {
+                element: wordElement,
+                text: randomWord,
+                x: randomX,
+                y: -50,
+                speed: duration
+            };
+            
+            words.push(wordData);
+            gameArea.appendChild(wordElement);
+            
+            // Remove word after animation completes
+            setTimeout(() => {
+                if (wordElement.parentNode) {
+                    wordElement.remove();
+                    // Check if word reached bottom (missed)
+                    if (gameActive) {
+                        // Update accuracy
+                        totalTyped++;
+                        updateAccuracy();
+                    }
+                }
+            }, duration * 1000);
+        }
+
+        // Handle typing input
+        function handleTyping() {
+            if (!gameActive) return;
+            
+            const inputValue = typingInput.value.trim().toLowerCase();
+            
+            // Find matching words
+            words.forEach((wordData, index) => {
+                if (wordData.text.toLowerCase() === inputValue) {
+                    // Correct match
+                    wordData.element.classList.add('correct-word');
+                    wordData.element.style.animationPlayState = 'paused';
+                    
+                    // Remove word after a short delay
+                    setTimeout(() => {
+                        if (wordData.element.parentNode) {
+                            wordData.element.remove();
+                            words.splice(index, 1);
+                        }
+                    }, 500);
+                    
+                    // Update score
+                    score += wordData.text.length * level;
+                    totalTyped++;
+                    correctTyped++;
+                    updateStats();
+                    updateAccuracy();
+                    
+                    // Clear input
+                    typingInput.value = '';
+                    
+                    // Increase difficulty
+                    increaseDifficulty();
+                }
+            });
+        }
+
+        // Update stats display
+        function updateStats() {
+            scoreValue.textContent = score;
+            levelValue.textContent = level;
+        }
+
+        // Update accuracy display
+        function updateAccuracy() {
+            if (totalTyped > 0) {
+                const accuracy = Math.round((correctTyped / totalTyped) * 100);
+                accuracyValue.textContent = `${accuracy}%`;
+            } else {
+                accuracyValue.textContent = '100%';
+            }
+        }
+
+        // Increase difficulty
+        function increaseDifficulty() {
+            // Increase level every 5 words
+            if (score > 0 && score % 100 === 0) {
+                level++;
+                updateStats();
+                
+                // Increase speed (but cap at minimum speed)
+                wordSpeed = Math.max(500, wordSpeed - 100);
+                
+                // Clear existing interval and set new one
+                if (spawnInterval) clearInterval(spawnInterval);
+                spawnInterval = setInterval(spawnWord, wordSpeed);
+            }
+        }
+
+        // Create raindrops for background effect
+        function createRaindrops() {
+            const raindropCount = 100;
+            for (let i = 0; i < raindropCount; i++) {
+                const raindrop = document.createElement('div');
+                raindrop.className = 'raindrop';
+                
+                // Random properties
+                const size = Math.random() * 4 + 1;
+                const left = Math.random() * 100;
+                const delay = Math.random() * 5;
+                const duration = Math.random() * 3 + 2;
+                
+                raindrop.style.width = `${size}px`;
+                raindrop.style.height = `${size * 3}px`;
+                raindrop.style.left = `${left}%`;
+                raindrop.style.animationDelay = `${delay}s`;
+                raindrop.style.animationDuration = `${duration}s`;
+                
+                document.body.appendChild(raindrop);
+            }
+        }
+
+        // Event Listeners
+        typingInput.addEventListener('input', handleTyping);
+        
+        startButton.addEventListener('click', () => {
+            if (gameActive) {
+                pauseGame();
+            } else {
+                if (words.length === 0) {
+                    initGame();
+                } else {
+                    resumeGame();
+                }
+            }
+        });
+        
+        resetButton.addEventListener('click', resetGame);
+
+        // Initialize raindrops
+        createRaindrops();
+
+        // Initial setup
+        updateStats();
+        updateAccuracy();
+    </script>
+</body>
+</html>

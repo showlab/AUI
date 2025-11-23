@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Fruit Catcher - Falling Objects Game (Destylized)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Catch the falling fruits with your basket. Destylized, accessible, responsive game using HTML5, CSS3, and vanilla JavaScript.">
+  <style>
+    /* Destylization: simple, high-contrast, no gradients/shadows/rounded corners/animations */
+    :root {
+      --bg: #ffffff;
+      --text: #000000;
+      --accent: #0057ce;
+      --accent2: #d00000;
+      --safe: #067d00;
+      --muted: #666666;
+      --panel: #f3f3f3;
+      --border: #000000;
+      --edge: #222222;
+      --controlH: 44px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial; line-height: 1.4; user-select: none; }
+    a { color: var(--accent); text-decoration: underline; }
+
+    /* Layout: two-column desktop that fits in 1280x720 */
+    .wrap {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 100%;
+      max-height: 100%;
+    }
+
+    header, footer {
+      padding: 8px 12px;
+      width: 100%;
+    }
+
+    header .bar, footer .bar {
+      display: grid;
+      align-items: center;
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      gap: 12px;
+      border: 1px solid var(--border);
+      padding: 8px;
+      background: var(--panel);
+    }
+
+    header .bar {
+      grid-template-columns: 1fr auto auto;
+    }
+
+    h1 {
+      font-size: 20px;
+      margin: 0;
+      font-weight: 700;
+    }
+
+    /* Scoreboard */
+    .scoreboard {
+      display: inline-grid;
+      grid-auto-flow: column;
+      gap: 12px;
+      align-items: center;
+      justify-content: start;
+    }
+    .score-item {
+      border: 1px solid var(--border);
+      padding: 6px 8px;
+      font-weight: 700;
+      min-height: var(--controlH);
+      display: inline-flex;
+      align-items: center;
+    }
+    .score-item strong {
+      margin-left: 6px;
+      font-variant-numeric: tabular-nums;
+    }
+    .score-item.highlight { background: #e1f0ff; }
+    .lives {
+      display: inline-flex;
+      align-items: center;
+      min-height: var(--controlH);
+    }
+    #livesHearts {
+      letter-spacing: 3px;
+      font-size: 18px;
+    }
+
+    /* Top controls: Start/Reset always visible */
+    #topControls {
+      display: inline-grid;
+      grid-auto-flow: column;
+      gap: 8px;
+      justify-content: end;
+      align-items: center;
+    }
+    button {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: #000000;
+      padding: 8px 12px;
+      min-height: var(--controlH);
+      min-width: 120px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button[aria-disabled="true"] {
+      background: #eeeeee;
+      color: #666666;
+      cursor: not-allowed;
+    }
+    button:focus-visible {
+      outline: 3px solid #000000;
+      outline-offset: 1px;
+    }
+
+    /* Main content: two columns */
+    main {
+      padding: 8px 12px;
+      width: 100%;
+    }
+    .content {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 12px;
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      align-items: start;
+    }
+
+    /* Control Panel (Left Column) */
+    #controlPanel {
+      border: 1px solid var(--border);
+      padding: 8px;
+      background: #ffffff;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+    #statusPanel {
+      border: 1px solid var(--border);
+      padding: 8px;
+      display: grid;
+      gap: 8px;
+      background: #f9f9f9;
+    }
+    .statusRow {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+    .label {
+      font-weight: 700;
+    }
+    .value {
+      font-variant-numeric: tabular-nums;
+    }
+    #keyboardHint {
+      border: 1px solid var(--border);
+      padding: 8px;
+      background: #f9f9f9;
+    }
+    #keyboardHint small { color: var(--muted); }
+
+    /* Rate slider and operator-friendly controls */
+    #rateControls {
+      border: 1px solid var(--border);
+      padding: 8px;
+      background: #f9f9f9;
+      display: grid;
+      gap: 8px;
+    }
+    #rateControlsRow {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+    #rateSlider {
+      width: 100%;
+      height: var(--controlH);
+    }
+    .miniBtn {
+      min-width: 44px;
+      min-height: var(--controlH);
+      padding: 0;
+    }
+
+    /* Game Area (Right Column) */
+    #gameArea {
+      position: relative;
+      width: 100%;
+      height: clamp(480px, 70vh, 720px);
+      border: 2px solid var(--border);
+      background: #ffffff;
+      outline: none;
+      overflow: hidden;
+    }
+    #gameArea[data-focused="false"] { border-color: var(--accent2); }
+    #gameArea[data-edge="left"] { box-shadow: inset -2px 0 0 0 var(--edge); }
+    #gameArea[data-edge="right"] { box-shadow: inset 2px 0 0 0 var(--edge); }
+    #gameArea .edgeLine {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #cccccc;
+      pointer-events: none;
+    }
+    #edgeLeft { left: 0; }
+    #edgeRight { right: 0; }
+
+    /* Layers */
+    #fruitLayer, #uiLayer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    /* Basket destylized */
+    #basket {
+      position: absolute;
+      bottom: 10%;
+      left: 0;
+      width: 180px;
+      height: 60px;
+      background: #a86d2a;
+      border: 2px solid #000000;
+      will-change: transform;
+      pointer-events: none;
+    }
+    #basket.flash { outline: 4px solid var(--accent); }
+    #basket.rim-catch { background: #c78b47; }
+    #basket.edge { outline: 4px solid var(--accent2); }
+
+    /* Fruit destylized */
+    .fruit {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      will-change: transform;
+      pointer-events: none;
+      display: grid;
+      place-items: center;
+      border: 1px solid #000000;
+      background: #ffffff;
+    }
+    .fruit span {
+      font-size: 56px;
+      line-height: 1;
+    }
+    .fruit.caught {
+      background: #d7ffd7;
+      border-color: var(--safe);
+    }
+    .fruit.missed {
+      background: #ffe7e7;
+      border-color: var(--accent2);
+    }
+
+    /* Overlay (Start/Game Over/Paused) */
+    #overlay {
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      top: 12px;
+      margin: 0;
+      background: #ffffff;
+      border: 2px solid var(--border);
+      display: grid;
+      padding: 8px;
+      gap: 8px;
+      z-index: 5;
+    }
+    #overlay.hidden { display: none; }
+    .panel {
+      display: grid;
+      gap: 8px;
+    }
+    .panel h2 { margin: 0; font-size: 18px; }
+    .panel p { margin: 0; }
+    .panel .big { font-size: 16px; }
+
+    .buttons {
+      display: inline-grid;
+      grid-auto-flow: column;
+      gap: 8px;
+    }
+
+    /* Banners and indicators within game area */
+    #pausedBanner, #readyBanner, #loadingIndicator, #focusPrompt {
+      position: absolute;
+      left: 8px;
+      top: auto;
+      bottom: 8px;
+      background: #f3f3f3;
+      border: 2px solid var(--border);
+      padding: 6px 8px;
+      z-index: 4;
+      display: none;
+    }
+    #pausedBanner.show,
+    #readyBanner.show,
+    #loadingIndicator.show,
+    #focusPrompt.show { display: block; }
+
+    #pausedBanner { left: 8px; }
+    #readyBanner { left: 8px; }
+    #loadingIndicator { right: 8px; left: auto; }
+    #focusPrompt { right: 8px; left: auto; }
+
+    /* Footer instructions sticky */
+    footer .bar {
+      position: sticky;
+      bottom: 0;
+      background: #ffffff;
+    }
+
+    /* Accessibility focus cues */
+    :focus-visible { outline: 3px solid #000000; outline-offset: 1px; }
+
+    /* Responsiveness */
+    @media (max-width: 900px) {
+      .content { grid-template-columns: 1fr; }
+      #controlPanel { order: 2; }
+      #gameArea { order: 1; height: clamp(420px, 54vh, 640px); }
+    }
+
+    /* Ensure minimum target sizes */
+    .statusRow button, .buttons button { min-height: var(--controlH); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="bar" role="region" aria-label="Scoreboard">
+        <h1>Fruit Catcher</h1>
+        <div class="scoreboard" id="scoreboard">
+          <div class="score-item" aria-live="polite" aria-atomic="true">
+            Score: <strong id="scoreValue">0</strong>
+          </div>
+          <div class="score-item">
+            Misses: <strong id="missesValue">0</strong>
+          </div>
+          <div class="lives" title="Lives remaining">
+            <span id="livesHearts" aria-hidden="true">❤️❤️❤️</span>
+          </div>
+        </div>
+        <div id="topControls" role="group" aria-label="Primary controls">
+          <button id="startButtonTop" type="button" aria-label="Start Game" aria-disabled="false">Start Game</button>
+          <button id="restartButtonTop" type="button" aria-label="Reset Score" aria-disabled="false">Reset</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="content">
+        <!-- Control/Status Panel -->
+        <aside id="controlPanel" role="region" aria-label="Control Panel">
+          <div id="statusPanel" role="status" aria-live="polite">
+            <div class="statusRow">
+              <span class="label">Game Status</span>
+              <span class="value" id="gameStatus">idle</span>
+            </div>
+            <div class="statusRow">
+              <span class="label">Overlay</span>
+              <span class="value" id="overlayStatus">shown</span>
+            </div>
+            <div class="statusRow">
+              <span class="label">Start</span>
+              <span class="value" id="startStatus">idle</span>
+            </div>
+            <div class="statusRow">
+              <span class="label">Reset</span>
+              <span class="value" id="resetStatus">idle</span>
+            </div>
+            <div class="statusRow">
+              <span class="label">Spawn</span>
+              <span class="value" id="spawnStatus">ready</span>
+            </div>
+            <div class="statusRow">
+              <span class="label">Catch</span>
+              <span class="value" id="catchStatus">none</span>
+            </div>
+            <div class="statusRow">
+              <span class="label">Miss</span>
+              <span class="value" id="missStatus">none</span>
+            </div>
+            <div class="statusRow">
+              <span class="label">Pause</span>
+              <span class="value" id="pauseStatus">running</span>
+            </div>
+            <div class="statusRow">
+              <span class="label">Focus</span>
+              <span class="value" id="focusStatus">inactive</span>
+            </div>
+            <div class="statusRow">
+              <span class="label">Input Mode</span>
+              <span class="value" id="inputModeLabel">Mouse</span>
+            </div>
+            <div class="statusRow">
+              <span class="label">Edge</span>
+              <span class="value" id="edgeStatus">none</span>
+            </div>
+          </div>
+
+          <div id="rateControls" role="group" aria-label="Difficulty">
+            <div><strong>Fruit Rate</strong> <span id="rateLabel">(ms): 1000</span></div>
+            <div id="rateControlsRow">
+              <button id="rateMinus" type="button" class="miniBtn" aria-label="Decrease rate">-</button>
+              <input id="rateSlider" type="range" min="200" max="1200" step="50" value="1000" aria-label="Fruit spawn interval in milliseconds">
+              <button id="ratePlus" type="button" class="miniBtn" aria-label="Increase rate">+</button>
+            </div>
+            <div class="statusRow">
+              <button id="applyRate" type="button" aria-label="Apply rate">Apply</button>
+              <span class="value" id="applyStatus">idle</span>
+            </div>
+            <small>Use Left/Right arrows to adjust slider. Press Apply to confirm. Press Enter to Start.</small>
+          </div>
+
+          <div id="keyboardHint">
+            <div><strong>Keyboard Hint</strong></div>
+            <p>Use Arrow Keys or A/D to move. Press Enter to Start Game.</p>
+            <small>Click inside the game area to regain keyboard focus if needed.</small>
+          </div>
+        </aside>
+
+        <!-- Game Area -->
+        <section id="gameArea" aria-label="Game area" tabindex="0" data-focused="false" data-edge="none">
+          <!-- Edge lines for boundary feedback -->
+          <div class="edgeLine" id="edgeLeft" aria-hidden="true"></div>
+          <div class="edgeLine" id="edgeRight" aria-hidden="true"></div>
+
+          <!-- Overlay -->
+          <div id="overlay" role="dialog" aria-modal="true" aria-labelledby="overlayTitle">
+            <div class="panel">
+              <h2 id="overlayTitle">Catch the Fruits!</h2>
+              <p class="big" id="messageText">Move the basket with your mouse or arrow keys to catch the falling fruits. Miss 3 and the game ends.</p>
+              <div class="buttons">
+                <button id="startButton" type="button" aria-label="Start Game" aria-disabled="false">Start Game</button>
+                <button id="restartButton" type="button" aria-label="Reset Score" aria-disabled="false">Reset</button>
+              </div>
+              <div><small>Press Enter to Start</small></div>
+            </div>
+          </div>
+
+          <!-- Status banners -->
+          <div id="pausedBanner" role="status">Paused. Press Resume or Enter.</div>
+          <div id="readyBanner" role="status">Game Ready</div>
+          <div id="loadingIndicator" role="status">Loading…</div>
+          <div id="focusPrompt" role="status">Keyboard input inactive. Click here to focus.</div>
+
+          <!-- Layers -->
+          <div id="fruitLayer" aria-hidden="true" data-ready="false"></div>
+          <div id="uiLayer" aria-hidden="true">
+            <div id="basket" aria-label="Basket"></div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <div class="bar" id="instructions">
+        Controls: Move your mouse across the game area, or use Left/Right arrow keys (A/D). Catch fruits to score. Missing 3 fruits ends the game. Edge catches will highlight the basket rim.
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    (function(){
+      "use strict";
+
+      /* Elements with IDs (for automation and accessibility) — keep_selectors contract preserved */
+      const gameArea = document.getElementById("gameArea");
+      const fruitLayer = document.getElementById("fruitLayer");
+      const basketEl = document.getElementById("basket");
+      const scoreValueEl = document.getElementById("scoreValue");
+      const missesValueEl = document.getElementById("missesValue");
+      const livesHeartsEl = document.getElementById("livesHearts");
+      const overlay = document.getElementById("overlay");
+      const messageText = document.getElementById("messageText");
+      const startButton = document.getElementById("startButton");
+      const restartButton = document.getElementById("restartButton");
+      const startButtonTop = document.getElementById("startButtonTop");
+      const restartButtonTop = document.getElementById("restartButtonTop");
+
+      /* Status/Proxy elements (MANDATORY DOM COMPLETION PROXIES) */
+      const gameStatusEl = document.getElementById("gameStatus");
+      const overlayStatusEl = document.getElementById("overlayStatus");
+      const startStatusEl = document.getElementById("startStatus");
+      const resetStatusEl = document.getElementById("resetStatus");
+      const spawnStatusEl = document.getElementById("spawnStatus");
+      const catchStatusEl = document.getElementById("catchStatus");
+      const missStatusEl = document.getElementById("missStatus");
+      const pauseStatusEl = document.getElementById("pauseStatus");
+      const focusStatusEl = document.getElementById("focusStatus");
+      const inputModeLabelEl = document.getElementById("inputModeLabel");
+      const edgeStatusEl = document.getElementById("edgeStatus");
+
+      const rateSliderEl = document.getElementById("rateSlider");
+      const rateLabelEl = document.getElementById("rateLabel");
+      const rateMinusBtn = document.getElementById("rateMinus");
+      const ratePlusBtn = document.getElementById("ratePlus");
+      const applyRateBtn = document.getElementById("applyRate");
+      const applyStatusEl = document.getElementById("applyStatus");
+
+      const pausedBanner = document.getElementById("pausedBanner");
+      const readyBanner = document.getElementById("readyBanner");
+      const loadingIndicator = document.getElementById("loadingIndicator");
+      const focusPrompt = document.getElementById("focusPrompt");
+      const scoreboardEl = document.getElementById("scoreboard");
+
+      /* Game constants and state — keep_api names preserved */
+      const MAX_MISSES = 3;
+      const FRUITS = ["🍎","🍌","🍓","🍇","🍊","🍍","🍉","🥝","🍒"];
+
+      let state = "idle"; // idle | playing | over
+      let paused = false;
+      let score = 0;
+      let misses = 0;
+
+      // Dimensions
+      let areaRect = gameArea.getBoundingClientRect();
+      let gameWidth = areaRect.width;
+      let gameHeight = areaRect.height;
+
+      // Basket properties
+      let basket = {
+        x: gameWidth/2 - 90,
+        y: gameHeight * 0.90,
+        w: 180,
+        h: 60,
+        speed: 800, // px/s (frame-rate independent)
+        leftHeld: false,
+        rightHeld: false
+      };
+
+      // Fruits array
+      const fruits = [];
+
+      // Timing
+      let rafId = 0;
+      let lastTime = performance.now();
+      let spawnTimer = 0;
+      let baseSpawnInterval = 1000; // controlled by slider
+      let spawnInterval = baseSpawnInterval; // dynamic according to score
+
+      // Per-frame collision control
+      let caughtThisFrame = false;
+
+      // Input tracking for context-sensitive instructions and feedback
+      let activeInputMode = "Mouse"; // "Mouse" | "Keyboard"
+      let gameAreaHasFocus = false;
+
+      // Utility: clamp
+      const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+
+      /* Helper: update status proxies synchronously */
+      function setGameStatus(text) {
+        gameStatusEl.textContent = text;
+        gameArea.dataset.state = text;
+      }
+      function setOverlayStatus(shown) {
+        overlayStatusEl.textContent = shown ? "shown" : "hidden";
+        overlay.setAttribute("aria-hidden", shown ? "false" : "true");
+      }
+      function setStartStatus(text) {
+        startStatusEl.textContent = text;
+      }
+      function setResetStatus(text) {
+        resetStatusEl.textContent = text;
+      }
+      function setSpawnStatus(text) {
+        spawnStatusEl.textContent = text;
+        fruitLayer.dataset.ready = (text === "active" || text === "ready") ? "true" : "false";
+      }
+      function setCatchStatus(text) {
+        catchStatusEl.textContent = text;
+      }
+      function setMissStatus(text) {
+        missStatusEl.textContent = text;
+      }
+      function setPauseStatus(text) {
+        pauseStatusEl.textContent = text;
+      }
+      function setFocusStatus(text) {
+        focusStatusEl.textContent = text;
+      }
+      function setInputMode(text) {
+        activeInputMode = text;
+        inputModeLabelEl.textContent = text;
+        // Context-sensitive instructions update — keep #instructions and "arrow keys" text presence
+        const instr = document.getElementById("instructions");
+        if (text === "Mouse") {
+          instr.textContent = "Controls: Move your mouse across the game area, or use Left/Right arrow keys (A/D). Catch fruits to score. Missing 3 fruits ends the game. Edge catches will highlight the basket rim.";
+        } else {
+          instr.textContent = "Controls: Use Left/Right arrow keys (A/D) to move, or move your mouse across the game area. Catch fruits to score. Missing 3 fruits ends the game. Edge catches will highlight the basket rim.";
+        }
+      }
+      function setEdgeStatus(text) {
+        edgeStatusEl.textContent = text;
+        gameArea.dataset.edge = text === "left" || text === "right" ? text : "none";
+      }
+
+      /* Resize and scale game elements — keep_api */
+      function updateDimensions(){
+        areaRect = gameArea.getBoundingClientRect();
+        gameWidth = areaRect.width;
+        gameHeight = areaRect.height;
+
+        // Scale basket size responsive
+        basket.w = clamp(gameWidth * 0.18, 140, 220);
+        basket.h = clamp(gameHeight * 0.08, 50, 72);
+        basket.y = gameHeight - (gameHeight * 0.10);
+
+        // Ensure basket remains within bounds
+        basket.x = clamp(basket.x, 0, gameWidth - basket.w);
+
+        // Apply to DOM
+        basketEl.style.width = basket.w + "px";
+        basketEl.style.height = basket.h + "px";
+        updateBasketTransform();
+
+        // Make sure fruits are on screen if any resizing happened; we keep existing fruit sizes
+      }
+
+      /* Keep_api: basket transform */
+      function updateBasketTransform(){
+        basketEl.style.transform = "translate3d(" + basket.x + "px, 0, 0)";
+        basketEl.style.bottom = (gameHeight - basket.y) + "px";
+
+        // Edge feedback
+        const atLeft = basket.x <= 0;
+        const atRight = basket.x >= (gameWidth - basket.w);
+        if (atLeft) {
+          setEdgeStatus("left");
+          basketEl.classList.add("edge");
+        } else if (atRight) {
+          setEdgeStatus("right");
+          basketEl.classList.add("edge");
+        } else {
+          setEdgeStatus("none");
+          basketEl.classList.remove("edge");
+        }
+      }
+
+      /* Keep_api: scoring */
+      function setScore(v){
+        score = Math.max(0, v | 0);
+        scoreValueEl.textContent = String(score);
+        // Dynamic difficulty uses baseSpawnInterval set via slider
+        spawnInterval = Math.max(350, baseSpawnInterval - score * 22);
+        setSpawnStatus("ready");
+      }
+
+      /* Keep_api: misses */
+      function setMisses(v){
+        misses = Math.max(0, v | 0);
+        missesValueEl.textContent = String(misses);
+        const livesLeft = clamp(MAX_MISSES - misses, 0, MAX_MISSES);
+        livesHeartsEl.textContent = "❤️".repeat(livesLeft) + "🖤".repeat(MAX_MISSES - livesLeft);
+
+        // Immediate visual feedback on miss counter
+        missStatusEl.textContent = "missed";
+        scoreboardEl.classList.add("highlight");
+        setTimeout(() => { scoreboardEl.classList.remove("highlight"); }, 300);
+      }
+
+      /* Keep_api: fruit sizing */
+      function randomFruitSize(){
+        const target = gameWidth * 0.06;
+        return Math.round(clamp(target, 44, 96));
+      }
+
+      /* Keep_api: random X within bounds */
+      function randomX(size){
+        return Math.random() * (gameWidth - size);
+      }
+
+      /* Keep_api: spawn fruit */
+      function spawnFruit(){
+        setSpawnStatus("active");
+        const size = randomFruitSize();
+        const fruit = document.createElement("div");
+        fruit.className = "fruit";
+        fruit.style.width = size + "px";
+        fruit.style.height = size + "px";
+        fruit.innerHTML = "<span>" + FRUITS[(Math.random() * FRUITS.length) | 0] + "</span>";
+        fruitLayer.appendChild(fruit);
+
+        const obj = {
+          id: "fruit-" + Date.now() + "-" + Math.floor(Math.random() * 1e6),
+          el: fruit,
+          x: randomX(size),
+          y: -size,
+          w: size,
+          h: size,
+          vy: 220 + Math.min(520, score * 14) + (Math.random() * 50 - 25)
+        };
+        fruit.dataset.id = obj.id;
+        fruits.push(obj);
+        updateFruitTransform(obj);
+      }
+
+      /* Keep_api: update fruit visual position */
+      function updateFruitTransform(f){
+        f.el.style.transform = "translate3d(" + f.x + "px, " + f.y + "px, 0)";
+      }
+
+      /* Keep_api: remove fruit by index */
+      function removeFruitAt(index){
+        const f = fruits[index];
+        if (!f) return;
+        if (f.el && f.el.parentNode) {
+          f.el.parentNode.removeChild(f.el);
+        }
+        fruits.splice(index, 1);
+      }
+
+      /* Keep_api: clear all fruits */
+      function clearAllFruits(){
+        while (fruits.length) {
+          const f = fruits.pop();
+          if (f.el && f.el.parentNode) f.el.parentNode.removeChild(f.el);
+        }
+        setSpawnStatus("ready");
+      }
+
+      /* Keep_api: rectangle intersection (inclusive edges) */
+      function rectsIntersect(ax1, ay1, aw, ah, bx1, by1, bw, bh){
+        const ax2 = ax1 + aw, ay2 = ay1 + ah, bx2 = bx1 + bw, by2 = by1 + bh;
+        return ax1 <= bx2 && ax2 >= bx1 && ay1 <= by2 && ay2 >= by1;
+      }
+
+      /* Visual: highlight rim catch — no animation, just class toggle */
+      function rimCatchFeedback(){
+        basketEl.classList.add("rim-catch");
+        setTimeout(() => basketEl.classList.remove("rim-catch"), 120);
+      }
+
+      /* Visual: highlight basket on input receive */
+      function basketFlash(){
+        basketEl.classList.add("flash");
+        setTimeout(() => basketEl.classList.remove("flash"), 120);
+      }
+
+      /* Keep_api: Game loop */
+      function gameLoop(timestamp){
+        const dt = Math.min(0.033, (timestamp - lastTime) / 1000); // cap dt for stability
+        lastTime = timestamp;
+
+        // Only run while playing and not paused
+        if (state !== "playing" || paused) {
+          rafId = requestAnimationFrame(gameLoop);
+          return;
+        }
+
+        // Keyboard movement — prevent leaving bounds
+        const dir = (basket.rightHeld ? 1 : 0) - (basket.leftHeld ? 1 : 0);
+        if (dir !== 0){
+          basket.x = clamp(basket.x + dir * basket.speed * dt, 0, gameWidth - basket.w);
+          updateBasketTransform();
+        }
+
+        // Spawn fruit: ensure visibility within 500ms on start
+        spawnTimer += dt * 1000;
+        if (spawnTimer >= spawnInterval) {
+          spawnTimer = 0;
+          spawnFruit();
+          // Chance to spawn a second fruit at higher scores, but count only one catch per frame
+          if (score > 10 && Math.random() < 0.25) {
+            setTimeout(spawnFruit, 150);
+          }
+        }
+
+        // Update fruits
+        const basketTop = basket.y - basket.h;
+        const basketLeft = basket.x;
+        const basketRight = basket.x + basket.w;
+
+        caughtThisFrame = false;
+        for (let i = fruits.length - 1; i >= 0; i--) {
+          const f = fruits[i];
+          f.y += f.vy * dt;
+          updateFruitTransform(f);
+
+          // Check catch (intersection with basket)
+          if (f.y + f.h >= basketTop) {
+            const intersects = rectsIntersect(f.x, f.y, f.w, f.h, basketLeft, basketTop, basket.w, basket.h);
+            if (intersects && !caughtThisFrame) {
+              // Detect rim catch: if touching near basket top/edges
+              const nearTop = Math.abs((f.y + f.h) - basketTop) <= 8;
+              const nearLeftEdge = Math.abs(f.x - basketLeft) <= 8;
+              const nearRightEdge = Math.abs((f.x + f.w) - basketRight) <= 8;
+
+              if (nearTop || nearLeftEdge || nearRightEdge) {
+                rimCatchFeedback();
+              }
+
+              // Caught!
+              setScore(score + 1);
+              setCatchStatus("caught");
+              f.el.classList.add("caught");
+
+              // Immediate removal to avoid overlap double-counting
+              removeFruitAt(i);
+              caughtThisFrame = true;
+
+              // Visual scoreboard feedback
+              scoreboardEl.classList.add("highlight");
+              setTimeout(() => { scoreboardEl.classList.remove("highlight"); }, 300);
+
+              continue; // proceed to next fruit
+            }
+          }
+
+          // Missed (off screen bottom)
+          if (f.y > gameHeight + 10) {
+            setMisses(misses + 1);
+            setMissStatus("missed");
+            f.el.classList.add("missed");
+            removeFruitAt(i);
+
+            // Input delayed feedback (shake via outline class toggle without animation)
+            basketFlash();
+
+            if (misses >= MAX_MISSES) {
+              // Delay 1s before showing overlay for feedback
+              endGame();
+              return;
+            }
+          }
+        }
+
+        rafId = requestAnimationFrame(gameLoop);
+      }
+
+      /* Keep_api: Start game */
+      function startGame(){
+        if (state === "playing") return; // don't restart mid-play
+        // Reset counters and fruits
+        setScore(0);
+        setMisses(0);
+        clearAllFruits();
+        spawnTimer = 0;
+        lastTime = performance.now();
+        state = "playing";
+        paused = false;
+
+        // Status proxies
+        setGameStatus("playing");
+        setStartStatus("started");
+        setPauseStatus("running");
+        setFocusStatus(gameAreaHasFocus ? "active" : "inactive");
+
+        // Start UI: hide overlay, show loading briefly, then ready
+        overlay.classList.add("hidden");
+        setOverlayStatus(false);
+
+        loadingIndicator.classList.add("show");
+        // Ensure fruits begin falling within 500ms
+        setTimeout(() => {
+          loadingIndicator.classList.remove("show");
+          readyBanner.classList.add("show");
+          setTimeout(() => readyBanner.classList.remove("show"), 600);
+          spawnFruit();
+        }, 200);
+
+        // Highlight scoreboard at start
+        scoreboardEl.classList.add("highlight");
+        setTimeout(() => { scoreboardEl.classList.remove("highlight"); }, 600);
+
+        // Focus game area for keyboard play
+        gameArea.focus({ preventScroll: true });
+      }
+
+      /* Keep_api: End game */
+      function endGame(){
+        // Delay to show feedback; do not update while paused/inactive
+        setGameStatus("over");
+        state = "over";
+
+        setTimeout(() => {
+          // Reveal overlay with message — ensure "final score" text presence
+          messageText.innerHTML = "Game Over: 3 fruits missed.<br>Great job! Your final score is <strong>" + score + "</strong>.<br>Click Restart to play again.";
+          overlay.classList.remove("hidden");
+          setOverlayStatus(true);
+        }, 1000);
+      }
+
+      /* Keep_api: Reset game */
+      function resetGame(){
+        // Reset counters but keep overlay visible if currently shown
+        setScore(0);
+        setMisses(0);
+        clearAllFruits();
+        messageText.textContent = "Move the basket with your mouse or arrow keys to catch the falling fruits. Miss 3 and the game ends.";
+        setResetStatus("done");
+
+        // Show ready banner for feedback
+        readyBanner.classList.add("show");
+        setTimeout(() => readyBanner.classList.remove("show"), 600);
+
+        // Keep neutral initial state
+        state = "idle";
+        setGameStatus("idle");
+        setPauseStatus("running");
+      }
+
+      /* Keep_api: Input handlers */
+      function onKeyDown(e){
+        // Prevent default scroll for arrow keys; global suppression
+        if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+          e.preventDefault();
+        }
+        if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A"){
+          basket.leftHeld = true;
+          setInputMode("Keyboard");
+          basketFlash();
+        } else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D"){
+          basket.rightHeld = true;
+          setInputMode("Keyboard");
+          basketFlash();
+        } else if (e.key === "Enter") {
+          e.preventDefault();
+          if (state !== "playing" && !paused) {
+            startGame();
+          } else if (paused && state === "playing") {
+            resumeGame();
+          }
+        }
+      }
+      function onKeyUp(e){
+        if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A"){
+          e.preventDefault();
+          basket.leftHeld = false;
+        } else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D"){
+          e.preventDefault();
+          basket.rightHeld = false;
+        }
+      }
+
+      /* Keep_api: Pointer/mouse move to control basket */
+      function onPointerMove(e){
+        const rect = gameArea.getBoundingClientRect();
+        const cx = (e.clientX ?? (e.touches && e.touches[0] && e.touches[0].clientX) ?? rect.left) - rect.left;
+        basket.x = clamp(cx - basket.w / 2, 0, gameWidth - basket.w);
+        updateBasketTransform();
+        setInputMode("Mouse");
+      }
+
+      /* Keep_api: Resize */
+      function onResize(){
+        updateDimensions();
+      }
+
+      /* Pause/Resume handling on tab visibility */
+      function onVisibilityChange(){
+        if (document.visibilityState !== "visible" && state === "playing") {
+          paused = true;
+          setPauseStatus("paused");
+          pausedBanner.classList.add("show");
+        } else if (document.visibilityState === "visible" && state === "playing") {
+          // Wait for user interaction to resume
+          paused = true;
+          setPauseStatus("paused");
+          pausedBanner.classList.add("show");
+        }
+      }
+      function resumeGame(){
+        paused = false;
+        setPauseStatus("running");
+        pausedBanner.classList.remove("show");
+        gameArea.focus({ preventScroll: true });
+      }
+
+      /* Focus handling & prompt */
+      function updateFocusState() {
+        const focused = document.activeElement === gameArea;
+        gameAreaHasFocus = focused;
+        gameArea.dataset.focused = focused ? "true" : "false";
+        setFocusStatus(focused ? "active" : "inactive");
+        if (!focused && state === "playing") {
+          focusPrompt.classList.add("show");
+        } else {
+          focusPrompt.classList.remove("show");
+        }
+      }
+
+      /* Rate slider controls */
+      function applyRate() {
+        baseSpawnInterval = parseInt(rateSliderEl.value, 10) || 1000;
+        rateLabelEl.textContent = "(ms): " + baseSpawnInterval;
+        spawnInterval = Math.max(350, baseSpawnInterval - score * 22);
+        applyStatusEl.textContent = "done";
+      }
+      function stepRate(delta){
+        const v = clamp(parseInt(rateSliderEl.value, 10) + delta, 200, 1200);
+        rateSliderEl.value = v;
+        rateLabelEl.textContent = "(ms): " + v;
+      }
+
+      /* Wire up buttons — keep API events */
+      startButton.addEventListener("click", function(){
+        startGame();
+      });
+      restartButton.addEventListener("click", function(){
+        resetGame();
+        setResetStatus("done");
+      });
+
+      // Duplicate top controls
+      startButtonTop.addEventListener("click", function(){
+        startGame();
+      });
+      restartButtonTop.addEventListener("click", function(){
+        resetGame();
+        setResetStatus("done");
+      });
+
+      // Resume button accessible via banner (create dynamically)
+      const resumeButton = document.createElement("button");
+      resumeButton.id = "resumeButton";
+      resumeButton.type = "button";
+      resumeButton.textContent = "Resume";
+      resumeButton.addEventListener("click", resumeGame);
+      pausedBanner.appendChild(resumeButton);
+
+      // Keyboard listeners
+      window.addEventListener("keydown", onKeyDown, { passive: false });
+      window.addEventListener("keyup", onKeyUp, { passive: false });
+
+      // Pointer listeners (mouse/touch)
+      gameArea.addEventListener("pointermove", onPointerMove);
+      gameArea.addEventListener("touchmove", (e) => {
+        if (e.touches && e.touches.length) {
+          onPointerMove(e);
+        }
+      }, { passive: true });
+
+      // Focus and click for focus prompt
+      gameArea.addEventListener("focus", updateFocusState);
+      gameArea.addEventListener("blur", updateFocusState);
+      gameArea.addEventListener("click", () => {
+        gameArea.focus({ preventScroll: true });
+        updateFocusState();
+      });
+
+      // Rate slider handlers
+      rateSliderEl.addEventListener("input", () => {
+        rateLabelEl.textContent = "(ms): " + rateSliderEl.value;
+        applyStatusEl.textContent = "idle";
+      });
+      rateMinusBtn.addEventListener("click", () => stepRate(-50));
+      ratePlusBtn.addEventListener("click", () => stepRate(50));
+      applyRateBtn.addEventListener("click", applyRate);
+      // Keyboard on slider
+      rateSliderEl.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowLeft") { e.preventDefault(); stepRate(-50); }
+        if (e.key === "ArrowRight") { e.preventDefault(); stepRate(50); }
+        if (e.key === "Enter") { e.preventDefault(); applyRate(); }
+      });
+
+      // Resize
+      window.addEventListener("resize", onResize);
+
+      // Visibility
+      document.addEventListener("visibilitychange", onVisibilityChange);
+
+      // Initialize sizes and start loop — neutral initial state, do not auto-trigger
+      updateDimensions();
+      setGameStatus("idle");
+      setOverlayStatus(true);
+      setStartStatus("idle");
+      setResetStatus("idle");
+      setSpawnStatus("ready");
+      setCatchStatus("none");
+      setMissStatus("none");
+      setPauseStatus("running");
+      setFocusStatus("inactive");
+      setInputMode("Mouse");
+      rateLabelEl.textContent = "(ms): " + baseSpawnInterval;
+      applyStatusEl.textContent = "idle";
+
+      lastTime = performance.now();
+      rafId = requestAnimationFrame(gameLoop);
+
+      // Ensure gameArea can be focused for keyboard play on click
+      gameArea.addEventListener("click", () => gameArea.focus({ preventScroll: true }));
+
+      // Safety: cleanup on unload
+      window.addEventListener("beforeunload", () => cancelAnimationFrame(rafId));
+
+      // Edge-case: ensure basket positions are correct on load
+      updateBasketTransform();
+
+      // Debounced input switching: simple cooldown
+      let inputSwitchCooldown = 0;
+      setInterval(() => {
+        inputSwitchCooldown = Math.max(0, inputSwitchCooldown - 1);
+      }, 100);
+
+      // Detect input mode changes explicitly
+      function declareKeyboardMode(){
+        if (inputSwitchCooldown > 0) return;
+        inputSwitchCooldown = 3;
+        setInputMode("Keyboard");
+      }
+      function declareMouseMode(){
+        if (inputSwitchCooldown > 0) return;
+        inputSwitchCooldown = 3;
+        setInputMode("Mouse");
+      }
+      window.addEventListener("keydown", declareKeyboardMode, { passive: true });
+      gameArea.addEventListener("pointermove", declareMouseMode, { passive: true });
+    })();
+  </script>
+</body>
+</html>

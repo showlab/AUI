@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math Practice Drills</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: #f4f4f9;
+      color: #333;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .settings, .quiz, .results {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    label {
+      font-size: 1.2rem;
+    }
+
+    select, button, input {
+      font-size: 1.2rem;
+      padding: 0.5rem;
+      margin: 0.5rem;
+    }
+
+    button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .quiz {
+      display: none;
+    }
+
+    .results {
+      display: none;
+    }
+
+    .score {
+      font-size: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 720px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      label, select, button, input {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Math Practice Drills</h1>
+
+  <div class="settings" id="settings">
+    <label for="difficulty">Select Difficulty:</label>
+    <select id="difficulty">
+      <option value="easy">Easy</option>
+      <option value="medium">Medium</option>
+      <option value="hard">Hard</option>
+    </select>
+    <br>
+    <button id="startQuiz">Start Quiz</button>
+  </div>
+
+  <div class="quiz" id="quiz">
+    <p id="question" class="question">What is 1 + 1?</p>
+    <input type="number" id="answer" placeholder="Your answer">
+    <br>
+    <button id="submitAnswer">Submit</button>
+    <p id="timer" class="timer">Time left: 30s</p>
+  </div>
+
+  <div class="results" id="results">
+    <p id="finalScore" class="score">Your score: 0</p>
+    <button id="restartQuiz">Restart</button>
+  </div>
+
+  <script>
+    const settingsDiv = document.getElementById('settings');
+    const quizDiv = document.getElementById('quiz');
+    const resultsDiv = document.getElementById('results');
+    const questionEl = document.getElementById('question');
+    const answerInput = document.getElementById('answer');
+    const timerEl = document.getElementById('timer');
+    const finalScoreEl = document.getElementById('finalScore');
+
+    const startQuizButton = document.getElementById('startQuiz');
+    const submitAnswerButton = document.getElementById('submitAnswer');
+    const restartQuizButton = document.getElementById('restartQuiz');
+
+    let difficulty = 'easy';
+    let timeLeft = 30;
+    let score = 0;
+    let currentQuestion = {};
+    let timerInterval = null;
+
+    const difficulties = {
+      easy: { maxNum: 10, operations: ['+'] },
+      medium: { maxNum: 20, operations: ['+', '-'] },
+      hard: { maxNum: 50, operations: ['+', '-', '*'] }
+    };
+
+    document.getElementById('difficulty').addEventListener('change', (e) => {
+      difficulty = e.target.value;
+    });
+
+    function startQuiz() {
+      score = 0;
+      timeLeft = 30;
+      settingsDiv.style.display = 'none';
+      quizDiv.style.display = 'block';
+      resultsDiv.style.display = 'none';
+      generateQuestion();
+      startTimer();
+    }
+
+    function generateQuestion() {
+      const { maxNum, operations } = difficulties[difficulty];
+      const num1 = Math.floor(Math.random() * maxNum) + 1;
+      const num2 = Math.floor(Math.random() * maxNum) + 1;
+      const operation = operations[Math.floor(Math.random() * operations.length)];
+
+      currentQuestion = {
+        num1,
+        num2,
+        operation,
+        answer: eval(`${num1} ${operation} ${num2}`)
+      };
+
+      questionEl.textContent = `What is ${num1} ${operation} ${num2}?`;
+      answerInput.value = '';
+      answerInput.focus();
+    }
+
+    function startTimer() {
+      timerEl.textContent = `Time left: ${timeLeft}s`;
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timerEl.textContent = `Time left: ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          endQuiz();
+        }
+      }, 1000);
+    }
+
+    function submitAnswer() {
+      const userAnswer = parseInt(answerInput.value, 10);
+      if (userAnswer === currentQuestion.answer) {
+        score++;
+      }
+      generateQuestion();
+    }
+
+    function endQuiz() {
+      clearInterval(timerInterval);
+      quizDiv.style.display = 'none';
+      resultsDiv.style.display = 'block';
+      finalScoreEl.textContent = `Your score: ${score}`;
+    }
+
+    function restartQuiz() {
+      settingsDiv.style.display = 'block';
+      quizDiv.style.display = 'none';
+      resultsDiv.style.display = 'none';
+    }
+
+    startQuizButton.addEventListener('click', startQuiz);
+    submitAnswerButton.addEventListener('click', submitAnswer);
+    restartQuizButton.addEventListener('click', restartQuiz);
+  </script>
+</body>
+</html>

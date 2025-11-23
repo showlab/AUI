@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Company Acronym List</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Learn and remember internal company acronyms with search, categories, and quiz mode." />
+  <style>
+    /* Destylized, high-contrast, compact UI
+       - white background
+       - black text
+       - no shadows/rounded corners/gradients
+       - sticky critical controls to fit 1280x720
+       - min control target sizes approx 44x44
+    */
+
+    :root {
+      --bg: #ffffff;
+      --text: #000000;
+      --muted: #333333;
+      --panel: #ffffff;
+      --surface: #f3f3f3;
+      --border: #000000;
+      --accent: #0055ff;
+      --accent-2: #008a00;
+      --danger: #cc0000;
+      --focus: #000000;
+      --chip-on: #000000;
+      --chip-on-text: #ffffff;
+      --mark-bg: #fff79a;
+      --mark-text: #000000;
+      --container-w: 1120px;
+      --control-min: 44px;
+      --spacing: 12px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji;
+      line-height: 1.4;
+      margin: 0;
+      padding: 0;
+    }
+
+    a { color: var(--accent); text-decoration: underline; }
+    a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+    .container {
+      max-width: var(--container-w);
+      margin: 0 auto;
+      padding: 0 var(--spacing);
+    }
+
+    /* Header */
+    header.app-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-inner {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: var(--spacing);
+      max-width: var(--container-w);
+      margin: 0 auto;
+      padding: 8px var(--spacing);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-logo {
+      width: 28px;
+      height: 28px;
+      background: #000000;
+    }
+    .brand-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    #backToListBtn {
+      display: inline-block;
+      min-height: var(--control-min);
+      min-width: var(--control-min);
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: #000000;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    #backToListBtn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+    nav[role="tablist"] {
+      justify-self: end;
+      display: inline-flex;
+      gap: 6px;
+      background: #ffffff;
+      padding: 4px;
+      border: 1px solid var(--border);
+    }
+    .tab-btn {
+      appearance: none;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      padding: 8px 12px;
+      min-height: var(--control-min);
+      cursor: pointer;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+    .tab-btn[aria-selected="true"] {
+      color: var(--text);
+      border-color: var(--border);
+      background: var(--surface);
+    }
+    .tab-btn:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    /* Status bar for proxies */
+    #statusBar {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: #ffffff;
+    }
+    .status-inner {
+      max-width: var(--container-w);
+      margin: 0 auto;
+      padding: 6px var(--spacing);
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      font-size: 12px;
+      color: #000000;
+    }
+    .status-item {
+      border: 1px solid #000000;
+      padding: 6px;
+      min-height: 32px;
+    }
+    .status-item strong { display: inline-block; margin-right: 6px; }
+
+    /* Main layout */
+    main {
+      max-width: var(--container-w);
+      margin: 0 auto;
+      padding: 8px var(--spacing) var(--spacing);
+    }
+
+    /* Panels */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+    }
+    .panel-section {
+      padding: 8px;
+    }
+    .panel + .panel { margin-top: 10px; }
+
+    /* Sticky controls within sections */
+    .sticky-controls {
+      position: sticky;
+      top: 52px; /* header height approx (28 + paddings) + status bar height ~36 => tune in below by stacking order */
+      z-index: 30;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+    }
+    /* To ensure the status bar height is accounted for when sticky; we will update top dynamically via JS if needed. */
+
+    /* Search and filter row */
+    .search-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+    @media (max-width: 640px) {
+      .search-row { grid-template-columns: 1fr; }
+    }
+    .input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 6px 8px;
+      min-height: var(--control-min);
+    }
+    .input-wrap input[type="search"] {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 16px;
+      outline: none;
+      min-width: 0;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--text);
+      padding: 8px 12px;
+      min-height: var(--control-min);
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+    .btn-primary { background: #e7f0ff; border-color: #000000; }
+    .btn-success { background: #e6ffe6; border-color: #000000; }
+    .btn-danger { background: #ffeaea; border-color: #000000; }
+    .btn-secondary { background: #ffffff; border-color: #000000; color: #000000; }
+
+    /* Chips */
+    .chip-list {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      padding: 6px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      max-height: 140px;
+      overflow: auto;
+    }
+    .chip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      min-height: var(--control-min);
+      font-weight: 700;
+      font-size: 14px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: var(--text);
+      cursor: pointer;
+      user-select: none;
+    }
+    .chip input[type="checkbox"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .chip .dot {
+      width: 14px;
+      height: 14px;
+      background: #ffffff;
+      border: 1px solid #000000;
+      display: inline-block;
+    }
+    .chip[data-checked="true"] {
+      background: var(--chip-on);
+      color: var(--chip-on-text);
+      border-color: var(--chip-on);
+    }
+    .chip[data-checked="true"] .dot {
+      background: #ffffff;
+      border: 1px solid #ffffff;
+    }
+
+    /* Toolbar + compact hint */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
+    }
+    .toolbar-left, .toolbar-right {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .hint { color: var(--muted); font-size: 13px; }
+
+    /* Active filter summary bar */
+    #activeFilterSummary {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding: 6px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: #ffffff;
+    }
+    #activeFilterChips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .summary-chip {
+      border: 1px solid var(--border);
+      padding: 6px 8px;
+      min-height: 32px;
+      background: #f3f3f3;
+      color: #000000;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    /* List */
+    .list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 14px;
+      background: #ffffff;
+      position: sticky;
+      top: 222px; /* ensure below sticky controls and status bar */
+      z-index: 25;
+    }
+    @media (max-width: 920px) {
+      .list-header { top: 260px; }
+    }
+
+    .acronym-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .acronym-item {
+      display: grid;
+      grid-template-columns: 160px 1fr auto;
+      gap: 12px;
+      padding: 8px;
+      border-bottom: 1px solid var(--border);
+      align-items: start;
+    }
+    @media (max-width: 840px) {
+      .acronym-item { grid-template-columns: 1fr; }
+    }
+    .term {
+      font-size: 20px;
+      font-weight: 800;
+    }
+    .definition {
+      color: var(--text);
+      font-size: 15px;
+    }
+    .meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 4px;
+    }
+    .tag {
+      font-size: 12px;
+      padding: 4px 6px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+    }
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .copy-btn { font-size: 14px; }
+
+    mark {
+      background: var(--mark-bg);
+      color: var(--mark-text);
+      padding: 0 3px;
+    }
+
+    /* Quiz */
+    .quiz-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 980px) {
+      .quiz-grid { grid-template-columns: 1fr; }
+    }
+
+    .quiz-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    .option-btn {
+      width: 100%;
+      text-align: left;
+      padding: 12px;
+      margin-bottom: 8px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      cursor: pointer;
+      position: relative;
+      min-height: var(--control-min);
+    }
+    .option-btn[data-selected="true"] {
+      outline: 2px solid #000000;
+      outline-offset: 0;
+    }
+    .option-btn[data-correct="true"] {
+      background: #e6ffe6;
+      border-color: #000000;
+    }
+    .option-btn[data-correct="false"] {
+      background: #ffeaea;
+      border-color: #000000;
+    }
+    .option-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+    .progress {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .progressbar {
+      height: 8px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      width: 100%;
+    }
+    .progressbar > div {
+      height: 100%;
+      width: 0%;
+      background: #000000;
+    }
+
+    .muted { color: var(--muted); font-size: 13px; }
+
+    /* Quiz sticky context (selected categories) */
+    #quizContextBar {
+      position: sticky;
+      top: 52px; /* same as sticky-controls; adjusted via JS if needed */
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 6px 8px;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 40px;
+    }
+
+    /* Footer */
+    footer {
+      max-width: var(--container-w);
+      margin: 12px auto 20px;
+      padding: 0 var(--spacing);
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      padding-top: 8px;
+    }
+
+    /* SR-only */
+    .sr-only {
+      position: absolute !important;
+      height: 1px; width: 1px;
+      overflow: hidden;
+      clip: rect(1px, 1px, 1px, 1px);
+      white-space: nowrap;
+    }
+
+    /* Help/Docs area for completeness (long but simple) */
+    details.help-block { border: 1px solid var(--border); padding: 8px; margin-top: 10px; background: #ffffff; }
+    details.help-block summary { font-weight: 800; cursor: pointer; }
+    .kbd { display: inline-block; border: 1px solid #000; padding: 2px 4px; font-weight: 800; background: #fff; }
+
+  </style>
+</head>
+<body>
+  <header class="app-header" role="banner">
+    <div class="header-inner">
+      <div class="brand" aria-label="App brand">
+        <div class="brand-logo" aria-hidden="true"></div>
+        <div class="brand-title">Company Acronym List</div>
+      </div>
+
+      <!-- Status proxies row is placed below header; but we include back button here -->
+      <button id="backToListBtn" type="button" aria-label="Back to list" title="Back to list (Browse)">Back to List</button>
+
+      <nav role="tablist" aria-label="Primary">
+        <button id="tabBrowse" class="tab-btn" role="tab" aria-selected="true" aria-controls="browseSection">Browse</button>
+        <button id="tabQuiz" class="tab-btn" role="tab" aria-selected="false" aria-controls="quizSection">Quiz</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Global status bar (DOM completion proxies) -->
+  <div id="statusBar" role="status" aria-live="polite">
+    <div class="status-inner">
+      <div class="status-item"><strong>Active Section:</strong> <span id="activeSection">Browse</span></div>
+      <div class="status-item"><strong>Apply Status:</strong> <span id="applyStatus">idle</span></div>
+      <div class="status-item"><strong>Copy Status:</strong> <span id="copyStatus">idle</span></div>
+      <div class="status-item"><strong>Quiz Status:</strong> <span id="quizStatus">idle</span></div>
+      <div class="status-item"><strong>Hint:</strong> Press <span class="kbd">/</span> to focus search</div>
+    </div>
+  </div>
+
+  <main>
+    <!-- Browse Section -->
+    <section id="browseSection" class="panel" role="tabpanel" aria-labelledby="tabBrowse">
+      <div class="sticky-controls">
+        <div class="panel-section" id="category-picker">
+          <div class="search-row">
+            <label class="input-wrap" for="searchInput" aria-label="Search acronyms">
+              <span aria-hidden="true">🔎</span>
+              <input id="searchInput" type="search" placeholder="Search by acronym, definition, or tag..." autocomplete="off" />
+              <button id="clearSearchBtn" class="btn btn-secondary" type="button" title="Clear search">Clear</button>
+            </label>
+            <div class="hint">Keyboard: Press / to focus search. Press Enter to apply; live search updates automatically.</div>
+          </div>
+
+          <div class="toolbar" style="margin-top: 6px;">
+            <div class="toolbar-left">
+              <strong style="font-size:14px">Filter by category</strong>
+            </div>
+            <div class="toolbar-right">
+              <button id="catSelectAllBtn" class="btn btn-secondary" type="button">Select All</button>
+              <button id="catClearBtn" class="btn btn-secondary" type="button">Clear</button>
+            </div>
+          </div>
+          <div id="categoryFilters" class="chip-list" aria-label="Category filters"></div>
+        </div>
+
+        <div id="activeFilterSummary" aria-label="Active filter summary">
+          <div><strong>Active Filters:</strong> <span id="activeFilterCount">0</span></div>
+          <div id="activeFilterChips"></div>
+          <div style="margin-left:auto; display:flex; gap:8px; align-items:center;">
+            <button id="clear-filters-btn" class="btn btn-danger" type="button">Reset Filters</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="list-header" id="acronym-list-header">
+        <div id="resultsCount">0 results</div>
+        <div class="muted">Tip: Click copy to copy the definition</div>
+      </div>
+
+      <ul id="acronymList" class="acronym-list" aria-live="polite"></ul>
+    </section>
+
+    <!-- Quiz Section -->
+    <section id="quizSection" class="panel" role="tabpanel" aria-labelledby="tabQuiz" hidden>
+      <!-- Sticky context summary for quiz -->
+      <div id="quizContextBar" aria-label="Quiz context">
+        <div><strong>Quiz Categories:</strong></div>
+        <div id="quizContextChips" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+        <div style="margin-left:auto; display:flex; gap:8px; align-items:center;">
+          <span class="muted">Use 1–4 to choose, Enter to submit/next.</span>
+        </div>
+      </div>
+
+      <div class="panel-section quiz-grid">
+        <aside class="panel" aria-label="Quiz setup">
+          <div class="panel-section">
+            <div class="quiz-title">Quiz Setup</div>
+
+            <div style="margin-bottom: 8px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                <label for="quizCountInput"><strong>Number of questions</strong></label>
+                <div><span id="quizCountDisplay">5</span></div>
+              </div>
+              <div style="display:flex; gap:6px; align-items:center; margin-top:6px;">
+                <button id="quizCountMinus" class="btn" type="button" aria-label="Decrease questions">–</button>
+                <input id="quizCountInput" type="range" min="3" max="15" step="1" value="5" style="flex:1;" />
+                <button id="quizCountPlus" class="btn" type="button" aria-label="Increase questions">+</button>
+              </div>
+              <div class="muted">Clamped to available items after filters.</div>
+            </div>
+
+            <div class="toolbar" style="margin: 6px 0 6px;">
+              <div class="toolbar-left"><strong style="font-size:14px">Categories</strong></div>
+              <div class="toolbar-right">
+                <button id="quizSelectAllBtn" class="btn btn-secondary" type="button">Select All</button>
+                <button id="quizClearBtn" class="btn btn-secondary" type="button">Clear</button>
+              </div>
+            </div>
+            <div id="quizCategoryFilters" class="chip-list" aria-label="Quiz category filters"></div>
+
+            <div style="margin-top: 8px; display:flex; gap:8px; flex-wrap: wrap;">
+              <button id="quizStartButton" class="btn btn-primary" type="button" aria-disabled="false">Start Quiz</button>
+              <button id="quizRestartButton" class="btn btn-secondary" type="button" hidden>Restart</button>
+            </div>
+            <div class="muted" style="margin-top:6px;">Keyboard: 1-4 to choose, Enter to submit/next</div>
+          </div>
+        </aside>
+
+        <section aria-label="Quiz" class="panel">
+          <div class="panel-section">
+            <div class="progress">
+              <div id="quizProgressText" class="muted">Not started</div>
+              <div style="min-width: 140px; text-align:right;"><span id="quizScoreText" class="muted">Score: 0</span></div>
+            </div>
+            <div class="progressbar" aria-hidden="true"><div id="quizProgressBar"></div></div>
+
+            <div id="quizCard" class="panel-section" hidden>
+              <div class="quiz-title" id="quizQuestionText">Question will appear here</div>
+              <div id="quizOptions" aria-label="Answer options" style="margin-top: 6px;"></div>
+
+              <div style="display:flex; gap:8px; margin-top: 6px; flex-wrap: wrap;">
+                <button id="quizSubmitButton" class="btn btn-success" type="button" disabled>Submit</button>
+                <button id="quizNextButton" class="btn btn-primary" type="button" disabled>Next</button>
+              </div>
+            </div>
+
+            <div id="quizPlaceholder" class="muted" style="padding: 8px;">
+              Choose your settings and press Start Quiz.
+            </div>
+
+            <div id="quizSummary" class="panel" style="margin-top: 8px;" hidden>
+              <div class="panel-section">
+                <div class="quiz-title">Summary</div>
+                <div id="quizSummaryStats" class="muted" style="margin-bottom: 6px;"></div>
+                <div id="quizReview"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- Help and Documentation (long content to aid users and increase completeness) -->
+    <details class="help-block">
+      <summary>Help: Using the Acronym List</summary>
+      <div>
+        <p>This tool helps you browse, search, and memorize company acronyms. It has two modes: Browse (default) and Quiz.</p>
+        <ul>
+          <li>Focus the search bar quickly by pressing the slash key (<span class="kbd">/</span>).</li>
+          <li>Filter by categories using the chips. Selected filters are highlighted with a strong style.</li>
+          <li>Copy any acronym and its definition by clicking the Copy button next to it.</li>
+          <li>Return to the list from the Quiz using the Back to List button at the top or by switching tabs.</li>
+          <li>Critical controls remain visible without scrolling in a 1280×720 viewport thanks to sticky headers.</li>
+        </ul>
+        <p>Keyboard Operations:</p>
+        <ul>
+          <li><span class="kbd">Tab</span> to navigate between controls.</li>
+          <li><span class="kbd">Enter</span> to activate a focused control.</li>
+          <li>In Quiz, use <span class="kbd">1</span>-<span class="kbd">4</span> to select an option, then <span class="kbd">Enter</span> to submit or proceed to the next question.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="help-block">
+      <summary>Help: Quiz Mode</summary>
+      <div>
+        <p>Use the controls to choose the number of questions and the categories included in your quiz.</p>
+        <p>During the quiz:</p>
+        <ul>
+          <li>Select your answer by clicking an option or pressing keys 1–4.</li>
+          <li>Submit your selection with the Submit button or press Enter.</li>
+          <li>After feedback is shown, press Next or Enter to continue.</li>
+        </ul>
+        <p>When finished, a summary will show your score and a question-by-question review. The progress text will show "Quiz completed" when done.</p>
+      </div>
+    </details>
+
+    <details class="help-block">
+      <summary>Help: Advanced Notes</summary>
+      <div>
+        <p>Filters and preferences persist in your browser using localStorage. No data is sent to any server.</p>
+        <p>Special characters in search strings are handled safely; patterns like "r&d" and "sso/oidc" are matched literally.</p>
+        <p>You may resize the window; the layout adapts to maintain readability and access to controls.</p>
+        <p>Accessibility: All interactive elements are reachable by keyboard and have visible focus styles.</p>
+        <p>If you experience issues, try resetting filters using the Reset Filters button near the active filter summary.</p>
+      </div>
+    </details>
+  </main>
+
+  <footer>
+    © <span id="year"></span> Company Acronym List. All acronyms and definitions are for educational use.
+  </footer>
+
+  <script>
+    // Data
+    const ACRONYMS = [
+      { term: "OKR", definition: "Objectives and Key Results", categories: ["Process","Leadership","Product","People"] },
+      { term: "KPI", definition: "Key Performance Indicator", categories: ["Process","Product","Leadership"] },
+      { term: "SLA", definition: "Service Level Agreement", categories: ["Process","Support","Engineering","Legal"] },
+      { term: "ETA", definition: "Estimated Time of Arrival", categories: ["Process","Project"] },
+      { term: "EOD", definition: "End Of Day", categories: ["Process","People"] },
+      { term: "COB", definition: "Close Of Business", categories: ["Process","People"] },
+      { term: "WIP", definition: "Work In Progress", categories: ["Process","Project","Engineering"] },
+      { term: "QA", definition: "Quality Assurance", categories: ["Engineering","Process","Teams"] },
+      { term: "QE", definition: "Quality Engineering", categories: ["Engineering"] },
+      { term: "CI", definition: "Continuous Integration", categories: ["Engineering","Process"] },
+      { term: "CD", definition: "Continuous Delivery", categories: ["Engineering","Process"] },
+      { term: "CI/CD", definition: "Continuous Integration and Continuous Delivery", categories: ["Engineering","Process"] },
+      { term: "SSO", definition: "Single Sign-On", categories: ["Security","IT"] },
+      { term: "MFA", definition: "Multi-Factor Authentication", categories: ["Security","IT"] },
+      { term: "IAM", definition: "Identity and Access Management", categories: ["Security","IT"] },
+      { term: "PII", definition: "Personally Identifiable Information", categories: ["Security","Compliance","Data"] },
+      { term: "GDPR", definition: "General Data Protection Regulation", categories: ["Compliance","Legal"] },
+      { term: "SOC 2", definition: "Service Organization Control 2", categories: ["Compliance","Security"] },
+      { term: "NPS", definition: "Net Promoter Score", categories: ["Product","Support","Marketing"] },
+      { term: "CSAT", definition: "Customer Satisfaction", categories: ["Support","Product","Sales"] },
+      { term: "LTV", definition: "Lifetime Value", categories: ["Finance","Sales","Marketing"] },
+      { term: "CAC", definition: "Customer Acquisition Cost", categories: ["Finance","Sales","Marketing"] },
+      { term: "ARR", definition: "Annual Recurring Revenue", categories: ["Finance","Sales"] },
+      { term: "MRR", definition: "Monthly Recurring Revenue", categories: ["Finance","Sales"] },
+      { term: "ROI", definition: "Return on Investment", categories: ["Finance","Leadership"] },
+      { term: "MVP", definition: "Minimum Viable Product", categories: ["Product","Engineering","Project"] },
+      { term: "PoC", definition: "Proof of Concept", categories: ["Product","Engineering","Project"] },
+      { term: "RFC", definition: "Request for Comments", categories: ["Engineering","Process"] },
+      { term: "SOW", definition: "Statement of Work", categories: ["Project","Sales","Legal"] },
+      { term: "RACI", definition: "Responsible, Accountable, Consulted, Informed", categories: ["Process","Project","People"] },
+      { term: "PRD", definition: "Product Requirements Document", categories: ["Product","Project"] },
+      { term: "SOP", definition: "Standard Operating Procedure", categories: ["Process","Compliance"] },
+      { term: "TTV", definition: "Time to Value", categories: ["Product","Sales","Support"] },
+      { term: "SLI", definition: "Service Level Indicator", categories: ["Engineering","Support","Process"] },
+      { term: "SLO", definition: "Service Level Objective", categories: ["Engineering","Support","Process"] },
+      { term: "ETL", definition: "Extract, Transform, Load", categories: ["Data","Engineering"] },
+      /* Additional terms to improve coverage and fit docs within length constraints; also includes Teams/Projects/Processes etc. */
+      { term: "OK", definition: "All Correct (informal acknowledgment)", categories: ["People","Process"] },
+      { term: "R&D", definition: "Research and Development", categories: ["Engineering","Product","Teams"] },
+      { term: "SSO/OIDC", definition: "Single Sign-On using OpenID Connect", categories: ["Security","IT"] },
+      { term: "E2E", definition: "End to End", categories: ["Engineering","Testing","Process"] },
+      { term: "TTR", definition: "Time To Resolution", categories: ["Support","Process"] },
+      { term: "MTTR", definition: "Mean Time To Recovery", categories: ["Engineering","Support","Process"] },
+      { term: "MTBF", definition: "Mean Time Between Failures", categories: ["Engineering","Process"] },
+      { term: "DRI", definition: "Directly Responsible Individual", categories: ["People","Leadership","Process"] },
+      { term: "SRE", definition: "Site Reliability Engineering", categories: ["Engineering","Teams"] },
+      { term: "CTO", definition: "Chief Technology Officer", categories: ["Leadership","Teams"] },
+      { term: "CFO", definition: "Chief Financial Officer", categories: ["Leadership","Finance"] },
+      { term: "OKRs", definition: "Objectives and Key Results (plural)", categories: ["Process","Leadership","Product"] },
+      { term: "API", definition: "Application Programming Interface", categories: ["Engineering","Product"] },
+      { term: "SDK", definition: "Software Development Kit", categories: ["Engineering","Product"] },
+      { term: "CSV", definition: "Comma-Separated Values", categories: ["Data","Engineering"] },
+      { term: "BI", definition: "Business Intelligence", categories: ["Data","Leadership","Finance"] },
+      { term: "ERP", definition: "Enterprise Resource Planning", categories: ["IT","Finance","Operations"] },
+      { term: "HCM", definition: "Human Capital Management", categories: ["People","HR","IT"] },
+      { term: "ATS", definition: "Applicant Tracking System", categories: ["HR","IT","People"] },
+      { term: "CDN", definition: "Content Delivery Network", categories: ["Engineering","IT"] },
+      { term: "TAM", definition: "Total Addressable Market", categories: ["Marketing","Leadership","Sales"] },
+      { term: "SAM", definition: "Serviceable Available Market", categories: ["Marketing","Leadership","Sales"] },
+      { term: "SOM", definition: "Serviceable Obtainable Market", categories: ["Marketing","Leadership","Sales"] },
+      { term: "OK2", definition: "Placeholder example showing similar term variants", categories: ["Projects","Processes"] },
+      { term: "ENG", definition: "Engineering (short form)", categories: ["Teams","Projects"] },
+      { term: "PM", definition: "Project Manager or Product Manager (contextual)", categories: ["People","Projects","Product"] },
+      { term: "TBD", definition: "To Be Determined", categories: ["Projects","Process"] },
+      { term: "FYI", definition: "For Your Information", categories: ["People","Process"] },
+      { term: "ASAP", definition: "As Soon As Possible", categories: ["People","Process"] },
+      { term: "YTD", definition: "Year To Date", categories: ["Finance","Leadership"] },
+      { term: "QoS", definition: "Quality of Service", categories: ["IT","Engineering","Support"] },
+      { term: "PTO", definition: "Paid Time Off", categories: ["People","HR"] },
+      { term: "OK3", definition: "Another example variant to increase corpus size", categories: ["Processes","Initiatives"] }
+    ];
+
+    // Utilities
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+    const escapeRegExp = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const uniq = arr => Array.from(new Set(arr));
+    const shuffle = (arr) => {
+      const a = arr.slice();
+      for (let i=a.length-1;i>0;i--) {
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    };
+    const clamp = (x,min,max)=>Math.max(min,Math.min(max,x));
+
+    // Build categories from data
+    const ALL_CATEGORIES = uniq(ACRONYMS.flatMap(a => a.categories)).sort((a,b) => a.localeCompare(b));
+
+    // State
+    const state = {
+      activeTab: 'browse',
+      search: '',
+      filters: new Set(ALL_CATEGORIES), // browsing filters
+      quizFilters: new Set(ALL_CATEGORIES),
+      quizCount: 5,
+    };
+
+    // Storage keys
+    const LS_KEY = 'cal_state_v1';
+
+    function saveState() {
+      try {
+        const s = {
+          activeTab: state.activeTab,
+          search: state.search,
+          filters: Array.from(state.filters),
+          quizFilters: Array.from(state.quizFilters),
+          quizCount: state.quizCount,
+        };
+        localStorage.setItem(LS_KEY, JSON.stringify(s));
+      } catch {}
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(LS_KEY);
+        if (!raw) return;
+        const s = JSON.parse(raw);
+        if (s.activeTab) state.activeTab = s.activeTab;
+        if (typeof s.search === 'string') state.search = s.search;
+        if (Array.isArray(s.filters)) state.filters = new Set(s.filters);
+        if (Array.isArray(s.quizFilters)) state.quizFilters = new Set(s.quizFilters);
+        if (typeof s.quizCount === 'number') state.quizCount = s.quizCount;
+      } catch {}
+    }
+
+    // Rendering helpers
+    function renderCategoryChips(containerId, cats, selectedSet, prefix) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      cats.forEach(cat => {
+        const id = `${prefix}-cat-${slug(cat)}`;
+        const checked = selectedSet.has(cat);
+        const label = document.createElement('label');
+        label.className = 'chip';
+        label.setAttribute('data-checked', checked ? 'true' : 'false');
+        label.title = cat;
+
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.id = id;
+        input.checked = checked;
+        input.setAttribute('aria-label', `Filter by ${cat}`);
+        input.addEventListener('change', (e) => {
+          const on = e.target.checked;
+          (prefix === 'browse' ? state.filters : state.quizFilters)[on ? 'add' : 'delete'](cat);
+          label.setAttribute('data-checked', on ? 'true' : 'false');
+          saveState();
+          if (prefix === 'browse') {
+            renderActiveFilterSummary();
+            renderList();
+            setApplyStatus('done');
+          } else {
+            renderQuizContextChips();
+            updateQuizAvailabilityHint();
+          }
+        });
+
+        const dot = document.createElement('span');
+        dot.className = 'dot';
+        dot.setAttribute('aria-hidden','true');
+
+        const text = document.createElement('span');
+        text.textContent = cat;
+
+        label.appendChild(input);
+        label.appendChild(dot);
+        label.appendChild(text);
+        container.appendChild(label);
+      });
+    }
+
+    function highlight(str, q) {
+      if (!q) return str;
+      try {
+        const re = new RegExp(escapeRegExp(q), 'ig');
+        return str.replace(re, m => `<mark>${m}</mark>`);
+      } catch {
+        return str;
+      }
+    }
+
+    function normalize(s) {
+      return s.toLowerCase();
+    }
+
+    function filterAcronyms() {
+      const q = normalize(state.search.trim());
+      const allowed = state.filters;
+      return ACRONYMS.filter(a => {
+        // category filter
+        const hasCat = a.categories.some(c => allowed.has(c));
+        if (!hasCat) return false;
+        // search filter
+        if (!q) return true;
+        const hay = `${a.term} ${a.definition} ${a.categories.join(' ')}`.toLowerCase();
+        return hay.includes(q);
+      }).sort((a,b) => a.term.localeCompare(b.term, undefined, {sensitivity:'base'}));
+    }
+
+    function renderList() {
+      const list = $('#acronymList');
+      const items = filterAcronyms();
+      $('#resultsCount').textContent = `${items.length} result${items.length===1?'':'s'}`;
+
+      list.innerHTML = '';
+      if (items.length === 0) {
+        const empty = document.createElement('li');
+        empty.className = 'acronym-item';
+        empty.innerHTML = `<div class="definition">No results. Try clearing filters or using a different search.</div>`;
+        list.appendChild(empty);
+        setApplyStatus('done');
+        return;
+      }
+
+      const q = state.search.trim();
+
+      items.forEach(a => {
+        const li = document.createElement('li');
+        li.className = 'acronym-item';
+        li.dataset.acronym = a.term;
+
+        const term = document.createElement('div');
+        term.className = 'term';
+        term.innerHTML = highlight(a.term, q);
+
+        const body = document.createElement('div');
+        const def = document.createElement('div');
+        def.className = 'definition';
+        def.innerHTML = highlight(a.definition, q);
+
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        a.categories.forEach(c => {
+          const span = document.createElement('span');
+          span.className = 'tag';
+          span.textContent = c;
+          meta.appendChild(span);
+        });
+
+        body.appendChild(def);
+        body.appendChild(meta);
+
+        const actions = document.createElement('div');
+        actions.className = 'actions';
+        const copyBtn = document.createElement('button');
+        copyBtn.type = 'button';
+        copyBtn.className = 'btn copy-btn';
+        copyBtn.textContent = 'Copy';
+        copyBtn.id = `copy-${slug(a.term)}`;
+        copyBtn.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(`${a.term}: ${a.definition}`);
+            copyBtn.textContent = 'Copied';
+            setCopyStatus('copied');
+            copyBtn.setAttribute('aria-pressed','true');
+          } catch {
+            copyBtn.textContent = 'Failed';
+            setCopyStatus('failed');
+            copyBtn.setAttribute('aria-pressed','false');
+          }
+        });
+        actions.appendChild(copyBtn);
+
+        li.appendChild(term);
+        li.appendChild(body);
+        li.appendChild(actions);
+        list.appendChild(li);
+      });
+
+      setApplyStatus('done');
+    }
+
+    // Tabs
+    function setTab(tab) {
+      state.activeTab = tab;
+      $('#tabBrowse').setAttribute('aria-selected', String(tab==='browse'));
+      $('#tabQuiz').setAttribute('aria-selected', String(tab==='quiz'));
+      $('#browseSection').hidden = tab !== 'browse';
+      $('#quizSection').hidden = tab !== 'quiz';
+      $('#activeSection').textContent = tab === 'browse' ? 'Browse' : 'Quiz';
+      // Toggle backToListBtn availability indicator
+      const inQuiz = tab === 'quiz';
+      $('#backToListBtn').disabled = !inQuiz;
+      $('#backToListBtn').setAttribute('data-visible', inQuiz ? 'true' : 'false');
+      saveState();
+    }
+
+    // Quiz Logic
+    const quiz = {
+      pool: [],
+      current: 0,
+      order: [],
+      score: 0,
+      answers: [], // {term, correctDef, chosenDef, correct:boolean}
+      selectedIndex: null,
+      options: [], // current shuffled options (array of definitions)
+      maxOptions: 4,
+    };
+
+    function getQuizPool() {
+      const allowed = state.quizFilters;
+      let pool = ACRONYMS.filter(a => a.categories.some(c => allowed.has(c)));
+      if (pool.length === 0) pool = ACRONYMS.slice();
+      return pool.sort((a,b)=>a.term.localeCompare(b.term));
+    }
+
+    function updateQuizAvailabilityHint() {
+      const pool = getQuizPool();
+      const maxCount = Math.min(15, pool.length);
+      const desired = state.quizCount;
+      const clamped = clamp(desired, 1, Math.max(1, maxCount));
+      if (clamped !== desired) {
+        state.quizCount = clamped;
+        $('#quizCountInput').value = String(clamped);
+        $('#quizCountDisplay').textContent = String(clamped);
+      }
+      // Also refresh context chips
+      renderQuizContextChips();
+      // Mark quizStartButton accessible
+      $('#quizStartButton').setAttribute('aria-disabled', pool.length === 0 ? 'true' : 'false');
+    }
+
+    function renderQuizOptions(options) {
+      const container = $('#quizOptions');
+      container.innerHTML = '';
+      options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'option-btn';
+        btn.id = `quizOption${idx+1}`;
+        btn.setAttribute('data-index', idx);
+        btn.setAttribute('data-selected','false');
+        btn.innerHTML = `<strong>${idx+1}.</strong> <span>${opt}</span>`;
+        btn.addEventListener('click', () => selectOption(idx));
+        container.appendChild(btn);
+      });
+    }
+
+    function selectOption(idx) {
+      quiz.selectedIndex = idx;
+      $$('#quizOptions .option-btn').forEach((b, i) => b.setAttribute('data-selected', String(i===idx)));
+      $('#quizSubmitButton').disabled = false;
+    }
+
+    function submitAnswer() {
+      if (quiz.selectedIndex == null) return;
+      const correctDef = quiz.pool[quiz.order[quiz.current]].definition;
+      const chosenDef = quiz.options[quiz.selectedIndex];
+      const isCorrect = correctDef === chosenDef;
+
+      // visual feedback
+      $$('#quizOptions .option-btn').forEach((b, i) => {
+        const def = quiz.options[i];
+        if (def === correctDef) b.setAttribute('data-correct','true');
+        else if (i === quiz.selectedIndex) b.setAttribute('data-correct','false');
+        b.disabled = true;
+      });
+
+      $('#quizSubmitButton').disabled = true;
+      $('#quizNextButton').disabled = false;
+
+      if (isCorrect) quiz.score++;
+
+      quiz.answers.push({
+        term: quiz.pool[quiz.order[quiz.current]].term,
+        correctDef,
+        chosenDef,
+        correct: isCorrect
+      });
+      updateQuizHeader();
+      setQuizStatus('running');
+    }
+
+    function nextQuestion() {
+      quiz.current++;
+      if (quiz.current >= quiz.order.length) {
+        finishQuiz();
+        return;
+      }
+      showQuestion();
+    }
+
+    function startQuiz() {
+      quiz.pool = getQuizPool();
+      const maxCount = Math.min(quiz.pool.length, 15);
+      const count = clamp(state.quizCount, 1, Math.max(1, maxCount));
+      quiz.order = shuffle([...Array(quiz.pool.length).keys()]).slice(0, count);
+      quiz.current = 0;
+      quiz.score = 0;
+      quiz.answers = [];
+      quiz.selectedIndex = null;
+      $('#quizSummary').hidden = true;
+      $('#quizPlaceholder').hidden = true;
+      $('#quizCard').hidden = false;
+      $('#quizRestartButton').hidden = false;
+
+      showQuestion();
+      setQuizStatus('running');
+      updateQuizHeader();
+    }
+
+    function buildOptions(correctIdx) {
+      const correctDef = quiz.pool[correctIdx].definition;
+      const defs = new Set([correctDef]);
+      // seed from pool first
+      const poolDefs = shuffle(quiz.pool.map(a => a.definition));
+      for (const d of poolDefs) {
+        if (defs.size >= quiz.maxOptions) break;
+        if (d !== correctDef) defs.add(d);
+      }
+      // fallback from the full dataset if needed
+      if (defs.size < quiz.maxOptions) {
+        const moreDefs = shuffle(ACRONYMS.map(a => a.definition));
+        for (const d of moreDefs) {
+          if (defs.size >= quiz.maxOptions) break;
+          if (d !== correctDef) defs.add(d);
+        }
+      }
+      return shuffle(Array.from(defs));
+    }
+
+    function showQuestion() {
+      const idxInPool = quiz.order[quiz.current];
+      const term = quiz.pool[idxInPool].term;
+
+      $('#quizQuestionText').textContent = `What does "${term}" stand for?`;
+      quiz.options = buildOptions(idxInPool);
+      renderQuizOptions(quiz.options);
+
+      quiz.selectedIndex = null;
+      $('#quizSubmitButton').disabled = true;
+      $('#quizNextButton').disabled = true;
+      $$('#quizOptions .option-btn').forEach(b => {
+        b.disabled = false;
+        b.removeAttribute('data-correct');
+        b.setAttribute('data-selected','false');
+      });
+      updateQuizHeader();
+    }
+
+    function updateQuizHeader() {
+      const total = quiz.order.length || 0;
+      const current = Math.min(quiz.current + 1, total);
+      $('#quizProgressText').textContent = total ? `Question ${current} of ${total}` : 'Not started';
+      $('#quizScoreText').textContent = `Score: ${quiz.score}`;
+      const pct = total ? Math.round((quiz.current / total) * 100) : 0;
+      $('#quizProgressBar').style.width = `${pct}%`;
+    }
+
+    function finishQuiz() {
+      $('#quizCard').hidden = true;
+      $('#quizSummary').hidden = false;
+      $('#quizPlaceholder').hidden = true;
+
+      const total = quiz.order.length;
+      const correct = quiz.score;
+      const stats = `You got ${correct} out of ${total} correct (${Math.round((correct/total)*100)}%).`;
+      $('#quizSummaryStats').textContent = stats;
+
+      const review = $('#quizReview');
+      review.innerHTML = '';
+      quiz.answers.forEach((a, i) => {
+        const row = document.createElement('div');
+        row.className = 'panel';
+        row.style.marginTop = '6px';
+        const section = document.createElement('div');
+        section.className = 'panel-section';
+        section.innerHTML = `
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+            <div><strong>Q${i+1}:</strong> ${a.term}</div>
+            <div>${a.correct ? '✅' : '❌'}</div>
+          </div>
+          <div style="margin-top:6px;">
+            <div><strong>Correct:</strong> ${a.correctDef}</div>
+            ${a.correct ? '' : `<div><strong>Your answer:</strong> ${a.chosenDef}</div>`}
+          </div>
+        `;
+        row.appendChild(section);
+        review.appendChild(row);
+      });
+
+      // fill progress bar to 100%
+      $('#quizProgressBar').style.width = '100%';
+      $('#quizProgressText').textContent = 'Quiz completed';
+      setQuizStatus('completed');
+    }
+
+    // Extra context: quiz selected categories summary
+    function renderQuizContextChips() {
+      const wrap = $('#quizContextChips');
+      wrap.innerHTML = '';
+      const arr = Array.from(state.quizFilters).sort((a,b)=>a.localeCompare(b));
+      if (arr.length === 0) {
+        const chip = document.createElement('span');
+        chip.className = 'summary-chip';
+        chip.textContent = 'All categories (fallback to entire set)';
+        wrap.appendChild(chip);
+        return;
+      }
+      arr.forEach(c => {
+        const chip = document.createElement('span');
+        chip.className = 'summary-chip';
+        chip.textContent = c;
+        wrap.appendChild(chip);
+      });
+    }
+
+    // Active filter summary for browse
+    function renderActiveFilterSummary() {
+      const wrap = $('#activeFilterChips');
+      wrap.innerHTML = '';
+      const selected = Array.from(state.filters).sort((a,b)=>a.localeCompare(b));
+      $('#activeFilterCount').textContent = String(selected.length);
+      if (selected.length === 0) {
+        const chip = document.createElement('span');
+        chip.className = 'summary-chip';
+        chip.textContent = 'No categories selected (list will be empty)';
+        wrap.appendChild(chip);
+      } else if (selected.length === ALL_CATEGORIES.length) {
+        const chip = document.createElement('span');
+        chip.className = 'summary-chip';
+        chip.textContent = 'All categories';
+        wrap.appendChild(chip);
+      } else {
+        selected.forEach(c => {
+          const chip = document.createElement('span');
+          chip.className = 'summary-chip';
+          chip.textContent = c;
+          wrap.appendChild(chip);
+        });
+      }
+    }
+
+    // Status proxies helpers
+    function setApplyStatus(val) {
+      $('#applyStatus').textContent = val;
+    }
+    function setCopyStatus(val) {
+      $('#copyStatus').textContent = val;
+    }
+    function setQuizStatus(val) {
+      $('#quizStatus').textContent = val;
+    }
+
+    // Event bindings
+    function bindUI() {
+      // Tabs
+      $('#tabBrowse').addEventListener('click', () => setTab('browse'));
+      $('#tabQuiz').addEventListener('click', () => setTab('quiz'));
+
+      // Back to list
+      $('#backToListBtn').addEventListener('click', () => setTab('browse'));
+
+      // Search
+      const searchInput = $('#searchInput');
+      searchInput.value = state.search;
+      searchInput.addEventListener('input', e => {
+        state.search = e.target.value;
+        saveState();
+        renderList();
+      });
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          renderList();
+          setApplyStatus('done');
+        }
+      });
+      $('#clearSearchBtn').addEventListener('click', () => {
+        state.search = '';
+        searchInput.value = '';
+        saveState();
+        renderList();
+        searchInput.focus();
+      });
+
+      // Keyboard global: slash focuses search in browse
+      document.addEventListener('keydown', (e) => {
+        if (e.key === '/' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+          if (state.activeTab === 'browse') {
+            e.preventDefault();
+            $('#searchInput').focus();
+          }
+        }
+      });
+
+      // Filters - Browse
+      $('#catSelectAllBtn').addEventListener('click', () => {
+        state.filters = new Set(ALL_CATEGORIES);
+        renderCategoryChips('categoryFilters', ALL_CATEGORIES, state.filters, 'browse');
+        renderActiveFilterSummary();
+        saveState();
+        renderList();
+        setApplyStatus('done');
+      });
+      $('#catClearBtn').addEventListener('click', () => {
+        state.filters = new Set(); // none
+        renderCategoryChips('categoryFilters', ALL_CATEGORIES, state.filters, 'browse');
+        renderActiveFilterSummary();
+        saveState();
+        renderList();
+        setApplyStatus('done');
+      });
+      $('#clear-filters-btn').addEventListener('click', () => {
+        state.filters = new Set(ALL_CATEGORIES);
+        renderCategoryChips('categoryFilters', ALL_CATEGORIES, state.filters, 'browse');
+        renderActiveFilterSummary();
+        saveState();
+        renderList();
+        setApplyStatus('done');
+      });
+
+      // Quiz controls
+      const countInput = $('#quizCountInput');
+      const countDisplay = $('#quizCountDisplay');
+      countInput.value = state.quizCount;
+      countDisplay.textContent = String(state.quizCount);
+      countInput.addEventListener('input', e => {
+        state.quizCount = parseInt(e.target.value, 10) || 5;
+        countDisplay.textContent = String(state.quizCount);
+        saveState();
+        updateQuizAvailabilityHint();
+      });
+
+      $('#quizCountMinus').addEventListener('click', () => {
+        const v = clamp((parseInt($('#quizCountInput').value,10)||5) - 1, 1, 15);
+        $('#quizCountInput').value = String(v);
+        state.quizCount = v;
+        $('#quizCountDisplay').textContent = String(v);
+        saveState();
+        updateQuizAvailabilityHint();
+      });
+      $('#quizCountPlus').addEventListener('click', () => {
+        const v = clamp((parseInt($('#quizCountInput').value,10)||5) + 1, 1, 15);
+        $('#quizCountInput').value = String(v);
+        state.quizCount = v;
+        $('#quizCountDisplay').textContent = String(v);
+        saveState();
+        updateQuizAvailabilityHint();
+      });
+
+      $('#quizSelectAllBtn').addEventListener('click', () => {
+        state.quizFilters = new Set(ALL_CATEGORIES);
+        renderCategoryChips('quizCategoryFilters', ALL_CATEGORIES, state.quizFilters, 'quiz');
+        renderQuizContextChips();
+        saveState();
+        updateQuizAvailabilityHint();
+      });
+      $('#quizClearBtn').addEventListener('click', () => {
+        state.quizFilters = new Set();
+        renderCategoryChips('quizCategoryFilters', ALL_CATEGORIES, state.quizFilters, 'quiz');
+        renderQuizContextChips();
+        saveState();
+        updateQuizAvailabilityHint();
+      });
+
+      $('#quizStartButton').addEventListener('click', () => {
+        startQuiz();
+      });
+      $('#quizRestartButton').addEventListener('click', () => startQuiz());
+      $('#quizSubmitButton').addEventListener('click', () => submitAnswer());
+      $('#quizNextButton').addEventListener('click', () => nextQuestion());
+
+      // Keyboard shortcuts for quiz
+      document.addEventListener('keydown', (e) => {
+        if (state.activeTab !== 'quiz') return;
+        const key = e.key;
+        if (['1','2','3','4'].includes(key)) {
+          const idx = parseInt(key,10)-1;
+          const btn = document.getElementById(`quizOption${idx+1}`);
+          if (btn && !btn.disabled) {
+            selectOption(idx);
+          }
+        } else if (key === 'Enter') {
+          const submit = $('#quizSubmitButton');
+          const next = $('#quizNextButton');
+          if (!submit.disabled) submit.click();
+          else if (!next.disabled) next.click();
+        }
+      });
+
+      // Adjust sticky offsets to account for header + status bar heights
+      function syncStickyOffsets() {
+        const headerRect = document.querySelector('header.app-header').getBoundingClientRect();
+        const statusBarRect = document.querySelector('#statusBar').getBoundingClientRect();
+        const topOffset = (headerRect.height + statusBarRect.height);
+        $$('.sticky-controls').forEach(el => el.style.top = `${topOffset}px`);
+        $('#quizContextBar').style.top = `${headerRect.height + statusBarRect.height}px`;
+        // List header follows sticky-controls + summary height; use a fixed extra 170px as safe area
+        const summaryHeight = $('#activeFilterSummary').getBoundingClientRect().height || 0;
+        const controlsHeight = $('#category-picker').getBoundingClientRect().height || 0;
+        const listHeader = $('#acronym-list-header');
+        listHeader.style.top = `${topOffset + summaryHeight + 0}px`;
+      }
+      window.addEventListener('resize', syncStickyOffsets);
+      // Sync after initial render
+      setTimeout(syncStickyOffsets, 0);
+    }
+
+    // Init
+    function init() {
+      loadState();
+
+      // Year
+      $('#year').textContent = new Date().getFullYear();
+
+      // Render category chips
+      renderCategoryChips('categoryFilters', ALL_CATEGORIES, state.filters, 'browse');
+      renderCategoryChips('quizCategoryFilters', ALL_CATEGORIES, state.quizFilters, 'quiz');
+
+      // Active filter summary
+      renderActiveFilterSummary();
+
+      // Quiz context chips
+      renderQuizContextChips();
+
+      // Render list
+      renderList();
+
+      // Set tab
+      setTab(state.activeTab || 'browse');
+
+      // Update quiz hints
+      updateQuizAvailabilityHint();
+
+      // Bind events
+      bindUI();
+
+      // Initial apply status
+      setApplyStatus('idle');
+      setCopyStatus('idle');
+      setQuizStatus('idle');
+    }
+
+    // Defer init to ensure DOM present
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

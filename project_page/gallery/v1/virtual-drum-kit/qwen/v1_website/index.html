@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Drum Kit</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #000;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            font-size: 16px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #ff8a00;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: 1px solid #fff;
+            border-radius: 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #333;
+            color: #fff;
+            min-width: 120px;
+        }
+
+        button:hover {
+            background: #555;
+        }
+
+        button:active {
+            background: #777;
+        }
+
+        button#recordBtn {
+            background: #ff416c;
+            border-color: #ff416c;
+        }
+
+        button#playbackBtn {
+            background: #00c9ff;
+            border-color: #00c9ff;
+        }
+
+        button#clearBtn {
+            background: #ff8a00;
+            border-color: #ff8a00;
+        }
+
+        .drum-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            max-width: 1200px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .drum-pad {
+            aspect-ratio: 1/1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            background: #222;
+            border: 1px solid #444;
+            padding: 10px;
+            position: relative;
+        }
+
+        .drum-pad:hover {
+            background: #333;
+        }
+
+        .drum-pad:active {
+            background: #444;
+        }
+
+        .drum-pad.active {
+            background: #555;
+            box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .pad-key {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #ff8a00;
+        }
+
+        .pad-name {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .recording-indicator {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 0, 0, 0.8);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 0;
+            font-weight: bold;
+            display: none;
+            z-index: 100;
+        }
+
+        .instructions {
+            background: rgba(30, 30, 30, 0.9);
+            padding: 15px;
+            border-radius: 0;
+            max-width: 800px;
+            margin-top: 15px;
+            text-align: center;
+            border: 1px solid #444;
+        }
+
+        .instructions h2 {
+            margin-bottom: 10px;
+            color: #ff8a00;
+        }
+
+        .instructions p {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .keyboard-hint {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 3px 8px;
+            margin: 0 3px;
+            font-family: monospace;
+            border: 1px solid #444;
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 15px;
+            text-align: center;
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        .status-indicator {
+            margin-top: 10px;
+            padding: 8px 15px;
+            background: #333;
+            border-radius: 0;
+            border: 1px solid #444;
+            min-height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .recording-status {
+            display: none;
+        }
+
+        .playback-status {
+            display: none;
+        }
+
+        .empty-recording {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .drum-container {
+                grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+                gap: 10px;
+            }
+            
+            .drum-pad {
+                padding: 5px;
+            }
+            
+            .pad-key {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .drum-container {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .instructions {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 id="app-title">Virtual Drum Kit</h1>
+        <p class="subtitle">Play with your keyboard or click on the pads</p>
+    </header>
+
+    <div class="controls">
+        <button id="recordBtn" aria-label="Start recording">Record</button>
+        <button id="playbackBtn" aria-label="Playback recording">Playback</button>
+        <button id="clearBtn" aria-label="Clear recording">Clear</button>
+    </div>
+
+    <div class="recording-indicator" id="recordingIndicator">RECORDING</div>
+
+    <div class="drum-container" id="drumContainer">
+        <!-- Drums will be generated by JavaScript -->
+    </div>
+
+    <div class="status-indicator">
+        <span id="recordingStatus" class="recording-status">Recording: <span id="recordingCount">0</span> events</span>
+        <span id="playbackStatus" class="playback-status">Playing back...</span>
+        <span id="emptyRecording" class="empty-recording">No recording to play</span>
+    </div>
+
+    <div class="instructions">
+        <h2>How to Play</h2>
+        <p>Use your keyboard keys or click/tap on the pads to play different drum sounds:</p>
+        <p><span class="keyboard-hint">Q</span> <span class="keyboard-hint">W</span> <span class="keyboard-hint">E</span> <span class="keyboard-hint">A</span> <span class="keyboard-hint">S</span> <span class="keyboard-hint">D</span> <span class="keyboard-hint">Z</span> <span class="keyboard-hint">X</span> <span class="keyboard-hint">C</span></p>
+        <p>Click the Record button to start capturing your performance, then Playback to hear it back!</p>
+    </div>
+
+    <footer>
+        <p>Virtual Drum Kit | Created with HTML, CSS & JavaScript</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Drum pad configuration
+            const drumPads = [
+                { key: 'Q', name: 'Kick', sound: 'kick' },
+                { key: 'W', name: 'Snare', sound: 'snare' },
+                { key: 'E', name: 'Hi-Hat', sound: 'hihat' },
+                { key: 'A', name: 'Tom 1', sound: 'tom1' },
+                { key: 'S', name: 'Tom 2', sound: 'tom2' },
+                { key: 'D', name: 'Tom 3', sound: 'tom3' },
+                { key: 'Z', name: 'Crash', sound: 'crash' },
+                { key: 'X', name: 'Ride', sound: 'ride' },
+                { key: 'C', name: 'Clap', sound: 'clap' }
+            ];
+
+            // Audio context for playing sounds
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            let isRecording = false;
+            let recordingStartTime = 0;
+            let recordedEvents = [];
+            let playbackTimeouts = [];
+            let recordingCount = 0;
+
+            // Create drum pads
+            const drumContainer = document.getElementById('drumContainer');
+            drumPads.forEach((pad, index) => {
+                const padElement = document.createElement('div');
+                padElement.className = 'drum-pad';
+                padElement.id = `pad-${index}`;
+                padElement.dataset.key = pad.key;
+                
+                padElement.innerHTML = `
+                    <div class="pad-key">${pad.key}</div>
+                    <div class="pad-name">${pad.name}</div>
+                `;
+                
+                padElement.addEventListener('click', () => playSound(pad.sound, pad.key));
+                drumContainer.appendChild(padElement);
+            });
+
+            // Keyboard event handling
+            document.addEventListener('keydown', (e) => {
+                const key = e.key.toUpperCase();
+                const pad = drumPads.find(p => p.key === key);
+                if (pad) {
+                    playSound(pad.sound, pad.key);
+                    highlightPad(pad.key);
+                }
+            });
+
+            // Play sound function
+            function playSound(soundType, key) {
+                // Create audio element for each sound
+                const audio = new Audio();
+                audio.src = getSoundUrl(soundType);
+                audio.volume = 0.7;
+                audio.play().catch(e => console.log("Audio play error:", e));
+
+                // Add visual feedback
+                highlightPad(key);
+                
+                // Record event if recording
+                if (isRecording) {
+                    const time = Date.now() - recordingStartTime;
+                    recordedEvents.push({ time, key });
+                    recordingCount++;
+                    updateRecordingStatus();
+                }
+            }
+
+            // Get sound URL based on type
+            function getSoundUrl(soundType) {
+                switch(soundType) {
+                    case 'kick': return 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFfHl8fHx9fX1+fn5/f3+AgICBgYGCgoKDg4OEhISFhYWGhoaHh4eIiIiJiYmKioqLi4uMjIyNjY2Ojo6Pj4+QkJCRkZGSkpKTk5OUlJSVlZWWlpaXl5eYmJiZmZmampqbm5ucnJydnZ2enp6fn5+goKChoaGioqKjo6OkpKSlpaWmpqanp6eoqKipqamqqqqrq6usrKytra2urq6vr6+wsLCxsbGysrKzs7O0tLS1tbW2tra3t7e4uLi5ubm6urq7u7u8vLy9vb2+vr6/v7/AwMDBwcHCwsLDw8PExMTFxcXGxsbHx8fIyMjJycnKysrLy8vMzMzNzc3Ozs7Pz8/Q0NDR0dHS0tLT09PU1NTV1dXW1tbX19fY2NjZ2dna2trb29vc3Nzd3d3e3t7f39/g4ODh4eHi4uLj4+Pk5OTl5eXm5ubn5+fo6Ojp6enq6urr6+vs7Ozt7e3u7u7v7+/w8PDx8fHy8vLz8/P09PT19fX29vb39/f4+Pj5+fn6+vr7+/v8/Pz9/f3+/v7///8=';
+                    case 'snare': return 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFfHl8fHx9fX1+fn5/f3+AgICBgYGCgoKDg4OEhISFhYWGhoaHh4eIiIiJiYmKioqLi4uMjIyNjY2Ojo6Pj4+QkJCRkZGSkpKTk5OUlJSVlZWWlpaXl5eYmJiZmZmampqbm5ucnJydnZ2enp6fn5+goKChoaGioqKjo6OkpKSlpaWmpqanp6eoqKipqamqqqqrq6usrKytra2urq6vr6+wsLCxsbGysrKzs7O0tLS1tbW2tra3t7e4uLi5ubm6urq7u7u8vLy9vb2+vr6/v7/AwMDBwcHCwsLDw8PExMTFxcXGxsbHx8fIyMjJycnKysrLy8vMzMzNzc3Ozs7Pz8/Q0NDR0dHS0tLT09PU1NTV1dXW1tbX19fY2NjZ2dna2trb29vc3Nzd3d3e3t7f39/g4ODh4eHi4uLj4+Pk5OTl5eXm5ubn5+fo6Ojp6enq6urr6+vs7Ozt7e3u7u7v7+/w8PDx8fHy8vLz8/P09PT19fX29vb39/f4+Pj5+fn6+vr7+/v8/Pz9/f3+/v7///8=';
+                    case 'hihat': return 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFfHl8fHx9fX1+fn5/f3+AgICBgYGCgoKDg4OEhISFhYWGhoaHh4eIiIiJiYmKioqLi4uMjIyNjY2Ojo6Pj4+QkJCRkZGSkpKTk5OUlJSVlZWWlpaXl5eYmJiZmZmampqbm5ucnJydnZ2enp6fn5+goKChoaGioqKjo6OkpKSlpaWmpqanp6eoqKipqamqqqqrq6usrKytra2urq6vr6+wsLCxsbGysrKzs7O0tLS1tbW2tra3t7e4uLi5ubm6urq7u7u8vLy9vb2+vr6/v7/AwMDBwcHCwsLDw8PExMTFxcXGxsbHx8fIyMjJycnKysrLy8vMzMzNzc3Ozs7Pz8/Q0NDR0dHS0tLT09PU1NTV1dXW1tbX19fY2NjZ2dna2trb29vc3Nzd3d3e3t7f39/g4ODh4eHi4uLj4+Pk5OTl5eXm5ubn5+fo6Ojp6enq6urr6+vs7Ozt7e3u7u7v7+/w8PDx8fHy8vLz8/P09PT19fX29vb39/f4+Pj5+fn6+vr7+/v8/Pz9/f3+/v7///8=';
+                    case 'tom1': return 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFfHl8fHx9fX1+fn5/f3+AgICBgYGCgoKDg4OEhISFhYWGhoaHh4eIiIiJiYmKioqLi4uMjIyNjY2Ojo6Pj4+QkJCRkZGSkpKTk5OUlJSVlZWWlpaXl5eYmJiZmZmampqbm5ucnJydnZ2enp6fn5+goKChoaGioqKjo6OkpKSlpaWmpqanp6eoqKipqamqqqqrq6usrKytra2urq6vr6+wsLCxsbGysrKzs7O0tLS1tbW2tra3t7e4uLi5ubm6urq7u7u8vLy9vb2+vr6/v7/AwMDBwcHCwsLDw8PExMTFxcXGxsbHx8fIyMjJycnKysrLy8vMzMzNzc3Ozs7Pz8/Q0NDR0dHS0tLT09PU1NTV1dXW1tbX19fY2NjZ2dna2trb29vc3Nzd3d3e3t7f39/g4ODh4eHi4uLj4+Pk5OTl5eXm5ubn5+fo6Ojp6enq6urr6+vs7Ozt7e3u7u7v7+/w8PDx8fHy8vLz8/P09PT19fX29vb39/f4+Pj5+fn6+vr7+/v8/Pz9/f3+/v7///8=';
+                    case 'tom2': return 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFfHl8fHx9fX1+fn5/f3+AgICBgYGCgoKDg4OEhISFhYWGhoaHh4eIiIiJiYmKioqLi4uMjIyNjY2Ojo6Pj4+QkJCRkZGSkpKTk5OUlJSVlZWWlpaXl5eYmJiZmZmampqbm5ucnJydnZ2enp6fn5+goKChoaGioqKjo6OkpKSlpaWmpqanp6eoqKipqamqqqqrq6usrKytra2urq6vr6+wsLCxsbGysrKzs7O0tLS1tbW2tra3t7e4uLi5ubm6urq7u7u8vLy9vb2+vr6/v7/AwMDBwcHCwsLDw8PExMTFxcXGxsbHx8fIyMjJycnKysrLy8vMzMzNzc3Ozs7Pz8/Q0NDR0dHS0tLT09PU1NTV1dXW1tbX19fY2NjZ2dna2trb29vc3Nzd3d3e3t7f39/g4ODh4eHi4uLj4+Pk5OTl5eXm5ubn5+fo6Ojp6enq6urr6+vs7Ozt7e3u7u7v7+/w8PDx8fHy8vLz8/P09PT19fX29vb39/f4+Pj5+fn6+vr7+/v8/Pz9/f3+/v7///8=';
+                    case 'tom3': return 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFfHl8fHx9fX1+fn5/f3+AgICBgYGCgoKDg4OEhISFhYWGhoaHh4eIiIiJiYmKioqLi4uMjIyNjY2Ojo6Pj4+QkJCRkZGSkpKTk5OUlJSVlZWWlpaXl5eYmJiZmZmampqbm5ucnJydnZ2enp6fn5+goKChoaGioqKjo6OkpKSlpaWmpqanp6eoqKipqamqqqqrq6usrKytra2urq6vr6+wsLCxsbGysrKzs7O0tLS1tbW2tra3t7e4uLi5ubm6urq7u7u8vLy9vb2+vr6/v7/AwMDBwcHCwsLDw8PExMTFxcXGxsbHx8fIyMjJycnKysrLy8vMzMzNzc3Ozs7Pz8/Q0NDR0dHS0tLT09PU1NTV1dXW1tbX19fY2NjZ2dna2trb29vc3Nzd3d3e3t7f39/g4ODh4eHi4uLj4+Pk5OTl5eXm5ubn5+fo6Ojp6enq6urr6+vs7Ozt7e3u7u7v7+/w8PDx8fHy8vLz8/P09PT19fX29vb39/f4+Pj5+fn6+vr7+/v8/Pz9/f3+/v7///8=';
+                    case 'crash': return 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFfHl8fHx9fX1+fn5/f3+AgICBgYGCgoKDg4OEhISFhYWGhoaHh4eIiIiJiYmKioqLi4uMjIyNjY2Ojo6Pj4+QkJCRkZGSkpKTk5OUlJSVlZWWlpaXl5eYmJiZmZmampqbm5ucnJydnZ2enp6fn5+goKChoaGioqKjo6OkpKSlpaWmpqanp6eoqKipqamqqqqrq6usrKytra2urq6vr6+wsLCxsbGysrKzs7O0tLS1tbW2tra3t7e4uLi5ubm6urq7u7u8vLy9vb2+vr6/v7/AwMDBwcHCwsLDw8PExMTFxcXGxsbHx8fIyMjJycnKysrLy8vMzMzNzc3Ozs7Pz8/Q0NDR0dHS0tLT09PU1NTV1dXW1tbX19fY2NjZ2dna2trb29vc3Nzd3d3e3t7f39/g4ODh4eHi4uLj4+Pk5OTl5eXm5ubn5+fo6Ojp6enq6urr6+vs7Ozt7e3u7u7v7+/w8PDx8fHy8vLz8/P09PT19fX29vb39/f4+Pj5+fn6+vr7+/v8/Pz9/f3+/v7///8=';
+                    case 'ride': return 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFfHl8fHx9fX1+fn5/f3+AgICBgYGCgoKDg4OEhISFhYWGhoaHh4eIiIiJiYmKioqLi4uMjIyNjY2Ojo6Pj4+QkJCRkZGSkpKTk5OUlJSVlZWWlpaXl5eYmJiZmZmampqbm5ucnJydnZ2enp6fn5+goKChoaGioqKjo6OkpKSlpaWmpqanp6eoqKipqamqqqqrq6usrKytra2urq6vr6+wsLCxsbGysrKzs7O0tLS1tbW2tra3t7e4uLi5ubm6urq7u7u8vLy9vb2+vr6/v7/AwMDBwcHCwsLDw8PExMTFxcXGxsbHx8fIyMjJycnKysrLy8vMzMzNzc3Ozs7Pz8/Q0NDR0dHS0tLT09PU1NTV1dXW1tbX19fY2NjZ2dna2trb29vc3Nzd3d3e3t7f39/g4ODh4eHi4uLj4+Pk5OTl5eXm5ubn5+fo6Ojp6enq6urr6+vs7Ozt7e3u7u7v7+/w8PDx8fHy8vLz8/P09PT19fX29vb39/f4+Pj5+fn6+vr7+/v8/Pz9/f3+/v7///8=';
+                    case 'clap': return 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFfHl8fHx9fX1+fn5/f3+AgICBgYGCgoKDg4OEhISFhYWGhoaHh4eIiIiJiYmKioqLi4uMjIyNjY2Ojo6Pj4+QkJCRkZGSkpKTk5OUlJSVlZWWlpaXl5eYmJiZmZmampqbm5ucnJydnZ2enp6fn5+goKChoaGioqKjo6OkpKSlpaWmpqanp6eoqKipqamqqqqrq6usrKytra2urq6vr6+wsLCxsbGysrKzs7O0tLS1tbW2tra3t7e4uLi5ubm6urq7u7u8vLy9vb2+vr6/v7/AwMDBwcHCwsLDw8PExMTFxcXGxsbHx8fIyMjJycnKysrLy8vMzMzNzc3Ozs7Pz8/Q0NDR0dHS0tLT09PU1NTV1dXW1tbX19fY2NjZ2dna2trb29vc3Nzd3d3e3t7f39/g4ODh4eHi4uLj4+Pk5OTl5eXm5ubn5+fo6Ojp6enq6urr6+vs7Ozt7e3u7u7v7+/w8PDx8fHy8vLz8/P09PT19fX29vb39/f4+Pj5+fn6+vr7+/v8/Pz9/f3+/v7///8=';
+                    default: return '';
+                }
+            }
+
+            // Visual feedback for pad activation
+            function highlightPad(key) {
+                const pad = document.querySelector(`[data-key="${key}"]`);
+                if (pad) {
+                    pad.classList.add('active');
+                    setTimeout(() => pad.classList.remove('active'), 150);
+                }
+            }
+
+            // Recording functionality
+            const recordBtn = document.getElementById('recordBtn');
+            const playbackBtn = document.getElementById('playbackBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const recordingIndicator = document.getElementById('recordingIndicator');
+            const recordingStatus = document.getElementById('recordingStatus');
+            const playbackStatus = document.getElementById('playbackStatus');
+            const emptyRecording = document.getElementById('emptyRecording');
+            const recordingCountElement = document.getElementById('recordingCount');
+
+            recordBtn.addEventListener('click', () => {
+                if (!isRecording) {
+                    startRecording();
+                } else {
+                    stopRecording();
+                }
+            });
+
+            playbackBtn.addEventListener('click', playRecording);
+            clearBtn.addEventListener('click', clearRecording);
+
+            function startRecording() {
+                isRecording = true;
+                recordingStartTime = Date.now();
+                recordedEvents = [];
+                recordingCount = 0;
+                recordingIndicator.style.display = 'block';
+                recordBtn.textContent = 'Stop Recording';
+                recordingStatus.style.display = 'inline';
+                playbackStatus.style.display = 'none';
+                emptyRecording.style.display = 'none';
+                updateRecordingStatus();
+            }
+
+            function stopRecording() {
+                isRecording = false;
+                recordingIndicator.style.display = 'none';
+                recordBtn.textContent = 'Record';
+                updateRecordingStatus();
+            }
+
+            function updateRecordingStatus() {
+                recordingCountElement.textContent = recordingCount;
+                if (recordingCount > 0) {
+                    recordingStatus.style.display = 'inline';
+                } else {
+                    recordingStatus.style.display = 'none';
+                }
+            }
+
+            function playRecording() {
+                if (recordedEvents.length === 0) {
+                    emptyRecording.style.display = 'inline';
+                    playbackStatus.style.display = 'none';
+                    return;
+                }
+
+                // Clear any existing timeouts
+                playbackTimeouts.forEach(timeout => clearTimeout(timeout));
+                playbackTimeouts = [];
+
+                // Show playback status
+                playbackStatus.style.display = 'inline';
+                emptyRecording.style.display = 'none';
+
+                // Sort events by time
+                const sortedEvents = [...recordedEvents].sort((a, b) => a.time - b.time);
+                
+                // Play each event with delay
+                sortedEvents.forEach(event => {
+                    const timeout = setTimeout(() => {
+                        playSound(getSoundFromKey(event.key), event.key);
+                    }, event.time);
+                    playbackTimeouts.push(timeout);
+                });
+                
+                // Hide playback status after playback finishes
+                setTimeout(() => {
+                    playbackStatus.style.display = 'none';
+                }, sortedEvents[sortedEvents.length - 1].time + 1000);
+            }
+
+            function clearRecording() {
+                recordedEvents = [];
+                recordingCount = 0;
+                playbackTimeouts.forEach(timeout => clearTimeout(timeout));
+                playbackTimeouts = [];
+                updateRecordingStatus();
+                emptyRecording.style.display = 'inline';
+                recordingStatus.style.display = 'none';
+                playbackStatus.style.display = 'none';
+            }
+
+            // Helper to map key to sound type
+            function getSoundFromKey(key) {
+                const pad = drumPads.find(p => p.key === key);
+                return pad ? pad.sound : '';
+            }
+
+            // Initialize with some sample sounds for demo purposes
+            setTimeout(() => {
+                playSound('kick', 'Q');
+                playSound('snare', 'W');
+                playSound('hihat', 'E');
+            }, 1000);
+            
+            // Set initial status
+            emptyRecording.style.display = 'inline';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Typing Rain</title>
+  <style>
+    /* General Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #87CEEB, #4682B4);
+      color: #fff;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    /* Header */
+    header {
+      width: 100%;
+      text-align: center;
+      padding: 10px 0;
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    header h1 {
+      font-size: 2rem;
+      margin-bottom: 5px;
+    }
+
+    header .stats {
+      font-size: 1rem;
+    }
+
+    /* Game Area */
+    #game-area {
+      position: relative;
+      width: 100%;
+      max-width: 800px;
+      height: 600px;
+      background: url('https://i.imgur.com/3eE9G2N.png') no-repeat center center;
+      background-size: cover;
+      border: 2px solid #fff;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    /* Falling Words */
+    .word {
+      position: absolute;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    }
+
+    /* Input Area */
+    #input-area {
+      margin-top: 10px;
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      justify-content: center;
+    }
+
+    #input-box {
+      width: 100%;
+      max-width: 400px;
+      padding: 10px;
+      font-size: 1.2rem;
+      border: 2px solid #fff;
+      border-radius: 5px;
+      outline: none;
+    }
+
+    #input-box:focus {
+      border-color: #87CEEB;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Typing Rain</h1>
+    <div class="stats">
+      <span>Score: <span id="score">0</span></span> |
+      <span>Accuracy: <span id="accuracy">100%</span></span>
+    </div>
+  </header>
+
+  <div id="game-area"></div>
+
+  <div id="input-area">
+    <input type="text" id="input-box" placeholder="Type here..." autocomplete="off">
+  </div>
+
+  <script>
+    // Game Variables
+    const gameArea = document.getElementById('game-area');
+    const inputBox = document.getElementById('input-box');
+    const scoreDisplay = document.getElementById('score');
+    const accuracyDisplay = document.getElementById('accuracy');
+
+    let score = 0;
+    let totalTyped = 0;
+    let correctTyped = 0;
+    let words = [];
+    let gameInterval;
+    let wordSpeed = 2; // Initial speed of falling words
+    const wordList = ['rain', 'cloud', 'storm', 'sun', 'wind', 'sky', 'drop', 'water', 'snow', 'hail'];
+
+    // Utility Functions
+    function randomWord() {
+      return wordList[Math.floor(Math.random() * wordList.length)];
+    }
+
+    function randomXPosition() {
+      return Math.floor(Math.random() * (gameArea.offsetWidth - 100));
+    }
+
+    function updateStats() {
+      scoreDisplay.textContent = score;
+      const accuracy = totalTyped > 0 ? Math.round((correctTyped / totalTyped) * 100) : 100;
+      accuracyDisplay.textContent = `${accuracy}%`;
+    }
+
+    // Create a new falling word
+    function createWord() {
+      const word = document.createElement('div');
+      word.classList.add('word');
+      word.textContent = randomWord();
+      word.style.left = `${randomXPosition()}px`;
+      word.style.top = '0px';
+      gameArea.appendChild(word);
+      words.push(word);
+    }
+
+    // Move words down
+    function moveWords() {
+      words.forEach((word, index) => {
+        const currentTop = parseInt(word.style.top);
+        if (currentTop + wordSpeed > gameArea.offsetHeight) {
+          // Word reached the bottom
+          gameArea.removeChild(word);
+          words.splice(index, 1);
+          totalTyped++;
+          updateStats();
+        } else {
+          word.style.top = `${currentTop + wordSpeed}px`;
+        }
+      });
+    }
+
+    // Check typed word
+    function checkWord(input) {
+      for (let i = 0; i < words.length; i++) {
+        if (words[i].textContent === input) {
+          // Correct word
+          gameArea.removeChild(words[i]);
+          words.splice(i, 1);
+          score++;
+          correctTyped++;
+          totalTyped++;
+          updateStats();
+          return true;
+        }
+      }
+      // Incorrect word
+      totalTyped++;
+      updateStats();
+      return false;
+    }
+
+    // Start the game
+    function startGame() {
+      gameInterval = setInterval(() => {
+        if (Math.random() < 0.1) {
+          createWord();
+        }
+        moveWords();
+        // Increase difficulty over time
+        wordSpeed += 0.001;
+      }, 50);
+    }
+
+    // Event Listener for Typing
+    inputBox.addEventListener('input', (e) => {
+      const input = e.target.value.trim();
+      if (input) {
+        checkWord(input);
+        e.target.value = ''; // Clear input box
+      }
+    });
+
+    // Initialize Game
+    startGame();
+  </script>
+</body>
+</html>

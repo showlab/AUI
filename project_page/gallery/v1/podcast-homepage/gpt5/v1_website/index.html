@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Podcast Home Page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A clean, audio-centric podcast home page for browsing and playing episodes, searching, and subscribing.">
+  <style>
+    /* Destylized, high-contrast theme */
+    :root {
+      --bg: #ffffff;
+      --panel: #f5f5f5;
+      --panel-2: #efefef;
+      --accent: #0055ff;
+      --accent-2: #0033aa;
+      --text: #000000;
+      --muted: #333333;
+      --danger: #cc0000;
+      --success: #008a00;
+      --warning: #b36b00;
+
+      --radius: 0; /* no rounded corners as per destylization */
+      --radius-sm: 0;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial;
+      line-height: 1.35;
+    }
+
+    /* Remove decorative effects */
+    * { box-sizing: border-box; }
+    img, svg { display: block; }
+
+    a { color: var(--accent-2); text-decoration: underline; }
+    a:hover { text-decoration: none; }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: #ffffff;
+      border-bottom: 1px solid #000000;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .header-bar {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .brand {
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .logo {
+      width: 44px;
+      height: 44px;
+      background: #000000;
+      color: #ffffff;
+      display: grid;
+      place-items: center;
+    }
+
+    .logo-wave {
+      width: 22px;
+      height: 22px;
+      fill: #ffffff;
+    }
+
+    .brand .title {
+      font-size: 18px;
+      font-weight: 800;
+      margin: 0;
+    }
+    .brand .subtitle {
+      margin: 0;
+      font-size: 13px;
+      color: #333333;
+    }
+
+    nav#siteNav {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    nav#siteNav a {
+      display: inline-block;
+      padding: 10px 12px;
+      min-width: 44px;
+      min-height: 44px;
+      line-height: 24px;
+      color: #000000;
+      text-decoration: none;
+      border: 1px solid #000000;
+      background: #efefef;
+      font-weight: 700;
+      text-align: center;
+    }
+    nav#siteNav a:hover { background: #e4e4e4; }
+    nav#siteNav a:focus-visible { outline: 3px solid #000000; }
+
+    .search-wrap {
+      display: grid;
+      grid-template-columns: 18px 1fr auto auto auto;
+      gap: 8px;
+      align-items: center;
+      background: #efefef;
+      padding: 8px 8px;
+      border: 1px solid #000000;
+      min-width: 420px;
+    }
+    .search-wrap svg { width: 18px; height: 18px; }
+    .search-wrap input {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #000000;
+      outline: none;
+      color: var(--text);
+      font-size: 14px;
+      padding: 10px;
+      min-height: 44px;
+    }
+    .search-wrap .chip {
+      font-size: 12px;
+      color: var(--muted);
+      padding: 6px 10px;
+      border: 1px solid #000000;
+      background: #ffffff;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .btn {
+      appearance: none;
+      background: #efefef;
+      color: #000000;
+      border: 1px solid #000000;
+      padding: 10px 14px;
+      min-width: 44px;
+      min-height: 44px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .btn:hover { background: #e4e4e4; }
+    .btn:focus-visible { outline: 3px solid #000000; outline-offset: 1px; }
+
+    .primary { background: #0055ff; color: #ffffff; }
+    .primary:hover { background: #0044cc; }
+    .secondary { background: #dddddd; }
+    .ghost { background: #ffffff; }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    main {
+      padding: 8px 0 60px;
+    }
+
+    /* Toolbar and helper bars */
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 16px;
+      align-items: start;
+      margin: 10px 0 14px;
+    }
+    .results {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .helper-bar {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid #000000;
+      background: #f5f5f5;
+      margin: 12px 0;
+    }
+    .helper-bar strong { display: inline-block; min-width: 120px; }
+
+    /* Tag filters row */
+    .filters-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 8px 0 6px;
+    }
+    .tag-chip {
+      border: 1px solid #000000;
+      background: #ffffff;
+      color: #000000;
+      padding: 8px 12px;
+      min-height: 44px;
+      min-width: 44px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .tag-chip[aria-pressed="true"] {
+      background: #000000;
+      color: #ffffff;
+    }
+    .tag-chip:focus-visible { outline: 3px solid #000000; }
+
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin: 6px 0 10px;
+    }
+    .controls-row label {
+      font-weight: 700;
+    }
+    select, input[type="text"] {
+      border: 1px solid #000000;
+      background: #ffffff;
+      color: #000000;
+      padding: 10px;
+      min-height: 44px;
+      min-width: 44px;
+    }
+    select:focus-visible { outline: 3px solid #000000; }
+    .hint { color: #333333; font-size: 12px; }
+
+    .status-proxies {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin: 8px 0 12px;
+    }
+    .status-box {
+      border: 1px solid #000000;
+      background: #ffffff;
+      padding: 8px;
+      font-size: 12px;
+      min-height: 44px;
+      display: grid;
+      align-content: center;
+    }
+    .status-box strong { display: block; margin-bottom: 4px; }
+
+    /* Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    @media (max-width: 960px) {
+      .grid { grid-template-columns: 1fr; }
+      .search-wrap { min-width: 0; }
+      .header-bar { grid-template-columns: 1fr; }
+      .actions { justify-content: flex-start; }
+      nav#siteNav { order: 3; }
+    }
+
+    article.episode {
+      background: #f5f5f5;
+      border: 1px solid #000000;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 16px;
+    }
+
+    .cover {
+      width: 120px;
+      height: 120px;
+      background: #efefef;
+      border: 1px solid #000000;
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cover .badge {
+      position: absolute;
+      left: 0;
+      top: 0;
+      padding: 6px 8px;
+      background: #000000;
+      color: #ffffff;
+      font-size: 12px;
+    }
+    .cover svg {
+      width: 84%;
+      height: 84%;
+      stroke: #000000;
+    }
+
+    .meta {
+      display: grid;
+      grid-template-rows: auto auto auto auto auto;
+      gap: 8px;
+      min-width: 0;
+    }
+    .meta h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+    .meta .subline {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .description {
+      color: #000000;
+      font-size: 14px;
+    }
+
+    .player {
+      background: #ffffff;
+      border: 1px solid #000000;
+      padding: 10px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .play {
+      min-width: 46px;
+      min-height: 46px;
+      width: 46px;
+      height: 46px;
+      background: #0055ff;
+      color: #ffffff;
+      border: 1px solid #000000;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-rows: auto auto;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .progress {
+      position: relative;
+      height: 10px;
+      background: #efefef;
+      border: 1px solid #000000;
+      cursor: pointer;
+    }
+    .bar {
+      position: absolute;
+      top: 0; left: 0; height: 100%;
+      width: 0%;
+      background: #0055ff;
+    }
+    .scrubber {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 14px; height: 14px;
+      background: #000000;
+      color: #ffffff;
+    }
+    .time {
+      display: flex;
+      justify-content: space-between;
+      color: #000000;
+      font-size: 12px;
+    }
+
+    .episode-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .subscribe-toggle {
+      border-color: #000000;
+    }
+    .subscribe-toggle.subscribed {
+      background: #008a00;
+      color: #ffffff;
+      border-color: #000000;
+    }
+    .subscribe-toggle:focus-visible {
+      outline: 3px solid #000000;
+    }
+
+    footer {
+      border-top: 1px solid #000000;
+      color: var(--muted);
+      font-size: 14px;
+      padding: 18px 16px 36px;
+      background: #ffffff;
+    }
+
+    dialog.modal {
+      border: 1px solid #000000;
+      padding: 0;
+      background: #ffffff;
+      color: #000000;
+      width: min(560px, 92vw);
+    }
+
+    .modal .content {
+      padding: 16px;
+    }
+    .modal h2 { margin: 0 0 6px; }
+    .modal .providers {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 12px 0 8px;
+    }
+    .providers a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: #efefef;
+      border: 1px solid #000000;
+      color: #000000;
+      font-weight: 700;
+      min-height: 44px;
+      text-decoration: none;
+    }
+    .providers a:hover { background: #e4e4e4; }
+    .providers a:focus-visible { outline: 3px solid #000000; }
+
+    .rss-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .rss-row input {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #000000;
+      color: #000000;
+      padding: 10px;
+      font-family: ui-monospace, Menlo, Consolas, "Liberation Mono", monospace;
+      min-height: 44px;
+    }
+    .modal .actions {
+      padding: 12px 16px 16px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .toast {
+      position: fixed;
+      left: 16px;
+      bottom: 16px;
+      background: #000000;
+      color: #ffffff;
+      border: 1px solid #000000;
+      padding: 10px 16px;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; pointer-events: auto; }
+
+    .empty {
+      text-align: center;
+      color: #333333;
+      padding: 28px 10px;
+      border: 1px dashed #000000;
+      background: #ffffff;
+    }
+
+    /* Header subscribe bar (external CTAs) */
+    .subscribe-cta-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid #000000;
+      background: #f5f5f5;
+      margin-top: 8px;
+    }
+    .subscribe-cta-bar a {
+      padding: 10px 12px;
+      border: 1px solid #000000;
+      background: #ffffff;
+      color: #000000;
+      min-height: 44px;
+      min-width: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .subscribe-cta-bar a:hover { background: #efefef; }
+    .subscribe-cta-bar a:focus-visible { outline: 3px solid #000000; }
+
+    /* About/Contact sections */
+    section.app-section {
+      border: 1px solid #000000;
+      background: #ffffff;
+      margin: 16px 0;
+      padding: 16px;
+    }
+    section.app-section h2 { margin: 0 0 8px; font-size: 18px; }
+    section.app-section p { margin: 8px 0; font-size: 14px; }
+
+    /* Focus */
+    :focus-visible { outline: 3px solid #000000; outline-offset: 1px; }
+  </style>
+</head>
+<body id="top">
+  <header>
+    <div class="container header-bar">
+      <a href="#top" class="logo" id="logoLink" aria-label="Go to page top">
+        <svg class="logo-wave" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 12c2 0 2-6 4-6s2 12 4 12 2-12 4-12 2 6 4 6" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"></path>
+        </svg>
+      </a>
+      <div>
+        <div class="brand" aria-label="Podcast brand">
+          <div style="display:none"></div>
+          <div>
+            <p class="title">Podcast Home Page</p>
+            <p class="subtitle">Browse, play, and subscribe</p>
+          </div>
+        </div>
+        <div class="subscribe-cta-bar" aria-label="Quick subscribe">
+          <span style="font-weight:700;">Subscribe:</span>
+          <a id="appleCtaHeader" href="https://podcasts.apple.com/" target="_blank" rel="noopener noreferrer" aria-label="Open Apple Podcasts in a new tab">Apple Podcasts</a>
+          <a id="spotifyCtaHeader" href="https://open.spotify.com/" target="_blank" rel="noopener noreferrer" aria-label="Open Spotify in a new tab">Spotify</a>
+          <a id="pocketCtaHeader" href="https://pocketcasts.com/" target="_blank" rel="noopener noreferrer" aria-label="Open Pocket Casts in a new tab">Pocket Casts</a>
+          <a id="rssCtaHeader" href="https://example.com/podcast/feed.rss" target="_blank" rel="noopener noreferrer" aria-label="Open RSS feed in a new tab">RSS Feed</a>
+        </div>
+      </div>
+
+      <nav id="siteNav" aria-label="Site">
+        <a id="navEpisodes" href="#episodesSection">Episodes</a>
+        <a id="navAbout" href="#aboutSection">About</a>
+        <a id="navContact" href="#contactSection">Contact</a>
+      </nav>
+    </div>
+
+    <div class="container">
+      <form class="search-wrap" role="search" aria-label="Episode search" onsubmit="return false;">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M21 21l-4.3-4.3m1.8-5.2a7 7 0 11-14 0 7 7 0 0114 0z" stroke="#000000" stroke-width="2" stroke-linecap="square"></path>
+        </svg>
+        <input id="searchInput" type="search" placeholder="Search episodes, topics, or guests…" aria-label="Search episodes">
+        <span class="chip" id="resultsCount" aria-live="polite">All episodes</span>
+        <button id="searchButton" type="button" class="btn secondary" title="Search episodes">Search</button>
+        <button id="clearSearchButton" type="button" class="btn ghost" title="Clear search">Clear</button>
+      </form>
+      <div class="hint" style="margin-top:6px;">Hint: Press Enter to Search. Arrow Left/Right skips 15s when a play button is focused.</div>
+    </div>
+  </header>
+
+  <main class="container" id="mainContent">
+    <section class="toolbar" aria-label="Episode toolbar">
+      <div class="results" id="toolbarStatus">Tap play to start listening</div>
+      <div class="results">Tip: Use ← → to skip 15s when a play button is focused</div>
+    </section>
+
+    <section class="helper-bar" aria-label="Filter controls">
+      <strong>Filters</strong>
+      <div>
+        <div class="controls-row">
+          <label for="sortOrder">Sort:</label>
+          <select id="sortOrder" aria-label="Sort order">
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+          </select>
+          <button id="clearAllFilters" class="btn ghost" type="button" title="Clear search and tag filters">Clear all</button>
+          <span id="activeFiltersLabel" class="hint">No tag filters active</span>
+        </div>
+        <div id="tagFilterRow" class="filters-row" role="toolbar" aria-label="Tag filters"></div>
+      </div>
+    </section>
+
+    <section class="status-proxies" aria-label="Status indicators">
+      <div class="status-box" id="filterStatus"><strong>Filter</strong><span>idle</span></div>
+      <div class="status-box" id="sortStatus"><strong>Sort</strong><span>newest</span></div>
+      <div class="status-box" id="applyStatus"><strong>Apply</strong><span>ready</span></div>
+      <div class="status-box" id="activeSection"><strong>Active section</strong><span>Episodes</span></div>
+    </section>
+
+    <section aria-labelledby="latestHeading" id="episodesSection" class="app-section">
+      <h2 id="latestHeading" style="margin: 0 0 12px;">Latest Episodes</h2>
+      <div id="episodeList" class="grid" role="list"></div>
+      <div id="emptyState" class="empty" hidden>No episodes match your search or filters. Try a different term or clear filters.</div>
+    </section>
+
+    <section id="aboutSection" class="app-section" aria-labelledby="aboutHeading">
+      <h2 id="aboutHeading">About the Show</h2>
+      <p>Welcome to the Podcast Home Page demo. This show explores design, engineering, and productivity for audio-first experiences. Each week we chat about craft, systems, and the people who build better sound.</p>
+      <p><strong>Hosts:</strong> Alex (producer/engineer) and Jamie (designer/researcher).</p>
+      <ul>
+        <li>Format: Weekly episodes, 20–40 minutes</li>
+        <li>Topics: Focus, UX, engineering, community stories</li>
+        <li>Free RSS: <a id="rssAboutLink" href="https://example.com/podcast/feed.rss" target="_blank" rel="noopener noreferrer">https://example.com/podcast/feed.rss</a></li>
+      </ul>
+    </section>
+
+    <section id="contactSection" class="app-section" aria-labelledby="contactHeading">
+      <h2 id="contactHeading">Contact</h2>
+      <p>We love listener feedback. Reach out on social or send an email.</p>
+      <ul>
+        <li><a id="mailtoLink" href="mailto:hello@example.com?subject=Podcast%20Feedback">hello@example.com</a></li>
+        <li><a id="twitterLink" href="https://twitter.com/" target="_blank" rel="noopener noreferrer">X / Twitter</a></li>
+        <li><a id="instagramLink" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">Instagram</a></li>
+        <li><a id="linkedinLink" href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+      </ul>
+      <p class="hint">After clicking a link, this page remains open. Use the browser Back button to return if needed.</p>
+    </section>
+  </main>
+
+  <footer class="container" role="contentinfo">
+    <div style="display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: start;">
+      <div>
+        © <span id="year"></span> Podcast Home Page. All episode audio in this demo is a generated tone for preview purposes.
+        <div style="margin-top:8px;">
+          <a id="footerTerms" href="https://www.example.com/terms" target="_blank" rel="noopener noreferrer">Terms</a> •
+          <a id="footerPrivacy" href="https://www.example.com/privacy" target="_blank" rel="noopener noreferrer">Privacy</a> •
+          <a id="footerRss" href="https://example.com/podcast/feed.rss" target="_blank" rel="noopener noreferrer">RSS</a> •
+          <a id="backToTop" href="#top">Back to top</a>
+        </div>
+      </div>
+      <div>
+        <div class="status-box" id="lastLinkClicked" style="min-width:260px;"><strong>Last link clicked</strong><span>none</span></div>
+      </div>
+    </div>
+  </footer>
+
+  <dialog id="subscribeModal" class="modal" aria-labelledby="subscribeHeading">
+    <header class="container" style="padding: 12px 16px; border-bottom: 1px solid #000000;">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+        <h2 id="subscribeHeading" style="margin: 0;">Subscribe to the Podcast</h2>
+        <button id="closeSubscribeModalButton" class="btn ghost" type="button" aria-label="Close subscribe dialog">Close</button>
+      </div>
+    </header>
+    <div class="content">
+      <p style="margin-top: 0;">Choose your favorite app or copy the RSS feed to add this podcast to your player.</p>
+      <div class="providers">
+        <a id="appleProviderLink" href="https://podcasts.apple.com/" target="_blank" rel="noopener noreferrer" data-provider="Apple Podcasts" role="button" aria-label="Subscribe on Apple Podcasts (opens in new tab)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#000000" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle></svg>
+          Apple
+        </a>
+        <a id="spotifyProviderLink" href="https://open.spotify.com/" target="_blank" rel="noopener noreferrer" data-provider="Spotify" role="button" aria-label="Subscribe on Spotify (opens in new tab)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#000000" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle></svg>
+          Spotify
+        </a>
+        <a id="pocketProviderLink" href="https://pocketcasts.com/" target="_blank" rel="noopener noreferrer" data-provider="Pocket Casts" role="button" aria-label="Subscribe on Pocket Casts (opens in new tab)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#000000" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle></svg>
+          Pocket
+        </a>
+      </div>
+
+      <div class="rss-row">
+        <input id="rssInput" type="text" readonly value="https://example.com/podcast/feed.rss" aria-label="Podcast RSS feed URL">
+        <button id="copyRssButton" class="btn secondary" type="button" title="Copy RSS URL">Copy RSS</button>
+        <a id="openRssButton" class="btn ghost" href="https://example.com/podcast/feed.rss" target="_blank" rel="noopener noreferrer">Open RSS</a>
+      </div>
+      <div class="hint" style="margin-top:8px;">You can open the RSS feed or copy it to your clipboard.</div>
+    </div>
+    <div class="actions">
+      <button id="closeSubscribeModalButton2" class="btn ghost" type="button" aria-label="Close subscribe dialog">Close</button>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    /* ===========================
+       Global helper API (preservation)
+       =========================== */
+
+    // Utility: time formatting (preserved API)
+    function fmtTime(sec) {
+      sec = Math.max(0, Math.floor(sec || 0));
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      const s = sec % 60;
+      if (h > 0) return h + ":" + String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+      return m + ":" + String(s).padStart(2,"0");
+    }
+
+    // Global writeString (exposed as requested in keep_api)
+    function writeString(view, offset, string) {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    }
+
+    // Toast API (preserved)
+    let toastTimeout;
+    function showToast(msg) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => el.classList.remove("show"), 2200);
+    }
+
+    // Audio generation: create a short tone WAV via OfflineAudioContext then encode to WAV (preserved)
+    async function generateToneUrl({ duration = 6, frequency = 440, volume = 0.2 }) {
+      const sampleRate = 44100;
+      const length = Math.floor(duration * sampleRate);
+      const Ctx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+      const ctx = new Ctx(1, length, sampleRate);
+
+      const osc = ctx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.value = frequency;
+
+      const gain = ctx.createGain();
+      const attack = 0.03, release = 0.2;
+      const sustainStart = attack;
+      const sustainEnd = Math.max(attack + 0.01, duration - release);
+      gain.gain.setValueAtTime(0, 0);
+      gain.gain.linearRampToValueAtTime(volume, attack);
+      gain.gain.setValueAtTime(volume, sustainStart);
+      gain.gain.linearRampToValueAtTime(0.0001, sustainEnd);
+
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(0);
+      osc.stop(duration);
+
+      const rendered = await ctx.startRendering();
+      const wav = audioBufferToWav(rendered);
+      const blob = new Blob([wav], { type: "audio/wav" });
+      return URL.createObjectURL(blob);
+    }
+
+    // WAV encoder (preserved)
+    function audioBufferToWav(buffer) {
+      const numOfChan = buffer.numberOfChannels;
+      const sampleRate = buffer.sampleRate;
+      const format = 1; // PCM
+      const bitDepth = 16;
+
+      const samples = buffer.getChannelData(0);
+      const length = samples.length * numOfChan * 2 + 44;
+      const wav = new ArrayBuffer(length);
+      const view = new DataView(wav);
+
+      let offset = 0;
+      writeString(view, offset, 'RIFF'); offset += 4;
+      view.setUint32(offset, length - 8, true); offset += 4;
+      writeString(view, offset, 'WAVE'); offset += 4;
+
+      writeString(view, offset, 'fmt '); offset += 4;
+      view.setUint32(offset, 16, true); offset += 4;
+      view.setUint16(offset, format, true); offset += 2;
+      view.setUint16(offset, numOfChan, true); offset += 2;
+      view.setUint32(offset, sampleRate, true); offset += 4;
+      view.setUint32(offset, sampleRate * numOfChan * bitDepth / 8, true); offset += 4;
+      view.setUint16(offset, numOfChan * bitDepth / 8, true); offset += 2;
+      view.setUint16(offset, bitDepth, true); offset += 2;
+
+      writeString(view, offset, 'data'); offset += 4;
+      view.setUint32(offset, samples.length * numOfChan * bitDepth / 8, true); offset += 4;
+
+      const channels = [];
+      for (let i = 0; i < numOfChan; i++) channels.push(buffer.getChannelData(i));
+      let pos = 0;
+      for (let i = 0; i < samples.length; i++) {
+        for (let ch = 0; ch < numOfChan; ch++) {
+          let sample = channels[ch][i];
+          sample = Math.max(-1, Math.min(1, sample));
+          view.setInt16(offset + pos, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+          pos += 2;
+        }
+      }
+      return wav;
+    }
+
+    /* ===========================
+       Data and State
+       =========================== */
+    const EPISODES = [
+      {
+        id: "e01",
+        title: "The Origin Story: How It All Began",
+        date: "2025-07-12",
+        durationSec: 780,
+        tags: ["intro", "host", "story"],
+        description: "We kick off the show with our origin story, inspirations, and what you can expect from this podcast."
+      },
+      {
+        id: "e02",
+        title: "Deep Dive: The Art of Focus",
+        date: "2025-07-19",
+        durationSec: 1920,
+        tags: ["productivity", "focus", "mindset"],
+        description: "From context switching to flow state, we break down practical strategies for staying focused in a noisy world."
+      },
+      {
+        id: "e03",
+        title: "Designing for the Ear: Audio UX",
+        date: "2025-07-26",
+        durationSec: 1560,
+        tags: ["design", "audio", "ux"],
+        description: "Great audio is more than sound. We explore patterns that make audio-first products delightful and accessible."
+      },
+      {
+        id: "e04",
+        title: "Shipping Fast Without Breaking Things",
+        date: "2025-08-02",
+        durationSec: 2280,
+        tags: ["engineering", "process", "delivery"],
+        description: "How to ship quickly while maintaining quality: release trains, feature flags, and testing strategies."
+      },
+      {
+        id: "e05",
+        title: "Meet the Community: Listener Stories",
+        date: "2025-08-09",
+        durationSec: 1800,
+        tags: ["community", "stories"],
+        description: "We turn the mic to our listeners. From big wins to lessons learned—your stories, your voice."
+      },
+      {
+        id: "e06",
+        title: "The Sound of Productivity: Music vs. Silence",
+        date: "2025-08-16",
+        durationSec: 2100,
+        tags: ["music", "focus"],
+        description: "Do playlists help or hinder? We bring science and anecdotes to the eternal debate."
+      },
+      {
+        id: "e07",
+        title: "Behind the Scenes: Our Recording Setup",
+        date: "2025-08-23",
+        durationSec: 1620,
+        tags: ["gear", "studio", "setup"],
+        description: "Microphones, acoustics, and the software we rely on to make this show sound great."
+      },
+      {
+        id: "e08",
+        title: "Q&A: Your Questions Answered",
+        date: "2025-08-30",
+        durationSec: 1860,
+        tags: ["Q&A", "community"],
+        description: "We answer your questions on career, creativity, and everything in between."
+      }
+    ];
+
+    const state = {
+      filter: "",
+      tagFilters: new Set(),
+      sort: "newest",
+      audioUrls: new Map(), // id -> ObjectURL
+      audioRefs: new Map(), // id -> HTMLAudioElement
+      playingId: null,
+      subscribedEpisodes: new Set(JSON.parse(localStorage.getItem("subscribedEpisodes") || "[]")),
+      subscribedShow: JSON.parse(localStorage.getItem("subscribedShow") || "false"),
+    };
+
+    /* ===========================
+       Rendering
+       =========================== */
+
+    function updateProxies() {
+      document.querySelector("#filterStatus span").textContent = state.tagFilters.size > 0 || state.filter.trim() ? "active" : "idle";
+      document.querySelector("#sortStatus span").textContent = state.sort;
+      document.querySelector("#applyStatus span").textContent = "done";
+    }
+
+    function generateWavePath() {
+      const points = [];
+      const W = 200, H = 200;
+      const steps = 24;
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        const x = 10 + t * (W - 20);
+        const y = H/2 + Math.sin(t * Math.PI * 2) * 50 * Math.sin(t * Math.PI);
+        points.push([x, y]);
+      }
+      let d = "M " + points[0][0] + " " + points[0][1];
+      for (let i = 1; i < points.length - 1; i++) {
+        const xc = (points[i][0] + points[i + 1][0]) / 2;
+        const yc = (points[i][1] + points[i + 1][1]) / 2;
+        d += " Q " + points[i][0] + " " + points[i][1] + " " + xc + " " + yc;
+      }
+      return d;
+    }
+
+    function renderTagFilters() {
+      const row = document.getElementById("tagFilterRow");
+      row.innerHTML = "";
+      const tags = Array.from(new Set(EPISODES.flatMap(e => e.tags))).sort();
+      tags.forEach(tag => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "tag-chip";
+        btn.setAttribute("data-tag", tag);
+        btn.setAttribute("aria-pressed", state.tagFilters.has(tag) ? "true" : "false");
+        btn.id = "tagBtn-" + tag.replace(/\W+/g, "_");
+        btn.textContent = "#" + tag;
+        btn.addEventListener("click", () => {
+          if (state.tagFilters.has(tag)) state.tagFilters.delete(tag);
+          else state.tagFilters.add(tag);
+          btn.setAttribute("aria-pressed", state.tagFilters.has(tag) ? "true" : "false");
+          const active = Array.from(state.tagFilters).map(t => "#" + t).join(", ");
+          document.getElementById("activeFiltersLabel").textContent = state.tagFilters.size ? ("Active: " + active) : "No tag filters active";
+          document.querySelector("#filterStatus span").textContent = state.tagFilters.size || state.filter.trim() ? "active" : "idle";
+          applySearch();
+        });
+        row.appendChild(btn);
+      });
+    }
+
+    function renderEpisodes(list) {
+      const container = document.getElementById("episodeList");
+      container.innerHTML = "";
+      const empty = document.getElementById("emptyState");
+      empty.hidden = list.length > 0;
+
+      for (const ep of list) {
+        const article = document.createElement("article");
+        article.className = "episode";
+        article.id = "episode-" + ep.id;
+        article.setAttribute("role", "listitem");
+
+        const cover = document.createElement("div");
+        cover.className = "cover";
+        cover.innerHTML = `
+          <span class="badge" aria-hidden="true">${fmtTime(ep.durationSec)}</span>
+          <svg viewBox="0 0 200 200" aria-hidden="true">
+            <path d="${generateWavePath()}" stroke-width="2" fill="none" stroke-linecap="square"></path>
+          </svg>
+        `;
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        const tagsLine = ep.tags.map(t => "#" + t).join(" ");
+        const notesId = "notes-" + ep.id;
+        const shareBtnId = "shareBtn-" + ep.id;
+        meta.innerHTML = `
+          <h3>${ep.title}</h3>
+          <div class="subline">${new Date(ep.date).toLocaleDateString()} • ${tagsLine}</div>
+          <p class="description">${ep.description}</p>
+
+          <div class="player" role="group" aria-label="Audio player for ${ep.title}">
+            <div class="controls">
+              <button class="btn secondary" id="rewindBtn-${ep.id}" type="button" title="Rewind 15 seconds" aria-label="Rewind 15 seconds">⏪ 15s</button>
+              <button class="btn play" id="playBtn-${ep.id}" type="button" aria-label="Play ${ep.title}" title="Play/Pause">Play</button>
+              <button class="btn secondary" id="forwardBtn-${ep.id}" type="button" title="Forward 15 seconds" aria-label="Forward 15 seconds">15s ⏩</button>
+            </div>
+            <div class="timeline">
+              <div class="progress" id="progress-${ep.id}" role="slider" aria-label="Seek bar" aria-valuemin="0" aria-valuemax="${ep.durationSec}" aria-valuenow="0" tabindex="0">
+                <div class="bar" id="progressBar-${ep.id}"></div>
+                <div class="scrubber" id="scrubber-${ep.id}" style="left: 0%"></div>
+              </div>
+              <div class="time">
+                <span id="timeCurrent-${ep.id}">0:00</span>
+                <span id="timeTotal-${ep.id}">${fmtTime(ep.durationSec)}</span>
+              </div>
+            </div>
+            <div class="episode-actions">
+              <button class="btn ghost subscribe-toggle" id="episodeSubscribeBtn-${ep.id}" type="button" aria-label="Subscribe to this episode" aria-pressed="false">Subscribe to this episode</button>
+              <button class="btn ghost" id="${shareBtnId}" type="button" aria-label="Copy episode link">Share</button>
+              <button class="btn ghost" type="button" onclick="openSubscribeModal()" aria-label="Open subscribe options">Subscribe to show</button>
+              <button class="btn ghost" type="button" aria-controls="${notesId}" aria-expanded="false" id="notesToggle-${ep.id}">View notes</button>
+            </div>
+            <audio id="audio-${ep.id}" preload="none" crossorigin="anonymous"></audio>
+          </div>
+
+          <div id="${notesId}" hidden>
+            <p><strong>Show notes:</strong></p>
+            <ul>
+              <li>Key takeaways from ${ep.title}</li>
+              <li>Chapters are not available in this demo, but you can expand notes.</li>
+              <li>Subscribe on your favorite platform to get the full episode.</li>
+            </ul>
+          </div>
+        `;
+
+        article.appendChild(cover);
+        article.appendChild(meta);
+        container.appendChild(article);
+
+        // After DOM creation, wire controls
+        setupPlayer(ep);
+        setupEpisodeExtras(ep);
+      }
+      updateResultsCount();
+      updateProxies();
+    }
+
+    /* ===========================
+       Player wiring
+       =========================== */
+
+    // Global API versions (preserved names) for external inspection
+    function setPlayIcon(btnOrEpisodeId, isPlaying) {
+      // helper that works with a button element or an episode id
+      let playBtn = null;
+      if (typeof btnOrEpisodeId === "string") {
+        playBtn = document.getElementById("playBtn-" + btnOrEpisodeId);
+      } else {
+        playBtn = btnOrEpisodeId;
+      }
+      if (!playBtn) return;
+      playBtn.textContent = isPlaying ? "Pause" : "Play";
+      if (playBtn.id && playBtn.id.startsWith("playBtn-")) {
+        const eid = playBtn.id.replace("playBtn-", "");
+        playBtn.setAttribute("aria-label", (isPlaying ? "Pause " : "Play ") + (eid || "episode"));
+      }
+    }
+
+    function seekFromClientX(progressElOrId, clientX) {
+      const progress = typeof progressElOrId === "string" ? document.getElementById(progressElOrId) : progressElOrId;
+      if (!progress) return 0;
+      const rect = progress.getBoundingClientRect();
+      const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+      return ratio;
+    }
+
+    function setupPlayer(ep) {
+      const audio = document.getElementById("audio-" + ep.id);
+      state.audioRefs.set(ep.id, audio);
+
+      const playBtn = document.getElementById("playBtn-" + ep.id);
+      const rewindBtn = document.getElementById("rewindBtn-" + ep.id);
+      const forwardBtn = document.getElementById("forwardBtn-" + ep.id);
+      const progress = document.getElementById("progress-" + ep.id);
+      const progressBar = document.getElementById("progressBar-" + ep.id);
+      const scrubber = document.getElementById("scrubber-" + ep.id);
+      const tCur = document.getElementById("timeCurrent-" + ep.id);
+      const tTot = document.getElementById("timeTotal-" + ep.id);
+
+      // Per-episode icon updater (shadows global, preserves V0 behavior)
+      function setPlayIconLocal(isPlaying) {
+        playBtn.textContent = isPlaying ? "Pause" : "Play";
+        playBtn.setAttribute("aria-label", (isPlaying ? "Pause " : "Play ") + ep.title);
+      }
+
+      playBtn.addEventListener("click", async () => {
+        // Pause other
+        if (state.playingId && state.playingId !== ep.id) {
+          const other = state.audioRefs.get(state.playingId);
+          if (other && !other.paused) other.pause();
+          const otherBtn = document.getElementById("playBtn-" + state.playingId);
+          if (otherBtn) {
+            otherBtn.textContent = "Play";
+          }
+        }
+        // Ensure src
+        if (!state.audioUrls.has(ep.id)) {
+          const baseFreq = 220 + (parseInt(ep.id.replace(/\D/g,''), 10) || 1) * 35;
+          const url = await generateToneUrl({ duration: Math.min(ep.durationSec, 30), frequency: baseFreq });
+          state.audioUrls.set(ep.id, url);
+          audio.src = url;
+        }
+
+        if (audio.paused) {
+          await audio.play();
+          state.playingId = ep.id;
+          setPlayIconLocal(true);
+          document.getElementById("toolbarStatus").textContent = "Now playing: " + ep.title;
+        } else {
+          audio.pause();
+          setPlayIconLocal(false);
+        }
+      });
+
+      playBtn.addEventListener("keydown", (e) => {
+        if (e.key === " " || e.key === "Spacebar" || e.code === "Space") {
+          e.preventDefault();
+          playBtn.click();
+        } else if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          audio.currentTime = Math.max(0, (audio.currentTime || 0) - 15);
+        } else if (e.key === "ArrowRight") {
+          e.preventDefault();
+          const dur = audio.duration || Math.min(ep.durationSec, 30);
+          audio.currentTime = Math.min(dur, (audio.currentTime || 0) + 15);
+        }
+      });
+
+      function onTimeUpdate() {
+        const cur = audio.currentTime || 0;
+        const dur = audio.duration || Math.min(ep.durationSec, 30);
+        const pct = dur ? (cur / dur) * 100 : 0;
+        progressBar.style.width = pct + "%";
+        scrubber.style.left = pct + "%";
+        tCur.textContent = fmtTime(cur);
+        tTot.textContent = fmtTime(dur);
+        progress.setAttribute("aria-valuenow", Math.floor(cur));
+      }
+
+      audio.addEventListener("timeupdate", onTimeUpdate);
+      audio.addEventListener("loadedmetadata", onTimeUpdate);
+      audio.addEventListener("ended", () => {
+        setPlayIconLocal(false);
+        state.playingId = null;
+      });
+
+      function localSeekFromClientX(clientX) {
+        const rect = progress.getBoundingClientRect();
+        const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+        const target = (audio.duration || Math.min(ep.durationSec, 30)) * ratio;
+        audio.currentTime = target;
+      }
+
+      progress.addEventListener("click", (e) => localSeekFromClientX(e.clientX));
+      progress.addEventListener("keydown", (e) => {
+        const step = 5;
+        if (e.key === "ArrowLeft") {
+          audio.currentTime = Math.max(0, (audio.currentTime || 0) - step);
+          e.preventDefault();
+        } else if (e.key === "ArrowRight") {
+          const dur = audio.duration || Math.min(ep.durationSec, 30);
+          audio.currentTime = Math.min(dur, (audio.currentTime || 0) + step);
+          e.preventDefault();
+        }
+      });
+
+      rewindBtn.addEventListener("click", () => {
+        audio.currentTime = Math.max(0, (audio.currentTime || 0) - 15);
+      });
+      forwardBtn.addEventListener("click", () => {
+        const dur = audio.duration || Math.min(ep.durationSec, 30);
+        audio.currentTime = Math.min(dur, (audio.currentTime || 0) + 15);
+      });
+
+      // Episode subscribe toggle
+      const epSubBtn = document.getElementById("episodeSubscribeBtn-" + ep.id);
+      const isSub = state.subscribedEpisodes.has(ep.id);
+      epSubBtn.classList.toggle("subscribed", isSub);
+      epSubBtn.textContent = isSub ? "Subscribed" : "Subscribe to this episode";
+      epSubBtn.setAttribute("aria-pressed", String(isSub));
+      epSubBtn.addEventListener("click", () => {
+        const now = !state.subscribedEpisodes.has(ep.id);
+        if (now) state.subscribedEpisodes.add(ep.id);
+        else state.subscribedEpisodes.delete(ep.id);
+        localStorage.setItem("subscribedEpisodes", JSON.stringify(Array.from(state.subscribedEpisodes)));
+        epSubBtn.classList.toggle("subscribed", now);
+        epSubBtn.textContent = now ? "Subscribed" : "Subscribe to this episode";
+        epSubBtn.setAttribute("aria-pressed", String(now));
+        showToast(now ? "Episode subscribed" : "Episode unsubscribed");
+      });
+    }
+
+    // Extra actions per episode
+    function setupEpisodeExtras(ep) {
+      const shareBtn = document.getElementById("shareBtn-" + ep.id);
+      shareBtn.addEventListener("click", async () => {
+        const url = location.origin + location.pathname + "#episode-" + ep.id;
+        try {
+          await navigator.clipboard.writeText(url);
+          showToast("Link copied");
+        } catch {
+          // Non-blocking: set fallback by selecting a hidden input
+        }
+        const shareStatus = document.getElementById("lastLinkClicked");
+        if (shareStatus) {
+          shareStatus.querySelector("span").textContent = "share: " + ep.id;
+        }
+        const applyBox = document.getElementById("applyStatus");
+        if (applyBox) applyBox.querySelector("span").textContent = "done";
+        const proxy = document.getElementById("shareStatus");
+        if (proxy) proxy.textContent = "copied";
+      });
+
+      const toggleBtn = document.getElementById("notesToggle-" + ep.id);
+      const notes = document.getElementById("notes-" + ep.id);
+      toggleBtn.addEventListener("click", () => {
+        const isHidden = notes.hasAttribute("hidden");
+        if (isHidden) notes.removeAttribute("hidden");
+        else notes.setAttribute("hidden", "");
+        toggleBtn.setAttribute("aria-expanded", String(isHidden));
+        toggleBtn.textContent = isHidden ? "Hide notes" : "View notes";
+      });
+    }
+
+    /* ===========================
+       Search/Filter/Sort
+       =========================== */
+
+    function getFilteredEpisodes() {
+      let list = EPISODES.slice();
+
+      // Search filter
+      if (state.filter.trim()) {
+        const q = state.filter.toLowerCase();
+        list = list.filter(e =>
+          e.title.toLowerCase().includes(q) ||
+          e.description.toLowerCase().includes(q) ||
+          e.tags.some(t => t.toLowerCase().includes(q))
+        );
+      }
+
+      // Tag filters (AND across selected tags)
+      if (state.tagFilters.size > 0) {
+        const tagsWanted = Array.from(state.tagFilters);
+        list = list.filter(e => tagsWanted.every(t => e.tags.includes(t)));
+      }
+
+      // Sort
+      list.sort((a, b) => {
+        const da = new Date(a.date).getTime();
+        const db = new Date(b.date).getTime();
+        return state.sort === "newest" ? db - da : da - db;
+      });
+
+      return list;
+    }
+
+    function updateResultsCount() {
+      const countEl = document.getElementById("resultsCount");
+      const list = getFilteredEpisodes();
+      if (!state.filter.trim() && state.tagFilters.size === 0) {
+        countEl.textContent = "All episodes";
+      } else {
+        countEl.textContent = list.length + " result" + (list.length === 1 ? "" : "s");
+      }
+    }
+
+    function applySearch() {
+      const list = getFilteredEpisodes();
+      renderEpisodes(list);
+      document.querySelector("#applyStatus span").textContent = "done";
+    }
+
+    // Global exported function (preserved name)
+    function doSearch() {
+      const searchInput = document.getElementById("searchInput");
+      state.filter = searchInput.value || "";
+      document.querySelector("#filterStatus span").textContent = state.filter.trim() || state.tagFilters.size ? "active" : "idle";
+      applySearch();
+    }
+
+    /* ===========================
+       Subscribe modal controls
+       =========================== */
+    function openSubscribeModal() {
+      const modal = document.getElementById("subscribeModal");
+      if (typeof modal.showModal === "function") {
+        modal.showModal();
+      } else {
+        modal.setAttribute("open", "");
+      }
+    }
+    function closeSubscribeModal() {
+      const modal = document.getElementById("subscribeModal");
+      if (typeof modal.close === "function") modal.close();
+      else modal.removeAttribute("open");
+    }
+    window.openSubscribeModal = openSubscribeModal;
+
+    /* ===========================
+       Navigation helpers
+       =========================== */
+    function markActiveSection(name) {
+      const el = document.querySelector("#activeSection span");
+      if (el) el.textContent = name;
+    }
+
+    /* ===========================
+       Initialization
+       =========================== */
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("year").textContent = new Date().getFullYear();
+
+      // Build tag filters
+      renderTagFilters();
+
+      // Initial render
+      renderEpisodes(getFilteredEpisodes());
+
+      // Search wiring
+      const searchInput = document.getElementById("searchInput");
+      const searchButton = document.getElementById("searchButton");
+      const clearSearchButton = document.getElementById("clearSearchButton");
+
+      searchInput.addEventListener("input", () => {
+        state.filter = searchInput.value || "";
+        document.querySelector("#filterStatus span").textContent = state.filter.trim() || state.tagFilters.size ? "active" : "idle";
+        applySearch();
+      });
+      searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          doSearch();
+        }
+      });
+      searchButton.addEventListener("click", doSearch);
+      clearSearchButton.addEventListener("click", () => {
+        searchInput.value = "";
+        state.filter = "";
+        document.querySelector("#filterStatus span").textContent = state.tagFilters.size ? "active" : "idle";
+        applySearch();
+        searchInput.focus();
+      });
+
+      // Sort wiring
+      const sortOrder = document.getElementById("sortOrder");
+      sortOrder.addEventListener("change", () => {
+        state.sort = sortOrder.value;
+        document.querySelector("#sortStatus span").textContent = state.sort;
+        applySearch();
+      });
+
+      // Clear all
+      document.getElementById("clearAllFilters").addEventListener("click", () => {
+        state.filter = "";
+        state.tagFilters.clear();
+        document.getElementById("searchInput").value = "";
+        // reset tag chips
+        document.querySelectorAll(".tag-chip").forEach(b => b.setAttribute("aria-pressed", "false"));
+        document.getElementById("activeFiltersLabel").textContent = "No tag filters active";
+        document.querySelector("#filterStatus span").textContent = "idle";
+        applySearch();
+      });
+
+      // Subscribe modal open/close
+      document.getElementById("subscribeButton").addEventListener("click", openSubscribeModal);
+      document.getElementById("closeSubscribeModalButton").addEventListener("click", closeSubscribeModal);
+      document.getElementById("closeSubscribeModalButton2").addEventListener("click", closeSubscribeModal);
+
+      // Provider links: do not prevent default; only update state and proxies
+      function wireProviderLink(id) {
+        const a = document.getElementById(id);
+        a.addEventListener("click", () => {
+          const provider = a.getAttribute("data-provider") || a.textContent.trim();
+          state.subscribedShow = true;
+          localStorage.setItem("subscribedShow", JSON.stringify(true));
+          document.getElementById("lastLinkClicked").querySelector("span").textContent = provider;
+          showToast("Opening " + provider + " in a new tab");
+          closeSubscribeModal();
+        });
+      }
+      wireProviderLink("appleProviderLink");
+      wireProviderLink("spotifyProviderLink");
+      wireProviderLink("pocketProviderLink");
+
+      // Header CTA links update lastLinkClicked
+      function wireHeaderCta(id, label) {
+        const a = document.getElementById(id);
+        a.addEventListener("click", () => {
+          document.getElementById("lastLinkClicked").querySelector("span").textContent = label;
+        });
+      }
+      wireHeaderCta("appleCtaHeader", "Apple Podcasts");
+      wireHeaderCta("spotifyCtaHeader", "Spotify");
+      wireHeaderCta("pocketCtaHeader", "Pocket Casts");
+      wireHeaderCta("rssCtaHeader", "RSS Feed");
+
+      // Copy RSS
+      document.getElementById("copyRssButton").addEventListener("click", async () => {
+        const val = document.getElementById("rssInput").value;
+        try {
+          await navigator.clipboard.writeText(val);
+          showToast("RSS feed copied");
+        } catch {
+          const input = document.getElementById("rssInput");
+          input.focus();
+          input.select();
+          showToast("Select + copy the RSS feed");
+        }
+        const last = document.getElementById("lastLinkClicked");
+        last.querySelector("span").textContent = "Copy RSS";
+      });
+
+      // Modal backdrop close support
+      const modal = document.getElementById("subscribeModal");
+      modal.addEventListener("click", (e) => {
+        const rect = modal.getBoundingClientRect();
+        const isInDialog = (e.clientX >= rect.left && e.clientX <= rect.right &&
+                            e.clientY >= rect.top && e.clientY <= rect.bottom);
+        if (!isInDialog) closeSubscribeModal();
+      });
+      modal.addEventListener("cancel", (e) => { e.preventDefault(); closeSubscribeModal(); });
+
+      // Navigation anchors: set active section proxy
+      function wireNav(id, sectionName) {
+        document.getElementById(id).addEventListener("click", () => markActiveSection(sectionName));
+      }
+      wireNav("navEpisodes", "Episodes");
+      wireNav("navAbout", "About");
+      wireNav("navContact", "Contact");
+      document.getElementById("logoLink").addEventListener("click", () => markActiveSection("Top"));
+      document.getElementById("backToTop").addEventListener("click", () => markActiveSection("Top"));
+
+      // Social/contact link clicks update lastLinkClicked
+      function wireSimpleLink(id, label) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener("click", () => {
+          document.getElementById("lastLinkClicked").querySelector("span").textContent = label;
+        });
+      }
+      wireSimpleLink("mailtoLink", "email");
+      wireSimpleLink("twitterLink", "Twitter");
+      wireSimpleLink("instagramLink", "Instagram");
+      wireSimpleLink("linkedinLink", "LinkedIn");
+      wireSimpleLink("footerTerms", "Terms");
+      wireSimpleLink("footerPrivacy", "Privacy");
+      wireSimpleLink("footerRss", "RSS");
+      wireSimpleLink("rssAboutLink", "About RSS");
+
+      // Pause audio when navigating away
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden && state.playingId) {
+          const audio = state.audioRefs.get(state.playingId);
+          if (audio && !audio.paused) {
+            audio.pause();
+            const btn = document.getElementById("playBtn-" + state.playingId);
+            if (btn) btn.textContent = "Play";
+            state.playingId = null;
+          }
+        }
+      });
+    });

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Visualization Playground - Enhanced</title>
+  <style>
+    /* Simplified styling according to visual simplification rules */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #ffffff;
+      color: #000000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      margin: 0;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 1280px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    input[type="file"],
+    textarea,
+    select,
+    input[type="color"],
+    button {
+      font-size: 1rem;
+      padding: 10px;
+      margin: 0;
+      border: 1px solid #000000;
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 100%;
+      background-color: #ffffff;
+      color: #000000;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #f0f0f0;
+    }
+
+    canvas {
+      display: block;
+      margin: 20px auto;
+      border: 1px solid #000000;
+      max-width: 100%;
+    }
+
+    .status {
+      font-size: 0.9rem;
+      color: #555555;
+    }
+
+    #controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    #chartPreview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Data Visualization Playground - Enhanced</h1>
+  </header>
+  <div class="container">
+    <!-- Input Section -->
+    <div class="form-group">
+      <label for="csvInput">Paste CSV Data or Upload a File:</label>
+      <textarea id="csvInput" placeholder="Paste CSV data here..."></textarea>
+      <input type="file" id="csvUpload" accept=".csv">
+    </div>
+    <div class="form-group">
+      <label for="chartType">Select Chart Type:</label>
+      <select id="chartType">
+        <option value="bar">Bar Chart</option>
+        <option value="line">Line Chart</option>
+        <option value="pie">Pie Chart</option>
+        <option value="scatter">Scatter Plot</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="seriesColors">Customize Series Colors (comma-separated, e.g., #ff0000,#00ff00):</label>
+      <textarea id="seriesColors" placeholder="Enter hex colors for each series..."></textarea>
+    </div>
+    <div class="form-group">
+      <label for="chartColor">Set Default Chart Color:</label>
+      <input type="color" id="chartColor" value="#007bff">
+    </div>
+    <div id="controls">
+      <button id="generateChart">Generate Chart</button>
+      <button id="saveImage">Save as Image</button>
+    </div>
+    <div class="status">
+      <span id="chartStatus">Waiting for input...</span>
+    </div>
+    <!-- Chart Preview Section -->
+    <div id="chartPreview" class="hidden">
+      <canvas id="chartCanvas" width="800" height="400"></canvas>
+      <span id="downloadStatus" class="status hidden">Download ready.</span>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const csvInput = document.getElementById('csvInput');
+      const csvUpload = document.getElementById('csvUpload');
+      const chartType = document.getElementById('chartType');
+      const seriesColors = document.getElementById('seriesColors');
+      const chartColor = document.getElementById('chartColor');
+      const generateChartButton = document.getElementById('generateChart');
+      const saveImageButton = document.getElementById('saveImage');
+      const chartCanvas = document.getElementById('chartCanvas');
+      const chartPreview = document.getElementById('chartPreview');
+      const chartStatus = document.getElementById('chartStatus');
+      const downloadStatus = document.getElementById('downloadStatus');
+      const ctx = chartCanvas.getContext('2d');
+      let chartInstance = null;
+
+      function parseCSVData(csv) {
+        const rows = csv.split('\n').map(row => row.split(',').map(cell => cell.trim()));
+        if (rows.length < 2) {
+          throw new Error('CSV data is invalid or too short.');
+        }
+        const labels = rows[0];
+        const data = rows.slice(1).map(row => row.map(Number));
+        return { labels, data };
+      }
+
+      function generateChart() {
+        try {
+          const csvData = csvInput.value.trim();
+          const csvFile = csvUpload.files[0];
+          let parsedData;
+          if (csvData) {
+            parsedData = parseCSVData(csvData);
+          } else if (csvFile) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              parsedData = parseCSVData(e.target.result);
+              renderChart(parsedData);
+            };
+            reader.readAsText(csvFile);
+            return;
+          } else {
+            alert('Please provide CSV data or upload a file.');
+            return;
+          }
+          renderChart(parsedData);
+        } catch (error) {
+          alert('Error generating chart: ' + error.message);
+        }
+      }
+
+      function renderChart({ labels, data }) {
+        if (chartInstance) {
+          chartInstance.destroy();
+        }
+        const selectedType = chartType.value;
+        const colors = (seriesColors.value || chartColor.value).split(',').map(c => c.trim());
+        const datasets = data.map((series, index) => ({
+          label: labels[index + 1],
+          data: series,
+          backgroundColor: colors[index % colors.length] || chartColor.value,
+          borderColor: '#000',
+          borderWidth: 1,
+        }));
+        chartInstance = new Chart(ctx, {
+          type: selectedType,
+          data: {
+            labels: labels[0],
+            datasets,
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+          },
+        });
+        chartPreview.classList.remove('hidden');
+        chartStatus.textContent = 'Chart generated successfully.';
+      }
+
+      function saveChartAsImage() {
+        if (!chartInstance) {
+          alert('No chart available to save.');
+          return;
+        }
+        const link = document.createElement('a');
+        link.download = 'chart.png';
+        link.href = chartCanvas.toDataURL('image/png');
+        link.click();
+        downloadStatus.textContent = 'Download ready.';
+        downloadStatus.classList.remove('hidden');
+      }
+
+      generateChartButton.addEventListener('click', generateChart);
+      saveImageButton.addEventListener('click', saveChartAsImage);
+    });
+  </script>
+</body>
+</html>

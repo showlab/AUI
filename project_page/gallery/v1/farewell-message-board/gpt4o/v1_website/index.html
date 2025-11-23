@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farewell Message Board</title>
+  <style>
+    /* Global Styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #ffffff;
+      color: #000000;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background-color: #f5f5f5;
+      border-bottom: 1px solid #ccc;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    header button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    header button:hover {
+      background-color: #0056b3;
+    }
+
+    main {
+      max-width: 1280px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .message-board {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .card {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      background-color: #f5f5f5;
+      border: 1px solid #ccc;
+      padding: 1rem;
+      gap: 1rem;
+    }
+
+    .card img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+
+    .card-content {
+      flex: 1;
+    }
+
+    .card-content p {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .write-button-container {
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    .write-button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .write-button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-content h2 {
+      margin-top: 0;
+    }
+
+    .modal-content textarea {
+      width: 100%;
+      height: 100px;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    .modal-content button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .modal-content button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Farewell Message Board</h1>
+    <button id="login-button">Login</button>
+  </header>
+  <main>
+    <section class="message-board" id="message-board">
+      <!-- Pre-posted messages -->
+      <div class="card">
+        <img src="https://via.placeholder.com/100" alt="Farewell">
+        <div class="card-content">
+          <p>Goodbye and good luck on your next adventure!</p>
+        </div>
+      </div>
+      <div class="card">
+        <img src="https://via.placeholder.com/100" alt="Farewell">
+        <div class="card-content">
+          <p>We will miss you. Stay in touch!</p>
+        </div>
+      </div>
+    </section>
+    <div class="write-button-container">
+      <button class="write-button" id="write-button">Write a Message</button>
+    </div>
+  </main>
+
+  <!-- Modal for writing a message -->
+  <div class="modal" id="message-modal">
+    <div class="modal-content">
+      <h2>Write a Message</h2>
+      <textarea id="message-input" placeholder="Write your heartfelt message here..."></textarea>
+      <button id="submit-message-button">Submit</button>
+    </div>
+  </div>
+
+  <script>
+    const writeButton = document.getElementById('write-button');
+    const messageModal = document.getElementById('message-modal');
+    const submitMessageButton = document.getElementById('submit-message-button');
+    const messageInput = document.getElementById('message-input');
+    const messageBoard = document.getElementById('message-board');
+
+    writeButton.addEventListener('click', () => {
+      messageModal.style.display = 'flex';
+    });
+
+    submitMessageButton.addEventListener('click', () => {
+      const messageText = messageInput.value.trim();
+      if (messageText) {
+        const newCard = document.createElement('div');
+        newCard.className = 'card';
+        newCard.innerHTML = `
+          <img src="https://via.placeholder.com/100" alt="Farewell">
+          <div class="card-content">
+            <p>${messageText}</p>
+          </div>
+        `;
+        messageBoard.appendChild(newCard);
+        messageInput.value = '';
+        messageModal.style.display = 'none';
+      } else {
+        alert('Please write a message before submitting.');
+      }
+    });
+
+    messageModal.addEventListener('click', (e) => {
+      if (e.target === messageModal) {
+        messageModal.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>

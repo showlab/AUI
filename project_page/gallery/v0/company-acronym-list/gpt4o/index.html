@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Company Acronym List</title>
+  <style>
+    /* General styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    header {
+      background-color: #0078d7;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    /* Main container */
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Search bar */
+    .search-bar {
+      display: flex;
+      margin-bottom: 1rem;
+    }
+    .search-bar input {
+      flex: 1;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px 0 0 4px;
+    }
+    .search-bar button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border: none;
+      background-color: #0078d7;
+      color: white;
+      border-radius: 0 4px 4px 0;
+      cursor: pointer;
+    }
+    .search-bar button:hover {
+      background-color: #005fa3;
+    }
+
+    /* Acronym list */
+    .acronym-list {
+      margin-bottom: 2rem;
+    }
+    .acronym-item {
+      padding: 0.5rem;
+      border-bottom: 1px solid #eee;
+    }
+    .acronym-item:last-child {
+      border-bottom: none;
+    }
+    .acronym-item h3 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+    .acronym-item p {
+      margin: 0.2rem 0 0;
+      font-size: 0.9rem;
+      color: #555;
+    }
+    .category-tag {
+      display: inline-block;
+      margin-top: 0.5rem;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.8rem;
+      color: white;
+      background-color: #0078d7;
+      border-radius: 4px;
+    }
+
+    /* Quiz mode */
+    .quiz-mode {
+      margin-top: 2rem;
+    }
+    .quiz-question {
+      margin-bottom: 1rem;
+    }
+    .quiz-options button {
+      display: block;
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+      border: none;
+      background-color: #f0f0f0;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .quiz-options button:hover {
+      background-color: #e0e0e0;
+    }
+    .quiz-result {
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+
+    /* Responsive design */
+    @media (max-width: 600px) {
+      .search-bar button {
+        font-size: 0.9rem;
+      }
+      .acronym-item h3 {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Company Acronym List</h1>
+  </header>
+  <div class="container">
+    <!-- Search bar -->
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search for an acronym...">
+      <button id="searchButton">Search</button>
+    </div>
+
+    <!-- Acronym list -->
+    <div class="acronym-list" id="acronymList">
+      <!-- Acronyms will be dynamically added here -->
+    </div>
+
+    <!-- Quiz mode -->
+    <div class="quiz-mode" id="quizMode">
+      <h2>Quiz Mode</h2>
+      <div class="quiz-question" id="quizQuestion"></div>
+      <div class="quiz-options" id="quizOptions"></div>
+      <div class="quiz-result" id="quizResult"></div>
+    </div>
+  </div>
+
+  <script>
+    // Sample data
+    const acronyms = [
+      { acronym: "HR", definition: "Human Resources", category: "Team" },
+      { acronym: "OKR", definition: "Objectives and Key Results", category: "Process" },
+      { acronym: "API", definition: "Application Programming Interface", category: "Technology" },
+      { acronym: "UX", definition: "User Experience", category: "Design" },
+    ];
+
+    // DOM elements
+    const searchInput = document.getElementById("searchInput");
+    const searchButton = document.getElementById("searchButton");
+    const acronymList = document.getElementById("acronymList");
+    const quizQuestion = document.getElementById("quizQuestion");
+    const quizOptions = document.getElementById("quizOptions");
+    const quizResult = document.getElementById("quizResult");
+
+    // Render acronym list
+    function renderAcronymList(filter = "") {
+      acronymList.innerHTML = "";
+      const filteredAcronyms = acronyms.filter(acronym =>
+        acronym.acronym.toLowerCase().includes(filter.toLowerCase()) ||
+        acronym.definition.toLowerCase().includes(filter.toLowerCase())
+      );
+      filteredAcronyms.forEach(acronym => {
+        const item = document.createElement("div");
+        item.className = "acronym-item";
+        item.innerHTML = `
+          <h3>${acronym.acronym}</h3>
+          <p>${acronym.definition}</p>
+          <span class="category-tag">${acronym.category}</span>
+        `;
+        acronymList.appendChild(item);
+      });
+    }
+
+    // Quiz mode
+    let currentQuizIndex = 0;
+    function startQuiz() {
+      quizResult.textContent = "";
+      if (currentQuizIndex >= acronyms.length) {
+        quizQuestion.textContent = "Quiz completed!";
+        quizOptions.innerHTML = "";
+        return;
+      }
+      const currentAcronym = acronyms[currentQuizIndex];
+      quizQuestion.textContent = `What does "${currentAcronym.acronym}" stand for?`;
+      quizOptions.innerHTML = "";
+      const options = [...acronyms.map(a => a.definition)];
+      options.sort(() => Math.random() - 0.5); // Shuffle options
+      options.forEach(option => {
+        const button = document.createElement("button");
+        button.textContent = option;
+        button.addEventListener("click", () => {
+          if (option === currentAcronym.definition) {
+            quizResult.textContent = "Correct!";
+          } else {
+            quizResult.textContent = "Incorrect!";
+          }
+          currentQuizIndex++;
+          setTimeout(startQuiz, 1000);
+        });
+        quizOptions.appendChild(button);
+      });
+    }
+
+    // Event listeners
+    searchButton.addEventListener("click", () => {
+      renderAcronymList(searchInput.value);
+    });
+
+    // Initialize app
+    renderAcronymList();
+    startQuiz();
+  </script>
+</body>
+</html>

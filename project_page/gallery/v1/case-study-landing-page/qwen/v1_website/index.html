@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Case Study - XYZ Corp</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #f97316;
+            --light-color: #f8fafc;
+            --dark-color: #0f172a;
+            --gray-color: #64748b;
+            --success-color: #10b981;
+            --border-radius: 0;
+            --box-shadow: none;
+            --transition: none;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            line-height: 1.6;
+            color: #000000;
+            background-color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: #000000;
+            color: white;
+            padding: 1rem 0;
+            position: relative;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .tagline {
+            font-size: 1rem;
+            opacity: 0.9;
+            max-width: 600px;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid transparent;
+        }
+
+        nav a:hover {
+            background-color: #333;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #000000;
+        }
+
+        .hero p {
+            font-size: 1rem;
+            color: #333;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+
+        /* Problem-Solution Section */
+        .section {
+            padding: 2rem 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-title h2 {
+            font-size: 1.5rem;
+            color: #000000;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-title p {
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .problem-solution {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid #ccc;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #000000;
+        }
+
+        .card h3 {
+            margin-bottom: 0.5rem;
+            color: #000000;
+        }
+
+        /* Metrics Section */
+        .metrics {
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            text-align: center;
+        }
+
+        .metric-item {
+            padding: 1rem;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #000000;
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-label {
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        /* Testimonial Section */
+        .testimonial {
+            background-color: #f0f0f0;
+            color: #000000;
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        .testimonial-content {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .testimonial-text {
+            font-size: 1rem;
+            font-style: italic;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .testimonial-author {
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .author-title {
+            opacity: 0.8;
+            font-size: 0.8rem;
+        }
+
+        /* CTA Section */
+        .cta {
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        .cta h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta p {
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto 1rem;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #f97316;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            text-align: center;
+            min-width: 150px;
+        }
+
+        .btn:hover {
+            background-color: #ea580c;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #000000;
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .footer-logo {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .footer-links a {
+            color: #ccc;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .copyright {
+            color: #ccc;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 1.5rem;
+            }
+            
+            .hero p {
+                font-size: 0.9rem;
+            }
+            
+            .section-title h2 {
+                font-size: 1.3rem;
+            }
+            
+            .metrics {
+                padding: 1rem;
+            }
+            
+            .metric-value {
+                font-size: 1.3rem;
+            }
+            
+            .testimonial-text {
+                font-size: 0.9rem;
+            }
+            
+            nav {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .logo {
+                font-size: 1.2rem;
+            }
+            
+            .tagline {
+                font-size: 0.9rem;
+            }
+            
+            .section {
+                padding: 1rem 0;
+            }
+            
+            .hero {
+                padding: 1rem 0;
+            }
+            
+            .problem-solution {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Hidden section for contact form */
+        #contact-section {
+            padding: 2rem 0;
+            display: none;
+        }
+
+        #contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 1rem;
+            border: 1px solid #ccc;
+        }
+
+        #contact-form input,
+        #contact-form textarea {
+            width: 100%;
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border: 1px solid #ccc;
+        }
+
+        #contact-form button {
+            background-color: #f97316;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        #contact-form button:hover {
+            background-color: #ea580c;
+        }
+
+        /* Active section indicator */
+        #activeSection {
+            display: none;
+        }
+
+        /* Download status indicator */
+        #downloadStatus {
+            display: none;
+        }
+
+        /* Solve status indicator */
+        #solveStatus {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header id="header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="logo">XYZ Corp</h1>
+                <p class="tagline">Transforming businesses through innovative SaaS solutions</p>
+                <nav>
+                    <a href="#problem-solution">Problem</a>
+                    <a href="#metrics">Metrics</a>
+                    <a href="#testimonial">Testimonial</a>
+                    <a href="#contact">Contact</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Streamline Operations with Our Platform</h1>
+            <p>Discover how ABC Industries transformed their workflow and achieved remarkable growth using our enterprise SaaS solution.</p>
+            <a href="#cta" class="btn">Get Started Today</a>
+        </div>
+    </section>
+
+    <!-- Problem/Solution Section -->
+    <section class="section" id="problem-solution">
+        <div class="container">
+            <div class="section-title">
+                <h2>The Challenge & Our Solution</h2>
+                <p>ABC Industries faced significant operational challenges that were impacting their growth potential</p>
+            </div>
+            
+            <div class="problem-solution">
+                <div class="card">
+                    <div class="card-icon">⚠️</div>
+                    <h3>Operational Inefficiencies</h3>
+                    <p>Manual processes and fragmented systems led to errors, delays, and increased costs across departments.</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon">📊</div>
+                    <h3>Lack of Visibility</h3>
+                    <p>Without real-time data insights, decision-making was slow and often based on outdated information.</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon">🚀</div>
+                    <h3>Scalability Issues</h3>
+                    <p>Existing solutions couldn't accommodate rapid business growth, causing bottlenecks during peak periods.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Metrics Section -->
+    <section class="section" id="metrics">
+        <div class="container">
+            <div class="section-title">
+                <h2>Measurable Results</h2>
+                <p>Quantifiable improvements achieved through our integrated platform</p>
+            </div>
+            
+            <div class="metrics">
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <div class="metric-value">42%</div>
+                        <div class="metric-label">Cost Reduction</div>
+                    </div>
+                    
+                    <div class="metric-item">
+                        <div class="metric-value">68%</div>
+                        <div class="metric-label">Productivity Increase</div>
+                    </div>
+                    
+                    <div class="metric-item">
+                        <div class="metric-value">92%</div>
+                        <div class="metric-label">Process Automation</div>
+                    </div>
+                    
+                    <div class="metric-item">
+                        <div class="metric-value">150%</div>
+                        <div class="metric-label">ROI in 12 Months</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonial Section -->
+    <section class="testimonial" id="testimonial">
+        <div class="container">
+            <div class="testimonial-content">
+                <blockquote class="testimonial-text">
+                    "Implementing XYZ Corp's solution transformed our entire operation. We've reduced manual work by 70% and improved team productivity significantly. The ROI was evident within the first quarter."
+                </blockquote>
+                <div class="testimonial-author">
+                    Sarah Johnson<br>
+                    <span class="author-title">Chief Operations Officer, ABC Industries</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta" id="cta">
+        <div class="container">
+            <h2>Ready to Transform Your Business?</h2>
+            <p>Join hundreds of companies experiencing measurable results with our platform</p>
+            <a href="#contact" class="btn" id="cta-button">Get Started Today</a>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact-section">
+        <div class="container">
+            <h2>Contact Us</h2>
+            <form id="contact-form">
+                <input type="text" placeholder="Your Name" required>
+                <input type="email" placeholder="Your Email" required>
+                <textarea placeholder="Your Message" rows="5" required></textarea>
+                <button type="submit">Send Message</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">XYZ Corp</div>
+                <div class="footer-links">
+                    <a href="#home">Home</a>
+                    <a href="#solution">Solution</a>
+                    <a href="#case-study">Case Studies</a>
+                    <a href="#contact">Contact</a>
+                </div>
+                <p class="copyright">© 2023 XYZ Corp. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Hidden status indicators -->
+    <div id="activeSection"></div>
+    <div id="downloadStatus"></div>
+    <div id="solveStatus"></div>
+
+    <script>
+        // Simple scroll animation for elements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up navigation
+            const navLinks = document.querySelectorAll('nav a, footer a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    if (targetId && targetId !== '#') {
+                        const targetElement = document.querySelector(targetId);
+                        if (targetElement) {
+                            // Update active section indicator
+                            document.getElementById('activeSection').textContent = targetId.substring(1);
+                            
+                            // Scroll to element
+                            window.scrollTo({
+                                top: targetElement.offsetTop - 80,
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                });
+            });
+
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        window.scrollTo({
+                            top: target.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            // Button hover effect enhancement
+            const ctaButton = document.getElementById('cta-button');
+            if (ctaButton) {
+                ctaButton.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                });
+                
+                ctaButton.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            }
+
+            // Handle form submission
+            const contactForm = document.getElementById('contact-form');
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    // In a real app, this would send the form data
+                    alert('Thank you for your message! We will get back to you soon.');
+                    this.reset();
+                });
+            }
+
+            // Simulate loading animations
+            setTimeout(() => {
+                document.body.classList.add('loaded');
+            }, 100);
+
+            // Set initial active section
+            document.getElementById('activeSection').textContent = 'home';
+        });
+    </script>
+</body>
+</html>

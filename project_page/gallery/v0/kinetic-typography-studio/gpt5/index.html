@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kinetic Typography Studio</title>
+<meta name="description" content="Design and export animated text sequences with keyframes, presets, audio-reactive beats, and WebM/PNG sequence export.">
+<style>
+  :root{
+    --bg:#0f1115;
+    --panel:#151923;
+    --panel-2:#191f2b;
+    --text:#dfe7ff;
+    --muted:#9fb1d4;
+    --accent:#62a5ff;
+    --accent-2:#7ef2c5;
+    --danger:#ff6b7a;
+    --ok:#7bff9e;
+    --outline:#2a3345;
+    --focus:#bed8ff;
+    --shadow: 0 10px 30px rgba(0,0,0,0.35);
+    --radius:10px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;background:var(--bg);color:var(--text);font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, "Apple Color Emoji","Segoe UI Emoji";}
+  body{margin:0;display:flex;flex-direction:column}
+  header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:linear-gradient(to bottom, #121623, #0d111a);border-bottom:1px solid var(--outline)}
+  header h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.3px}
+  header .toolbar{display:flex;gap:8px;align-items:center}
+  header .toolbar button, header .toolbar select{
+    background:var(--panel); color:var(--text); border:1px solid var(--outline); border-radius:8px; padding:8px 10px; cursor:pointer;
+  }
+  header .toolbar button:focus, header .toolbar select:focus, input:focus, textarea:focus{
+    outline:2px solid var(--focus); outline-offset:2px;
+  }
+  main{flex:1;display:grid;grid-template-columns: 320px minmax(400px,1fr) 380px; gap:10px; padding:10px; min-height:0}
+  aside, .right{background:var(--panel); border:1px solid var(--outline); border-radius:var(--radius); box-shadow:var(--shadow); min-height:0}
+  .left{display:flex;flex-direction:column}
+  .tabs{display:flex}
+  .tabs button{flex:1;padding:10px;background:var(--panel-2);border:0;border-bottom:2px solid transparent;color:var(--muted);cursor:pointer}
+  .tabs button.active{color:var(--text);border-bottom-color:var(--accent);background:var(--panel)}
+  .pane{display:none; padding:10px; overflow:auto}
+  .pane.active{display:block}
+  .section{padding:10px;border:1px solid var(--outline); border-radius:8px; margin-bottom:8px; background:var(--panel-2)}
+  .section h3{margin:0 0 8px 0;font-size:13px;text-transform:uppercase;letter-spacing:.15em;color:var(--muted)}
+  label{display:flex;flex-direction:column;gap:6px;margin-bottom:8px;font-size:12px}
+  input[type="text"], input[type="number"], input[type="color"], select, textarea{
+    background:#0f1420; color:var(--text); border:1px solid var(--outline); border-radius:8px; padding:8px; width:100%;
+  }
+  textarea{min-height:80px; resize:vertical}
+  .row{display:flex; gap:8px}
+  .row > *{flex:1}
+  .toggle{display:flex; align-items:center; gap:8px; font-size:12px}
+  .toggle input{width:auto}
+  .small{font-size:11px;color:var(--muted)}
+  .btn{background:var(--panel-2); color:var(--text); border:1px solid var(--outline); border-radius:8px; padding:8px 10px; cursor:pointer}
+  .btn.primary{background:linear-gradient(180deg, #1d4ed8,#0ea5e9); border:0}
+  .btn.ghost{background:transparent}
+  .btn.danger{background:#2a1114;border-color:#5d1a22;color:#ff98a2}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .preview-wrap{display:flex;flex-direction:column; gap:8px; min-height:0}
+  .stage-wrap{position:relative; background:#0c0f16; border:1px solid var(--outline); border-radius:var(--radius); overflow:hidden; display:flex;align-items:center;justify-content:center; min-height:0; flex:1}
+  canvas#previewCanvas{max-width:100%; max-height:100%; background:#000}
+  .aspect-controls{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+  .overlay-badge{position:absolute; top:8px; left:8px; font-size:11px; color:#c1d3ff; background:rgba(13,17,26,.6); padding:4px 8px; border-radius:999px; border:1px solid var(--outline)}
+  .right{display:flex; flex-direction:column}
+  .timeline{display:flex; flex-direction:column; gap:6px; padding:6px; height:100%}
+  .time-controls{display:flex; align-items:center; gap:8px; padding:6px; background:var(--panel-2); border-radius:8px}
+  .time-controls input[type="range"]{flex:1}
+  .tracklist{flex:1; overflow:auto; border:1px solid var(--outline); border-radius:8px; background:#0d111a}
+  .track{display:grid; grid-template-columns: 140px 1fr; align-items:center; border-bottom:1px solid var(--outline)}
+  .track:last-child{border-bottom:0}
+  .track .label{padding:6px 8px; font-size:12px; color:var(--muted); border-right:1px solid var(--outline)}
+  .track .area{position:relative; height:36px}
+  .keyframe{position:absolute; top:50%; transform:translate(-50%,-50%); width:10px; height:10px; border-radius:2px; background:var(--accent); border:1px solid #0a2540; cursor:pointer}
+  .keyframe.selected{box-shadow:0 0 0 2px rgba(190,216,255,.5)}
+  .time-grid{position:absolute; inset:0; background:repeating-linear-gradient(to right, transparent, transparent 39px, rgba(255,255,255,.05) 40px)}
+  .beat{position:absolute; top:0; bottom:0; width:2px; background:rgba(126,242,197,0.5)}
+  .playhead{position:absolute; top:0; bottom:0; width:2px; background:var(--accent-2)}
+  .curve-editor{height:140px; background:#0d111a; border:1px solid var(--outline); border-radius:8px; position:relative}
+  .curve-editor canvas{width:100%; height:100%}
+  .handle{position:absolute; width:12px; height:12px; border-radius:50%; background:#f5d76e; border:1px solid #6b5b1e; cursor:grab}
+  .handle:active{cursor:grabbing}
+  .guide{position:absolute; pointer-events:none; border:1px dashed rgba(255,255,255,.2)}
+  .footer{padding:8px 12px; font-size:12px; color:var(--muted); display:flex; justify-content:space-between; align-items:center; background:linear-gradient(to top, #0d111a, #0f131d); border-top:1px solid var(--outline)}
+  .kbd{background:#0a0e16; border:1px solid #1a2130; padding:2px 6px; border-radius:6px; color:#d0e2ff; font-weight:600}
+  /* responsive tweaks */
+  @media (max-width:1200px){
+    main{grid-template-columns: 300px 1fr}
+    .right{grid-column: 1 / -1; grid-row: 3}
+  }
+  /* prefers-reduced-motion */
+  @media (prefers-reduced-motion: reduce){
+    .anim-heavy{animation:none !important; transition:none !important}
+  }
+</style>
+</head>
+<body>
+<header role="banner">
+  <h1 aria-label="App title">Kinetic Typography Studio</h1>
+  <div class="toolbar" role="toolbar" aria-label="Playback controls">
+    <button id="playBtn" aria-label="Play or pause (Space)" title="Play/Pause (Space)">▶︎</button>
+    <button id="stopBtn" aria-label="Stop and rewind" title="Stop">⏹</button>
+    <label class="toggle" aria-label="Loop playback">
+      <input id="loopToggle" type="checkbox"> Loop
+    </label>
+    <select id="aspectSelect" aria-label="Aspect ratio preset">
+      <option value="1:1">1:1</option>
+      <option value="9:16">9:16</option>
+      <option value="16:9" selected>16:9</option>
+    </select>
+    <select id="resolutionSelect" aria-label="Preview resolution">
+      <option value="720p" selected>1280x720</option>
+      <option value="1080p">1920x1080</option>
+      <option value="540x960">540x960 (9:16)</option>
+      <option value="1080x1920">1080x1920 (9:16)</option>
+      <option value="1024">Custom...</option>
+    </select>
+    <button id="safeToggle" aria-label="Toggle safe-area guides (B)" title="Safe guides (B)">☷</button>
+    <button id="gridToggle" aria-label="Toggle grid (G)" title="Grid (G)">#</button>
+  </div>
+</header>
+<main role="main">
+  <aside class="left" aria-label="Left sidebar - tools">
+    <div class="tabs" role="tablist">
+      <button id="tabText" class="active" role="tab" aria-selected="true" aria-controls="paneText">Text</button>
+      <button id="tabStyle" role="tab" aria-selected="false" aria-controls="paneStyle">Style</button>
+      <button id="tabLayout" role="tab" aria-selected="false" aria-controls="paneLayout">Layout</button>
+      <button id="tabAudio" role="tab" aria-selected="false" aria-controls="paneAudio">Audio</button>
+      <button id="tabExport" role="tab" aria-selected="false" aria-controls="paneExport">Export</button>
+    </div>
+    <div id="paneText" class="pane active" role="tabpanel" aria-labelledby="tabText">
+      <div class="section">
+        <h3>Content</h3>
+        <label aria-label="Text input">
+          Text
+          <textarea id="textInput" placeholder="Enter your text here" aria-label="Text content"></textarea>
+        </label>
+        <div class="row">
+          <label>
+            Align
+            <select id="alignSelect" aria-label="Text alignment">
+              <option value="left">Left</option>
+              <option value="center" selected>Center</option>
+              <option value="right">Right</option>
+            </select>
+          </label>
+          <label>
+            Anchor
+            <select id="anchorSelect" aria-label="Anchor point">
+              <option value="center" selected>Center</option>
+              <option value="top-left">Top-Left</option>
+              <option value="top">Top</option>
+              <option value="top-right">Top-Right</option>
+              <option value="left">Left</option>
+              <option value="right">Right</option>
+              <option value="bottom-left">Bottom-Left</option>
+              <option value="bottom">Bottom</option>
+              <option value="bottom-right">Bottom-Right</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <div class="section">
+        <h3>Animation Presets</h3>
+        <div class="row">
+          <button id="presetTypewriter" class="btn" aria-label="Apply typewriter preset">Typewriter</button>
+          <button id="presetFadeUp" class="btn" aria-label="Apply fade-up preset">Fade-Up</button>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button id="presetBounce" class="btn" aria-label="Apply bounce preset">Bounce</button>
+          <button id="presetLiquid" class="btn" aria-label="Apply liquid preset">Liquid</button>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button id="presetGlitch" class="btn" aria-label="Apply glitch preset">Glitch</button>
+          <button id="presetCascade" class="btn" aria-label="Apply cascade preset">Cascade</button>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <label>
+            Stagger (ms)
+            <input id="staggerInput" type="number" min="0" step="5" value="40" aria-label="Per-glyph stagger in ms">
+          </label>
+          <label>
+            Cascade by
+            <select id="cascadeBySelect" aria-label="Cascade unit">
+              <option value="letter" selected>Letter</option>
+              <option value="word">Word</option>
+              <option value="line">Line</option>
+            </select>
+          </label>
+        </div>
+        <div class="small">Presets insert or adjust keyframes and per-glyph behaviors. You can tweak further in the timeline.</div>
+      </div>
+      <div class="section">
+        <h3>Properties at Playhead</h3>
+        <div class="row">
+          <label>
+            X
+            <input id="posXInput" type="number" step="1" value="0" aria-label="Position X">
+          </label>
+          <label>
+            Y
+            <input id="posYInput" type="number" step="1" value="0" aria-label="Position Y">
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            Scale
+            <input id="scaleInput" type="number" step="0.01" value="1" aria-label="Scale">
+          </label>
+          <label>
+            Rotation
+            <input id="rotationInput" type="number" step="0.1" value="0" aria-label="Rotation degrees">
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            Opacity
+            <input id="opacityInput" type="number" min="0" max="1" step="0.01" value="1" aria-label="Opacity">
+          </label>
+          <label>
+            Tracking
+            <input id="trackingInput" type="number" step="0.5" value="0" aria-label="Tracking letter spacing">
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            Glyph Offset X
+            <input id="goxInput" type="number" step="1" value="0" aria-label="Per-glyph offset X">
+          </label>
+          <label>
+            Glyph Offset Y
+            <input id="goyInput" type="number" step="1" value="0" aria-label="Per-glyph offset Y">
+          </label>
+        </div>
+        <div class="row">
+          <button id="addKeyAll" class="btn" aria-label="Add keyframes for all properties">Add Keys</button>
+          <button id="deleteKeySel" class="btn danger" aria-label="Delete selected keyframe">Delete Key</button>
+        </div>
+        <div class="section" style="margin-top:8px">
+          <h3>Easing</h3>
+          <div class="row">
+            <label>
+              Preset
+              <select id="easingPreset" aria-label="Easing preset">
+                <option value="linear">Linear</option>
+                <option value="ease">Ease</option>
+                <option value="ease-in">Ease In</option>
+                <option value="ease-out" selected>Ease Out</option>
+                <option value="ease-in-out">Ease In Out</option>
+                <option value="back">Back</option>
+                <option value="bounce">Bounce</option>
+                <option value="custom">Custom Bézier</option>
+              </select>
+            </label>
+          </div>
+          <div class="curve-editor" aria-label="Bezier curve editor">
+            <canvas id="bezierCanvas"></canvas>
+            <div id="handle1" class="handle" title="Control Point 1"></div>
+            <div id="handle2" class="handle" title="Control Point 2"></div>
+          </div>
+          <div class="small">Bezier control points (x1,y1,x2,y2) in 0..1 are applied to selected/new keyframes when Easing is set to Custom.</div>
+        </div>
+      </div>
+    </div>
+    <div id="paneStyle" class="pane" role="tabpanel" aria-labelledby="tabStyle">
+      <div class="section">
+        <h3>Font</h3>
+        <div class="row">
+          <label>
+            Family
+            <select id="fontSelect" aria-label="Font family">
+              <option>system-ui</option>
+              <option>Segoe UI</option>
+              <option>Roboto</option>
+              <option>Arial</option>
+              <option>Helvetica Neue</option>
+              <option>Times New Roman</option>
+              <option>Georgia</option>
+              <option>Courier New</option>
+              <option>Menlo</option>
+              <option>Monaco</option>
+            </select>
+          </label>
+          <label>
+            Weight
+            <select id="weightSelect" aria-label="Font weight">
+              <option value="300">Light</option>
+              <option value="400" selected>Regular</option>
+              <option value="600">Semibold</option>
+              <option value="700">Bold</option>
+              <option value="900">Black</option>
+            </select>
+          </label>
+        </div>
+        <div class="row">
+          <label class="toggle">
+            <input id="italicToggle" type="checkbox"> Italic
+          </label>
+          <label>
+            Size (px)
+            <input id="fontSizeInput" type="number" min="8" value="96" aria-label="Font size">
+          </label>
+        </div>
+      </div>
+      <div class="section">
+        <h3>Paint</h3>
+        <div class="row">
+          <label>
+            Fill
+            <input id="fillColor" type="color" value="#ffffff" aria-label="Fill color">
+          </label>
+          <label>
+            Outline
+            <input id="strokeColor" type="color" value="#000000" aria-label="Stroke color">
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            Stroke Width
+            <input id="strokeWidth" type="number" min="0" step="0.5" value="0" aria-label="Stroke width">
+          </label>
+          <label>
+            Gradient
+            <select id="gradientSelect" aria-label="Gradient type">
+              <option value="none">None</option>
+              <option value="top-bottom">Top to Bottom</option>
+              <option value="left-right">Left to Right</option>
+            </select>
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            Grad Start
+            <input id="gradStart" type="color" value="#66ccff" aria-label="Gradient start">
+          </label>
+          <label>
+            Grad End
+            <input id="gradEnd" type="color" value="#ff66cc" aria-label="Gradient end">
+          </label>
+        </div>
+      </div>
+      <div class="section">
+        <h3>Effects</h3>
+        <div class="row">
+          <label>
+            Shadow X
+            <input id="shadowX" type="number" value="0" step="1" aria-label="Shadow X">
+          </label>
+          <label>
+            Shadow Y
+            <input id="shadowY" type="number" value="0" step="1" aria-label="Shadow Y">
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            Shadow Blur
+            <input id="shadowBlur" type="number" value="0" step="1" aria-label="Shadow blur">
+          </label>
+          <label>
+            Shadow Color
+            <input id="shadowColor" type="color" value="#000000" aria-label="Shadow color">
+          </label>
+        </div>
+        <div class="row">
+          <label class="toggle">
+            <input id="motionBlurToggle" type="checkbox" checked> Motion Blur
+          </label>
+          <label class="toggle">
+            <input id="glowToggle" type="checkbox"> Glow
+          </label>
+        </div>
+      </div>
+      <div class="section">
+        <h3>Background</h3>
+        <div class="row">
+          <label>
+            Color
+            <input id="bgColor" type="color" value="#0b0b10" aria-label="Background color">
+          </label>
+          <label>
+            Image
+            <input id="bgImage" type="file" accept="image/*" aria-label="Background image">
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            Fit
+            <select id="bgFit" aria-label="Background image fit">
+              <option value="cover" selected>Cover</option>
+              <option value="contain">Contain</option>
+              <option value="stretch">Stretch</option>
+              <option value="center">Center</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div id="paneLayout" class="pane" role="tabpanel" aria-labelledby="tabLayout">
+      <div class="section">
+        <h3>Aspect & Safe Areas</h3>
+        <div class="row">
+          <label>
+            Aspect
+            <select id="aspectSelect2" aria-label="Aspect ratio preset 2">
+              <option value="1:1">1:1</option>
+              <option value="9:16">9:16</option>
+              <option value="16:9" selected>16:9</option>
+            </select>
+          </label>
+          <label>
+            Margins (px)
+            <input id="marginInput" type="number" value="24" step="1" aria-label="Margins">
+          </label>
+        </div>
+        <div class="row">
+          <label class="toggle">
+            <input id="safeAreaToggle" type="checkbox" checked> Show Safe Areas
+          </label>
+          <label class="toggle">
+            <input id="gridAreaToggle" type="checkbox"> Show Grid
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            Grid Rows
+            <input id="gridRows" type="number" value="6" min="1" step="1" aria-label="Grid rows">
+          </label>
+          <label>
+            Grid Cols
+            <input id="gridCols" type="number" value="6" min="1" step="1" aria-label="Grid columns">
+          </label>
+        </div>
+      </div>
+      <div class="section">
+        <h3>Duration & Frame Rate</h3>
+        <div class="row">
+          <label>
+            Duration (s)
+            <input id="durationInput" type="number" min="0.5" step="0.1" value="6" aria-label="Duration seconds">
+          </label>
+          <label>
+            Frame Rate
+            <input id="fpsInput" type="number" min="8" step="1" value="30" aria-label="Frames per second">
+          </label>
+        </div>
+      </div>
+    </div>
+    <div id="paneAudio" class="pane" role="tabpanel" aria-labelledby="tabAudio">
+      <div class="section">
+        <h3>Audio Reactive</h3>
+        <div class="row">
+          <label>
+            Audio File
+            <input id="audioFile" type="file" accept="audio/*" aria-label="Audio file">
+          </label>
+        </div>
+        <div class="row">
+          <label class="toggle">
+            <input id="audioPlayToggle" type="checkbox"> Play audio with preview
+          </label>
+          <label class="toggle">
+            <input id="snapBeatsToggle" type="checkbox" checked> Snap keyframes to beats (S)
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            Sensitivity
+            <input id="beatSensitivity" type="range" min="0" max="1" step="0.01" value="0.5" aria-label="Beat sensitivity">
+          </label>
+        </div>
+        <div class="small" id="audioInfo">No audio loaded.</div>
+      </div>
+    </div>
+    <div id="paneExport" class="pane" role="tabpanel" aria-labelledby="tabExport">
+      <div class="section">
+        <h3>Export</h3>
+        <div class="row">
+          <label>
+            Format
+            <select id="exportFormat" aria-label="Export format">
+              <option value="webm" selected>WebM (video)</option>
+              <option value="pngseq">PNG Sequence (.tar.gz)</option>
+            </select>
+          </label>
+          <label>
+            FPS
+            <input id="exportFps" type="number" value="30" min="8" step="1" aria-label="Export FPS">
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            Width
+            <input id="exportW" type="number" value="1280" min="128" step="2" aria-label="Export width">
+          </label>
+          <label>
+            Height
+            <input id="exportH" type="number" value="720" min="128" step="2" aria-label="Export height">
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            Duration (s)
+            <input id="exportDur" type="number" value="6" min="0.5" step="0.1" aria-label="Export duration">
+          </label>
+          <label class="toggle">
+            <input id="exportIncludeAudio" type="checkbox"> Include audio (WebM only)
+          </label>
+        </div>
+        <button id="exportBtn" class="btn primary" aria-label="Start export">Start Export</button>
+        <div id="exportStatus" class="small" aria-live="polite" style="margin-top:6px">Ready.</div>
+      </div>
+    </div>
+  </aside>
+
+  <section class="preview-wrap" aria-label="Center preview">
+    <div class="aspect-controls">
+      <div class="small">Aspect and resolution presets apply to preview. Export can override.</div>
+    </div>
+    <div class="stage-wrap" id="stageWrap" tabindex="0" aria-label="Preview stage">
+      <div class="overlay-badge" id="overlayBadge">16:9 • 1280x720</div>
+      <canvas id="previewCanvas" width="1280" height="720" aria-label="Preview canvas"></canvas>
+      <div id="safeGuide" class="guide" style="display:none"></div>
+      <div id="gridGuide" class="guide" style="display:none"></div>
+    </div>
+  </section>
+
+  <aside class="right" aria-label="Right sidebar - timeline and tracks">
+    <div class="timeline">
+      <div class="time-controls">
+        <button id="rewBtn" title="Rewind to start">⏮</button>
+        <input id="timeSlider" type="range" min="0" max="6" step="0.001" value="0" aria-label="Timeline scrubber">
+        <div id="timeLabel" aria-live="polite">0.00s</div>
+      </div>
+      <div class="tracklist" id="tracklist" aria-label="Timeline tracks">
+        <!-- Tracks will be injected -->
+      </div>
+    </div>
+  </aside>
+</main>
+<div class="footer" role="contentinfo">
+  <div>
+    Shortcuts: <span class="kbd">Space</span> Play/Pause • <span class="kbd">K</span> Add Key • <span class="kbd">Del</span> Delete Key • <span class="kbd">S</span> Snap Beats • <span class="kbd">G</span> Grid • <span class="kbd">B</span> Safe • <span class="kbd">M</span> Motion Blur
+  </div>
+  <div id="statusText">Ready.</div>
+</div>
+
+<script>
+/* State and utilities */
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+const clamp = (v,min,max)=>Math.max(min,Math.min(max,v));
+const lerp = (a,b,t)=>a+(b-a)*t;
+const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const state = {
+  aspect: {w:16,h:9},
+  resolution:{w:1280,h:720},
+  duration:6,
+  fps:30,
+  loop:false,
+  playing:false,
+  time:0,
+  text:"Kinetic\nTypography",
+  align:'center',
+  anchor:'center',
+  cascadeBy:'letter',
+  staggerMs:40,
+  revealMode:null, // 'typewriter'
+  presetFlags:{glitch:false, liquid:false},
+  tracks:{},
+  easingDefaults:{p1:{x:0.25,y:0.1}, p2:{x:0.25,y:1}},
+  selectedTrack:null,
+  selectedKey:null,
+  style:{
+    fontFamily:'system-ui',
+    weight:400,
+    italic:false,
+    fontSize:96,
+    fill:'#ffffff',
+    gradient:'none',
+    gradStart:'#66ccff',
+    gradEnd:'#ff66cc',
+    stroke:'#000000',
+    strokeWidth:0,
+    shadowX:0, shadowY:0, shadowBlur:0, shadowColor:'#000000',
+    motionBlur:!prefersReducedMotion,
+    glow:false,
+    bgColor:'#0b0b10',
+    bgImage:null, bgFit:'cover',
+  },
+  layout:{
+    margins:24,
+    showSafe:true,
+    showGrid:false,
+    gridRows:6, gridCols:6
+  },
+  audio:{
+    buffer:null,
+    beats:[],
+    bpm:null,
+    snapBeats:true,
+    playAudio:false,
+    element:null,
+    context:null,
+    source:null,
+    startAt:0,
+    startedTime:0,
+    sensitivity:0.5
+  }
+};
+
+const trackDefs = [
+  {id:'posX', name:'Position X', min:-2000,max:2000,step:1, default:0},
+  {id:'posY', name:'Position Y', min:-2000,max:2000,step:1, default:0},
+  {id:'scale', name:'Scale', min:0,max:10,step:0.01, default:1},
+  {id:'rotation', name:'Rotation', min:-720,max:720,step:0.1, default:0},
+  {id:'opacity', name:'Opacity', min:0,max:1,step:0.01, default:1},
+  {id:'tracking', name:'Tracking', min:-50,max:200,step:0.5, default:0},
+  {id:'gox', name:'Glyph Offset X', min:-300,max:300,step:1, default:0},
+  {id:'goy', name:'Glyph Offset Y', min:-300,max:300,step:1, default:0},
+];
+
+for (const def of trackDefs){
+  state.tracks[def.id] = [];
+}
+
+/* Easing functions */
+function cubicBezier(p1x,p1y,p2x,p2y){
+  // Based on https://github.com/gre/bezier-easing MIT
+  const NEWTON_ITERATIONS = 4;
+  const NEWTON_MIN_SLOPE = 0.001;
+  const SUBDIVISION_PRECISION = 0.0000001;
+  const SUBDIVISION_MAX_ITERATIONS = 10;
+  const kSplineTableSize = 11;
+  const kSampleStepSize = 1.0 / (kSplineTableSize - 1.0);
+  const float32ArraySupported = typeof Float32Array === 'function';
+  if (!(0 <= p1x && p1x <= 1 && 0 <= p2x && p2x <= 1)) return t=>t;
+  const sampleValues = float32ArraySupported ? new Float32Array(kSplineTableSize) : new Array(kSplineTableSize);
+  function A(a1,a2){return 1.0 - 3.0*a2 + 3.0*a1}
+  function B(a1,a2){return 3.0*a2 - 6.0*a1}
+  function C(a1){return 3.0*a1}
+  function calcBezier(t,a1,a2){return ((A(a1,a2)*t + B(a1,a2))*t + C(a1))*t}
+  function getSlope(t,a1,a2){return 3.0*A(a1,a2)*t*t + 2.0*B(a1,a2)*t + C(a1)}
+  for (let i=0;i<kSplineTableSize;i++){ sampleValues[i] = calcBezier(i*kSampleStepSize, p1x, p2x) }
+  function getTForX(x){
+    let intervalStart = 0.0;
+    let currentSample = 1;
+    let lastSample = kSplineTableSize - 1;
+    for (; currentSample !== lastSample && sampleValues[currentSample] <= x; ++currentSample) {
+      intervalStart += kSampleStepSize;
+    }
+    --currentSample;
+    let dist = (x - sampleValues[currentSample]) / (sampleValues[currentSample+1] - sampleValues[currentSample]);
+    let guessForT = intervalStart + dist*kSampleStepSize;
+
+    let initialSlope = getSlope(guessForT, p1x, p2x);
+    if (initialSlope >= NEWTON_MIN_SLOPE) {
+      for (let i=0;i<NEWTON_ITERATIONS;i++){
+        let currentSlope = getSlope(guessForT, p1x, p2x);
+        if (currentSlope === 0.0) return guessForT;
+        let currentX = calcBezier(guessForT, p1x, p2x) - x;
+        guessForT -= currentX / currentSlope;
+      }
+      return guessForT;
+    } else if (initialSlope === 0.0) {
+      return guessForT;
+    }
+    // binary subdivision
+    let a = intervalStart, b = intervalStart + kSampleStepSize, currentX, currentT, i = 0;
+    do {
+      currentT = a + (b - a) / 2.0;
+      currentX = calcBezier(currentT, p1x, p2x) - x;
+      if (currentX > 0.0) b = currentT; else a = currentT;
+    } while (Math.abs(currentX) > SUBDIVISION_PRECISION && ++i < SUBDIVISION_MAX_ITERATIONS);
+    return currentT;
+  }
+  return function(x){
+    if (p1x === p1y && p2x === p2y) return x;
+    return calcBezier(getTForX(x), p1y, p2y);
+  }
+}
+const easings = {
+  linear: t=>t,
+  ease: cubicBezier(.25,.1,.25,1),
+  'ease-in': cubicBezier(.42,0,1,1),
+  'ease-out': cubicBezier(0,0,.58,1),
+  'ease-in-out': cubicBezier(.42,0,.58,1),
+  back: t=>{
+    const c1=1.70158, c3=c1+1;
+    return 1 + c3*Math.pow(t-1,3) + c1*Math.pow(t-1,2);
+  },
+  bounce: t=>{
+    const n1=7.5625, d1=2.75;
+    if (t < 1/d1) return n1*t*t;
+    else if (t < 2/d1) return n1*(t-=1.5/d1)*t + .75;
+    else if (t < 2.5/d1) return n1*(t-=2.25/d1)*t + .9375;
+    else return n1*(t-=2.625/d1)*t + .984375;
+  }
+};
+
+/* Keyframe Track */
+function createKey(value, time, easingName='ease-out', bezier=null){
+  return {time, value, easing:easingName, bezier}; // if easing='custom', bezier:{x1,y1,x2,y2}
+}
+function ensureSorted(arr){arr.sort((a,b)=>a.time-b.time)}
+function valueAt(track, t){
+  if (track.length===0) return null;
+  if (t<=track[0].time) return track[0].value;
+  if (t>=track[track.length-1].time) return track[track.length-1].value;
+  for (let i=0;i<track.length-1;i++){
+    const a=track[i], b=track[i+1];
+    if (t>=a.time && t<=b.time){
+      const dt=(t-a.time)/(b.time-a.time);
+      let ease = easings[a.easing] || easings['ease-out'];
+      if (a.easing==='custom' && a.bezier){
+        ease = cubicBezier(a.bezier.x1, a.bezier.y1, a.bezier.x2, a.bezier.y2);
+      }
+      const p = clamp(ease(dt),0,1);
+      return a.value + (b.value - a.value)*p;
+    }
+  }
+  return track[track.length-1].value;
+}
+function addKey(trackId, time, value, easingNameOrObj){
+  const tr = state.tracks[trackId];
+  let easingName='ease-out', bezier=null;
+  if (typeof easingNameOrObj==='string') easingName = easingNameOrObj;
+  else if (easingNameOrObj && easingNameOrObj.type==='custom'){
+    easingName='custom'; bezier = {x1:easingNameOrObj.x1,y1:easingNameOrObj.y1,x2:easingNameOrObj.x2,y2:easingNameOrObj.y2};
+  }
+  // Snap to beats if enabled
+  if (state.audio.snapBeats && state.audio.beats.length>0){
+    const nearest = state.audio.beats.reduce((p,c)=>Math.abs(c-time)<Math.abs(p-time)?c:p, state.audio.beats[0]);
+    if (Math.abs(nearest-time) < 0.08) time = nearest;
+  }
+  const existing = tr.find(k=>Math.abs(k.time-time)<(1/1000));
+  if (existing){ existing.value=value; existing.easing=easingName; existing.bezier=bezier; }
+  else tr.push(createKey(value,time,easingName,bezier));
+  ensureSorted(tr);
+  refreshTimeline();
+}
+
+/* Bezier editor */
+const bezCanvas = $('#bezierCanvas');
+const handle1 = $('#handle1'), handle2 = $('#handle2');
+let bez = {x1: state.easingDefaults.p1.x, y1: state.easingDefaults.p1.y, x2: state.easingDefaults.p2.x, y2: state.easingDefaults.p2.y};
+function drawBezierEditor(){
+  const ctx = bezCanvas.getContext('2d');
+  const w = bezCanvas.clientWidth, h=bezCanvas.clientHeight;
+  if (bezCanvas.width!==w || bezCanvas.height!==h){ bezCanvas.width=w; bezCanvas.height=h; }
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle='#0e1420'; ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle='#283044'; ctx.lineWidth=1;
+  for (let i=0;i<=10;i++){
+    const x=i/10*w;
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke();
+    const y=i/10*h;
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke();
+  }
+  // curve
+  const p0={x:0,y:h}, p1={x:bez.x1*w,y:(1-bez.y1)*h}, p2={x:bez.x2*w,y:(1-bez.y2)*h}, p3={x:w,y:0};
+  ctx.strokeStyle='#7ef2c5'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(p0.x,p0.y);
+  ctx.bezierCurveTo(p1.x,p1.y,p2.x,p2.y,p3.x,p3.y);
+  ctx.stroke();
+  // handles
+  handle1.style.left = `${p1.x-6}px`; handle1.style.top = `${p1.y-6}px`;
+  handle2.style.left = `${p2.x-6}px`; handle2.style.top = `${p2.y-6}px`;
+}
+function initHandleDrag(el, idx){
+  let dragging=false, rect=null;
+  el.addEventListener('pointerdown', e=>{
+    dragging=true; rect=bezCanvas.getBoundingClientRect(); el.setPointerCapture(e.pointerId);
+  });
+  el.addEventListener('pointermove', e=>{
+    if (!dragging) return;
+    const x = clamp((e.clientX-rect.left)/rect.width, 0, 1);
+    const y = clamp((e.clientY-rect.top)/rect.height, 0, 1);
+    if (idx===1){ bez.x1=x; bez.y1=1-y; } else { bez.x2=x; bez.y2=1-y; }
+    drawBezierEditor();
+  });
+  el.addEventListener('pointerup', ()=>{ dragging=false; });
+}
+initHandleDrag(handle1,1); initHandleDrag(handle2,2);
+
+/* Timeline UI */
+const tracklistEl = $('#tracklist');
+function refreshTimeline(){
+  // build tracks if empty
+  tracklistEl.innerHTML='';
+  const total = state.duration;
+  const pxPerSec = 160; // area width scales with container
+  const areaPadding = 6;
+  trackDefs.forEach(def=>{
+    const row = document.createElement('div'); row.className='track';
+    const label = document.createElement('div'); label.className='label'; label.textContent=def.name;
+    row.appendChild(label);
+    const area = document.createElement('div'); area.className='area'; area.dataset.track=def.id;
+    const grid = document.createElement('div'); grid.className='time-grid'; area.appendChild(grid);
+    // beat markers
+    state.audio.beats.forEach(bt=>{
+      if (bt<0 || bt>total) return;
+      const b = document.createElement('div'); b.className='beat';
+      b.style.left = `${bt*pxPerSec + areaPadding}px`; area.appendChild(b);
+    });
+    // keyframes
+    state.tracks[def.id].forEach((k, idx)=>{
+      const el = document.createElement('div'); el.className='keyframe'; el.tabIndex=0;
+      const left = k.time*pxPerSec + areaPadding;
+      el.style.left = `${left}px`;
+      el.title = `${k.time.toFixed(3)}s`;
+      el.dataset.time = k.time;
+      el.dataset.index = idx;
+      el.dataset.track = def.id;
+      if (state.selectedTrack===def.id && state.selectedKey===idx) el.classList.add('selected');
+      area.appendChild(el);
+    });
+    // playhead
+    const ph = document.createElement('div'); ph.className='playhead'; ph.style.left = `${state.time*pxPerSec + areaPadding}px`; area.appendChild(ph);
+    // interactions
+    area.addEventListener('pointerdown', e=>{
+      if (e.target.classList.contains('keyframe')) return; // handled by keyframe
+      const rect = area.getBoundingClientRect();
+      const t = clamp((e.clientX-rect.left-areaPadding)/pxPerSec, 0, state.duration);
+      state.time = t; $('#timeSlider').value = t; updateTimeLabel();
+      if (e.detail===2){ // double click to add key
+        const val = getValueForTrackAtCurrent(def.id);
+        addKey(def.id, state.time, val, getSelectedEasing());
+        state.selectedTrack = def.id;
+        state.selectedKey = state.tracks[def.id].findIndex(k=>Math.abs(k.time-state.time)<1/1000);
+      }
+      render();
+      refreshTimeline();
+    });
+    // keyframe drag
+    area.querySelectorAll('.keyframe').forEach(kf=>{
+      let dragging=false, rect=null, idx=+kf.dataset.index, trackId=kf.dataset.track;
+      kf.addEventListener('pointerdown', e=>{ dragging=true; rect=area.getBoundingClientRect(); kf.setPointerCapture(e.pointerId); state.selectedTrack=trackId; state.selectedKey=idx; refreshTimeline();});
+      kf.addEventListener('pointermove', e=>{
+        if (!dragging) return;
+        const pxPerSecLocal = pxPerSec;
+        const t = clamp((e.clientX-rect.left-areaPadding)/pxPerSecLocal, 0, state.duration);
+        state.tracks[trackId][idx].time = t;
+        ensureSorted(state.tracks[trackId]);
+        state.time = t; $('#timeSlider').value = t; updateTimeLabel();
+        render(); refreshTimeline();
+      });
+      kf.addEventListener('pointerup', ()=>{ dragging=false; });
+      kf.addEventListener('keydown', e=>{
+        if (e.key==='Delete' || e.key==='Backspace'){ deleteSelectedKey(); }
+      });
+    });
+    row.appendChild(area);
+    tracklistEl.appendChild(row);
+  });
+}
+function getValueForTrackAtCurrent(trackId){
+  switch(trackId){
+    case 'posX': return +$('#posXInput').value;
+    case 'posY': return +$('#posYInput').value;
+    case 'scale': return +$('#scaleInput').value;
+    case 'rotation': return +$('#rotationInput').value;
+    case 'opacity': return +$('#opacityInput').value;
+    case 'tracking': return +$('#trackingInput').value;
+    case 'gox': return +$('#goxInput').value;
+    case 'goy': return +$('#goyInput').value;
+  }
+}
+function setUIValueFromTrackAtCurrent(trackId, val){
+  const map = {posX:'posXInput', posY:'posYInput', scale:'scaleInput', rotation:'rotationInput', opacity:'opacityInput', tracking:'trackingInput', gox:'goxInput', goy:'goyInput'};
+  if (map[trackId]) $('#'+map[trackId]).value = val;
+}
+function updateValuesFromTracksAt(t){
+  trackDefs.forEach(def=>{
+    const v = valueAt(state.tracks[def.id], t);
+    if (v!==null) setUIValueFromTrackAtCurrent(def.id, v);
+  });
+}
+
+/* Text segmentation */
+function segmentTextBy(text, by){
+  const lines = text.split(/\r?\n/);
+  let units=[];
+  if (by==='line'){
+    lines.forEach((ln,i)=>units.push({text:ln, line:i, wordIndex:0, charIndex:0}));
+    return {units, lines};
+  }
+  if (by==='word'){
+    let lineIndex=0;
+    for (const ln of lines){
+      const words = ln.match(/\S+|\s+/g) || [];
+      let wIndex=0;
+      for (const w of words){
+        if (/^\s+$/.test(w)) { // keep spaces as separate units for spacing
+          units.push({text:w, line:lineIndex, wordIndex:wIndex, charIndex:0, isSpace:true});
+        } else {
+          units.push({text:w, line:lineIndex, wordIndex:wIndex, charIndex:0});
+          wIndex++;
+        }
+      }
+      lineIndex++;
+    }
+    return {units, lines};
+  }
+  // letter/grapheme
+  const useSeg = typeof Intl!=='undefined' && Intl.Segmenter;
+  let lineIndex=0;
+  for (const ln of lines){
+    const seg = useSeg ? Array.from(new Intl.Segmenter(undefined, {granularity:'grapheme'}).segment(ln)) : Array.from(ln);
+    let cIndex=0;
+    for (const s of seg){
+      const ch = useSeg ? s.segment : s;
+      units.push({text:ch, line:lineIndex, wordIndex:0, charIndex:cIndex});
+      cIndex++;
+    }
+    // keep newline as unit? Not drawn.
+    lineIndex++;
+  }
+  return {units, lines};
+}
+
+/* Renderer */
+const canvas = $('#previewCanvas');
+const ctx = canvas.getContext('2d');
+let bgImageBitmap = null;
+function setCanvasSize(w,h){
+  canvas.width=w; canvas.height=h;
+}
+function getCurrentValues(t){
+  const getVal = (id, def)=> valueAt(state.tracks[id], t) ?? def;
+  return {
+    x: getVal('posX', 0),
+    y: getVal('posY', 0),
+    scale: getVal('scale', 1),
+    rotation: getVal('rotation', 0),
+    opacity: getVal('opacity', 1),
+    tracking: getVal('tracking', 0),
+    gox: getVal('gox', 0),
+    goy: getVal('goy', 0)
+  };
+}
+function computeAnchorPoint(w,h){
+  const a = state.anchor;
+  let ax=0, ay=0;
+  switch(a){
+    case 'top-left': ax=0; ay=0; break;
+    case 'top': ax=w/2; ay=0; break;
+    case 'top-right': ax=w; ay=0; break;
+    case 'left': ax=0; ay=h/2; break;
+    case 'center': ax=w/2; ay=h/2; break;
+    case 'right': ax=w; ay=h/2; break;
+    case 'bottom-left': ax=0; ay=h; break;
+    case 'bottom': ax=w/2; ay=h; break;
+    case 'bottom-right': ax=w; ay=h; break;
+  }
+  return {ax,ay};
+}
+function drawBackground(){
+  const {w,h} = canvas;
+  ctx.save();
+  ctx.fillStyle = state.style.bgColor;
+  ctx.fillRect(0,0,w,h);
+  if (bgImageBitmap){
+    const fit = state.style.bgFit;
+    if (fit==='stretch'){
+      ctx.drawImage(bgImageBitmap, 0,0,w,h);
+    } else if (fit==='center'){
+      const iw = bgImageBitmap.width, ih=bgImageBitmap.height;
+      const x = (w - iw)/2, y=(h - ih)/2;
+      ctx.drawImage(bgImageBitmap, x,y);
+    } else {
+      // cover/contain
+      const iw = bgImageBitmap.width, ih=bgImageBitmap.height;
+      const scale = fit==='contain' ? Math.min(w/iw, h/ih) : Math.max(w/iw, h/ih);
+      const nw = iw*scale, nh=ih*scale;
+      const x = (w - nw)/2, y=(h - nh)/2;
+      ctx.drawImage(bgImageBitmap, x,y,nw,nh);
+    }
+  }
+  ctx.restore();
+}
+function drawGuides(){
+  const {w,h} = canvas;
+  const m = state.layout.margins;
+  if (state.layout.showSafe){
+    ctx.save();
+    ctx.strokeStyle='rgba(255,255,255,0.25)';
+    ctx.lineWidth=1; ctx.setLineDash([6,4]);
+    ctx.strokeRect(m,m,w-2*m,h-2*m);
+    ctx.restore();
+  }
+  if (state.layout.showGrid){
+    ctx.save();
+    ctx.strokeStyle='rgba(255,255,255,0.12)';
+    ctx.lineWidth=1; ctx.setLineDash([4,4]);
+    const rows=state.layout.gridRows, cols=state.layout.gridCols;
+    for (let i=1;i<rows;i++){
+      const y = i*(h/rows);
+      ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke();
+    }
+    for (let i=1;i<cols;i++){
+      const x = i*(w/cols);
+      ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke();
+    }
+    ctx.restore();
+  }
+}
+function buildGradient(w,h){
+  const type = state.style.gradient;
+  if (type==='none') return null;
+  if (type==='top-bottom'){
+    const g = ctx.createLinearGradient(0,0,0,h);
+    g.addColorStop(0, state.style.gradStart);
+    g.addColorStop(1, state.style.gradEnd);
+    return g;
+  }
+  if (type==='left-right'){
+    const g = ctx.createLinearGradient(0,0,w,0);
+    g.addColorStop(0, state.style.gradStart);
+    g.addColorStop(1, state.style.gradEnd);
+    return g;
+  }
+  return null;
+}
+function perGlyphProgress(t, idx, total){
+  const stagger = state.staggerMs/1000;
+  const start = idx * stagger;
+  const D = state.duration; // long window
+  const p = clamp((t - start) / Math.min(1, D), 0, 1);
+  return p;
+}
+function measureLines(text, font, tracking, align){
+  // return line widths and arrays of glyphs with positions
+  ctx.save();
+  ctx.font = font;
+  const lines = text.split(/\r?\n/);
+  const lineWidths = lines.map(ln=>{
+    let width = 0;
+    const chars = Array.from(ln);
+    for (let i=0;i<chars.length;i++){
+      width += ctx.measureText(chars[i]).width + (i<chars.length-1? tracking:0);
+    }
+    return width;
+  });
+  ctx.restore();
+  return {lines, lineWidths};
+}
+function getFontCSS(){
+  return `${state.style.italic?'italic ':''}${state.style.weight} ${state.style.fontSize}px "${state.style.fontFamily}", ${state.style.fontFamily}, system-ui, sans-serif`;
+}
+
+let lastFrameCanvas = null;
+function render(nowTs){
+  const {w,h} = canvas;
+  drawBackground();
+  drawGuides();
+
+  const values = getCurrentValues(state.time);
+  const font = getFontCSS();
+  const grad = buildGradient(w,h);
+  const align = state.align;
+  const text = state.text;
+
+  ctx.save();
+  // global transform around anchor
+  const {ax,ay} = computeAnchorPoint(w,h);
+  ctx.translate(ax + values.x, ay + values.y);
+  ctx.rotate(values.rotation * Math.PI/180);
+  ctx.scale(values.scale, values.scale);
+  ctx.globalAlpha = values.opacity;
+
+  // text style
+  ctx.font = font;
+  ctx.textAlign = align;
+  ctx.textBaseline = 'middle';
+
+  // compute drawing origin for alignment per line
+  const lines = text.split(/\r?\n/);
+  const lineHeight = state.style.fontSize * 1.2;
+  let maxWidth = 0;
+  for (const ln of lines){
+    const m = ctx.measureText(ln);
+    maxWidth = Math.max(maxWidth, m.width + (Array.from(ln).length-1)*values.tracking);
+  }
+  const totalHeight = lines.length * lineHeight;
+
+  // reveal typewriter
+  let revealCount = Infinity;
+  if (state.revealMode==='typewriter') {
+    const speed = Math.max(1, 20 - (state.style.fontSize/12)|0); // letters per sec approx
+    revealCount = Math.floor(state.time * speed);
+  }
+
+  // per-glyph effects flags
+  const doGlitch = state.presetFlags.glitch && !prefersReducedMotion;
+  const doLiquid = state.presetFlags.liquid;
+
+  // draw each line and glyph
+  const segmented = segmentTextBy(text, state.cascadeBy);
+  let glyphIndex=0;
+  let drawIndex=0;
+  for (let li=0; li<lines.length; li++){
+    const ln = lines[li];
+    let xBase = 0;
+    if (align==='center') xBase = 0;
+    else if (align==='left') xBase = -maxWidth/2;
+    else if (align==='right') xBase = maxWidth/2;
+
+    // y position for line
+    const y = (li - (lines.length-1)/2) * lineHeight;
+
+    // iterate glyphs of this line
+    const graphemes = Array.from(ln);
+    let xCursor = 0;
+    for (let ci=0; ci<graphemes.length; ci++){
+      const g = graphemes[ci];
+
+      if (drawIndex >= revealCount) { // typewriter stops here
+        break;
+      }
+
+      const m = ctx.measureText(g);
+      const width = m.width;
+
+      // per-glyph progress
+      const p = perGlyphProgress(state.time, glyphIndex, segmented.units.length);
+
+      // compute per-glyph offset
+      let gox = values.gox * (1 - (1-p)); // simple usage
+      let goy = values.goy * (1 - (1-p));
+
+      // fade-up preset popularly uses goy upward and opacity from 0->1
+      let glyphAlpha = 1;
+      if (state._fadeUp) {
+        const fp = clamp(p,0,1);
+        goy -= (1-fp) * 40;
+        glyphAlpha *= fp;
+      }
+
+      // bounce preset: scale + slight vertical movement using easing
+      let gScale = 1;
+      if (state._bounce){
+        const b = easings.bounce(clamp(p,0,1));
+        gScale = lerp(0.2, 1, b);
+        goy -= (1-b)*10;
+      }
+
+      // liquid preset: sine wave baseline
+      if (doLiquid){
+        const amp = 8;
+        const freq = 2.2;
+        goy += Math.sin((state.time*freq + glyphIndex*0.25) * Math.PI*2) * amp;
+      }
+
+      // glitch preset: occasional jitter and opacity flicker
+      let jitterX=0, jitterY=0;
+      if (doGlitch){
+        if (Math.random()<0.06){
+          jitterX = (Math.random()-0.5)*10;
+          jitterY = (Math.random()-0.5)*6;
+          glyphAlpha *= Math.random()*0.5+0.5;
+        }
+      }
+
+      const drawX = xBase + (align==='left'? xCursor : align==='right'? -maxWidth + xCursor : xCursor - maxWidth/2);
+      const drawY = y;
+
+      ctx.save();
+      ctx.translate(drawX + gox + jitterX, drawY + goy + jitterY);
+      ctx.scale(gScale, gScale);
+      ctx.globalAlpha *= glyphAlpha;
+
+      // fill/gradient
+      if (grad){ ctx.fillStyle = grad; } else { ctx.fillStyle = state.style.fill; }
+      ctx.strokeStyle = state.style.stroke; ctx.lineWidth = state.style.strokeWidth;
+
+      if (state.style.glow){
+        ctx.shadowColor = state.style.fill;
+        ctx.shadowBlur = 16;
+      } else {
+        ctx.shadowColor = state.style.shadowColor;
+        ctx.shadowBlur = state.style.shadowBlur;
+        ctx.shadowOffsetX = state.style.shadowX;
+        ctx.shadowOffsetY = state.style.shadowY;
+      }
+
+      // draw glyph
+      ctx.fillText(g, 0, 0);
+      if (state.style.strokeWidth>0){
+        ctx.strokeText(g, 0, 0);
+      }
+
+      ctx.restore();
+
+      xCursor += width + values.tracking;
+      glyphIndex++;
+      drawIndex++;
+    }
+    // handle spaces in typewriter: if cut mid-line, still accounted via revealCount
+  }
+
+  ctx.restore();
+
+  // simple motion blur: blend previous frame
+  if (state.style.motionBlur && lastFrameCanvas){
+    ctx.save();
+    ctx.globalAlpha = 0.2;
+    ctx.drawImage(lastFrameCanvas, 0,0,w,h);
+    ctx.restore();
+  }
+  // store current frame
+  if (!lastFrameCanvas){ lastFrameCanvas = document.createElement('canvas'); lastFrameCanvas.width=w; lastFrameCanvas.height=h; }
+  const lctx = lastFrameCanvas.getContext('2d');
+  lctx.clearRect(0,0,w,h);
+  lctx.drawImage(canvas,0,0);
+
+  // overlay title of aspect/res
+  $('#overlayBadge').textContent = `${state.aspect.w}:${state.aspect.h} • ${state.resolution.w}x${state.resolution.h}`;
+}
+
+/* Playback */
+let rafId = null, lastTs=null;
+function tick(ts){
+  if (!state.playing){ lastTs=null; return; }
+  if (!lastTs) lastTs=ts;
+  const dt = (ts - lastTs) / 1000;
+  lastTs = ts;
+  state.time += dt;
+  if (state.time>state.duration){
+    if (state.loop) state.time=0;
+    else { state.time = state.duration; pause(); }
+  }
+  $('#timeSlider').value = state.time; updateTimeLabel();
+  if (state.audio.playAudio && state.audio.element){
+    // keep media in sync with timeline when scrubbing is off; during play, let audio drive time if playing
+    // when playing, we sync animation time to audio currentTime-start
+    const t0 = state.audio.startAt;
+    const at = state.audio.element.currentTime - t0;
+    if (!isNaN(at) && isFinite(at)){
+      state.time = clamp(at, 0, state.duration);
+      $('#timeSlider').value = state.time; updateTimeLabel();
+    }
+  }
+  updateValuesFromTracksAt(state.time);
+  render(ts);
+  rafId = requestAnimationFrame(tick);
+}
+function play(){
+  if (state.playing) return;
+  state.playing = true;
+  $('#playBtn').textContent='❚❚';
+  if (state.audio.playAudio && state.audio.buffer){
+    startAudioAt(state.time);
+  }
+  rafId = requestAnimationFrame(tick);
+}
+function pause(){
+  state.playing = false;
+  $('#playBtn').textContent='▶︎';
+  cancelAnimationFrame(rafId);
+  stopAudio();
+}
+function stop(){
+  pause();
+  state.time = 0; $('#timeSlider').value=0; updateTimeLabel();
+  render();
+}
+
+/* Audio handling and beat detection */
+async function loadAudioFile(file){
+  const arrayBuffer = await file.arrayBuffer();
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if (!state.audio.context) state.audio.context = new AudioCtx();
+  const buffer = await state.audio.context.decodeAudioData(arrayBuffer);
+  state.audio.buffer = buffer;
+  $('#audioInfo').textContent = `Loaded: ${file.name} • ${(buffer.duration).toFixed(2)}s • ${buffer.sampleRate}Hz`;
+  // detect beats offline
+  state.audio.beats = detectBeats(buffer, state.audio.sensitivity);
+  estimateBPM();
+  refreshTimeline();
+}
+function detectBeats(buffer, sensitivity=0.5){
+  const channel = buffer.getChannelData(0);
+  const sampleRate = buffer.sampleRate;
+  const win = 1024; const hop = 512;
+  // energy envelope
+  let energies = [];
+  for (let i=0;i+win<channel.length;i+=hop){
+    let sum=0; for (let j=0;j<win;j++){ const s=channel[i+j]; sum += s*s; }
+    energies.push(sum/win);
+  }
+  // moving average and peaks
+  const maWin = 43; // ~0.5s at hop 512/48k
+  const beats = [];
+  for (let i=maWin;i<energies.length;i++){
+    let avg=0; for (let j=i-maWin;j<i;j++) avg+=energies[j]; avg/=maWin;
+    let stdev=0; for (let j=i-maWin;j<i;j++) { const d=energies[j]-avg; stdev+=d*d; } stdev=Math.sqrt(stdev/maWin)+1e-6;
+    const e = energies[i];
+    const thresh = avg + stdev*(0.8 + sensitivity*1.2);
+    if (e > thresh && energies[i-1] <= thresh){
+      const time = (i*hop)/sampleRate;
+      beats.push(time);
+    }
+  }
+  return beats;
+}
+function estimateBPM(){
+  const beats = state.audio.beats;
+  if (beats.length<2){ state.audio.bpm = null; return; }
+  const intervals = [];
+  for (let i=1;i<beats.length;i++) intervals.push(beats[i]-beats[i-1]);
+  intervals.sort((a,b)=>a-b);
+  const median = intervals[Math.floor(intervals.length/2)];
+  const bpm = 60/median;
+  state.audio.bpm = Math.round(bpm);
+  $('#audioInfo').textContent += ` • Beats: ${beats.length} • ~${state.audio.bpm} BPM`;
+}
+function startAudioAt(time){
+  stopAudio();
+  const ctx = state.audio.context;
+  if (!ctx || !state.audio.buffer) return;
+  const el = new Audio();
+  el.src = URL.createObjectURL(bufferToWave(state.audio.buffer));
+  el.onended=()=>{ if (state.playing && !state.loop) pause(); };
+  el.playbackRate = 1;
+  el.currentTime = time;
+  el.play().catch(()=>{ /* ignore autoplay block */ });
+  state.audio.element = el;
+  state.audio.startAt = time;
+  state.audio.startedTime = ctx.currentTime;
+}
+function stopAudio(){
+  if (state.audio.element){
+    state.audio.element.pause();
+    URL.revokeObjectURL(state.audio.element.src);
+    state.audio.element = null;
+  }
+}
+function bufferToWave(abuffer) {
+  // Encode PCM16 WAV
+  const numOfChan = abuffer.numberOfChannels, length = abuffer.length * numOfChan * 2 + 44;
+  const buffer = new ArrayBuffer(length); const view = new DataView(buffer);
+  const channels = []; let sample, offset = 0, pos = 0;
+  // write WAV header
+  setUint32(0x46464952); setUint32(length - 8); setUint32(0x45564157);
+  setUint32(0x20746d66); setUint32(16); setUint16(1); setUint16(numOfChan);
+  setUint32(abuffer.sampleRate); setUint32(abuffer.sampleRate * 2 * numOfChan);
+  setUint16(numOfChan * 2); setUint16(16); setUint32(0x61746164); setUint32(length - pos - 4);
+  // write interleaved data
+  for (let i=0;i<abuffer.numberOfChannels;i++) channels.push(abuffer.getChannelData(i));
+  while (pos < abuffer.length){
+    for (let i=0;i<numOfChan;i++){
+      sample = Math.max(-1, Math.min(1, channels[i][pos])); // clamp
+      view.setInt16(offset, sample<0? sample*0x8000 : sample*0x7FFF, true); offset += 2;
+    }
+    pos++;
+  }
+  return new Blob([buffer], {type:"audio/wav"});
+  function setUint16(data){ view.setUint16(offset, data, true); offset += 2; }
+  function setUint32(data){ view.setUint32(offset, data, true); offset += 4; }
+}
+
+/* UI bindings */
+function updateTimeLabel(){
+  $('#timeLabel').textContent = `${state.time.toFixed(2)}s`;
+}
+function getSelectedEasing(){
+  const esel = $('#easingPreset').value;
+  if (esel==='custom') return {type:'custom', x1:bez.x1, y1:bez.y1, x2:bez.x2, y2:bez.y2};
+  return esel;
+}
+function deleteSelectedKey(){
+  const t = state.selectedTrack, i = state.selectedKey;
+  if (!t || i==null) return;
+  state.tracks[t].splice(i,1);
+  state.selectedTrack=null; state.selectedKey=null;
+  refreshTimeline();
+}
+
+/* Presets */
+function applyTypewriter(){
+  state.revealMode = 'typewriter';
+  // also set opacity to 1 and minor cursor effect not implemented
+}
+function applyFadeUp(){
+  // Use goy and opacity easing via internal flag that renderer reads
+  state._fadeUp = true;
+  // Add baseline keyframes: opacity 0 at start, 1 at 1s
+  addKey('opacity', 0, 0, 'linear');
+  addKey('opacity', Math.min(0.6, state.duration*0.2), 1, 'ease-out');
+  // Add goy amplitude that eases to 0
+  addKey('goy', 0, 40, 'ease-out');
+  addKey('goy', Math.min(0.8, state.duration*0.25), 0, 'ease-out');
+}
+function applyBounce(){
+  state._bounce = true;
+  addKey('scale', 0, 0.2, 'ease-out');
+  addKey('scale', Math.min(state.duration, 0.5), 1.25, 'bounce');
+  addKey('scale', Math.min(state.duration, 1.0), 1.0, 'ease-out');
+}
+function applyLiquid(){
+  state.presetFlags.liquid = true;
+}
+function applyGlitch(){
+  state.presetFlags.glitch = true;
+}
+function applyCascade(){
+  // Just ensure stagger and cascadeBy are used
+  // Optional: small offset and opacity keyframes
+  addKey('goy', 0, 20, 'ease-out');
+  addKey('goy', Math.min(state.duration, 0.6), 0, 'ease-out');
+  addKey('opacity', 0, 0, 'linear');
+  addKey('opacity', Math.min(state.duration, 0.6), 1, 'ease-out');
+}
+
+/* Export */
+async function exportWebM(){
+  const fps = +$('#exportFps').value;
+  const w = +$('#exportW').value, h=+$('#exportH').value;
+  const dur = +$('#exportDur').value;
+  const includeAudio = $('#exportIncludeAudio').checked && state.audio.buffer;
+
+  // Create an offscreen canvas to render at export resolution
+  const expCanvas = document.createElement('canvas'); expCanvas.width=w; expCanvas.height=h;
+  const expCtx = expCanvas.getContext('2d');
+  const stream = expCanvas.captureStream(fps);
+  let audioTrack = null;
+
+  // If including audio, route an audio element into MediaStream
+  let mediaRecorder;
+  let chunks=[];
+  try{
+    if (includeAudio && state.audio.buffer){
+      const audioEl = new Audio();
+      audioEl.src = URL.createObjectURL(bufferToWave(state.audio.buffer));
+      audioEl.crossOrigin = 'anonymous';
+      audioEl.muted = false;
+      const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+      const source = audioCtx.createMediaElementSource(audioEl);
+      const dest = audioCtx.createMediaStreamDestination();
+      source.connect(dest);
+      source.connect(audioCtx.destination);
+      stream.addTrack(dest.stream.getAudioTracks()[0]);
+      audioTrack = dest.stream.getAudioTracks()[0];
+      // Start audio slightly after start to ensure recorder is ready
+      audioEl.currentTime = 0;
+      setTimeout(()=>audioEl.play(), 200);
+    }
+    mediaRecorder = new MediaRecorder(stream, {mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 6_000_000});
+  } catch(e){
+    $('#exportStatus').textContent = 'MediaRecorder not supported for WebM on this browser.';
+    return;
+  }
+  mediaRecorder.ondataavailable = e=>{ if (e.data.size>0) chunks.push(e.data); };
+  mediaRecorder.onstop = ()=>{
+    const blob = new Blob(chunks, {type:'video/webm'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'kinetic-typography.webm';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    $('#exportStatus').textContent = 'Export complete.';
+  };
+  mediaRecorder.start();
+
+  // Render loop at FPS
+  $('#exportStatus').textContent = 'Rendering...';
+  const totalFrames = Math.floor(dur*fps);
+  let frame=0;
+  const tmpLast = document.createElement('canvas'); tmpLast.width=w; tmpLast.height=h; const tmpLastCtx = tmpLast.getContext('2d');
+  function drawExportFrame(t){
+    // draw into expCtx using same renderer but swapped contexts
+    // Save original contexts and replace global variables temporarily
+    const savedCanvas = canvas, savedCtx = ctx, savedLast = lastFrameCanvas;
+    window.previewCanvas_saved = savedCanvas; // not used
+    // swap
+    window._origCanvas = canvas; window._origCtx = ctx;
+    // override
+    window.canvas = expCanvas; window.ctx = expCtx;
+    lastFrameCanvas = tmpLast;
+
+    const oldRes = {w: state.resolution.w, h: state.resolution.h};
+    state.resolution.w = w; state.resolution.h = h;
+    render();
+
+    // restore
+    state.resolution = oldRes;
+    window.canvas = savedCanvas; window.ctx = savedCtx;
+    lastFrameCanvas = savedLast;
+
+    // Transfer expCanvas into tmpLast for motion blur trail
+    tmpLastCtx.clearRect(0,0,w,h);
+    tmpLastCtx.drawImage(expCanvas, 0,0);
+  }
+  const interval = 1000/fps;
+  let start = performance.now();
+  function step(){
+    const t = frame / fps;
+    state.time = t;
+    drawExportFrame(t);
+    frame++;
+    if (frame<=totalFrames){
+      $('#exportStatus').textContent = `Rendering ${((frame/totalFrames)*100).toFixed(0)}%`;
+      setTimeout(step, 0);
+    } else {
+      mediaRecorder.stop();
+      if (audioTrack) audioTrack.stop();
+    }
+  }
+  step();
+}
+
+async function exportPNGSequence(){
+  const fps = +$('#exportFps').value;
+  const w = +$('#exportW').value, h=+$('#exportH').value;
+  const dur = +$('#exportDur').value;
+  const totalFrames = Math.floor(dur*fps);
+
+  const expCanvas = document.createElement('canvas'); expCanvas.width=w; expCanvas.height=h; const expCtx = expCanvas.getContext('2d');
+  const tmpLast = document.createElement('canvas'); tmpLast.width=w; tmpLast.height=h; const tmpLastCtx = tmpLast.getContext('2d');
+
+  // Create a tar.gz of PNG frames
+  const entries = [];
+  function writeString(view, offset, str){
+    for (let i=0;i<str.length;i++) view.setUint8(offset+i, str.charCodeAt(i));
+  }
+  function pad(n){ return ((n+511)>>9)<<9; } // to 512 multiple
+  function tarEntry(name, contentBytes){
+    // Create a ustar header
+    const buf = new ArrayBuffer(512); const view = new DataView(buf);
+    let off=0;
+    const encoder = new TextEncoder();
+    function write(o, s){ const bytes=encoder.encode(s); for (let i=0;i<bytes.length;i++) view.setUint8(o+i, bytes[i]); }
+    write(0, name);
+    const sizeOct = contentBytes.length.toString(8).padStart(11,'0') + '\0';
+    write(100, '0000777\0'); // mode
+    write(108, '0000000\0'); // uid
+    write(116, '0000000\0'); // gid
+    write(124, sizeOct);
+    write(136, Math.floor(Date.now()/1000).toString(8).padStart(11,'0')+'\0');
+    write(148, '        '); // checksum placeholder
+    write(156, '0'); // type
+    write(257, 'ustar\0'); write(263, '00');
+    // checksum
+    let sum=0; for (let i=0;i<512;i++) sum += view.getUint8(i);
+    const chk = sum.toString(8).padStart(6,'0') + '\0 ';
+    write(148, chk);
+    return new Uint8Array(buf);
+  }
+  function concatArrays(arrs){
+    let total=0; for (const a of arrs) total+=a.length;
+    const out = new Uint8Array(total); let off=0; for (const a of arrs){ out.set(a, off); off+=a.length; }
+    return out;
+  }
+  async function gzip(bytes){
+    if ('CompressionStream' in window){
+      const cs = new CompressionStream('gzip');
+      const stream = new Blob([bytes]).stream().pipeThrough(cs);
+      const rep = await new Response(stream).blob();
+      return new Uint8Array(await rep.arrayBuffer());
+    }
+    return bytes; // fallback no gzip
+  }
+
+  $('#exportStatus').textContent = 'Rendering frames...';
+  const pngChunks = [];
+  for (let f=0; f<totalFrames; f++){
+    const t = f/fps;
+    state.time = t;
+
+    // draw using renderer swapped to expCtx
+    const savedCanvas = canvas, savedCtx = ctx, savedLast = lastFrameCanvas;
+    window.canvas = expCanvas; window.ctx = expCtx; lastFrameCanvas = tmpLast;
+    const oldRes = {w: state.resolution.w, h: state.resolution.h};
+    state.resolution.w = w; state.resolution.h = h;
+    render();
+    state.resolution = oldRes;
+    window.canvas = savedCanvas; window.ctx = savedCtx; lastFrameCanvas = savedLast;
+    tmpLastCtx.clearRect(0,0,w,h); tmpLastCtx.drawImage(expCanvas,0,0);
+
+    const blob = await new Promise(res=>expCanvas.toBlob(res, 'image/png'));
+    const arr = new Uint8Array(await blob.arrayBuffer());
+    pngChunks.push({name:`frame_${String(f).padStart(5,'0')}.png`, bytes:arr});
+    if (f%10===0) $('#exportStatus').textContent = `Rendering ${((f/totalFrames)*100).toFixed(0)}%`;
+    await new Promise(r=>setTimeout(r, 0)); // yield
+  }
+  // Build tar
+  const parts = [];
+  for (const ch of pngChunks){
+    const header = tarEntry(ch.name, ch.bytes);
+    parts.push(header);
+    const bodyPadded = pad(ch.bytes.length);
+    const body = new Uint8Array(bodyPadded);
+    body.set(ch.bytes, 0);
+    parts.push(body);
+  }
+  // End with two 512-byte zero blocks
+  parts.push(new Uint8Array(1024));
+  const tarBytes = concatArrays(parts);
+  const gz = await gzip(tarBytes);
+  const blob = new Blob([gz], {type: 'application/gzip'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'frames.tar.gz';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  $('#exportStatus').textContent = 'Export complete.';
+}
+
+/* Event wiring */
+function bindUI(){
+  // Tabs
+  const tabs = [
+    {btn:'#tabText', pane:'#paneText'},
+    {btn:'#tabStyle', pane:'#paneStyle'},
+    {btn:'#tabLayout', pane:'#paneLayout'},
+    {btn:'#tabAudio', pane:'#paneAudio'},
+    {btn:'#tabExport', pane:'#paneExport'},
+  ];
+  tabs.forEach(t=>{
+    $(t.btn).addEventListener('click', ()=>{
+      tabs.forEach(x=>{ $(x.btn).classList.remove('active'); $(x.pane).classList.remove('active'); $(x.btn).setAttribute('aria-selected','false'); });
+      $(t.btn).classList.add('active'); $(t.pane).classList.add('active'); $(t.btn).setAttribute('aria-selected','true');
+    });
+  });
+
+  // Playback
+  $('#playBtn').addEventListener('click', ()=> state.playing? pause(): play());
+  $('#stopBtn').addEventListener('click', ()=> stop());
+  $('#loopToggle').addEventListener('change', e=> state.loop = e.target.checked);
+  $('#rewBtn').addEventListener('click', ()=>{ state.time=0; $('#timeSlider').value=0; updateTimeLabel(); render(); });
+
+  // Timeline slider
+  $('#timeSlider').addEventListener('input', e=>{
+    state.time = +e.target.value;
+    updateTimeLabel();
+    updateValuesFromTracksAt(state.time);
+    if (state.audio.playAudio && state.audio.element){
+      state.audio.element.currentTime = state.time;
+    }
+    render();
+  });
+
+  // Aspect and resolution
+  function applyAspect(val){
+    const [w,h] = val.split(':').map(Number);
+    state.aspect = {w,h};
+    // update stage CSS size to fit container while keeping ratio
+    const wrap = $('#stageWrap');
+    // Canvas internal resolution controlled elsewhere
+    render();
+  }
+  $('#aspectSelect').addEventListener('change', e=>{
+    applyAspect(e.target.value);
+    $('#aspectSelect2').value = e.target.value;
+    fitCanvasToPreview();
+  });
+  $('#aspectSelect2').addEventListener('change', e=>{
+    applyAspect(e.target.value);
+    $('#aspectSelect').value = e.target.value;
+    fitCanvasToPreview();
+  });
+  $('#resolutionSelect').addEventListener('change', e=>{
+    const val = e.target.value;
+    let w=1280,h=720;
+    if (val==='720p'){ w=1280; h=720; }
+    else if (val==='1080p'){ w=1920; h=1080; }
+    else if (val==='540x960'){ w=540; h=960; }
+    else if (val==='1080x1920'){ w=1080; h=1920; }
+    else { // custom – keep current
+      return;
+    }
+    state.resolution = {w,h};
+    setCanvasSize(w,h);
+    fitCanvasToPreview();
+    render();
+  });
+
+  // Guides toggles
+  function syncGuides(){
+    state.layout.showSafe = $('#safeAreaToggle').checked || $('#safeToggle').classList.contains('active');
+    state.layout.showGrid = $('#gridAreaToggle').checked || $('#gridToggle').classList.contains('active');
+    render();
+  }
+  $('#safeToggle').addEventListener('click', e=>{ e.target.classList.toggle('active'); state.layout.showSafe = e.target.classList.contains('active'); render(); });
+  $('#gridToggle').addEventListener('click', e=>{ e.target.classList.toggle('active'); state.layout.showGrid = e.target.classList.contains('active'); render(); });
+  $('#safeAreaToggle').addEventListener('change', syncGuides);
+  $('#gridAreaToggle').addEventListener('change', syncGuides);
+  $('#gridRows').addEventListener('input', e=>{ state.layout.gridRows=+e.target.value; render(); });
+  $('#gridCols').addEventListener('input', e=>{ state.layout.gridCols=+e.target.value; render(); });
+  $('#marginInput').addEventListener('input', e=>{ state.layout.margins=+e.target.value; render(); });
+
+  // Text fields
+  $('#textInput').addEventListener('input', e=>{ state.text=e.target.value; render(); });
+  $('#alignSelect').addEventListener('change', e=>{ state.align=e.target.value; render(); });
+  $('#anchorSelect').addEventListener('change', e=>{ state.anchor=e.target.value; render(); });
+
+  // Style
+  $('#fontSelect').addEventListener('change', e=>{ state.style.fontFamily=e.target.value; render(); });
+  $('#weightSelect').addEventListener('change', e=>{ state.style.weight=+e.target.value; render(); });
+  $('#italicToggle').addEventListener('change', e=>{ state.style.italic=e.target.checked; render(); });
+  $('#fontSizeInput').addEventListener('input', e=>{ state.style.fontSize=+e.target.value; render(); });
+  $('#fillColor').addEventListener('input', e=>{ state.style.fill=e.target.value; render(); });
+  $('#strokeColor').addEventListener('input', e=>{ state.style.stroke=e.target.value; render(); });
+  $('#strokeWidth').addEventListener('input', e=>{ state.style.strokeWidth=+e.target.value; render(); });
+  $('#gradientSelect').addEventListener('change', e=>{ state.style.gradient=e.target.value; render(); });
+  $('#gradStart').addEventListener('input', e=>{ state.style.gradStart=e.target.value; render(); });
+  $('#gradEnd').addEventListener('input', e=>{ state.style.gradEnd=e.target.value; render(); });
+  $('#shadowX').addEventListener('input', e=>{ state.style.shadowX=+e.target.value; render(); });
+  $('#shadowY').addEventListener('input', e=>{ state.style.shadowY=+e.target.value; render(); });
+  $('#shadowBlur').addEventListener('input', e=>{ state.style.shadowBlur=+e.target.value; render(); });
+  $('#shadowColor').addEventListener('input', e=>{ state.style.shadowColor=e.target.value; render(); });
+  $('#motionBlurToggle').addEventListener('change', e=>{ state.style.motionBlur=e.target.checked; render(); });
+  $('#glowToggle').addEventListener('change', e=>{ state.style.glow=e.target.checked; render(); });
+  $('#bgColor').addEventListener('input', e=>{ state.style.bgColor=e.target.value; render(); });
+  $('#bgImage').addEventListener('change', async e=>{
+    const file = e.target.files[0]; if (!file){ bgImageBitmap=null; render(); return; }
+    const bmp = await createImageBitmap(file);
+    bgImageBitmap = bmp; render();
+  });
+  $('#bgFit').addEventListener('change', e=>{ state.style.bgFit=e.target.value; render(); });
+
+  // Properties at playhead + Add keys
+  function bindPropInput(id, trackId){
+    $(id).addEventListener('change', e=>{
+      const v = Number(e.target.value);
+      addKey(trackId, state.time, v, getSelectedEasing());
+      render();
+    });
+  }
+  bindPropInput('#posXInput','posX');
+  bindPropInput('#posYInput','posY');
+  bindPropInput('#scaleInput','scale');
+  bindPropInput('#rotationInput','rotation');
+  bindPropInput('#opacityInput','opacity');
+  bindPropInput('#trackingInput','tracking');
+  bindPropInput('#goxInput','gox');
+  bindPropInput('#goyInput','goy');
+  $('#addKeyAll').addEventListener('click', ()=>{
+    addKey('posX', state.time, +$('#posXInput').value, getSelectedEasing());
+    addKey('posY', state.time, +$('#posYInput').value, getSelectedEasing());
+    addKey('scale', state.time, +$('#scaleInput').value, getSelectedEasing());
+    addKey('rotation', state.time, +$('#rotationInput').value, getSelectedEasing());
+    addKey('opacity', state.time, +$('#opacityInput').value, getSelectedEasing());
+    addKey('tracking', state.time, +$('#trackingInput').value, getSelectedEasing());
+    addKey('gox', state.time, +$('#goxInput').value, getSelectedEasing());
+    addKey('goy', state.time, +$('#goyInput').value, getSelectedEasing());
+    render();
+  });
+  $('#deleteKeySel').addEventListener('click', deleteSelectedKey);
+  $('#easingPreset').addEventListener('change', ()=>{ /* applied on add/update */ });
+
+  // Presets
+  $('#presetTypewriter').addEventListener('click', ()=>{ applyTypewriter(); render(); });
+  $('#presetFadeUp').addEventListener('click', ()=>{ applyFadeUp(); render(); });
+  $('#presetBounce').addEventListener('click', ()=>{ applyBounce(); render(); });
+  $('#presetLiquid').addEventListener('click', ()=>{ applyLiquid(); render(); });
+  $('#presetGlitch').addEventListener('click', ()=>{ applyGlitch(); render(); });
+  $('#presetCascade').addEventListener('click', ()=>{ applyCascade(); render(); });
+  $('#staggerInput').addEventListener('input', e=>{ state.staggerMs=+e.target.value; });
+  $('#cascadeBySelect').addEventListener('change', e=>{ state.cascadeBy=e.target.value; render(); });
+
+  // Layout
+  $('#durationInput').addEventListener('input', e=>{ state.duration=+e.target.value; $('#timeSlider').max=state.duration; refreshTimeline(); });
+  $('#fpsInput').addEventListener('input', e=>{ state.fps=+e.target.value; });
+
+  // Audio
+  $('#audioFile').addEventListener('change', e=>{ if (e.target.files[0]) loadAudioFile(e.target.files[0]); });
+  $('#audioPlayToggle').addEventListener('change', e=>{ state.audio.playAudio = e.target.checked; if (!e.target.checked) stopAudio(); });
+  $('#snapBeatsToggle').addEventListener('change', e=>{ state.audio.snapBeats = e.target.checked; });
+  $('#beatSensitivity').addEventListener('input', e=>{
+    state.audio.sensitivity=+e.target.value;
+    if (state.audio.buffer){
+      state.audio.beats = detectBeats(state.audio.buffer, state.audio.sensitivity);
+      estimateBPM();
+      refreshTimeline();
+    }
+  });
+
+  // Export
+  $('#exportBtn').addEventListener('click', async ()=>{
+    $('#exportStatus').textContent = 'Preparing export...';
+    if ($('#exportFormat').value==='webm') await exportWebM();
+    else await exportPNGSequence();
+  });
+
+  // Keyboard shortcuts
+  window.addEventListener('keydown', e=>{
+    if (/input|textarea|select/i.test(document.activeElement.tagName)) return;
+    if (e.code==='Space'){ e.preventDefault(); state.playing? pause(): play(); }
+    else if (e.key==='k' || e.key==='K'){ e.preventDefault(); $('#addKeyAll').click(); }
+    else if (e.key==='Delete' || e.key==='Backspace'){ e.preventDefault(); deleteSelectedKey(); }
+    else if (e.key==='g' || e.key==='G'){ e.preventDefault(); $('#gridToggle').click(); }
+    else if (e.key==='b' || e.key==='B'){ e.preventDefault(); $('#safeToggle').click(); }
+    else if (e.key==='m' || e.key==='M'){ e.preventDefault(); state.style.motionBlur=!state.style.motionBlur; $('#motionBlurToggle').checked=state.style.motionBlur; render(); }
+    else if (e.key==='s' || e.key==='S'){ e.preventDefault(); state.audio.snapBeats=!state.audio.snapBeats; $('#snapBeatsToggle').checked=state.audio.snapBeats; }
+    else if (e.key==='ArrowRight'){ state.time=clamp(state.time+1/state.fps,0,state.duration); $('#timeSlider').value=state.time; updateTimeLabel(); render(); }
+    else if (e.key==='ArrowLeft'){ state.time=clamp(state.time-1/state.fps,0,state.duration); $('#timeSlider').value=state.time; updateTimeLabel(); render(); }
+  });
+
+  // Focus order for accessibility
+  $('#stageWrap').addEventListener('keydown', e=>{
+    if (e.code==='Space'){ e.preventDefault(); state.playing? pause(): play(); }
+  });
+
+  // Resize handling
+  window.addEventListener('resize', fitCanvasToPreview);
+}
+
+/* Layout: fit canvas into stage while preserving aspect */
+function fitCanvasToPreview(){
+  const wrap = $('#stageWrap');
+  const pad = 0;
+  const ww = wrap.clientWidth - pad*2;
+  const wh = wrap.clientHeight - pad*2;
+  const ar = state.resolution.w / state.resolution.h;
+  let vw=ww, vh=vw/ar;
+  if (vh>wh){ vh=wh; vw=vh*ar; }
+  canvas.style.width = `${vw}px`;
+  canvas.style.height = `${vh}px`;
+}
+
+/* Initialization */
+function init(){
+  // defaults
+  $('#textInput').value = state.text;
+  $('#timeSlider').max = state.duration; $('#timeSlider').value=0; updateTimeLabel();
+  $('#safeToggle').classList.toggle('active', state.layout.showSafe);
+  $('#gridToggle').classList.toggle('active', state.layout.showGrid);
+  $('#safeAreaToggle').checked = state.layout.showSafe;
+  $('#gridAreaToggle').checked = state.layout.showGrid;
+  $('#aspectSelect').value = '16:9';
+  $('#aspectSelect2').value = '16:9';
+  $('#resolutionSelect').value = '720p';
+  setCanvasSize(state.resolution.w, state.resolution.h);
+  fitCanvasToPreview();
+  drawBezierEditor();
+  bindUI();
+  refreshTimeline();
+  render();
+}
+
+init();
+</script>
+</body>
+</html>

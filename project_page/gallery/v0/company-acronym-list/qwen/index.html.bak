@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Acronym List</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #34495e;
+            --success-color: #27ae60;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--dark-color));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background-color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: var(--box-shadow);
+        }
+
+        .tab-btn.active {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .tab-btn:hover:not(.active) {
+            background-color: var(--light-color);
+        }
+
+        .search-section {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 1.5rem;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+
+        #search-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        #search-input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        #search-button {
+            padding: 12px 20px;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        #search-button:hover {
+            background-color: #2980b9;
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+
+        .filter-tag {
+            padding: 6px 12px;
+            background-color: var(--light-color);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .filter-tag:hover,
+        .filter-tag.active {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .acronyms-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .acronym-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .acronym-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .acronym-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .acronym-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .acronym-category {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .acronym-definition {
+            color: #555;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .quiz-section {
+            background-color: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            display: none;
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-number {
+            font-size: 1.2rem;
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .quiz-question {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .option-btn {
+            padding: 15px;
+            background-color: var(--light-color);
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            text-align: left;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1rem;
+        }
+
+        .option-btn:hover {
+            background-color: #d6eaf8;
+            border-color: var(--secondary-color);
+        }
+
+        .option-btn.correct {
+            background-color: #d5f5e3;
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .option-btn.incorrect {
+            background-color: #fadbd8;
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .feedback {
+            text-align: center;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin: 1rem 0;
+            display: none;
+        }
+
+        .feedback.correct {
+            background-color: #d5f5e3;
+            color: var(--success-color);
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fadbd8;
+            color: var(--accent-color);
+            display: block;
+        }
+
+        .quiz-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 1rem;
+        }
+
+        .quiz-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        #next-question {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        #next-question:hover {
+            background-color: #2980b9;
+        }
+
+        #restart-quiz {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        #restart-quiz:hover {
+            background-color: #219653;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-top: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: #777;
+            margin-top: 2rem;
+            border-top: 1px solid #eee;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .acronyms-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-bar {
+                flex-direction: column;
+            }
+            
+            .quiz-controls {
+                flex-direction: column;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Company Acronym List</h1>
+            <p class="subtitle">Learn and remember internal company acronyms</p>
+        </div>
+    </header>
+
+    <div class="container app-container">
+        <div class="tabs">
+            <button id="list-tab" class="tab-btn active" data-view="list">Acronyms List</button>
+            <button id="quiz-tab" class="tab-btn" data-view="quiz">Quiz Mode</button>
+        </div>
+
+        <section id="list-view" class="search-section">
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="Search acronyms..." aria-label="Search acronyms">
+                <button id="search-button">Search</button>
+            </div>
+            
+            <div class="filters">
+                <span class="filter-tag active" data-category="all">All Categories</span>
+                <span class="filter-tag" data-category="teams">Teams</span>
+                <span class="filter-tag" data-category="projects">Projects</span>
+                <span class="filter-tag" data-category="processes">Processes</span>
+                <span class="filter-tag" data-category="tools">Tools</span>
+            </div>
+            
+            <div id="acronyms-container" class="acronyms-list">
+                <!-- Acronyms will be populated here by JavaScript -->
+            </div>
+        </section>
+
+        <section id="quiz-view" class="quiz-section">
+            <div class="quiz-header">
+                <div class="question-number">Question <span id="current-question">1</span> of <span id="total-questions">5</span></div>
+                <h2 class="quiz-question" id="quiz-question">What does API stand for?</h2>
+            </div>
+            
+            <div class="options" id="quiz-options">
+                <!-- Options will be populated here by JavaScript -->
+            </div>
+            
+            <div id="feedback" class="feedback"></div>
+            
+            <div class="quiz-controls">
+                <button id="next-question" class="quiz-btn">Next Question</button>
+                <button id="restart-quiz" class="quiz-btn">Restart Quiz</button>
+            </div>
+        </section>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="total-acronyms">0</div>
+                <div class="stat-label">Total Acronyms</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="categories-count">0</div>
+                <div class="stat-label">Categories</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="quiz-score">0%</div>
+                <div class="stat-label">Quiz Score</div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>Company Acronym List &copy; 2023 | Learn and remember internal company acronyms</p>
+        </div>
+    </footer>
+
+    <script>
+        // Sample data for company acronyms
+        const acronyms = [
+            { acronym: "API", definition: "Application Programming Interface", category: "tools" },
+            { acronym: "CRM", definition: "Customer Relationship Management", category: "processes" },
+            { acronym: "KPI", definition: "Key Performance Indicator", category: "processes" },
+            { acronym: "UX", definition: "User Experience", category: "tools" },
+            { acronym: "UI", definition: "User Interface", category: "tools" },
+            { acronym: "SaaS", definition: "Software as a Service", category: "tools" },
+            { acronym: "B2B", definition: "Business to Business", category: "processes" },
+            { acronym: "B2C", definition: "Business to Consumer", category: "processes" },
+            { acronym: "ROI", definition: "Return on Investment", category: "processes" },
+            { acronym: "FAQ", definition: "Frequently Asked Questions", category: "tools" },
+            { acronym: "SLA", definition: "Service Level Agreement", category: "processes" },
+            { acronym: "POC", definition: "Proof of Concept", category: "projects" },
+            { acronym: "R&D", definition: "Research and Development", category: "teams" },
+            { acronym: "HR", definition: "Human Resources", category: "teams" },
+            { acronym: "IT", definition: "Information Technology", category: "teams" },
+            { acronym: "QA", definition: "Quality Assurance", category: "teams" },
+            { acronym: "CEO", definition: "Chief Executive Officer", category: "teams" },
+            { acronym: "CTO", definition: "Chief Technology Officer", category: "teams" },
+            { acronym: "CFO", definition: "Chief Financial Officer", category: "teams" },
+            { acronym: "CIO", definition: "Chief Information Officer", category: "teams" }
+        ];
+
+        // Quiz questions data
+        const quizQuestions = [
+            {
+                question: "What does API stand for?",
+                options: ["Application Programming Interface", "Advanced Programming Interface", "Application Process Integration", "Automated Program Interface"],
+                correct: 0
+            },
+            {
+                question: "What is the full form of CRM?",
+                options: ["Customer Relationship Management", "Customer Resource Management", "Corporate Relationship Management", "Corporate Resource Management"],
+                correct: 0
+            },
+            {
+                question: "What does KPI stand for?",
+                options: ["Key Performance Indicator", "Key Process Indicator", "Knowledge Performance Index", "Key Process Index"],
+                correct: 0
+            },
+            {
+                question: "What does UX stand for?",
+                options: ["User Experience", "User Extension", "User Engagement", "User Experience"],
+                correct: 0
+            },
+            {
+                question: "What does B2B mean?",
+                options: ["Business to Business", "Business to Buyer", "Business to Brand", "Business to Broker"],
+                correct: 0
+            }
+        ];
+
+        // DOM Elements
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
+        const acronymsContainer = document.getElementById('acronyms-container');
+        const filterTags = document.querySelectorAll('.filter-tag');
+        const listView = document.getElementById('list-view');
+        const quizView = document.getElementById('quiz-view');
+        const listTab = document.getElementById('list-tab');
+        const quizTab = document.getElementById('quiz-tab');
+        const quizQuestion = document.getElementById('quiz-question');
+        const quizOptions = document.getElementById('quiz-options');
+        const nextQuestionBtn = document.getElementById('next-question');
+        const restartQuizBtn = document.getElementById('restart-quiz');
+        const feedback = document.getElementById('feedback');
+        const currentQuestionSpan = document.getElementById('current-question');
+        const totalQuestionsSpan = document.getElementById('total-questions');
+        const totalAcronymsEl = document.getElementById('total-acronyms');
+        const categoriesCountEl = document.getElementById('categories-count');
+        const quizScoreEl = document.getElementById('quiz-score');
+
+        // State variables
+        let currentCategory = 'all';
+        let currentQuizIndex = 0;
+        let score = 0;
+        let selectedAnswer = null;
+
+        // Initialize the app
+        function init() {
+            renderAcronymsList();
+            updateStats();
+            setupEventListeners();
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Search functionality
+            searchButton.addEventListener('click', handleSearch);
+            searchInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') handleSearch();
+            });
+
+            // Filter tags
+            filterTags.forEach(tag => {
+                tag.addEventListener('click', () => {
+                    filterTags.forEach(t => t.classList.remove('active'));
+                    tag.classList.add('active');
+                    currentCategory = tag.dataset.category;
+                    renderAcronymsList();
+                });
+            });
+
+            // Tab switching
+            listTab.addEventListener('click', () => switchView('list'));
+            quizTab.addEventListener('click', () => switchView('quiz'));
+
+            // Quiz functionality
+            nextQuestionBtn.addEventListener('click', handleNextQuestion);
+            restartQuizBtn.addEventListener('click', startQuiz);
+
+            // Option selection
+            quizOptions.addEventListener('click', (e) => {
+                if (e.target.classList.contains('option-btn')) {
+                    selectOption(e.target);
+                }
+            });
+        }
+
+        // Handle search functionality
+        function handleSearch() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            if (searchTerm) {
+                renderAcronymsList(searchTerm);
+            } else {
+                renderAcronymsList();
+            }
+        }
+
+        // Render acronyms list
+        function renderAcronymsList(searchTerm = '') {
+            // Clear container
+            acronymsContainer.innerHTML = '';
+
+            // Filter acronyms based on search term and category
+            const filteredAcronyms = acronyms.filter(acronym => {
+                const matchesSearch = acronym.acronym.toLowerCase().includes(searchTerm) || 
+                                    acronym.definition.toLowerCase().includes(searchTerm);
+                const matchesCategory = currentCategory === 'all' || acronym.category === currentCategory;
+                return matchesSearch && matchesCategory;
+            });
+
+            // Display acronyms
+            if (filteredAcronyms.length === 0) {
+                acronymsContainer.innerHTML = '<p class="no-results">No acronyms found matching your criteria.</p>';
+                return;
+            }
+
+            filteredAcronyms.forEach(acronym => {
+                const card = document.createElement('div');
+                card.className = 'acronym-card';
+                card.innerHTML = `
+                    <div class="acronym-header">
+                        <h3 class="acronym-name">${acronym.acronym}</h3>
+                        <span class="acronym-category">${formatCategory(acronym.category)}</span>
+                    </div>
+                    <p class="acronym-definition">${acronym.definition}</p>
+                `;
+                acronymsContainer.appendChild(card);
+            });
+        }
+
+        // Format category names for display
+        function formatCategory(category) {
+            const categories = {
+                'teams': 'Teams',
+                'projects': 'Projects',
+                'processes': 'Processes',
+                'tools': 'Tools'
+            };
+            return categories[category] || category.charAt(0).toUpperCase() + category.slice(1);
+        }
+
+        // Switch between views
+        function switchView(view) {
+            if (view === 'list') {
+                listView.style.display = 'block';
+                quizView.style.display = 'none';
+                listTab.classList.add('active');
+                quizTab.classList.remove('active');
+            } else {
+                listView.style.display = 'none';
+                quizView.style.display = 'block';
+                quizTab.classList.add('active');
+                listTab.classList.remove('active');
+                startQuiz();
+            }
+        }
+
+        // Start quiz
+        function startQuiz() {
+            currentQuizIndex = 0;
+            score = 0;
+            selectedAnswer = null;
+            feedback.style.display = 'none';
+            totalQuestionsSpan.textContent = quizQuestions.length;
+            showQuestion();
+        }
+
+        // Show current question
+        function showQuestion() {
+            const question = quizQuestions[currentQuizIndex];
+            quizQuestion.textContent = question.question;
+            currentQuestionSpan.textContent = currentQuizIndex + 1;
+
+            // Clear previous options
+            quizOptions.innerHTML = '';
+
+            // Add new options
+            question.options.forEach((option, index) => {
+                const optionBtn = document.createElement('button');
+                optionBtn.className = 'option-btn';
+                optionBtn.textContent = option;
+                optionBtn.dataset.index = index;
+                quizOptions.appendChild(optionBtn);
+            });
+
+            // Reset UI state
+            selectedAnswer = null;
+            nextQuestionBtn.textContent = 'Next Question';
+            nextQuestionBtn.disabled = true;
+        }
+
+        // Select an answer
+        function selectOption(element) {
+            // Remove previous selections
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('correct', 'incorrect');
+            });
+
+            // Mark selected answer
+            element.classList.add('selected');
+            selectedAnswer = parseInt(element.dataset.index);
+
+            // Disable further selection
+            nextQuestionBtn.disabled = false;
+        }
+
+        // Handle next question
+        function handleNextQuestion() {
+            if (selectedAnswer === null) return;
+
+            const question = quizQuestions[currentQuizIndex];
+            const isCorrect = selectedAnswer === question.correct;
+
+            // Show feedback
+            feedback.textContent = isCorrect ? 'Correct!' : `Incorrect! The correct answer is: ${question.options[question.correct]}`;
+            feedback.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+            feedback.style.display = 'block';
+
+            // Highlight correct/incorrect answers
+            document.querySelectorAll('.option-btn').forEach((btn, index) => {
+                if (index === question.correct) {
+                    btn.classList.add('correct');
+                } else if (index === selectedAnswer && !isCorrect) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            // Update score if correct
+            if (isCorrect) {
+                score++;
+            }
+
+            // Move to next question or finish quiz
+            setTimeout(() => {
+                if (currentQuizIndex < quizQuestions.length - 1) {
+                    currentQuizIndex++;
+                    showQuestion();
+                } else {
+                    finishQuiz();
+                }
+            }, 1500);
+        }
+
+        // Finish quiz and show results
+        function finishQuiz() {
+            const percentage = Math.round((score / quizQuestions.length) * 100);
+            quizQuestion.textContent = `Quiz Complete! Your score: ${score}/${quizQuestions.length} (${percentage}%)`;
+            nextQuestionBtn.textContent = 'Restart Quiz';
+            nextQuestionBtn.disabled = false;
+            feedback.style.display = 'none';
+            updateQuizScore(percentage);
+        }
+
+        // Update quiz score display
+        function updateQuizScore(score) {
+            quizScoreEl.textContent = `${score}%`;
+        }
+
+        // Update statistics
+        function updateStats() {
+            totalAcronymsEl.textContent = acronyms.length;
+            
+            const categories = [...new Set(acronyms.map(a => a.category))];
+            categoriesCountEl.textContent = categories.length;
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Festival Lights Show</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-bottom: 30px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .control-panel {
+            background: #111111;
+            border: 1px solid #444444;
+            border-radius: 0;
+            padding: 25px;
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #ff00cc;
+        }
+
+        .control-group {
+            margin-bottom: 25px;
+        }
+
+        .control-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .color-picker {
+            width: 100%;
+            height: 50px;
+            border: none;
+            border-radius: 0;
+            cursor: pointer;
+            background: linear-gradient(90deg, 
+                #ff0000, #ff8000, #ffff00, 
+                #80ff00, #00ff00, #00ff80, 
+                #00ffff, #0080ff, #0000ff, 
+                #8000ff, #ff00ff, #ff0080);
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .slider {
+            flex: 1;
+            height: 10px;
+            -webkit-appearance: none;
+            background: #444444;
+            border-radius: 0;
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 0;
+            background: #ff00cc;
+            cursor: pointer;
+        }
+
+        .value-display {
+            min-width: 50px;
+            text-align: center;
+            font-weight: bold;
+            color: #00ccff;
+        }
+
+        .pattern-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .pattern-btn {
+            padding: 12px;
+            border: 1px solid #444444;
+            background: #222222;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .pattern-btn:hover {
+            background: #333333;
+        }
+
+        .pattern-btn.active {
+            background: #ff00cc;
+            color: #000000;
+        }
+
+        .music-sync {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider-toggle {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #444444;
+            transition: .4s;
+            border: 1px solid #666666;
+        }
+
+        .slider-toggle:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+        }
+
+        input:checked + .slider-toggle {
+            background-color: #ff00cc;
+        }
+
+        input:checked + .slider-toggle:before {
+            transform: translateX(26px);
+        }
+
+        .visualizer {
+            background: #111111;
+            border: 1px solid #444444;
+            border-radius: 0;
+            padding: 25px;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .visualizer-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #00ccff;
+        }
+
+        .light-container {
+            width: 100%;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .light {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(20px);
+            opacity: 0.7;
+            animation: pulse 4s infinite;
+        }
+
+        .light:nth-child(1) {
+            width: 200px;
+            height: 200px;
+            background: #ff00cc;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: 0s;
+        }
+
+        .light:nth-child(2) {
+            width: 150px;
+            height: 150px;
+            background: #00ccff;
+            top: 30%;
+            left: 30%;
+            animation-delay: 1s;
+        }
+
+        .light:nth-child(3) {
+            width: 120px;
+            height: 120px;
+            background: #ffcc00;
+            top: 70%;
+            left: 70%;
+            animation-delay: 2s;
+        }
+
+        .light:nth-child(4) {
+            width: 100px;
+            height: 100px;
+            background: #00ff99;
+            top: 40%;
+            left: 70%;
+            animation-delay: 3s;
+        }
+
+        .light:nth-child(5) {
+            width: 80px;
+            height: 80px;
+            background: #ff3366;
+            top: 60%;
+            left: 30%;
+            animation-delay: 4s;
+        }
+
+        .controls-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .action-btn {
+            padding: 15px 30px;
+            border: 1px solid #444444;
+            background: #ff00cc;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: #ff33cc;
+        }
+
+        .action-btn:active {
+            transform: translateY(1px);
+        }
+
+        .action-btn#stop-btn {
+            background: #ff3333;
+        }
+
+        .action-btn#stop-btn:hover {
+            background: #ff6666;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 30px;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            animation: particle-float 15s infinite linear;
+        }
+
+        @keyframes particle-float {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            font-size: 1.1rem;
+        }
+
+        .indicator-light {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #ff3333;
+        }
+
+        .indicator-light.active {
+            background: #00ff99;
+        }
+
+        /* New additions for improved UI */
+        .palette-controls {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #444444;
+        }
+
+        .palette-swatches {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .swatch {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #666666;
+            cursor: pointer;
+        }
+
+        .preset-controls {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #444444;
+        }
+
+        .preset-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .preset-btn {
+            padding: 8px 12px;
+            background: #222222;
+            border: 1px solid #444444;
+            color: white;
+            cursor: pointer;
+        }
+
+        .preset-btn:hover {
+            background: #333333;
+        }
+
+        .tap-tempo-controls {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #444444;
+        }
+
+        .tempo-display {
+            text-align: center;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        .direction-control {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #444444;
+        }
+
+        .direction-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .direction-btn {
+            padding: 8px 15px;
+            background: #222222;
+            border: 1px solid #444444;
+            color: white;
+            cursor: pointer;
+        }
+
+        .direction-btn:hover {
+            background: #333333;
+        }
+
+        .direction-btn.active {
+            background: #ff00cc;
+        }
+
+        .transition-controls {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #444444;
+        }
+
+        .transition-mode {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .transition-btn {
+            padding: 8px 15px;
+            background: #222222;
+            border: 1px solid #444444;
+            color: white;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+
+        .transition-btn:hover {
+            background: #333333;
+        }
+
+        .transition-btn.active {
+            background: #ff00cc;
+        }
+
+        .layer-controls {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #444444;
+        }
+
+        .layer-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .layer-btn {
+            padding: 8px 15px;
+            background: #222222;
+            border: 1px solid #444444;
+            color: white;
+            cursor: pointer;
+        }
+
+        .layer-btn:hover {
+            background: #333333;
+        }
+
+        .layer-btn.active {
+            background: #ff00cc;
+        }
+
+        .pattern-dropdown {
+            margin-top: 10px;
+            width: 100%;
+            padding: 8px;
+            background: #222222;
+            border: 1px solid #444444;
+            color: white;
+        }
+
+        .pattern-dropdown option {
+            background: #111111;
+            color: white;
+        }
+
+        .pattern-dropdown:focus {
+            outline: 1px solid #ff00cc;
+        }
+
+        .pattern-dropdown option:hover {
+            background: #333333;
+        }
+
+        .reset-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #ff3333;
+            border: 1px solid #444444;
+            color: white;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .reset-btn:hover {
+            background: #ff6666;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <header>
+            <h1 id="app-title">Festival Lights Show</h1>
+            <p class="subtitle">Control the ultimate virtual light experience</p>
+        </header>
+
+        <div class="main-content">
+            <div class="control-panel">
+                <h2 class="panel-title">Light Controls</h2>
+                
+                <div class="control-group">
+                    <label class="control-label" for="color-picker">Primary Color</label>
+                    <input type="color" id="color-picker" class="color-picker" value="#ff00cc">
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Brightness</label>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="100" value="75" class="slider" id="brightness-slider">
+                        <span class="value-display" id="brightness-value">75%</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Speed</label>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="10" value="5" class="slider" id="speed-slider">
+                        <span class="value-display" id="speed-value">5</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Patterns</label>
+                    <div class="pattern-buttons">
+                        <button class="pattern-btn active" data-pattern="static">Static</button>
+                        <button class="pattern-btn" data-pattern="pulse">Pulse</button>
+                        <button class="pattern-btn" data-pattern="wave">Wave</button>
+                        <button class="pattern-btn" data-pattern="rainbow">Rainbow</button>
+                        <button class="pattern-btn" data-pattern="strobe">Strobe</button>
+                        <button class="pattern-btn" data-pattern="random">Random</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Pattern Selection</label>
+                    <select class="pattern-dropdown" id="pattern-dropdown">
+                        <option value="static">Static</option>
+                        <option value="pulse">Pulse</option>
+                        <option value="wave">Wave</option>
+                        <option value="rainbow">Rainbow</option>
+                        <option value="strobe">Strobe</option>
+                        <option value="random">Random</option>
+                        <option value="spiral">Spiral</option>
+                        <option value="bars">Bars</option>
+                        <option value="ripple">Ripple</option>
+                        <option value="grid">Grid</option>
+                        <option value="aurora">Aurora</option>
+                        <option value="confetti">Confetti</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Music Sync</label>
+                    <div class="music-sync">
+                        <span>Enable</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="music-sync-toggle">
+                            <span class="slider-toggle"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="palette-controls">
+                    <label class="control-label">Palette</label>
+                    <div class="palette-swatches" id="palette-swatches">
+                        <div class="swatch" style="background-color: #ff0000;" data-color="#ff0000"></div>
+                        <div class="swatch" style="background-color: #00ff00;" data-color="#00ff00"></div>
+                        <div class="swatch" style="background-color: #0000ff;" data-color="#0000ff"></div>
+                        <div class="swatch" style="background-color: #ffff00;" data-color="#ffff00"></div>
+                        <div class="swatch" style="background-color: #ff00ff;" data-color="#ff00ff"></div>
+                        <div class="swatch" style="background-color: #00ffff;" data-color="#00ffff"></div>
+                    </div>
+                    <input type="text" id="palette-name" placeholder="Palette name" style="margin-top: 10px; width: 100%; padding: 8px; background: #222222; border: 1px solid #444444; color: white;">
+                    <button id="save-palette-btn" class="action-btn" style="margin-top: 10px;">Save Palette</button>
+                </div>
+
+                <div class="preset-controls">
+                    <label class="control-label">Presets</label>
+                    <div class="preset-list" id="preset-list">
+                        <button class="preset-btn">Club Night</button>
+                        <button class="preset-btn">Nightlife</button>
+                        <button class="preset-btn">Party Mode</button>
+                    </div>
+                    <button id="save-preset-btn" class="action-btn" style="margin-top: 10px;">Save Current Setup</button>
+                </div>
+
+                <div class="tap-tempo-controls">
+                    <label class="control-label">Tap Tempo</label>
+                    <div class="tempo-display" id="tempo-display">BPM: 120</div>
+                    <div class="tap-buttons" style="display: flex; justify-content: center; gap: 10px; margin-top: 10px;">
+                        <button id="tap-tempo-btn" class="action-btn">Tap Tempo</button>
+                    </div>
+                </div>
+
+                <div class="direction-control">
+                    <label class="control-label">Direction</label>
+                    <div class="direction-buttons">
+                        <button class="direction-btn active" data-direction="forward">Forward</button>
+                        <button class="direction-btn" data-direction="reverse">Reverse</button>
+                    </div>
+                </div>
+
+                <div class="transition-controls">
+                    <label class="control-label">Transition Mode</label>
+                    <div class="transition-mode">
+                        <button class="transition-btn active" data-transition="fade">Fade</button>
+                        <button class="transition-btn" data-transition="snap">Snap</button>
+                    </div>
+                </div>
+
+                <div class="layer-controls">
+                    <label class="control-label">Layer Effects</label>
+                    <div class="layer-buttons">
+                        <button class="layer-btn" data-layer="base">Base</button>
+                        <button class="layer-btn" data-layer="overlay">Overlay</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Beat Sensitivity</label>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="100" value="60" class="slider" id="beat-sensitivity-slider">
+                        <span class="value-display" id="beat-sensitivity-value">60%</span>
+                    </div>
+                </div>
+
+                <div class="status-indicator">
+                    <div class="indicator-light" id="status-light"></div>
+                    <span id="status-text">System Active</span>
+                </div>
+
+                <button id="reset-btn" class="reset-btn">Reset to Defaults</button>
+            </div>
+
+            <div class="visualizer">
+                <h2 class="visualizer-title">Light Visualization</h2>
+                <div class="light-container" id="light-container">
+                    <div class="light floating"></div>
+                    <div class="light floating pulse-animation"></div>
+                    <div class="light floating"></div>
+                    <div class="light floating pulse-animation"></div>
+                    <div class="light floating"></div>
+                </div>
+                
+                <div class="controls-row">
+                    <button class="action-btn" id="start-btn">Start Show</button>
+                    <button class="action-btn" id="stop-btn">Stop Show</button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Festival Lights Show &copy; 2023 | Virtual Light Experience</p>
+        </footer>
+    </div>
+
+    <script>
+        // DOM Elements
+        const colorPicker = document.getElementById('color-picker');
+        const brightnessSlider = document.getElementById('brightness-slider');
+        const brightnessValue = document.getElementById('brightness-value');
+        const speedSlider = document.getElementById('speed-slider');
+        const speedValue = document.getElementById('speed-value');
+        const patternButtons = document.querySelectorAll('.pattern-btn');
+        const musicSyncToggle = document.getElementById('music-sync-toggle');
+        const startBtn = document.getElementById('start-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const statusLight = document.getElementById('status-light');
+        const statusText = document.getElementById('status-text');
+        const lightContainer = document.getElementById('light-container');
+        const particlesContainer = document.getElementById('particles');
+        const patternDropdown = document.getElementById('pattern-dropdown');
+        const savePaletteBtn = document.getElementById('save-palette-btn');
+        const savePresetBtn = document.getElementById('save-preset-btn');
+        const tapTempoBtn = document.getElementById('tap-tempo-btn');
+        const tempoDisplay = document.getElementById('tempo-display');
+        const directionButtons = document.querySelectorAll('.direction-btn');
+        const transitionButtons = document.querySelectorAll('.transition-btn');
+        const layerButtons = document.querySelectorAll('.layer-btn');
+        const beatSensitivitySlider = document.getElementById('beat-sensitivity-slider');
+        const beatSensitivityValue = document.getElementById('beat-sensitivity-value');
+        const resetBtn = document.getElementById('reset-btn');
+        const paletteSwatches = document.querySelectorAll('.swatch');
+        const paletteNameInput = document.getElementById('palette-name');
+        const presetList = document.getElementById('preset-list');
+
+        // State variables
+        let currentPattern = 'static';
+        let isRunning = false;
+        let animationId = null;
+        let tapTimes = [];
+        let tapInterval = 0;
+        let currentDirection = 'forward';
+        let currentTransition = 'fade';
+        let currentLayer = 'base';
+
+        // Initialize particles
+        function createParticles() {
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.animationDuration = `${10 + Math.random() * 20}s`;
+                particle.style.animationDelay = `${Math.random() * 5}s`;
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Update brightness display
+        brightnessSlider.addEventListener('input', () => {
+            brightnessValue.textContent = `${brightnessSlider.value}%`;
+        });
+
+        // Update speed display
+        speedSlider.addEventListener('input', () => {
+            speedValue.textContent = speedSlider.value;
+        });
+
+        // Update beat sensitivity display
+        beatSensitivitySlider.addEventListener('input', () => {
+            beatSensitivityValue.textContent = `${beatSensitivitySlider.value}%`;
+        });
+
+        // Pattern selection
+        patternButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                patternButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                currentPattern = button.dataset.pattern;
+                patternDropdown.value = currentPattern;
+            });
+        });
+
+        // Pattern dropdown selection
+        patternDropdown.addEventListener('change', () => {
+            currentPattern = patternDropdown.value;
+            
+            // Update active button
+            patternButtons.forEach(btn => {
+                if (btn.dataset.pattern === currentPattern) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        });
+
+        // Start show
+        startBtn.addEventListener('click', () => {
+            if (!isRunning) {
+                isRunning = true;
+                statusLight.classList.add('active');
+                statusText.textContent = 'Show Running';
+                animateLights();
+            }
+        });
+
+        // Stop show
+        stopBtn.addEventListener('click', () => {
+            if (isRunning) {
+                isRunning = false;
+                statusLight.classList.remove('active');
+                statusText.textContent = 'System Active';
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                }
+            }
+        });
+
+        // Music sync toggle
+        musicSyncToggle.addEventListener('change', () => {
+            if (musicSyncToggle.checked) {
+                statusText.textContent = 'Music Sync Active';
+            } else {
+                statusText.textContent = 'System Active';
+            }
+        });
+
+        // Tap tempo functionality
+        tapTempoBtn.addEventListener('click', () => {
+            const now = Date.now();
+            tapTimes.push(now);
+            
+            // Keep only last 5 taps
+            if (tapTimes.length > 5) {
+                tapTimes.shift();
+            }
+            
+            // Calculate BPM if we have at least 2 taps
+            if (tapTimes.length >= 2) {
+                const intervals = [];
+                for (let i = 1; i < tapTimes.length; i++) {
+                    intervals.push(tapTimes[i] - tapTimes[i-1]);
+                }
+                
+                const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+                tapInterval = avgInterval;
+                const bpm = Math.round(60000 / avgInterval);
+                tempoDisplay.textContent = `BPM: ${bpm}`;
+            }
+        });
+
+        // Direction control
+        directionButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                directionButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                currentDirection = button.dataset.direction;
+            });
+        });
+
+        // Transition mode control
+        transitionButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                transitionButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                currentTransition = button.dataset.transition;
+            });
+        });
+
+        // Layer control
+        layerButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                layerButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                currentLayer = button.dataset.layer;
+            });
+        });
+
+        // Save palette functionality
+        savePaletteBtn.addEventListener('click', () => {
+            const paletteName = paletteNameInput.value.trim();
+            if (paletteName) {
+                alert(`Palette "${paletteName}" saved successfully!`);
+                paletteNameInput.value = '';
+            }
+        });
+
+        // Save preset functionality
+        savePresetBtn.addEventListener('click', () => {
+            alert('Current setup saved as preset!');
+        });
+
+        // Reset to defaults
+        resetBtn.addEventListener('click', () => {
+            if (confirm('Reset all settings to defaults?')) {
+                // Reset color picker
+                colorPicker.value = '#ff00cc';
+                
+                // Reset brightness
+                brightnessSlider.value = 75;
+                brightnessValue.textContent = '75%';
+                
+                // Reset speed
+                speedSlider.value = 5;
+                speedValue.textContent = '5';
+                
+                // Reset pattern to static
+                patternButtons.forEach(btn => btn.classList.remove('active'));
+                document.querySelector('[data-pattern="static"]').classList.add('active');
+                currentPattern = 'static';
+                patternDropdown.value = 'static';
+                
+                // Reset music sync
+                musicSyncToggle.checked = false;
+                statusText.textContent = 'System Active';
+                
+                // Reset direction
+                directionButtons.forEach(btn => btn.classList.remove('active'));
+                document.querySelector('[data-direction="forward"]').classList.add('active');
+                currentDirection = 'forward';
+                
+                // Reset transition mode
+                transitionButtons.forEach(btn => btn.classList.remove('active'));
+                document.querySelector('[data-transition="fade"]').classList.add('active');
+                currentTransition = 'fade';
+                
+                // Reset layer
+                layerButtons.forEach(btn => btn.classList.remove('active'));
+                document.querySelector('[data-layer="base"]').classList.add('active');
+                currentLayer = 'base';
+                
+                // Reset beat sensitivity
+                beatSensitivitySlider.value = 60;
+                beatSensitivityValue.textContent = '60%';
+                
+                // Reset status light
+                statusLight.classList.remove('active');
+                
+                // Reset tap tempo
+                tapTimes = [];
+                tempoDisplay.textContent = 'BPM: 120';
+                
+                alert('All settings reset to defaults.');
+            }
+        });
+
+        // Palette swatch selection
+        paletteSwatches.forEach(swatch => {
+            swatch.addEventListener('click', () => {
+                const color = swatch.dataset.color;
+                colorPicker.value = color;
+            });
+        });
+
+        // Animation functions
+        function animateLights() {
+            if (!isRunning) return;
+
+            const lights = document.querySelectorAll('.light');
+            const color = colorPicker.value;
+            const brightness = brightnessSlider.value / 100;
+            const speed = speedSlider.value;
+
+            // Apply color and brightness to lights
+            lights.forEach((light, index) => {
+                // Set base color
+                light.style.backgroundColor = color;
+                
+                // Adjust brightness
+                const rgb = hexToRgb(color);
+                const adjustedR = Math.min(255, rgb.r * brightness);
+                const adjustedG = Math.min(255, rgb.g * brightness);
+                const adjustedB = Math.min(255, rgb.b * brightness);
+                light.style.backgroundColor = `rgb(${adjustedR}, ${adjustedG}, ${adjustedB})`;
+
+                // Apply pattern effects
+                switch(currentPattern) {
+                    case 'pulse':
+                        light.style.animation = `pulse ${10/speed}s infinite`;
+                        break;
+                    case 'wave':
+                        light.style.animation = `float ${15/speed}s infinite`;
+                        break;
+                    case 'rainbow':
+                        light.style.background = `linear-gradient(${index * 60}deg, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080)`;
+                        break;
+                    case 'strobe':
+                        light.style.opacity = Math.random() > 0.5 ? '0.3' : '0.9';
+                        break;
+                    case 'random':
+                        light.style.transform = `translate(${Math.sin(Date.now()/1000 + index) * 50}px, ${Math.cos(Date.now()/1000 + index) * 50}px)`;
+                        break;
+                    case 'spiral':
+                        light.style.borderRadius = '50%';
+                        light.style.width = '100px';
+                        light.style.height = '100px';
+                        light.style.animation = `spin ${10/speed}s infinite linear`;
+                        break;
+                    case 'bars':
+                        light.style.width = '150px';
+                        light.style.height = '30px';
+                        light.style.borderRadius = '0';
+                        light.style.animation = `pulse ${10/speed}s infinite`;
+                        break;
+                    case 'ripple':
+                        light.style.borderRadius = '50%';
+                        light.style.width = '100px';
+                        light.style.height = '100px';
+                        light.style.animation = `ripple ${10/speed}s infinite`;
+                        break;
+                    case 'grid':
+                        light.style.width = '50px';
+                        light.style.height = '50px';
+                        light.style.borderRadius = '0';
+                        light.style.animation = `pulse ${10/speed}s infinite`;
+                        break;
+                    case 'aurora':
+                        light.style.background = 'linear-gradient(45deg, #ff00cc, #00ccff)';
+                        light.style.animation = `float ${15/speed}s infinite`;
+                        break;
+                    case 'confetti':
+                        light.style.width = '10px';
+                        light.style.height = '10px';
+                        light.style.borderRadius = '0';
+                        light.style.animation = `float ${15/speed}s infinite`;
+                        break;
+                    default: // static
+                        light.style.animation = 'none';
+                }
+            });
+
+            animationId = requestAnimationFrame(animateLights);
+        }
+
+        // Helper function to convert hex to RGB
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : {r: 0, g: 0, b: 0};
+        }
+
+        // Initialize
+        createParticles();
+
+        // Set initial state
+        statusLight.classList.add('active');
+        statusText.textContent = 'System Ready';
+
+        // Add CSS for new animations
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = `
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            
+            @keyframes ripple {
+                0% { transform: scale(1); opacity: 0.7; }
+                50% { transform: scale(1.5); opacity: 0.3; }
+                100% { transform: scale(1); opacity: 0.7; }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+    </script>
+</body>
+</html>

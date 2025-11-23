@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8" />
+  <title>Product Press Release — NovaBand</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Product Press Release for NovaBand — a next‑gen smart band with 10-day battery, health sensors, and LTE." />
+  <style>
+    /* Base Reset and Variables */
+    :root{
+      --bg: #0b0d12;
+      --panel: rgba(255,255,255,0.06);
+      --panel-strong: rgba(255,255,255,0.1);
+      --text: #e8ebf1;
+      --muted: #a6afc3;
+      --accent: #5b7cff; /* dynamic per color selection */
+      --accent-contrast: #0a0e20;
+      --success: #1dd1a1;
+      --warn: #ffd166;
+      --danger: #ff6b6b;
+      --shadow: 0 10px 30px rgba(0,0,0,0.25);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --radius-lg: 24px;
+      --maxw: 1200px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:
+        radial-gradient(1200px 600px at 80% -10%, rgba(91,124,255,0.18), transparent 60%),
+        radial-gradient(600px 600px at -10% 10%, rgba(255,99,132,0.15), transparent 60%),
+        var(--bg);
+      color:var(--text);
+      font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      color-scheme: dark;
+      scroll-behavior:smooth;
+    }
+    a{color:var(--text); text-decoration:none}
+    .container{max-width: var(--maxw); margin-inline:auto; padding: 0 24px}
+    header{position:sticky; top:0; z-index: 30; backdrop-filter: blur(10px); background: linear-gradient(to bottom, rgba(11,13,18,0.8), transparent)}
+    .nav{
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 18px 0;
+    }
+    .brand{
+      display:flex; gap:12px; align-items:center; font-weight:700; letter-spacing:.2px
+    }
+    .brand-dot{width:12px; height:12px; border-radius:50%; background: var(--accent); box-shadow: 0 0 0 6px color-mix(in oklab, var(--accent) 20%, transparent)}
+    .nav a{opacity:.9}
+    .nav .links{display:flex; gap:18px}
+    .cta-small{
+      padding:10px 14px; background: var(--panel); border-radius: 10px; border:1px solid var(--panel-strong)
+    }
+    .cta-small:hover{background: color-mix(in oklab, var(--panel) 90%, var(--accent) 10%); border-color: color-mix(in oklab, var(--panel-strong) 80%, var(--accent) 20%)}
+    /* Hero */
+    .hero{display:grid; grid-template-columns: 1.1fr 0.9fr; align-items:center; gap:40px; padding: 30px 0 40px; min-height: 78vh}
+    .eyebrow{display:inline-flex; align-items:center; gap:8px; font-size: 13px; color:var(--muted); background: var(--panel); border:1px solid var(--panel-strong); padding:6px 10px; border-radius: 99px}
+    .eyebrow b{color:var(--text)}
+    h1{font-size: clamp(36px, 4.6vw, 64px); line-height:1.08; margin: 14px 0}
+    .sub{color: var(--muted); font-size: clamp(16px, 1.8vw, 18px); max-width: 60ch}
+    .hero-ctas{display:flex; gap:12px; margin-top:20px}
+    .btn{
+      --bgc: var(--accent); --txt: black; --ring: color-mix(in oklab, var(--accent) 30%, transparent);
+      display:inline-flex; align-items:center; justify-content:center; gap:10px;
+      padding: 14px 20px; border-radius: 14px; border: 0; cursor:pointer;
+      background: linear-gradient(180deg, color-mix(in oklab, var(--bgc) 96%, #fff 4%), var(--bgc));
+      color: var(--accent-contrast);
+      box-shadow: 0 10px 20px var(--ring), inset 0 1px 0 rgba(255,255,255,0.3);
+      font-weight: 700; letter-spacing: .2px;
+    }
+    .btn.secondary{
+      --bgc: #1b2030; color: var(--text);
+      background: var(--panel);
+      border: 1px solid var(--panel-strong);
+      box-shadow: none
+    }
+    .btn:active{transform: translateY(1px)}
+    .hero-art{
+      position:relative; width:100%; height:min(68vh, 560px);
+      display:grid; place-items:center;
+    }
+    .art-card{
+      position:absolute; inset:0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+      border:1px solid var(--panel-strong);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+    }
+    .product-3d{
+      width: 86%; max-width: 520px;
+      transition: transform 0.8s cubic-bezier(.2,.6,0,1);
+      transform-style: preserve-3d;
+    }
+    .rotating .product-3d{animation: spin 12s linear infinite}
+    @keyframes spin { from{ transform: rotateY(0);} to{ transform: rotateY(360deg);} }
+    .art-controls{position:absolute; right:16px; bottom:16px; display:flex; gap:10px}
+    .chip{
+      background: var(--panel); border:1px solid var(--panel-strong); color:var(--text);
+      padding:8px 12px; border-radius: 999px; font-size: 13px; display:inline-flex; align-items:center; gap:8px; cursor:pointer;
+    }
+    .chip input{accent-color: var(--accent)}
+    .chip .dot{width:10px; height:10px; border-radius:50%; background: var(--accent)}
+    /* Specs */
+    section{padding: 26px 0}
+    .section-title{font-size: 28px; margin: 4px 0 18px}
+    .specs-grid{
+      display:grid; gap:16px;
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+      border:1px solid var(--panel-strong);
+      border-radius: var(--radius);
+      padding:18px; display:flex; gap:14px; align-items:flex-start;
+    }
+    .icon{
+      width:38px; height:38px; border-radius:10px;
+      display:grid; place-items:center;
+      background: color-mix(in oklab, var(--accent) 16%, transparent);
+      border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
+      color: var(--text);
+      flex: none;
+    }
+    .card h3{margin: 4px 0 6px; font-size: 18px}
+    .muted{color: var(--muted)}
+    .divider{height:1px; background: var(--panel-strong); margin: 18px 0}
+    /* Config + Preorder */
+    .preorder{
+      display:grid; grid-template-columns: 1.2fr 0.8fr; gap: 26px; align-items:start;
+    }
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+      border:1px solid var(--panel-strong);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+    .option-row{display:flex; flex-wrap: wrap; gap:10px; margin-top:8px}
+    .swatch{width:34px; height:34px; border-radius:50%; border:2px solid transparent; outline:1px solid var(--panel-strong); cursor:pointer; position:relative}
+    .swatch[data-selected="true"]{border-color:#fff}
+    .swatch input{position:absolute; inset:0; opacity:0; cursor:pointer}
+    .sizes,.connectivity{display:flex; gap:10px}
+    .radio-btn input{display:none}
+    .radio-btn{
+      border-radius: 12px; border:1px solid var(--panel-strong); background: var(--panel);
+      padding: 10px 12px; cursor:pointer; user-select:none
+    }
+    .radio-btn[data-selected="true"]{outline:2px solid var(--accent); border-color: color-mix(in oklab, var(--accent) 60%, var(--panel-strong))}
+    .qty{
+      display:flex; align-items:center; gap:10px; margin-top:10px
+    }
+    .stepper{
+      display:flex; align-items:center; border-radius:12px; overflow:hidden; border:1px solid var(--panel-strong)
+    }
+    .stepper button{
+      width:38px; height:38px; background: var(--panel); color:var(--text); border:0; cursor:pointer
+    }
+    .stepper input{
+      width:64px; height:38px; background: #101420; color: var(--text);
+      text-align:center; border:0; border-inline:1px solid var(--panel-strong); font-size:16px
+    }
+    .price{
+      display:grid; grid-template-columns: 1fr auto; gap: 8px; align-items:center; margin-top: 6px
+    }
+    .price .line{display:flex; justify-content:space-between; gap:8px; color:var(--muted); font-size:14px}
+    .price-strong{font-size: 24px; font-weight: 800}
+    .ship{font-size: 14px; color: var(--muted)}
+    .ship strong{color: var(--text)}
+    .form-grid{display:grid; gap:10px; grid-template-columns: repeat(2, 1fr)}
+    .form-grid .full{grid-column: 1/-1}
+    label{font-size:14px; color: var(--muted)}
+    input[type="text"], input[type="email"], select{
+      width:100%; background:#101420; color: var(--text); border:1px solid var(--panel-strong);
+      border-radius: 12px; padding: 12px 12px; margin-top:6px; outline: none
+    }
+    input:focus, select:focus{border-color: color-mix(in oklab, var(--accent) 50%, var(--panel-strong)); box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 20%, transparent)}
+    .terms{display:flex; gap:10px; align-items:flex-start; font-size:14px; color:var(--muted)}
+    .banner{
+      background: linear-gradient(90deg, color-mix(in oklab, var(--accent) 50%, transparent), transparent);
+      border:1px dashed color-mix(in oklab, var(--accent) 50%, var(--panel-strong));
+      padding:10px 12px; border-radius:12px; color:#dfe7ff; font-size:14px; display:flex; gap:10px; align-items:flex-start
+    }
+    .notice{color: var(--warn)}
+    /* Modal */
+    .modal-backdrop{position:fixed; inset:0; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); display:none; align-items:center; justify-content:center; z-index: 40}
+    .modal{background: #0e111a; border:1px solid var(--panel-strong); border-radius: 18px; max-width: 520px; width: calc(100% - 28px); padding: 18px; box-shadow: var(--shadow)}
+    .modal h3{margin: 0 0 10px}
+    .modal .actions{display:flex; gap:10px; justify-content:flex-end; margin-top: 14px}
+    .modal .summary{font-size:14px; color:var(--muted)}
+    .toast{
+      position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: #0e111a;
+      border:1px solid var(--panel-strong); color: var(--text); border-radius: 999px; padding: 10px 16px; display:none; z-index:50
+    }
+    footer{padding: 24px 0 40px; color: var(--muted); font-size: 14px}
+    footer a{color: var(--text); text-decoration: underline; text-decoration-color: color-mix(in oklab, var(--accent) 40%, transparent)}
+    /* Responsive */
+    @media (max-width: 980px){
+      .hero{grid-template-columns: 1fr; gap: 20px; min-height:auto}
+      .hero-art{order:-1; height: 420px}
+      .preorder{grid-template-columns: 1fr}
+      .specs-grid{grid-template-columns: 1fr 1fr}
+    }
+    @media (max-width: 600px){
+      .form-grid{grid-template-columns: 1fr}
+      .specs-grid{grid-template-columns: 1fr}
+      .hero-ctas{flex-direction: column; align-items: stretch}
+    }
+    /* Utility focus-visible */
+    :focus-visible{outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <div class="brand" aria-label="Product Press Release">
+        <span class="brand-dot" aria-hidden="true"></span>
+        <span>NovaBand</span>
+      </div>
+      <nav class="links" aria-label="Primary">
+        <a href="#specs" class="cta-small">Specs</a>
+        <a href="#preorder" class="cta-small">Pre-order</a>
+        <a href="#contact" class="cta-small">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="container hero" aria-labelledby="hero-title">
+      <div>
+        <span class="eyebrow"><b>New</b> • Product Press Release</span>
+        <h1 id="hero-title">Meet NovaBand — power at your pulse</h1>
+        <p class="sub">A featherweight smart band with 10-day battery, precision health sensors, and LTE freedom. Designed to disappear. Built to perform.</p>
+        <div class="hero-ctas">
+          <a href="#preorder" class="btn" id="cta-preorder" aria-label="Jump to pre-order form">Pre-order now</a>
+          <button class="btn secondary" id="toggle-rotate" aria-pressed="false">View 360</button>
+        </div>
+        <div class="divider" aria-hidden="true"></div>
+        <div class="ship">
+          Launch window: <strong>October 2025</strong> • Pre-order discount automatically applied at checkout.
+        </div>
+      </div>
+      <div class="hero-art" id="hero-art">
+        <div class="art-card" aria-hidden="true"></div>
+        <!-- Inline SVG smartwatch visual -->
+        <svg class="product-3d" id="product-visual" viewBox="0 0 400 520" role="img" aria-label="NovaBand product rendering">
+          <defs>
+            <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000" flood-opacity=".4"/>
+            </filter>
+            <linearGradient id="screenGrad" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="#121826"/>
+              <stop offset="100%" stop-color="#0a0e18"/>
+            </linearGradient>
+            <linearGradient id="gloss" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.18)"/>
+              <stop offset="40%" stop-color="rgba(255,255,255,0.05)"/>
+              <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+            </linearGradient>
+          </defs>
+          <!-- Band -->
+          <g filter="url(#shadow)">
+            <rect x="150" y="30" width="100" height="460" rx="40" fill="var(--accent)" opacity="0.75"/>
+            <rect x="150" y="30" width="100" height="180" rx="40" fill="var(--accent)" />
+            <rect x="150" y="310" width="100" height="180" rx="40" fill="var(--accent)" />
+          </g>
+          <!-- Case -->
+          <g filter="url(#shadow)">
+            <rect x="80" y="120" width="240" height="280" rx="52" fill="#121826" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
+            <rect x="90" y="130" width="220" height="260" rx="44" fill="url(#screenGrad)" />
+            <!-- Screen content -->
+            <g transform="translate(120,160)">
+              <circle cx="80" cy="80" r="74" fill="#0c111b"/>
+              <circle cx="80" cy="80" r="70" fill="none" stroke="var(--accent)" stroke-width="8" stroke-dasharray="18 14" opacity=".9"/>
+              <text x="80" y="88" text-anchor="middle" fill="#e8ebf1" font-size="28" font-weight="700" font-family="system-ui">72</text>
+              <text x="80" y="112" text-anchor="middle" fill="#a6afc3" font-size="12" font-family="system-ui">BPM</text>
+            </g>
+            <!-- Gloss -->
+            <path d="M110,140 C210,110 260,110 300,155 L300,170 C250,130 200,140 110,170 Z" fill="url(#gloss)"/>
+            <!-- Button -->
+            <rect x="318" y="210" width="12" height="100" rx="6" fill="var(--accent)"/>
+          </g>
+          <!-- Bottom shadow ellipse -->
+          <ellipse cx="200" cy="500" rx="120" ry="14" fill="#000" opacity=".25"/>
+        </svg>
+        <div class="art-controls">
+          <label class="chip" title="Current color">
+            <span class="dot" aria-hidden="true"></span> Accent
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="container" id="specs" aria-labelledby="specs-title">
+      <h2 class="section-title" id="specs-title">Specs that matter</h2>
+      <div class="specs-grid">
+        <article class="card">
+          <div class="icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M12 8v5l4 2" /></svg>
+          </div>
+          <div>
+            <h3>10-day Battery</h3>
+            <p class="muted">Efficient chipset and adaptive refresh for power that lasts. 60-minute fast charge to 80%.</p>
+          </div>
+        </article>
+        <article class="card">
+          <div class="icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3a9 9 0 1 0 0 18a9 9 0 0 0 0-18m0 2a7 7 0 1 1 0 14a7 7 0 0 1 0-14m0 3a4 4 0 0 0-4 4h2a2 2 0 1 1 2 2v3h2v-3a4 4 0 0 0-2-7" /></svg>
+          </div>
+          <div>
+            <h3>Health Suite</h3>
+            <p class="muted">Heart rate, SpO₂, skin temp, and sleep stages with on-device insights.</p>
+          </div>
+        </article>
+        <article class="card">
+          <div class="icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2L3 6v6c0 5 3.8 9.7 9 10c5.2-.3 9-5 9-10V6z"/></svg>
+          </div>
+          <div>
+            <h3>50m Water Resistant</h3>
+            <p class="muted">Swim-proof with auto workout detection and lap tracking.</p>
+          </div>
+        </article>
+        <article class="card">
+          <div class="icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M3 5h18v14H3zM5 7v10h14V7z"/></svg>
+          </div>
+          <div>
+            <h3>Always-On Display</h3>
+            <p class="muted">1.9" AMOLED, sapphire glass, 2000 nits peak brightness.</p>
+          </div>
+        </article>
+        <article class="card">
+          <div class="icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M12 20a8 8 0 1 1 8-8a8 8 0 0 1-8 8m1-13v5l4 2"/></svg>
+          </div>
+          <div>
+            <h3>Multi‑band GPS</h3>
+            <p class="muted">Dual-frequency GNSS for accurate routes under dense canopies.</p>
+          </div>
+        </article>
+        <article class="card">
+          <div class="icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M4 6h16v12H4zM8 18v2h8v-2"/></svg>
+          </div>
+          <div>
+            <h3>NFC Pay</h3>
+            <p class="muted">Leave the wallet. Tap to pay with secure on‑device tokenization.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="container" id="preorder" aria-labelledby="pre-title">
+      <h2 class="section-title" id="pre-title">Pre-order NovaBand</h2>
+      <div class="preorder">
+        <!-- Configuration Panel -->
+        <aside class="panel" aria-label="Configure your NovaBand">
+          <div class="banner" role="note">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M13 13h-2V7h2m0 10h-2v-2h2M1 21h22L12 2"/></svg>
+            Pre-order saves 10% off MSRP. Limited quantities for select colors.
+          </div>
+
+          <div class="divider"></div>
+
+          <div>
+            <h3>Choose color</h3>
+            <div class="option-row" role="radiogroup" aria-label="Band color">
+              <label class="swatch" style="background:#0f1324" title="Midnight" data-color="#5b7cff" id="color-midnight" data-selected="true">
+                <input type="radio" name="color" value="midnight" checked aria-labelledby="color-midnight-label">
+              </label>
+              <span id="color-midnight-label" class="visually-hidden" style="position:absolute;left:-9999px">Midnight</span>
+
+              <label class="swatch" style="background:#e7e7e7" title="Stone" data-color="#a0aec0" id="color-stone">
+                <input type="radio" name="color" value="stone" aria-labelledby="color-stone-label">
+              </label>
+              <span id="color-stone-label" class="visually-hidden" style="position:absolute;left:-9999px">Stone</span>
+
+              <label class="swatch" style="background:#ff7a59" title="Sunset" data-color="#ff7a59" id="color-sunset">
+                <input type="radio" name="color" value="sunset" aria-labelledby="color-sunset-label">
+              </label>
+              <span id="color-sunset-label" class="visually-hidden" style="position:absolute;left:-9999px">Sunset</span>
+
+              <label class="swatch" style="background:#00c2a8" title="Lagoon" data-color="#00c2a8" id="color-lagoon">
+                <input type="radio" name="color" value="lagoon" aria-labelledby="color-lagoon-label">
+              </label>
+              <span id="color-lagoon-label" class="visually-hidden" style="position:absolute;left:-9999px">Lagoon</span>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div>
+            <h3>Case size</h3>
+            <div class="sizes" role="radiogroup" aria-label="Case size">
+              <label class="radio-btn" id="size-40" data-selected="true">
+                <input type="radio" name="size" value="40" checked> 40 mm
+              </label>
+              <label class="radio-btn" id="size-44">
+                <input type="radio" name="size" value="44"> 44 mm (+$30)
+              </label>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div>
+            <h3>Connectivity</h3>
+            <div class="connectivity" role="radiogroup" aria-label="Connectivity">
+              <label class="radio-btn" id="conn-gps" data-selected="true">
+                <input type="radio" name="conn" value="gps" checked> GPS
+              </label>
+              <label class="radio-btn" id="conn-lte">
+                <input type="radio" name="conn" value="lte"> GPS + LTE (+$80)
+              </label>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="qty">
+            <div>
+              <h3>Quantity</h3>
+              <p class="muted" id="qty-announce" aria-live="polite"></p>
+            </div>
+            <div class="stepper" role="group" aria-label="Quantity stepper">
+              <button id="qty-minus" aria-label="Decrease quantity">−</button>
+              <input id="qty" type="number" min="1" max="10" value="1" aria-label="Quantity">
+              <button id="qty-plus" aria-label="Increase quantity">+</button>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="price" aria-live="polite">
+            <div class="line"><span>Base</span><span id="price-base">$299</span></div>
+            <div class="line"><span>Options</span><span id="price-options">$0</span></div>
+            <div class="line"><span>Pre-order discount</span><span id="price-discount" class="notice">−$0</span></div>
+            <div class="line"><span>Qty</span><span id="price-qty">×1</span></div>
+            <div class="line"><span>Subtotal</span><span id="price-sub">$299</span></div>
+            <div class="divider"></div>
+            <strong>Total</strong>
+            <div class="price-strong" id="price-total">$299</div>
+          </div>
+
+          <div class="divider"></div>
+
+          <p class="ship">Estimated ship: <strong id="ship-estimate">2–3 weeks</strong> • <span id="stock-note">In stock</span></p>
+        </aside>
+
+        <!-- Pre-order Form -->
+        <form class="panel" id="preorder-form" aria-label="Pre-order form" novalidate>
+          <h3>Secure your NovaBand</h3>
+          <div class="form-grid">
+            <div>
+              <label for="fname">First name</label>
+              <input id="fname" type="text" placeholder="Ada" required>
+            </div>
+            <div>
+              <label for="lname">Last name</label>
+              <input id="lname" type="text" placeholder="Lovelace" required>
+            </div>
+            <div class="full">
+              <label for="email">Email</label>
+              <input id="email" type="email" placeholder="you@example.com" required>
+            </div>
+            <div>
+              <label for="country">Country/Region</label>
+              <select id="country" required>
+                <option value="">Select…</option>
+                <option>United States</option>
+                <option>Canada</option>
+                <option>United Kingdom</option>
+                <option>Germany</option>
+                <option>Australia</option>
+                <option>Japan</option>
+              </select>
+            </div>
+            <div>
+              <label for="postal">Postal code</label>
+              <input id="postal" type="text" placeholder="10001" required>
+            </div>
+            <div class="full terms">
+              <input id="agree" type="checkbox" aria-describedby="agree-help">
+              <label for="agree">I agree to the pre-order terms and acknowledge that estimated ship dates may change.</label>
+            </div>
+            <div class="full muted" id="agree-help">We’ll send a confirmation to your email. You can cancel anytime before shipment.</div>
+          </div>
+          <div class="divider"></div>
+          <button type="submit" class="btn" id="preorder-btn">Review and place order</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="modal-backdrop" aria-hidden="true" aria-labelledby="modal-title" role="dialog">
+    <div class="modal" role="document">
+      <h3 id="modal-title">Review your order</h3>
+      <div class="summary" id="order-summary"></div>
+      <div class="actions">
+        <button class="btn secondary" id="modal-cancel">Cancel</button>
+        <button class="btn" id="modal-confirm">Place order</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">Order placed. Check your email for confirmation.</div>
+
+  <footer class="container" id="contact">
+    <div class="divider" aria-hidden="true"></div>
+    <p>Press contact: press@novaband.example • Product images and media kit available on request.</p>
+    <p>© 2025 NovaBand. All rights reserved. <a href="#">Privacy</a> • <a href="#">Terms</a></p>
+  </footer>
+
+  <script>
+    // State and Config
+    const state = {
+      color: 'midnight',
+      colorMap: {
+        midnight: {accent:'#5b7cff', ship:'2–3 weeks', stock:'In stock'},
+        stone: {accent:'#a0aec0', ship:'3–4 weeks', stock:'Limited'},
+        sunset: {accent:'#ff7a59', ship:'4–5 weeks', stock:'Backorder'},
+        lagoon: {accent:'#00c2a8', ship:'2 weeks', stock:'In stock'}
+      },
+      size: 40,
+      conn: 'gps',
+      qty: 1,
+      pricing: {
+        base: 299,
+        size44: 30,
+        lte: 80,
+        preorderDiscount: 0.10
+      }
+    };
+
+    // Utilities
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+    function formatUSD(n){ return '$' + n.toFixed(2).replace(/\.00$/,''); }
+    function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+    function persist(){
+      localStorage.setItem('novaband-config', JSON.stringify({
+        color: state.color, size: state.size, conn: state.conn, qty: state.qty
+      }));
+    }
+    function restore(){
+      try{
+        const saved = JSON.parse(localStorage.getItem('novaband-config') || '{}');
+        if(saved.color && state.colorMap[saved.color]) state.color = saved.color;
+        if(saved.size) state.size = Number(saved.size);
+        if(saved.conn) state.conn = saved.conn;
+        if(saved.qty) state.qty = clamp(Number(saved.qty), 1, 10);
+      }catch(e){}
+    }
+
+    // Initialization
+    document.addEventListener('DOMContentLoaded', () => {
+      restore();
+      bindColorControls();
+      bindSizeConnectivity();
+      bindQty();
+      bindRotateToggle();
+      bindForm();
+      applyStateToUI();
+      announceQty();
+    });
+
+    // Color selection
+    function bindColorControls(){
+      const swatches = $$('.swatch');
+      swatches.forEach(s => {
+        const input = s.querySelector('input');
+        if(input){
+          input.addEventListener('change', () => {
+            swatches.forEach(x => x.dataset.selected='false');
+            s.dataset.selected = 'true';
+            // Map value to accent color
+            const value = input.value;
+            state.color = value;
+            updateAccent(state.colorMap[value].accent);
+            updateShipping();
+            persist();
+          });
+        }
+        // Allow click anywhere on swatch
+        s.addEventListener('click', () => { s.querySelector('input').checked = true; s.querySelector('input').dispatchEvent(new Event('change')); });
+      });
+      // Restore selection
+      const sel = $('#color-' + state.color);
+      if(sel){ sel.dataset.selected = 'true'; sel.querySelector('input').checked = true; }
+      updateAccent(state.colorMap[state.color].accent);
+      updateShipping();
+    }
+
+    function updateAccent(color){
+      document.documentElement.style.setProperty('--accent', color);
+      // Update art control dot
+      const dot = document.querySelector('.art-controls .dot');
+      if(dot) dot.style.backgroundColor = color;
+    }
+
+    // Size & connectivity
+    function bindSizeConnectivity(){
+      // Size
+      const sizeLabels = [$('#size-40'), $('#size-44')];
+      sizeLabels.forEach(lbl => {
+        lbl.addEventListener('click', () => {
+          sizeLabels.forEach(x => x.dataset.selected='false');
+          lbl.dataset.selected = 'true';
+          const val = Number(lbl.querySelector('input').value);
+          state.size = val;
+          updatePrice();
+          persist();
+        });
+      });
+      // Connectivity
+      const connLabels = [$('#conn-gps'), $('#conn-lte')];
+      connLabels.forEach(lbl => {
+        lbl.addEventListener('click', () => {
+          connLabels.forEach(x => x.dataset.selected='false');
+          lbl.dataset.selected = 'true';
+          const val = lbl.querySelector('input').value;
+          state.conn = val;
+          updatePrice();
+          persist();
+        });
+      });
+      // Restore selected states
+      $('#size-40').dataset.selected = String(state.size === 40);
+      $('#size-44').dataset.selected = String(state.size === 44);
+      $('#size-' + state.size + ' input').checked = true;
+      $('#conn-gps').dataset.selected = String(state.conn === 'gps');
+      $('#conn-lte').dataset.selected = String(state.conn === 'lte');
+      $('#conn-' + state.conn + ' input').checked = true;
+      updatePrice();
+    }
+
+    // Quantity
+    function bindQty(){
+      const input = $('#qty');
+      const minus = $('#qty-minus');
+      const plus = $('#qty-plus');
+      input.value = state.qty;
+      input.addEventListener('input', () => {
+        const v = clamp(Number(input.value || 1), 1, 10);
+        input.value = v;
+        state.qty = v;
+        announceQty();
+        updatePrice();
+        persist();
+      });
+      minus.addEventListener('click', () => {
+        state.qty = clamp(state.qty - 1, 1, 10);
+        input.value = state.qty;
+        announceQty();
+        updatePrice();
+        persist();
+      });
+      plus.addEventListener('click', () => {
+        state.qty = clamp(state.qty + 1, 1, 10);
+        input.value = state.qty;
+        announceQty();
+        updatePrice();
+        persist();
+      });
+    }
+    function announceQty(){
+      $('#qty-announce').textContent = 'Quantity: ' + state.qty;
+      $('#price-qty').textContent = '×' + state.qty;
+    }
+
+    // Price calculation
+    function calcPrice(){
+      const {base, size44, lte, preorderDiscount} = state.pricing;
+      let options = 0;
+      if(state.size === 44) options += size44;
+      if(state.conn === 'lte') options += lte;
+      const unit = base + options;
+      const discount = unit * preorderDiscount;
+      const unitAfter = unit - discount;
+      const subtotal = unitAfter * state.qty;
+      return { base, options, discount, unit, unitAfter, subtotal };
+    }
+
+    function updatePrice(){
+      const p = calcPrice();
+      $('#price-base').textContent = formatUSD(state.pricing.base);
+      $('#price-options').textContent = formatUSD(p.options);
+      $('#price-discount').textContent = '−' + formatUSD(p.discount);
+      $('#price-sub').textContent = formatUSD(p.unitAfter);
+      $('#price-total').textContent = formatUSD(p.subtotal);
+    }
+
+    // Shipping estimate
+    function updateShipping(){
+      const info = state.colorMap[state.color];
+      $('#ship-estimate').textContent = info.ship;
+      const note = $('#stock-note');
+      note.textContent = info.stock;
+      note.style.color = info.stock === 'Backorder' ? 'var(--danger)' : (info.stock === 'Limited' ? 'var(--warn)' : 'var(--success)');
+    }
+
+    // Apply restored state to UI
+    function applyStateToUI(){
+      // Already handled for color, size, conn, qty
+      updatePrice();
+      updateShipping();
+    }
+
+    // Rotate toggle
+    function bindRotateToggle(){
+      const btn = $('#toggle-rotate');
+      const art = $('#hero-art');
+      btn.addEventListener('click', () => {
+        const active = art.classList.toggle('rotating');
+        btn.setAttribute('aria-pressed', String(active));
+        btn.textContent = active ? 'Pause 360' : 'View 360';
+      });
+    }
+
+    // Form handling
+    function bindForm(){
+      const form = $('#preorder-form');
+      const modal = $('#modal-backdrop');
+      const summary = $('#order-summary');
+      const cancel = $('#modal-cancel');
+      const confirm = $('#modal-confirm');
+
+      function openModal(){
+        // Build summary
+        const p = calcPrice();
+        summary.innerHTML = `
+          <div style="display:grid; gap:8px">
+            <div><strong>Configuration</strong></div>
+            <div>Color: <b>${capitalize(state.color)}</b></div>
+            <div>Size: <b>${state.size} mm</b></div>
+            <div>Connectivity: <b>${state.conn.toUpperCase()}</b></div>
+            <div>Quantity: <b>${state.qty}</b></div>
+            <div>Estimated ship: <b>${$('#ship-estimate').textContent}</b></div>
+            <div class="divider"></div>
+            <div>Unit price after discount: <b>${formatUSD(p.unitAfter)}</b></div>
+            <div>Total: <b>${formatUSD(p.subtotal)}</b></div>
+          </div>
+        `;
+        modal.style.display = 'flex';
+        modal.removeAttribute('aria-hidden');
+        trapFocus(modal);
+        confirm.focus();
+      }
+
+      function closeModal(){
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+        releaseFocusTrap();
+        $('#preorder-btn').focus();
+      }
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const valid = validateForm();
+        if(!valid) return;
+        openModal();
+      });
+
+      cancel.addEventListener('click', closeModal);
+      modal.addEventListener('click', (e) => {
+        if(e.target === modal) closeModal();
+      });
+      document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape' && modal.style.display === 'flex') closeModal();
+      });
+
+      confirm.addEventListener('click', () => {
+        closeModal();
+        showToast('Order placed. Check your email for confirmation.');
+        // Simulate submission and reset minimal fields but keep config
+        $('#fname').value = '';
+        $('#lname').value = '';
+        $('#email').value = '';
+        $('#country').value = '';
+        $('#postal').value = '';
+        $('#agree').checked = false;
+      });
+    }
+
+    function validateForm(){
+      const fields = [
+        {el: $('#fname'), name:'First name'},
+        {el: $('#lname'), name:'Last name'},
+        {el: $('#email'), name:'Email', type:'email'},
+        {el: $('#country'), name:'Country'},
+        {el: $('#postal'), name:'Postal code'}
+      ];
+      let firstInvalid = null;
+      fields.forEach(f => {
+        const v = f.el.value.trim();
+        let ok = v.length > 0;
+        if(f.type === 'email') ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+        setValidity(f.el, ok);
+        if(!ok && !firstInvalid) firstInvalid = f.el;
+      });
+      const agree = $('#agree');
+      setValidity(agree, agree.checked);
+      if(!agree.checked && !firstInvalid) firstInvalid = agree;
+
+      if(firstInvalid){
+        firstInvalid.focus();
+        showToast('Please complete all required fields correctly.');
+        return false;
+      }
+      return true;
+    }
+
+    function setValidity(el, ok){
+      if(ok){
+        el.style.borderColor = 'var(--panel-strong)';
+        el.style.boxShadow = 'none';
+      }else{
+        el.style.borderColor = 'var(--danger)';
+        el.style.boxShadow = '0 0 0 4px rgba(255, 107, 107, 0.2)';
+      }
+    }
+
+    // Toast
+    let toastTimer = null;
+    function showToast(msg){
+      const t = $('#toast');
+      t.textContent = msg;
+      t.style.display = 'inline-flex';
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { t.style.display = 'none'; }, 3000);
+    }
+
+    // Focus trap for modal
+    let lastFocused = null;
+    let trapHandler = null;
+    function trapFocus(modal){
+      lastFocused = document.activeElement;
+      const focusables = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      trapHandler = (e) => {
+        if(e.key !== 'Tab') return;
+        if(e.shiftKey && document.activeElement === first){
+          e.preventDefault(); last.focus();
+        }else if(!e.shiftKey && document.activeElement === last){
+          e.preventDefault(); first.focus();
+        }
+      };
+      document.addEventListener('keydown', trapHandler);
+    }
+    function releaseFocusTrap(){
+      document.removeEventListener('keydown', trapHandler);
+      if(lastFocused) lastFocused.focus();
+    }
+
+    function capitalize(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+  </script>
+</body>
+</html>

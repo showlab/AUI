@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AstroDogfight - 2D Space Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Fly a ship, blow up asteroids, and dogfight AI in a 2D space game.">
+  <style>
+    /* Destylization baseline */
+    :root {
+      --bg: #ffffff;
+      --text: #000000;
+      --muted: #333333;
+      --accent: #0057ff;
+      --good: #008a00;
+      --warn: #aa6b00;
+      --danger: #b00000;
+      --panel: #f2f2f2;
+      --border: #000000;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      line-height: 1.3;
+    }
+    a { color: var(--accent); }
+    a:focus, button:focus, select:focus, input:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 8px 10px;
+      background: #eeeeee;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      z-index: 10;
+    }
+    #brand {
+      font-weight: 700;
+      font-size: 18px;
+      margin-right: 12px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+    }
+    #controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      min-height: 44px;
+      padding: 4px 0;
+    }
+    #statusRow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      min-height: 44px;
+      margin-left: auto;
+      padding: 4px 0;
+    }
+    button, select, label.toggle {
+      min-height: 44px;
+      min-width: 44px;
+      padding: 10px 12px;
+      background: #ffffff;
+      color: var(--text);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+    }
+    button[disabled], [aria-disabled="true"] {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    label.toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    label.toggle input {
+      width: 20px;
+      height: 20px;
+    }
+    #scoreboard {
+      display: inline-flex;
+      gap: 10px;
+      padding: 4px 8px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      min-height: 44px;
+      align-items: center;
+    }
+    #scoreboard .item { color: var(--muted); }
+    #scoreboard .value { color: var(--text); font-weight: 700; }
+    #shieldContainer {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 6px 8px;
+      min-height: 44px;
+    }
+    #shieldBarWrap {
+      width: 180px;
+      height: 16px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      position: relative;
+    }
+    #shieldBar {
+      height: 100%;
+      width: 100%;
+      background: #0091ff;
+    }
+    #game {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 96px; /* header + small spacing */
+      bottom: 24px; /* footer */
+      display: flex;
+      flex-direction: column;
+    }
+    #topInfoBar {
+      display: flex;
+      gap: 12px;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      background: #fafafa;
+      align-items: center;
+    }
+    #gameStatusBox {
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 6px 8px;
+      min-height: 44px;
+    }
+    #gameCanvas {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: #ffffff;
+      cursor: crosshair;
+    }
+    #overlay {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      text-align: left;
+      background: rgba(255,255,255,0.95);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    #overlay[data-visible="true"] {
+      display: flex;
+    }
+    #overlay .content {
+      width: min(760px, 94vw);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      padding: 16px;
+    }
+    #overlay h2 {
+      margin: 0 0 8px 0;
+      font-size: 24px;
+    }
+    #overlay .row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin: 10px 0 0 0;
+    }
+    #helpPanel {
+      position: fixed;
+      right: 10px;
+      bottom: 36px;
+      width: min(420px, 95vw);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      padding: 10px;
+      display: none;
+      z-index: 20;
+    }
+    #helpPanel[data-visible="true"] { display: block; }
+    #helpPanel h3 { margin: 0 0 6px; }
+    #helpPanel p, #helpPanel li { margin: 6px 0; }
+    #helpPanel ul { margin: 6px 0 0 18px; padding: 0; }
+    #helpPanel .footer { display: flex; justify-content: flex-end; margin-top: 10px; }
+    #controlsDim {
+      position: absolute;
+      left: 0; right: 0; top: 0; height: 100%;
+      display: none;
+      background: rgba(255,255,255,0.7);
+      border-bottom: 1px solid var(--border);
+    }
+    #controlsDim[data-visible="true"] { display: block; }
+    #startTooltip {
+      position: absolute;
+      top: 44px;
+      left: 10px;
+      background: #fff3cd;
+      color: #000000;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      display: none;
+      max-width: 320px;
+      z-index: 11;
+    }
+    #startTooltip[data-visible="true"] { display: block; }
+    #gameOverPanel {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      padding: 16px;
+      width: min(600px, 94vw);
+      display: none;
+      z-index: 15;
+    }
+    #gameOverPanel[data-visible="true"] { display: block; }
+    #gameOverPanel h3 { margin: 0 0 8px 0; }
+    #gameOverPanel .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+    footer {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      padding: 4px 10px;
+      font-size: 12px;
+      border-top: 1px solid var(--border);
+      background: #fafafa;
+    }
+    /* Visible proxies */
+    .proxy {
+      padding: 2px 6px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      min-height: 24px;
+      display: inline-flex;
+      align-items: center;
+    }
+    /* Canvas messages */
+    #centerMessage {
+      position: absolute;
+      left: 50%;
+      top: calc(96px + 8px);
+      transform: translateX(-50%);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      padding: 6px 10px;
+      z-index: 12;
+      display: none;
+    }
+    #centerMessage[data-visible="true"] { display: block; }
+    /* Ensure layout fits 1280x720 comfortably */
+    @media (max-width: 900px) {
+      #statusRow { width: 100%; margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header role="banner" aria-label="Top controls">
+    <div id="brand">AstroDogfight</div>
+
+    <div id="controls" role="group" aria-label="Game Controls">
+      <button id="btnStart" type="button" title="Start Game">Start</button>
+      <button id="btnPause" type="button" title="Pause/Resume">Pause</button>
+      <button id="btnReset" type="button" title="Reset to Menu">Reset</button>
+      <select id="selectDifficulty" title="Difficulty">
+        <option value="easy">Easy</option>
+        <option value="rookie">Rookie</option>
+        <option value="normal" selected>Normal</option>
+        <option value="pilot">Pilot</option>
+        <option value="hard">Hard</option>
+        <option value="ace">Ace</option>
+      </select>
+      <label class="toggle" title="Sound">
+        <input id="toggleSound" type="checkbox" checked aria-checked="true">
+        Sound
+      </label>
+      <label class="toggle" title="Music">
+        <input id="toggleMusic" type="checkbox" aria-checked="false">
+        Music
+      </label>
+      <button id="btnHelp" type="button" title="Show Help">Help</button>
+    </div>
+
+    <div id="statusRow">
+      <div id="scoreboard">
+        <div class="item">Score: <span id="scoreValue" class="value">0</span></div>
+        <div class="item">Lives: <span id="livesValue" class="value">3</span></div>
+        <div class="item">Wave: <span id="waveValue" class="value">1</span></div>
+        <div class="item">Best: <span id="highScoreValue" class="value">0</span></div>
+      </div>
+
+      <div id="shieldContainer">
+        <span>Shield</span>
+        <div id="shieldBarWrap" aria-label="Shield level">
+          <div id="shieldBar" style="width: 100%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="controlsDim" aria-hidden="true"></div>
+    <div id="startTooltip" role="note">Close instructions or help to begin.</div>
+  </header>
+
+  <main id="game" role="main" aria-label="Game Area">
+    <div id="topInfoBar">
+      <div id="gameStatusBox">
+        <div>Game: <span id="gameStatus" class="proxy">idle</span></div>
+        <div>Start: <span id="startStatus" class="proxy">ready</span></div>
+        <div>Pause: <span id="pauseStatus" class="proxy">running</span></div>
+        <div>Music: <span id="musicStatus" class="proxy">off</span></div>
+        <div>Sound: <span id="soundStatus" class="proxy">on</span></div>
+        <div>Overlay: <span id="overlayStatus" class="proxy">visible</span></div>
+        <div>Help: <span id="helpStatus" class="proxy">closed</span></div>
+        <div>Active: <span id="activeSection" class="proxy">menu</span></div>
+      </div>
+      <div id="eventLog" class="proxy" style="margin-left: 12px;">event: none</div>
+    </div>
+
+    <canvas id="gameCanvas" tabindex="0" aria-label="Game Canvas" data-ready="false"></canvas>
+    <div id="centerMessage" role="status" aria-live="polite"></div>
+
+    <div id="overlay" role="dialog" aria-modal="true" data-visible="true" aria-label="Instructions and Start">
+      <div class="content">
+        <h2>AstroDogfight</h2>
+        <p>Classic 2D space combat with inertia, asteroids that split, and AI raiders.</p>
+        <p><strong>Controls</strong></p>
+        <ul>
+          <li>Rotate: A/D or Left/Right</li>
+          <li>Thrust: W or Up</li>
+          <li>Brake: S or Down</li>
+          <li>Boost: Shift (or Right/Middle mouse)</li>
+          <li>Fire: Space or Left mouse</li>
+          <li>Pause: P</li>
+          <li>Help: H</li>
+          <li>Toggle Music: M</li>
+        </ul>
+        <div class="row">
+          <label for="overlayDifficulty">Difficulty</label>
+          <select id="overlayDifficulty">
+            <option value="easy">Easy</option>
+            <option value="normal" selected>Normal</option>
+            <option value="hard">Hard</option>
+          </select>
+          <button id="overlayStart" type="button" title="Start game from menu">Start Game</button>
+          <span class="proxy" id="overlayHint">Hint: Press Space or Enter to start</span>
+        </div>
+        <p style="margin-top: 10px;">Objective: Survive and clear waves. Your shield regenerates slowly. Avoid collisions when low.</p>
+      </div>
+    </div>
+
+    <aside id="helpPanel" aria-label="Help panel">
+      <h3>How to Play</h3>
+      <p>Fly your ship, dodge or blast asteroids, and dogfight with hostile AI raiders. Survive waves to increase your score.</p>
+      <ul>
+        <li>Movement: A/D to rotate, W to thrust, S to brake</li>
+        <li>Boost: Hold Shift (or middle/right mouse)</li>
+        <li>Fire: Space or left click</li>
+        <li>Pause/Resume: P</li>
+        <li>Toggle music: M or top bar switch</li>
+      </ul>
+      <p>Tip: Your shield slowly regenerates. You are briefly invulnerable on spawn.</p>
+      <div class="footer">
+        <button id="btnCloseHelp" type="button">Close</button>
+      </div>
+    </aside>
+
+    <section id="gameOverPanel" role="dialog" aria-modal="true" aria-label="Game Over Summary" data-visible="false">
+      <h3>Game Over</h3>
+      <p>Your run has ended. Summary:</p>
+      <ul>
+        <li>Final Score: <span id="finalScore">0</span></li>
+        <li>Reached Wave: <span id="finalWave">1</span></li>
+        <li>Best Score: <span id="finalBest">0</span></li>
+        <li id="newBestNote" style="color: var(--good); display: none;">New High Score!</li>
+      </ul>
+      <div class="row">
+        <button id="play-again-btn" type="button">Play Again</button>
+        <button id="return-menu-btn" type="button">Main Menu</button>
+      </div>
+    </section>
+  </main>
+
+  <footer role="contentinfo">
+    Works best at 1280×720. Keyboard hint: Press Space to Start/Fire, P to Pause. © AstroDogfight
+  </footer>
+
+  <script>
+    (function(){
+      // DOM refs
+      const btnStart = document.getElementById('btnStart');
+      const btnPause = document.getElementById('btnPause');
+      const btnReset = document.getElementById('btnReset');
+      const btnHelp = document.getElementById('btnHelp');
+      const btnCloseHelp = document.getElementById('btnCloseHelp');
+      const selectDifficulty = document.getElementById('selectDifficulty');
+      const toggleSound = document.getElementById('toggleSound');
+      const toggleMusic = document.getElementById('toggleMusic');
+      const scoreValue = document.getElementById('scoreValue');
+      const livesValue = document.getElementById('livesValue'); // must keep selector id and semantics
+      const waveValue = document.getElementById('waveValue');   // must keep selector id and semantics
+      const highScoreValue = document.getElementById('highScoreValue');
+      const shieldBar = document.getElementById('shieldBar');
+      const canvas = document.getElementById('gameCanvas');
+      const overlay = document.getElementById('overlay');
+      const overlayStart = document.getElementById('overlayStart');
+      const overlayDifficulty = document.getElementById('overlayDifficulty');
+      const centerMessage = document.getElementById('centerMessage');
+      const controlsDim = document.getElementById('controlsDim');
+      const startTooltip = document.getElementById('startTooltip');
+      const gameStatus = document.getElementById('gameStatus');
+      const startStatus = document.getElementById('startStatus');
+      const pauseStatus = document.getElementById('pauseStatus');
+      const musicStatus = document.getElementById('musicStatus');
+      const soundStatus = document.getElementById('soundStatus');
+      const overlayStatus = document.getElementById('overlayStatus');
+      const helpStatus = document.getElementById('helpStatus');
+      const activeSection = document.getElementById('activeSection');
+      const eventLog = document.getElementById('eventLog');
+      const gameOverPanel = document.getElementById('gameOverPanel');
+      const finalScore = document.getElementById('finalScore');
+      const finalWave = document.getElementById('finalWave');
+      const finalBest = document.getElementById('finalBest');
+      const newBestNote = document.getElementById('newBestNote');
+      const playAgainBtn = document.getElementById('play-again-btn');
+      const returnMenuBtn = document.getElementById('return-menu-btn');
+
+      // Visible proxies initial
+      updateProxy(overlayStatus, overlay.dataset.visible === 'true' ? 'visible' : 'hidden');
+      updateProxy(helpStatus, 'closed');
+      updateProxy(musicStatus, toggleMusic.checked ? 'on' : 'off');
+      updateProxy(soundStatus, toggleSound.checked ? 'on' : 'off');
+      updateProxy(startStatus, 'ready');
+      updateProxy(pauseStatus, 'running');
+      updateProxy(gameStatus, 'idle');
+
+      // High score
+      const LS_KEY = 'astroHighScore';
+      let best = Number(localStorage.getItem(LS_KEY) || '0');
+      highScoreValue.textContent = String(best);
+      finalBest.textContent = String(best);
+
+      // Audio
+      let audioCtx = null;
+      let musicOsc = null;
+      let musicGain = null;
+      function initAudioCtx() {
+        if (!audioCtx) {
+          try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          } catch(e) {
+            logEvent('AudioContext not available');
+          }
+        }
+      }
+      function playSfx(type) {
+        if (!toggleSound.checked) return;
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        g.gain.value = 0.06;
+        g.gain.setTargetAtTime(0.0001, now + 0.05, 0.05);
+        o.connect(g).connect(audioCtx.destination);
+        if (type === 'fire') { o.type='square'; o.frequency.setValueAtTime(600, now); o.frequency.exponentialRampToValueAtTime(200, now+0.1); }
+        else if (type === 'boom') { o.type='sawtooth'; o.frequency.setValueAtTime(120, now); o.frequency.exponentialRampToValueAtTime(40, now+0.25); g.gain.value=0.09; }
+        else if (type === 'hit') { o.type='triangle'; o.frequency.setValueAtTime(300, now); o.frequency.exponentialRampToValueAtTime(150, now+0.12); }
+        else if (type === 'wave') { o.type='sine'; o.frequency.setValueAtTime(800, now); o.frequency.exponentialRampToValueAtTime(400, now+0.1); }
+        else { o.type='triangle'; o.frequency.setValueAtTime(440, now); }
+        o.start(now);
+        o.stop(now + 0.3);
+      }
+      function startMusic() {
+        if (!toggleMusic.checked) return;
+        if (!audioCtx) return;
+        if (musicOsc) return;
+        musicOsc = audioCtx.createOscillator();
+        musicGain = audioCtx.createGain();
+        musicOsc.type = 'triangle';
+        musicOsc.frequency.value = 140; // ambient-ish
+        musicGain.gain.value = 0.02;
+        musicOsc.connect(musicGain).connect(audioCtx.destination);
+        musicOsc.start();
+        updateProxy(musicStatus, 'on');
+      }
+      function stopMusic() {
+        if (musicOsc) {
+          try { musicOsc.stop(); } catch(e){}
+          musicOsc.disconnect();
+          musicGain.disconnect();
+          musicOsc = null;
+          musicGain = null;
+        }
+        updateProxy(musicStatus, 'off');
+      }
+
+      // Canvas and game world
+      const ctx = canvas.getContext('2d');
+      let DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      let W = 1280;
+      let H = 720;
+
+      function resizeCanvas() {
+        const rect = canvas.getBoundingClientRect();
+        W = Math.max(640, rect.width | 0);
+        H = Math.max(360, rect.height | 0);
+        DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        canvas.width = Math.floor(W * DPR);
+        canvas.height = Math.floor(H * DPR);
+        ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        canvas.dataset.ready = 'true';
+        updateProxyText('event: canvas ready', true);
+      }
+      window.addEventListener('resize', resizeCanvas);
+
+      // Game state
+      const STATE = { menu: 'menu', running: 'running', paused: 'paused', gameover: 'gameover' };
+      let state = STATE.menu;
+      let paused = false;
+      let score = 0;
+      let lives = 3;
+      let wave = 1;
+      let shield = 100;
+      let shieldMax = 100;
+      let lastTime = 0;
+      let keys = new Set();
+      let mouse = { x: 0, y: 0, down: false, right: false, mid: false };
+      let ship;
+      let bullets = [];
+      let enemyBullets = [];
+      let asteroids = [];
+      let enemies = [];
+      let nextFire = 0;
+      let rngSeed = Math.random() * 1e9;
+      function rng() { // simple LCG
+        rngSeed = (rngSeed * 1664525 + 1013904223) % 4294967296;
+        return rngSeed / 4294967296;
+      }
+      function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+      function dist2(ax, ay, bx, by) { const dx=ax-bx, dy=ay-by; return dx*dx+dy*dy; }
+
+      function resetToMenu() {
+        state = STATE.menu;
+        paused = false;
+        score = 0;
+        wave = 1;
+        lives = getLivesForDifficulty(getDifficulty());
+        shield = shieldMax;
+        bullets = [];
+        enemyBullets = [];
+        asteroids = [];
+        enemies = [];
+        ship = makeShip(W/2, H/2);
+        updateHUD();
+        showOverlay(true);
+        showGameOver(false);
+        updateProxy(gameStatus, 'idle');
+        updateProxy(startStatus, 'ready');
+        updateProxy(pauseStatus, 'running');
+        updateActiveSection('menu');
+        dimControls(true);
+        btnPause.textContent = 'Pause';
+        logEvent('reset to menu');
+        stopMusic();
+      }
+
+      function getDifficulty() {
+        const v = (selectDifficulty.value || 'normal').toLowerCase();
+        if (v === 'rookie' || v === 'easy') return 'easy';
+        if (v === 'pilot' || v === 'normal') return 'normal';
+        if (v === 'ace' || v === 'hard') return 'hard';
+        return 'normal';
+      }
+      function setDifficultyFromOverlay() {
+        const ov = overlayDifficulty.value;
+        // Map overlay difficulty to the top selector when we start
+        if (ov === 'easy') selectDifficulty.value = 'easy';
+        else if (ov === 'hard') selectDifficulty.value = 'hard';
+        else selectDifficulty.value = 'normal';
+      }
+      function getLivesForDifficulty(diff) {
+        if (diff === 'easy') return 5;
+        if (diff === 'hard') return 2;
+        return 3;
+      }
+      function getAsteroidCount(diff, wave) {
+        const base = diff === 'easy' ? 4 : (diff === 'hard' ? 7 : 6);
+        return Math.max(3, base + wave);
+      }
+      function getEnemyCount(diff, wave) {
+        if (wave < 2) return 0;
+        const base = diff === 'easy' ? 1 : (diff === 'hard' ? 2 : 1);
+        return base + Math.floor((wave-1)/2);
+      }
+
+      function makeShip(x, y) {
+        return {
+          x, y, vx: 0, vy: 0, angle: -Math.PI/2,
+          thrust: 180, rotSpeed: 3.2, maxSpeed: 320,
+          boostMul: 1.8, friction: 0.995,
+          radius: 12,
+          invulnUntil: performance.now() + 2000
+        };
+      }
+
+      function spawnWave(w) {
+        const diff = getDifficulty();
+        const nAst = getAsteroidCount(diff, w);
+        const nEn = getEnemyCount(diff, w);
+        const safe = 160;
+        for (let i=0;i<nAst;i++){
+          const p = pickSpawnFarFrom(ship.x, ship.y, safe);
+          const sz = (i%3===0) ? 'large' : (i%3===1) ? 'medium' : 'small';
+          asteroids.push(makeAsteroid(p.x, p.y, sz));
+        }
+        for (let i=0;i<nEn;i++){
+          const p = pickSpawnFarFrom(ship.x, ship.y, safe+80);
+          enemies.push(makeEnemy(i%2===0 ? 'light':'heavy', p.x, p.y));
+        }
+        showCenterMessage('Wave ' + w, 1600);
+        playSfx('wave');
+      }
+
+      function pickSpawnFarFrom(px, py, minDist) {
+        // pick edge spawn
+        const side = Math.floor(rng()*4);
+        let x = 0, y = 0;
+        if (side === 0) { x = 10; y = rng()*(H-20)+10; }
+        else if (side === 1) { x = W-10; y = rng()*(H-20)+10; }
+        else if (side === 2) { x = rng()*(W-20)+10; y = 10; }
+        else { x = rng()*(W-20)+10; y = H-10; }
+        if (Math.hypot(x-px, y-py) < minDist) {
+          // shift farther
+          const ang = Math.atan2(y-py, x-px);
+          x = px + Math.cos(ang) * (minDist+20);
+          y = py + Math.sin(ang) * (minDist+20);
+          x = (x+W)%W; y = (y+H)%H;
+        }
+        return {x, y};
+      }
+
+      function makeAsteroid(x, y, size='large') {
+        const sMul = size==='large' ? 1 : size==='medium' ? 0.6 : 0.35;
+        const speed = (40 + rng()*60) * (1.2 - sMul*0.4);
+        const ang = rng()*Math.PI*2;
+        return {
+          x, y, vx: Math.cos(ang)*speed, vy: Math.sin(ang)*speed,
+          size, radius: size==='large'?42:(size==='medium'?26:14),
+          rot: rng()*Math.PI*2, rotSpeed: (rng()*2-1)*0.8
+        };
+      }
+
+      function makeEnemy(type, x, y) {
+        if (type === 'light') {
+          return { type, x, y, vx: 0, vy: 0, speed: 140, radius: 14, fireCd: 0.9, fireTimer: 0, hp: 2, aimLead: 0.25 };
+        } else {
+          return { type, x, y, vx: 0, vy: 0, speed: 90, radius: 20, fireCd: 1.4, fireTimer: 0, hp: 4, aimLead: 0.35 };
+        }
+      }
+
+      function makeBullet(x, y, ang, speed, friendly=true) {
+        return { x, y, vx: Math.cos(ang)*speed, vy: Math.sin(ang)*speed, life: 1.25, r: 2.5, friendly };
+      }
+
+      function startGame() {
+        // prepare context
+        initAudioCtx();
+        if (toggleMusic.checked) startMusic();
+        showOverlay(false);
+        dimControls(false);
+        hideStartTooltip();
+        setDifficultyFromOverlay(); // sync overlay difficulty to header selector
+        // Initialize world
+        state = STATE.running;
+        paused = false;
+        score = 0;
+        wave = 1;
+        lives = getLivesForDifficulty(getDifficulty());
+        shield = shieldMax;
+        bullets.length = 0;
+        enemyBullets.length = 0;
+        asteroids.length = 0;
+        enemies.length = 0;
+        ship = makeShip(W/2, H/2);
+        spawnWave(1);
+        updateHUD();
+        updateProxy(gameStatus, 'running');
+        updateProxy(startStatus, 'running');
+        updateProxy(pauseStatus, 'running');
+        btnPause.textContent = 'Pause';
+        showCenterMessage('Go!', 600);
+        logEvent('start game');
+      }
+
+      function togglePause() {
+        if (state !== STATE.running && state !== STATE.paused) return;
+        paused = !paused;
+        if (paused) {
+          state = STATE.paused;
+          updateProxy(pauseStatus, 'paused');
+          btnPause.textContent = 'Resume';
+          logEvent('paused');
+        } else {
+          state = STATE.running;
+          updateProxy(pauseStatus, 'running');
+          btnPause.textContent = 'Pause';
+          logEvent('resumed');
+        }
+      }
+
+      function gameOver() {
+        state = STATE.gameover;
+        paused = false;
+        showGameOver(true);
+        updateProxy(gameStatus, 'gameover');
+        updateActiveSection('gameover');
+        // high score
+        if (score > best) {
+          best = score;
+          localStorage.setItem(LS_KEY, String(best));
+          highScoreValue.textContent = String(best);
+          finalBest.textContent = String(best);
+          newBestNote.style.display = 'list-item';
+        } else {
+          newBestNote.style.display = 'none';
+        }
+        finalScore.textContent = String(score);
+        finalWave.textContent = String(wave);
+        stopMusic();
+        logEvent('game over');
+      }
+
+      function updateHUD() {
+        scoreValue.textContent = String(score);
+        livesValue.textContent = String(lives);
+        waveValue.textContent = String(wave);
+        const pct = clamp(shield / shieldMax, 0, 1);
+        shieldBar.style.width = (pct*100).toFixed(0) + '%';
+      }
+
+      function showOverlay(show) {
+        overlay.dataset.visible = show ? 'true' : 'false';
+        overlay.setAttribute('aria-hidden', show ? 'false' : 'true');
+        updateProxy(overlayStatus, show ? 'visible' : 'hidden');
+        updateActiveSection(show ? 'menu' : 'game');
+        // Disable Start while overlay is open
+        btnStart.disabled = show;
+        btnStart.setAttribute('aria-disabled', String(show));
+        if (show) {
+          showStartTooltip();
+          dimControls(true);
+        } else {
+          hideStartTooltip();
+          dimControls(false);
+        }
+      }
+
+      function showHelp(show) {
+        document.getElementById('helpPanel').dataset.visible = show ? 'true' : 'false';
+        updateProxy(helpStatus, show ? 'open' : 'closed');
+        updateActiveSection(show ? 'help' : 'game');
+        // Disable Start while help is open
+        btnStart.disabled = show || overlay.dataset.visible === 'true';
+        btnStart.setAttribute('aria-disabled', String(btnStart.disabled));
+        if (show) {
+          showStartTooltip();
+          dimControls(true);
+        } else {
+          if (overlay.dataset.visible !== 'true') {
+            hideStartTooltip();
+            dimControls(false);
+          }
+        }
+      }
+
+      function showGameOver(show) {
+        gameOverPanel.dataset.visible = show ? 'true' : 'false';
+        // Dim controls while gameover visible to clarify modal priority
+        controlsDim.dataset.visible = show ? 'true' : 'false';
+        controlsDim.setAttribute('aria-hidden', show ? 'false' : 'true');
+      }
+
+      function dimControls(dim) {
+        controlsDim.dataset.visible = dim ? 'true' : 'false';
+        controlsDim.setAttribute('aria-hidden', dim ? 'false' : 'true');
+      }
+
+      function showStartTooltip() {
+        startTooltip.dataset.visible = 'true';
+      }
+      function hideStartTooltip() {
+        startTooltip.dataset.visible = 'false';
+      }
+
+      function showCenterMessage(text, ms) {
+        centerMessage.textContent = text;
+        centerMessage.dataset.visible = 'true';
+        if (showCenterMessage._to) clearTimeout(showCenterMessage._to);
+        showCenterMessage._to = setTimeout(()=>{ centerMessage.dataset.visible='false'; }, ms|0);
+      }
+
+      function logEvent(text) {
+        eventLog.textContent = 'event: ' + text;
+      }
+
+      function updateProxy(el, val) {
+        el.textContent = val;
+      }
+      function updateProxyText(text, ready=false) {
+        eventLog.textContent = text;
+        if (ready) canvas.setAttribute('data-ready', 'true');
+      }
+      function updateActiveSection(name) {
+        activeSection.textContent = name;
+      }
+
+      // Input handling
+      document.addEventListener('keydown', (e) => {
+        const tag = e.target && (e.target.tagName || '').toLowerCase();
+        if (tag === 'input' || tag === 'select' || tag === 'textarea') return;
+        if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space','KeyW','KeyA','KeyS','KeyD'].includes(e.code)) {
+          e.preventDefault();
+        }
+        keys.add(e.code);
+        if (e.code === 'KeyP') { togglePause(); }
+        if (e.code === 'KeyM') { toggleMusic.checked = !toggleMusic.checked; onToggleMusic(); }
+        if (e.code === 'KeyH') { showHelp(document.getElementById('helpPanel').dataset.visible !== 'true'); }
+        if ((e.code === 'Space' || e.code === 'Enter') && overlay.dataset.visible === 'true') {
+          overlayStart.click();
+        }
+        if (e.code === 'Space' && state !== STATE.menu) {
+          // fire handled in update
+        }
+      });
+      document.addEventListener('keyup', (e) => {
+        keys.delete(e.code);
+      });
+
+      canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+      });
+      canvas.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        initAudioCtx();
+        canvas.focus();
+        if (e.button === 0) mouse.down = true;
+        if (e.button === 1) mouse.mid = true;
+        if (e.button === 2) mouse.right = true;
+      });
+      canvas.addEventListener('mouseup', (e) => {
+        e.preventDefault();
+        if (e.button === 0) mouse.down = false;
+        if (e.button === 1) mouse.mid = false;
+        if (e.button === 2) mouse.right = false;
+      });
+      canvas.addEventListener('contextmenu', (e)=>e.preventDefault());
+      canvas.addEventListener('blur', ()=>{ mouse.down = mouse.right = mouse.mid = false; });
+
+      // Buttons
+      btnStart.addEventListener('click', () => {
+        if (btnStart.disabled) {
+          showStartTooltip();
+          return;
+        }
+        startGame();
+      });
+      overlayStart.addEventListener('click', () => {
+        startGame();
+      });
+      btnPause.addEventListener('click', () => togglePause());
+      btnReset.addEventListener('click', () => resetToMenu());
+      btnHelp.addEventListener('click', () => showHelp(true));
+      btnCloseHelp.addEventListener('click', () => showHelp(false));
+      playAgainBtn.addEventListener('click', () => {
+        showGameOver(false);
+        startGame();
+      });
+      returnMenuBtn.addEventListener('click', () => {
+        resetToMenu();
+      });
+      selectDifficulty.addEventListener('change', () => {
+        // No strict validation; allow any value but map later
+        logEvent('difficulty set to ' + selectDifficulty.value);
+      });
+      toggleSound.addEventListener('change', () => {
+        // Update proxy immediately
+        updateProxy(soundStatus, toggleSound.checked ? 'on' : 'off');
+        toggleSound.setAttribute('aria-checked', String(toggleSound.checked));
+        initAudioCtx();
+        logEvent('sound ' + (toggleSound.checked ? 'on' : 'off'));
+      });
+      toggleMusic.addEventListener('change', onToggleMusic);
+      function onToggleMusic() {
+        updateProxy(musicStatus, toggleMusic.checked ? 'on' : 'off');
+        toggleMusic.setAttribute('aria-checked', String(toggleMusic.checked));
+        initAudioCtx();
+        if (toggleMusic.checked && state === STATE.running) startMusic();
+        else stopMusic();
+        logEvent('music ' + (toggleMusic.checked ? 'on' : 'off'));
+      }
+
+      // Main loop
+      function loop(ts) {
+        if (!lastTime) lastTime = ts;
+        const dt = Math.min(0.033, (ts - lastTime)/1000);
+        lastTime = ts;
+        if (state === STATE.running && !paused) {
+          update(dt);
+        }
+        draw();
+        requestAnimationFrame(loop);
+      }
+
+      function update(dt) {
+        // Input -> Ship control
+        const turningLeft = keys.has('ArrowLeft') || keys.has('KeyA');
+        const turningRight = keys.has('ArrowRight') || keys.has('KeyD');
+        const thrusting = keys.has('ArrowUp') || keys.has('KeyW');
+        const braking = keys.has('ArrowDown') || keys.has('KeyS');
+        const boosting = keys.has('ShiftLeft') || keys.has('ShiftRight') || mouse.right || mouse.mid;
+        if (turningLeft && !turningRight) ship.angle -= ship.rotSpeed * dt;
+        if (turningRight && !turningLeft) ship.angle += ship.rotSpeed * dt;
+
+        let acc = 0;
+        if (thrusting) acc = ship.thrust * (boosting ? ship.boostMul : 1);
+        // apply acceleration in facing direction
+        ship.vx += Math.cos(ship.angle) * acc * dt;
+        ship.vy += Math.sin(ship.angle) * acc * dt;
+
+        if (braking) { ship.vx *= 0.98; ship.vy *= 0.98; }
+
+        // clamp speed
+        const spd = Math.hypot(ship.vx, ship.vy);
+        const maxSpd = ship.maxSpeed * (boosting ? 1.35 : 1);
+        if (spd > maxSpd) {
+          const k = maxSpd / spd;
+          ship.vx *= k; ship.vy *= k;
+        }
+
+        // fire control
+        const wantFire = keys.has('Space') || mouse.down;
+        if (wantFire && performance.now() > nextFire) {
+          nextFire = performance.now() + 180; // rate limit
+          const bx = ship.x + Math.cos(ship.angle)*ship.radius*1.2;
+          const by = ship.y + Math.sin(ship.angle)*ship.radius*1.2;
+          bullets.push(makeBullet(bx, by, ship.angle, 460, true));
+          playSfx('fire');
+        }
+
+        // physics integration
+        ship.vx *= ship.friction;
+        ship.vy *= ship.friction;
+        ship.x += ship.vx * dt;
+        ship.y += ship.vy * dt;
+        wrap(ship);
+
+        // bullets
+        for (let i=bullets.length-1;i>=0;i--){
+          const b = bullets[i];
+          b.x += b.vx * dt;
+          b.y += b.vy * dt;
+          b.life -= dt;
+          wrap(b);
+          if (b.life <= 0) bullets.splice(i,1);
+        }
+        for (let i=enemyBullets.length-1;i>=0;i--){
+          const b = enemyBullets[i];
+          b.x += b.vx * dt;
+          b.y += b.vy * dt;
+          b.life -= dt;
+          wrap(b);
+          if (b.life <= 0) enemyBullets.splice(i,1);
+        }
+
+        // asteroids
+        for (let a of asteroids) {
+          a.x += a.vx * dt; a.y += a.vy * dt;
+          a.rot += a.rotSpeed * dt;
+          wrap(a);
+        }
+
+        // enemies
+        for (let e of enemies) {
+          const dx = ship.x - e.x;
+          const dy = ship.y - e.y;
+          const d = Math.hypot(dx, dy) + 0.0001;
+          // steer towards player
+          const ax = dx / d * e.speed;
+          const ay = dy / d * e.speed;
+          e.vx += ax * dt * 0.4;
+          e.vy += ay * dt * 0.4;
+          // clamp speed
+          const es = Math.hypot(e.vx, e.vy);
+          if (es > e.speed) { e.vx = e.vx/es*e.speed; e.vy = e.vy/es*e.speed; }
+          e.x += e.vx * dt; e.y += e.vy * dt;
+          wrap(e);
+          // fire
+          e.fireTimer -= dt;
+          if (e.fireTimer <= 0) {
+            e.fireTimer = e.fireCd * (0.8 + rng()*0.4);
+            // simple leading shot
+            const leadT = e.aimLead;
+            const tx = ship.x + ship.vx * leadT;
+            const ty = ship.y + ship.vy * leadT;
+            const ang = Math.atan2(ty - e.y, tx - e.x);
+            enemyBullets.push(makeBullet(e.x, e.y, ang, 280 + (e.type==='light'?40:0), false));
+          }
+        }
+
+        // collisions: friendly bullets vs asteroids
+        for (let i=bullets.length-1;i>=0;i--){
+          const b = bullets[i];
+          if (!b.friendly) continue;
+          let hit = false;
+          for (let j=asteroids.length-1;j>=0;j--){
+            const a = asteroids[j];
+            if (dist2(b.x,b.y,a.x,a.y) <= (a.radius + b.r)*(a.radius + b.r)) {
+              // hit asteroid
+              bullets.splice(i,1);
+              splitAsteroid(j);
+              score += a.size==='large' ? 50 : (a.size==='medium'?75:100);
+              updateHUD();
+              playSfx('boom');
+              hit = true;
+              break;
+            }
+          }
+          if (hit) continue;
+          // bullets vs enemies
+          for (let k=enemies.length-1;k>=0;k--){
+            const e = enemies[k];
+            if (dist2(b.x,b.y,e.x,e.y) <= (e.radius + 2)*(e.radius + 2)) {
+              bullets.splice(i,1);
+              e.hp -= 1;
+              playSfx('hit');
+              if (e.hp <= 0) {
+                enemies.splice(k,1);
+                score += e.type==='light' ? 150 : 250;
+                updateHUD();
+                playSfx('boom');
+              }
+              break;
+            }
+          }
+        }
+
+        // enemy bullets vs player
+        if (performance.now() < (ship.invulnUntil || 0)) {
+          // skip damage
+        } else {
+          for (let i=enemyBullets.length-1;i>=0;i--){
+            const b = enemyBullets[i];
+            if (dist2(b.x,b.y,ship.x,ship.y) <= (ship.radius + b.r)*(ship.radius + b.r)) {
+              enemyBullets.splice(i,1);
+              applyDamage(25);
+              playSfx('hit');
+            }
+          }
+          // asteroids vs player
+          for (let i=asteroids.length-1;i>=0;i--){
+            const a = asteroids[i];
+            if (dist2(a.x,a.y,ship.x,ship.y) <= (a.radius + ship.radius)*(a.radius + ship.radius)) {
+              // damage based on size
+              const dmg = a.size==='large' ? 60 : (a.size==='medium'?40:25);
+              applyDamage(dmg);
+              // small knockback
+              const ang = Math.atan2(ship.y - a.y, ship.x - a.x);
+              ship.vx += Math.cos(ang) * 120;
+              ship.vy += Math.sin(ang) * 120;
+              playSfx('hit');
+              break;
+            }
+          }
+        }
+
+        // shield regen
+        if (shield < shieldMax) {
+          shield += 6 * dt; // slow regen
+          if (shield > shieldMax) shield = shieldMax;
+          updateHUD();
+        }
+
+        // wave clear
+        if (asteroids.length === 0 && enemies.length === 0) {
+          wave++;
+          waveValue.textContent = String(wave);
+          spawnWave(wave);
+        }
+      }
+
+      function splitAsteroid(index) {
+        const a = asteroids[index];
+        asteroids.splice(index,1);
+        if (a.size === 'large') {
+          for (let k=0;k<2;k++){
+            const n = makeAsteroid(a.x, a.y, 'medium');
+            asteroids.push(n);
+          }
+        } else if (a.size === 'medium') {
+          for (let k=0;k<2;k++){
+            const n = makeAsteroid(a.x, a.y, 'small');
+            asteroids.push(n);
+          }
+        } else {
+          // small disappears
+        }
+      }
+
+      function applyDamage(amount) {
+        shield -= amount;
+        if (shield > 0) { updateHUD(); return; }
+        // life lost
+        lives--;
+        if (lives <= 0) {
+          updateHUD();
+          gameOver();
+          return;
+        }
+        // respawn
+        shield = shieldMax;
+        ship = makeShip(W/2, H/2);
+        ship.invulnUntil = performance.now() + 2000;
+        updateHUD();
+      }
+
+      function wrap(o) {
+        if (o.x < -20) o.x += W + 40;
+        if (o.x > W+20) o.x -= W + 40;
+        if (o.y < -20) o.y += H + 40;
+        if (o.y > H+20) o.y -= H + 40;
+      }
+
+      function draw() {
+        ctx.clearRect(0,0,W,H);
+        // draw ship
+        if (state !== STATE.menu) {
+          drawShip();
+          // draw bullets
+          ctx.fillStyle = '#000000';
+          for (let b of bullets) {
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
+            ctx.fill();
+          }
+          ctx.fillStyle = '#aa0000';
+          for (let b of enemyBullets) {
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
+            ctx.fill();
+          }
+          // draw asteroids
+          ctx.strokeStyle = '#000000';
+          ctx.lineWidth = 1;
+          for (let a of asteroids) {
+            ctx.save();
+            ctx.translate(a.x, a.y);
+            ctx.rotate(a.rot);
+            ctx.beginPath();
+            const r = a.radius;
+            // rough polygon
+            ctx.moveTo(r, 0);
+            ctx.lineTo(r*0.4, r*0.9);
+            ctx.lineTo(-r*0.2, r*0.7);
+            ctx.lineTo(-r, 0);
+            ctx.lineTo(-r*0.3, -r*0.7);
+            ctx.lineTo(r*0.5, -r*0.6);
+            ctx.closePath();
+            ctx.stroke();
+            ctx.restore();
+          }
+          // draw enemies
+          for (let e of enemies) {
+            ctx.save();
+            ctx.translate(e.x, e.y);
+            const ang = Math.atan2(ship.y - e.y, ship.x - e.x);
+            ctx.rotate(ang);
+            ctx.beginPath();
+            ctx.rect(-e.radius, -e.radius/2, e.radius*2, e.radius);
+            ctx.strokeStyle = '#000000';
+            ctx.stroke();
+            // small nose
+            ctx.beginPath();
+            ctx.moveTo(e.radius, 0);
+            ctx.lineTo(e.radius+8, 0);
+            ctx.stroke();
+            ctx.restore();
+          }
+        }
+        // HUD overlays: invuln indicator
+        if (state === STATE.running || state === STATE.paused) {
+          if (performance.now() < (ship.invulnUntil || 0)) {
+            ctx.strokeStyle = '#008a00';
+            ctx.beginPath();
+            ctx.arc(ship.x, ship.y, ship.radius+6, 0, Math.PI*2);
+            ctx.stroke();
+          }
+        }
+        // optional crosshair at mouse
+        ctx.strokeStyle = '#000000';
+        ctx.beginPath();
+        ctx.moveTo(mouse.x-6, mouse.y);
+        ctx.lineTo(mouse.x+6, mouse.y);
+        ctx.moveTo(mouse.x, mouse.y-6);
+        ctx.lineTo(mouse.x, mouse.y+6);
+        ctx.stroke();
+      }
+
+      function drawShip() {
+        ctx.save();
+        ctx.translate(ship.x, ship.y);
+        ctx.rotate(ship.angle);
+        ctx.strokeStyle = '#000000';
+        ctx.beginPath();
+        ctx.moveTo(14, 0);
+        ctx.lineTo(-10, -8);
+        ctx.lineTo(-6, 0);
+        ctx.lineTo(-10, 8);
+        ctx.closePath();
+        ctx.stroke();
+
+        // thrust flames if thrusting
+        const thrusting = keys.has('ArrowUp') || keys.has('KeyW');
+        const boosting = keys.has('ShiftLeft') || keys.has('ShiftRight') || mouse.right || mouse.mid;
+        if (thrusting) {
+          ctx.beginPath();
+          ctx.moveTo(-10, 0);
+          ctx.lineTo(-18 - (boosting ? 6 : 0), 0);
+          ctx.strokeStyle = '#aa6b00';
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      // Initialize canvas and neutral state
+      resizeCanvas();
+      showOverlay(true);
+      dimControls(true);
+      btnStart.disabled = true;
+      btnStart.setAttribute('aria-disabled', 'true');
+
+      // Kick loop
+      requestAnimationFrame(loop);
+
+      // Accessibility + proxies: ensure statuses reflect current ARIA states
+      function ensureStatuses() {
+        updateProxy(overlayStatus, overlay.dataset.visible === 'true' ? 'visible' : 'hidden');
+        updateProxy(helpStatus, document.getElementById('helpPanel').dataset.visible === 'true' ? 'open' : 'closed');
+        updateProxy(musicStatus, toggleMusic.checked ? 'on' : 'off');
+        updateProxy(soundStatus, toggleSound.checked ? 'on' : 'off');
+      }
+      setInterval(ensureStatuses, 1000);
+
+      // Public: close overlay when selecting difficulty and starting
+      overlayDifficulty.addEventListener('change', () => logEvent('overlay difficulty ' + overlayDifficulty.value));
+
+      // Pause spam safety: ignore if in menu or gameover
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden && state === STATE.running) {
+          paused = true;
+          state = STATE.paused;
+          updateProxy(pauseStatus, 'paused');
+          btnPause.textContent = 'Resume';
+          logEvent('paused by tab hidden');
+        }
+      });
+
+      // Utility: Keep critical controls within 1280x720
+      // Layout already compact; no scroll behavior is required.
+
+      // Workflow guards (non-blocking): Nothing auto-starts on load; initial neutral state preserved.
+
+      // Expose some properties for testing (non-destructive)
+      window.__ASTRODOGFIGHT__ = {
+        get state() { return state; },
+        get score() { return score; },
+        get wave() { return wave; },
+        get lives() { return lives; },
+        get difficulty() { return getDifficulty(); },
+        setDifficulty(value) { selectDifficulty.value = value; },
+        start: startGame,
+        reset: resetToMenu,
+        pauseToggle: toggle

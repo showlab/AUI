@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Theatre</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            color: white;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .container {
+            width: 1280px;
+            height: 720px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            max-width: 300px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #444;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ff6b6b;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .toggle-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px 25px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+
+        .toggle-btn {
+            background: #ff6b6b;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .toggle-btn:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+        }
+
+        .subtitle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            width: 80%;
+        }
+
+        .subtitle.show {
+            opacity: 1;
+        }
+
+        .title {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 2rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+            z-index: 10;
+        }
+
+        .scene-info {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 1300px) {
+            .container {
+                width: 90vw;
+                height: 90vh;
+                margin: 5vh auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">Weather Theatre</div>
+        
+        <canvas id="backgroundCanvas"></canvas>
+        <canvas id="foregroundCanvas"></canvas>
+        <canvas id="effectCanvas"></canvas>
+        
+        <div class="subtitle" id="subtitle"></div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="cosySlider">Cosy</label>
+                <input type="range" id="cosySlider" min="0" max="100" value="50">
+            </div>
+            <div class="control-group">
+                <label for="eerieSlider">Eerie</label>
+                <input type="range" id="eerieSlider" min="0" max="100" value="50">
+            </div>
+            <div class="control-group">
+                <label for="heroicSlider">Heroic</label>
+                <input type="range" id="heroicSlider" min="0" max="100" value="50">
+            </div>
+        </div>
+        
+        <div class="toggle-container">
+            <button class="toggle-btn" id="timeToggle">Matinée</button>
+        </div>
+        
+        <div class="scene-info" id="sceneInfo">Current Scene: <span id="sceneName">Cozy</span></div>
+    </div>
+
+    <script>
+        // Canvas setup
+        const bgCanvas = document.getElementById('backgroundCanvas');
+        const fgCanvas = document.getElementById('foregroundCanvas');
+        const effectCanvas = document.getElementById('effectCanvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        const fgCtx = fgCanvas.getContext('2d');
+        const effectCtx = effectCanvas.getContext('2d');
+
+        // Set canvas sizes
+        bgCanvas.width = 1280;
+        bgCanvas.height = 720;
+        fgCanvas.width = 1280;
+        fgCanvas.height = 720;
+        effectCanvas.width = 1280;
+        effectCanvas.height = 720;
+
+        // State variables
+        let cosyValue = 50;
+        let eerieValue = 50;
+        let heroicValue = 50;
+        let isNight = false;
+        let currentScene = 'cosy';
+        let subtitleText = '';
+        let subtitleIndex = 0;
+        let subtitleTimer = null;
+        let spotlightX = 0;
+        let spotlightY = 0;
+        let spotlightRadius = 0;
+        let curtainPosition = 0;
+
+        // Weather data
+        const weatherData = [
+            { temp: 22, condition: 'Sunny', description: 'A bright day awaits' },
+            { temp: 18, condition: 'Cloudy', description: 'Gloomy skies above' },
+            { temp: 15, condition: 'Rainy', description: 'Soft rain falls gently' },
+            { temp: 8, condition: 'Snowy', description: 'Winter\'s embrace' },
+            { temp: 25, condition: 'Hot', description: 'Scorching heat' },
+            { temp: 12, condition: 'Windy', description: 'Breezy conditions' }
+        ];
+
+        // Scene descriptions
+        const scenes = {
+            cosy: {
+                name: 'Cozy',
+                subtitle: 'A warm embrace of comfort',
+                color: '#FFD700',
+                bgColor: '#1a1a2e'
+            },
+            eerie: {
+                name: 'Eerie',
+                subtitle: 'Whispers in the shadows',
+                color: '#8B0000',
+                bgColor: '#0a0a1a'
+            },
+            heroic: {
+                name: 'Heroic',
+                subtitle: 'Courage in the storm',
+                color: '#4169E1',
+                bgColor: '#1a0a1a'
+            }
+        };
+
+        // Initialize
+        function init() {
+            setupEventListeners();
+            animate();
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            document.getElementById('cosySlider').addEventListener('input', (e) => {
+                cosyValue = parseInt(e.target.value);
+                updateScene();
+            });
+            
+            document.getElementById('eerieSlider').addEventListener('input', (e) => {
+                eerieValue = parseInt(e.target.value);
+                updateScene();
+            });
+            
+            document.getElementById('heroicSlider').addEventListener('input', (e) => {
+                heroicValue = parseInt(e.target.value);
+                updateScene();
+            });
+            
+            document.getElementById('timeToggle').addEventListener('click', toggleTimeOfDay);
+        }
+
+        // Update scene based on slider values
+        function updateScene() {
+            // Determine dominant scene
+            const max = Math.max(cosyValue, eerieValue, heroicValue);
+            if (max === cosyValue) {
+                currentScene = 'cosy';
+            } else if (max === eerieValue) {
+                currentScene = 'eerie';
+            } else {
+                currentScene = 'heroic';
+            }
+            
+            document.getElementById('sceneName').textContent = scenes[currentScene].name;
+            startTypewriter(scenes[currentScene].subtitle);
+        }
+
+        // Toggle between day and night
+        function toggleTimeOfDay() {
+            isNight = !isNight;
+            document.getElementById('timeToggle').textContent = isNight ? 'Night' : 'Matinée';
+        }
+
+        // Typewriter effect for subtitle
+        function startTypewriter(text) {
+            if (subtitleTimer) {
+                clearTimeout(subtitleTimer);
+            }
+            
+            subtitleText = text;
+            subtitleIndex = 0;
+            document.getElementById('subtitle').textContent = '';
+            document.getElementById('subtitle').classList.add('show');
+            
+            const type = () => {
+                if (subtitleIndex < subtitleText.length) {
+                    document.getElementById('subtitle').textContent += subtitleText.charAt(subtitleIndex);
+                    subtitleIndex++;
+                    subtitleTimer = setTimeout(type, 100);
+                } else {
+                    setTimeout(() => {
+                        document.getElementById('subtitle').classList.remove('show');
+                    }, 3000);
+                }
+            };
+            
+            type();
+        }
+
+        // Draw background elements
+        function drawBackground() {
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+            
+            // Sky gradient
+            const skyGradient = bgCtx.createLinearGradient(0, 0, 0, bgCanvas.height);
+            if (isNight) {
+                skyGradient.addColorStop(0, '#0a0a2a');
+                skyGradient.addColorStop(1, '#000000');
+            } else {
+                skyGradient.addColorStop(0, '#87CEEB');
+                skyGradient.addColorStop(1, '#1E90FF');
+            }
+            bgCtx.fillStyle = skyGradient;
+            bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+            
+            // Clouds
+            drawClouds();
+            
+            // Mountains
+            drawMountains();
+            
+            // Sun/Moon
+            drawSunMoon();
+        }
+
+        // Draw clouds
+        function drawClouds() {
+            const cloudCount = 5 + Math.floor(cosyValue / 20);
+            const cloudSize = 30 + (eerieValue / 10);
+            
+            for (let i = 0; i < cloudCount; i++) {
+                const x = (i * 250 + Date.now() / 50) % (bgCanvas.width + 200) - 100;
+                const y = 100 + (i * 30) % 150;
+                
+                bgCtx.fillStyle = isNight ? 'rgba(200, 200, 255, 0.3)' : 'rgba(255, 255, 255, 0.8)';
+                bgCtx.beginPath();
+                bgCtx.arc(x, y, cloudSize, 0, Math.PI * 2);
+                bgCtx.arc(x + cloudSize * 0.8, y - cloudSize * 0.2, cloudSize * 0.7, 0, Math.PI * 2);
+                bgCtx.arc(x + cloudSize * 1.5, y, cloudSize * 0.9, 0, Math.PI * 2);
+                bgCtx.arc(x + cloudSize * 1.2, y + cloudSize * 0.3, cloudSize * 0.6, 0, Math.PI * 2);
+                bgCtx.fill();
+            }
+        }
+
+        // Draw mountains
+        function drawMountains() {
+            const mountainHeight = 150 + (heroicValue / 2);
+            const mountainCount = 3 + Math.floor(cosyValue / 30);
+            
+            for (let i = 0; i < mountainCount; i++) {
+                const x = i * 400 - (Date.now() / 100) % 400;
+                const height = mountainHeight + (i * 20);
+                
+                bgCtx.fillStyle = isNight ? 
+                    `rgba(${Math.floor(50 + i * 10)}, ${Math.floor(30 + i * 5)}, ${Math.floor(80 + i * 10)}, 0.7)` :
+                    `rgba(${Math.floor(100 + i * 10)}, ${Math.floor(150 + i * 5)}, ${Math.floor(200 + i * 10)}, 0.7)`;
+                
+                bgCtx.beginPath();
+                bgCtx.moveTo(x, bgCanvas.height);
+                bgCtx.lineTo(x + 200, bgCanvas.height - height);
+                bgCtx.lineTo(x + 400, bgCanvas.height);
+                bgCtx.closePath();
+                bgCtx.fill();
+            }
+        }
+
+        // Draw sun or moon
+        function drawSunMoon() {
+            const size = 50 + (cosyValue / 2);
+            const x = 100 + (eerieValue / 2);
+            const y = 100 + (heroicValue / 2);
+            
+            if (isNight) {
+                // Moon
+                bgCtx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                bgCtx.beginPath();
+                bgCtx.arc(x, y, size, 0, Math.PI * 2);
+                bgCtx.fill();
+                
+                // Moon craters
+                bgCtx.fillStyle = 'rgba(200, 200, 200, 0.7)';
+                bgCtx.beginPath();
+                bgCtx.arc(x - size/3, y - size/4, size/4, 0, Math.PI * 2);
+                bgCtx.arc(x + size/2, y + size/3, size/5, 0, Math.PI * 2);
+                bgCtx.arc(x - size/2, y + size/5, size/6, 0, Math.PI * 2);
+                bgCtx.fill();
+            } else {
+                // Sun
+                const gradient = bgCtx.createRadialGradient(x, y, 0, x, y, size);
+                gradient.addColorStop(0, '#FFFF00');
+                gradient.addColorStop(1, '#FFA500');
+                
+                bgCtx.fillStyle = gradient;
+                bgCtx.beginPath();
+                bgCtx.arc(x, y, size, 0, Math.PI * 2);
+                bgCtx.fill();
+                
+                // Sun rays
+                bgCtx.strokeStyle = 'rgba(255, 255, 0, 0.5)';
+                bgCtx.lineWidth = 3;
+                for (let i = 0; i < 12; i++) {
+                    const angle = (i * Math.PI / 6);
+                    const startX = x + Math.cos(angle) * size;
+                    const startY = y + Math.sin(angle) * size;
+                    const endX = x + Math.cos(angle) * (size * 1.5);
+                    const endY = y + Math.sin(angle) * (size * 1.5);
+                    
+                    bgCtx.beginPath();
+                    bgCtx.moveTo(startX, startY);
+                    bgCtx.lineTo(endX, endY);
+                    bgCtx.stroke();
+                }
+            }
+        }
+
+        // Draw foreground elements
+        function drawForeground() {
+            fgCtx.clearRect(0, 0, fgCanvas.width, fgCanvas.height);
+            
+            // Ground
+            fgCtx.fillStyle = isNight ? '#1a1a2e' : '#8B4513';
+            fgCtx.fillRect(0, bgCanvas.height - 100, bgCanvas.width, 100);
+            
+            // Grass details
+            fgCtx.fillStyle = isNight ? '#0a0a1a' : '#228B22';
+            for (let i = 0; i < 100; i++) {
+                const x = (i * 20) % bgCanvas.width;
+                const height = 5 + (Math.sin(i) * 5);
+                fgCtx.fillRect(x, bgCanvas.height - 100, 2, -height);
+            }
+            
+            // Trees
+            drawTrees();
+            
+            // Buildings
+            drawBuildings();
+        }
+
+        // Draw trees
+        function drawTrees() {
+            const treeCount = 5 + Math.floor(heroicValue / 20);
+            
+            for (let i = 0; i < treeCount; i++) {
+                const x = 100 + (i * 200);
+                const height = 100 + (cosyValue / 2);
+                
+                // Trunk
+                fgCtx.fillStyle = '#8B4513';
+                fgCtx.fillRect(x - 10, bgCanvas.height - 100 - height, 20, height);
+                
+                // Leaves
+                fgCtx.fillStyle = isNight ? '#0a3a0a' : '#228B22';
+                fgCtx.beginPath();
+                fgCtx.arc(x, bgCanvas.height - 100 - height - 20, 30, 0, Math.PI * 2);
+                fgCtx.fill();
+            }
+        }
+
+        // Draw buildings
+        function drawBuildings() {
+            const buildingCount = 3 + Math.floor(cosyValue / 30);
+            
+            for (let i = 0; i < buildingCount; i++) {
+                const x = 200 + (i * 300);
+                const height = 150 + (eerieValue / 2);
+                const width = 80 + (heroicValue / 5);
+                
+                // Building
+                fgCtx.fillStyle = isNight ? '#2a2a3a' : '#A9A9A9';
+                fgCtx.fillRect(x, bgCanvas.height - 100 - height, width, height);
+                
+                // Windows
+                fgCtx.fillStyle = isNight ? '#444466' : '#FFFF00';
+                for (let j = 0; j < 5; j++) {
+                    for (let k = 0; k < 3; k++) {
+                        if (Math.random() > 0.3) {
+                            fgCtx.fillRect(
+                                x + 10 + j * 15, 
+                                bgCanvas.height - 100 - height + 10 + k * 30, 
+                                10, 20
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
+        // Draw effects
+        function drawEffects() {
+            effectCtx.clearRect(0, 0, effectCanvas.width, effectCanvas.height);
+            
+            // Spotlight effect
+            if (heroicValue > 50) {
+                const spotlightIntensity = heroicValue / 100;
+                const centerX = bgCanvas.width / 2 + (Math.sin(Date.now() / 1000) * 100);
+                const centerY = bgCanvas.height / 2 + (Math.cos(Date.now() / 1000) * 50);
+                
+                const gradient = effectCtx.createRadialGradient(
+                    centerX, centerY, 0,
+                    centerX, centerY, 300
+                );
+                gradient.addColorStop(0, `rgba(255, 255, 255, ${spotlightIntensity * 0.8})`);
+                gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
+                
+                effectCtx.fillStyle = gradient;
+                effectCtx.fillRect(0, 0, effectCanvas.width, effectCanvas.height);
+            }
+            
+            // Curtain effect
+            if (cosyValue > 50) {
+                const curtainWidth = 50 + (cosyValue / 2);
+                const curtainHeight = 100 + (cosyValue / 2);
+                
+                effectCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                effectCtx.fillRect(0, 0, curtainWidth, effectCanvas.height);
+                effectCtx.fillRect(effectCanvas.width - curtainWidth, 0, curtainWidth, effectCanvas.height);
+            }
+            
+            // Rain effect
+            if (eerieValue > 50 && !isNight) {
+                const rainCount = 50 + (eerieValue / 2);
+                for (let i = 0; i < rainCount; i++) {
+                    const x = (i * 10 + Date.now() / 10) % effectCanvas.width;
+                    const y = (i * 20 + Date.now() / 5) % effectCanvas.height;
+                    const length = 10 + (eerieValue / 10);
+                    
+                    effectCtx.strokeStyle = 'rgba(200, 200, 255, 0.7)';
+                    effectCtx.lineWidth = 1;
+                    effectCtx.beginPath();
+                    effectCtx.moveTo(x, y);
+                    effectCtx.lineTo(x, y + length);
+                    effectCtx.stroke();
+                }
+            }
+        }
+
+        // Main animation loop
+        function animate() {
+            drawBackground();
+            drawForeground();
+            drawEffects();
+            
+            requestAnimationFrame(animate);
+        }
+
+        // Initialize the app
+        window.onload = init;
+    </script>
+</body>
+</html>

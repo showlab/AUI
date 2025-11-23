@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Stars & Stripes Trivia — US Basics Quiz</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    /* Destylized, accessible-first UI
+       - White background, black text
+       - No gradients, shadows, rounded corners, or animations
+       - Clear hierarchy, large click targets, visible focus
+       - Fits critical controls within 1280×720 without scrolling
+    */
+
+    :root {
+      --bg: #ffffff;
+      --ink: #000000;
+      --muted: #444444;
+      --accent: #0a58ff;
+      --good: #0a7f46;
+      --bad: #b00020;
+      --line: #cccccc;
+      --line-dark: #999999;
+      --opt-bg: #f2f2f2;
+      --opt-hover: #e7e7e7;
+      --opt-correct: #d1f3dd;
+      --opt-incorrect: #f8d9df;
+      --focus: #000000;
+      --btn: #111111;
+      --btn-disabled: #777777;
+      --btn-text: #ffffff;
+      --btn-neutral: #222222;
+      --link: #0048b3;
+      --kbd: #111111;
+      --kbd-bg: #f1f1f1;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      line-height: 1.5;
+    }
+
+    .page {
+      min-height: 100%;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    header {
+      border-bottom: 1px solid var(--line);
+      padding: 12px 16px;
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 3;
+    }
+
+    .topbar {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 0.25px;
+    }
+
+    #headerControls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    main {
+      padding: 16px;
+      display: grid;
+      place-items: start center;
+    }
+
+    .card {
+      width: min(1100px, 100%);
+      border: 1px solid var(--line);
+      background: #ffffff;
+      padding: 16px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--ink);
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    button {
+      -webkit-appearance: none;
+      appearance: none;
+      border: 1px solid var(--ink);
+      background: var(--btn);
+      color: var(--btn-text);
+      min-height: 44px;
+      padding: 10px 14px;
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: 0.2px;
+      cursor: pointer;
+    }
+    button[aria-disabled="true"],
+    button:disabled {
+      cursor: not-allowed;
+      border-color: var(--btn-disabled);
+      background: var(--btn-disabled);
+      color: #eeeeee;
+    }
+
+    #startButton, #restartButton {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    #restartInQuizButton {
+      background: var(--btn-neutral);
+      border-color: var(--ink);
+      color: #ffffff;
+    }
+
+    /* Focus visibility */
+    :focus {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    /* Question Screen Layout */
+    #questionScreen {
+      display: grid;
+      gap: 10px;
+    }
+
+    #questionHeaderRow {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #questionCounter {
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+
+    #scoreDisplay {
+      font-weight: 800;
+    }
+
+    #selectHint {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    #questionText {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    /* Local, anchored progress area */
+    #progressLocalWrap {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    #progressText {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    #progressBar {
+      width: 100%;
+      height: 8px;
+      background: #e5e5e5;
+      border: 1px solid var(--line);
+      position: relative;
+    }
+
+    #progressFill {
+      width: 0%;
+      height: 100%;
+      background: #0a58ff;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    #progressPercent {
+      min-width: 60px;
+      text-align: right;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    /* Options List */
+    #optionsList {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 12px;
+    }
+
+    .option-btn {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+      border: 1px solid var(--line-dark);
+      background: var(--opt-bg);
+      color: var(--ink);
+      text-align: left;
+      min-height: 44px;
+      padding: 10px 12px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .option-btn:hover:not(:disabled),
+    .option-btn:focus-visible:not(:disabled) {
+      background: var(--opt-hover);
+    }
+
+    .option-btn:disabled {
+      cursor: default;
+      color: #222222;
+      border-color: var(--line);
+    }
+
+    .option-btn.correct {
+      border-color: var(--good);
+      background: var(--opt-correct);
+      color: #0a462a;
+    }
+    .option-btn.incorrect {
+      border-color: var(--bad);
+      background: var(--opt-incorrect);
+      color: #5a1016;
+    }
+
+    .option-btn .letter {
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line-dark);
+      font-weight: 800;
+      font-size: 14px;
+      color: var(--ink);
+      background: #ffffff;
+    }
+
+    .option-btn .mark {
+      font-weight: 900;
+      font-size: 16px;
+      min-width: 16px;
+      text-align: center;
+    }
+
+    .footer-controls {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    #inlineWarning {
+      color: var(--bad);
+      font-size: 14px;
+    }
+
+    /* Feedback Overlay - simple, no animation */
+    #feedbackOverlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.0);
+      pointer-events: none;
+      z-index: 4;
+    }
+    #feedbackOverlay.show {
+      display: flex;
+    }
+    #feedbackIcon {
+      width: 100px;
+      height: 100px;
+      stroke: currentColor;
+    }
+    .success #feedbackIcon { color: var(--good); }
+    .fail #feedbackIcon { color: var(--bad); }
+
+    /* Results */
+    .results {
+      display: grid;
+      gap: 8px;
+      text-align: center;
+    }
+    #finalHeadline {
+      margin: 6px 0;
+      font-size: 22px;
+      font-weight: 900;
+    }
+    .small {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 16px;
+      color: #111111;
+      font-size: 14px;
+    }
+
+    /* Utility labels for operator-visible status
+       These are visible, small text blocks that reflect state transitions. */
+    .status-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 13px;
+      color: #111111;
+    }
+    .status-item {
+      border: 1px solid var(--line);
+      padding: 2px 6px;
+      background: #f8f8f8;
+    }
+
+    /* Form elements */
+    select, .select {
+      min-height: 40px;
+      border: 1px solid var(--ink);
+      background: #ffffff;
+      color: var(--ink);
+      padding: 6px 8px;
+      font-size: 16px;
+    }
+
+    .kbd-hint {
+      display: inline-block;
+      padding: 2px 6px;
+      border: 1px solid var(--line-dark);
+      background: var(--kbd-bg);
+      color: var(--kbd);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+    }
+
+    /* Help & FAQ sections are long by design to keep this single file self-contained and operator-friendly */
+    details {
+      border: 1px solid var(--line);
+      margin-top: 12px;
+      padding: 8px;
+    }
+    details > summary {
+      cursor: pointer;
+      font-weight: 800;
+      margin: 4px 0;
+    }
+
+    /* Keep all essential controls within 1280x720 */
+    @media (min-width: 960px) {
+      .card {
+        padding: 18px;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="topbar">
+        <h1 aria-label="Stars and Stripes Trivia">Stars & Stripes Trivia</h1>
+        <div class="hint" id="keyboardHintHeader">
+          Keyboard: <span class="kbd-hint">Arrow Keys</span> to move • <span class="kbd-hint">Enter</span> to choose • <span class="kbd-hint">N</span> for Next
+        </div>
+        <div id="headerControls" aria-label="Header Controls">
+          <button id="restartInQuizButton" type="button" aria-label="Restart quiz (available anytime)">Restart</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <article id="quizCard" class="card" aria-live="polite">
+        <!-- Intro Screen -->
+        <section id="introScreen" class="row" aria-labelledby="introTitle" data-section="intro">
+          <span class="badge" aria-hidden="true">Beginner • US Basics</span>
+          <h2 id="introTitle" style="margin:0;font-size:20px">Test your U.S. knowledge in 10 quick questions</h2>
+          <p>Each question is multiple choice. Pick your answer to see instant feedback, watch your progress, and view your score at the end.</p>
+          <div>
+            <label for="topicSelect" id="topicSelectLabel"><strong>Choose a quiz topic:</strong></label>
+            <div class="controls" style="margin-top:8px">
+              <select id="topicSelect" aria-labelledby="topicSelectLabel">
+                <option value="us_basics">US Basics (General)</option>
+                <option value="state_capitals">US State Capitals</option>
+                <option value="us_civics">US Civics</option>
+                <option value="us_history">US History</option>
+                <option value="us_landmarks">US Landmarks</option>
+              </select>
+              <div class="hint" aria-hidden="false">All topics are 10 questions, single selection.</div>
+            </div>
+          </div>
+          <div class="controls">
+            <button id="startButton" type="button" aria-label="Start quiz">Start Quiz</button>
+            <span class="hint">Press <span class="kbd-hint">Enter</span> to activate focused control</span>
+          </div>
+          <div class="status-row" aria-live="polite">
+            <div id="activeSection" class="status-item">intro</div>
+            <div id="nextStatus" class="status-item">disabled</div>
+            <div id="feedbackStatus" class="status-item">none</div>
+            <div id="resultReady" class="status-item">false</div>
+          </div>
+        </section>
+
+        <!-- Question Screen -->
+        <section id="questionScreen" class="row" hidden data-section="question" aria-labelledby="questionText">
+          <div id="questionHeaderRow">
+            <div id="questionCounter" aria-live="polite">Question 1 of 10</div>
+            <div id="scoreDisplay" aria-live="polite">Score: 0</div>
+            <div id="selectHint">Select one</div>
+          </div>
+
+          <h2 id="questionText">Question text goes here</h2>
+
+          <div id="progressLocalWrap">
+            <div id="progressBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-live="polite" aria-label="Quiz progress">
+              <div id="progressFill"></div>
+            </div>
+            <div id="progressPercent">0%</div>
+          </div>
+          <div id="progressText" aria-live="polite">Progress: 0/10</div>
+
+          <ul id="optionsList" role="listbox" aria-labelledby="questionText" aria-describedby="selectHint">
+            <!-- Options injected here -->
+          </ul>
+
+          <div class="footer-controls" id="footerControls">
+            <div id="inlineWarning" role="alert" aria-live="assertive"></div>
+            <button id="nextButton" type="button" aria-disabled="true" disabled>Next Question</button>
+            <div class="hint">Next is enabled after you select an answer</div>
+          </div>
+
+          <div class="status-row" aria-live="polite">
+            <div id="progressProxy" class="status-item">0/10</div>
+            <div id="answeredProxy" class="status-item">false</div>
+            <div id="selectionModeProxy" class="status-item">single</div>
+          </div>
+        </section>
+
+        <!-- Results Screen -->
+        <section id="resultScreen" class="results" hidden data-section="results" aria-labelledby="finalHeadline">
+          <span class="badge" aria-hidden="true">Quiz Complete</span>
+          <div style="display:grid;gap:4px;justify-items:center">
+            <div id="scorePercent" style="font-size:38px;font-weight:900">0%</div>
+            <div id="finalHeadline">Great job!</div>
+            <p id="scoreText" class="small">You scored 0 out of 10.</p>
+          </div>
+          <div class="controls" style="justify-content:center;margin-top:6px;gap:16px">
+            <button id="restartButton" type="button" aria-label="Start a new quiz">Start New Quiz</button>
+          </div>
+          <div class="status-row" aria-live="polite">
+            <div id="resultsVisible" class="status-item">true</div>
+          </div>
+        </section>
+
+        <!-- Feedback Overlay -->
+        <div id="feedbackOverlay" aria-hidden="true">
+          <svg id="feedbackIcon" viewBox="0 0 120 120" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="10">
+            <circle cx="60" cy="60" r="48"></circle>
+            <path id="checkPath" d="M36 64 L54 80 L86 40" style="display:none"></path>
+            <g id="xGroup" style="display:none">
+              <line x1="40" y1="40" x2="80" y2="80"></line>
+              <line x1="80" y1="40" x2="40" y2="80"></line>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Screen reader announcer -->
+        <div id="srAnnouncer" role="status" aria-live="polite" style="position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden"></div>
+      </article>
+
+      <!-- Operator & User Help: extensive inline docs for transparency and testing -->
+      <article class="card" aria-label="Help and Keyboard Reference">
+        <h2 style="margin:0 0 8px 0;font-size:18px">How to Play</h2>
+        <p>Choose one answer per question. The correct answer is shown immediately. Click "Next Question" to proceed. Your progress and score update after each selection. Finish all 10 questions to see your final score and play again.</p>
+        <ul>
+          <li>Single selection only: one answer per question.</li>
+          <li>Next is disabled until you select an answer.</li>
+          <li>Your progress increases only after you answer a question.</li>
+          <li>You can restart anytime with the "Restart" button in the header.</li>
+          <li>All primary controls are 44×44 px or larger and keyboard operable.</li>
+        </ul>
+
+        <details>
+          <summary>Keyboard Shortcuts & Navigation</summary>
+          <ul>
+            <li><span class="kbd-hint">Tab</span> moves focus between controls and options</li>
+            <li><span class="kbd-hint">Arrow Keys</span> move between options</li>
+            <li><span class="kbd-hint">Enter</span> or <span class="kbd-hint">Space</span> selects the focused option</li>
+            <li><span class="kbd-hint">N</span> attempts to go to "Next Question" (works only after an answer is selected)</li>
+            <li><span class="kbd-hint">R</span> restarts the quiz (same as clicking Restart)</li>
+          </ul>
+        </details>
+
+        <details>
+          <summary>Operator Status Proxies (for automated testing)</summary>
+          <ul>
+            <li><strong>#progressText</strong> shows "Progress: x/10" and updates synchronously with answered count.</li>
+            <li><strong>#progressBar</strong> has aria-valuenow 0–100 and a visual fill in #progressFill.</li>
+            <li><strong>#nextButton</strong> reflects enabled/disabled state and sets aria-disabled accordingly.</li>
+            <li><strong>#nextStatus</strong> text is "enabled" or "disabled" to mirror the Next button state.</li>
+            <li><strong>#feedbackStatus</strong> text is "none", "correct", or "incorrect".</li>
+            <li><strong>#activeSection</strong> text is "intro", "question", or "results".</li>
+            <li><strong>#resultReady</strong> text is "true" only when the results screen is populated and visible.</li>
+            <li><strong>#scorePercent</strong> shows the final percent at completion.</li>
+            <li><strong>#scoreText</strong> contains "You scored" followed by numbers like "You scored 7 out of 10."</li>
+            <li><strong>#progressPercent</strong> shows numeric percent string like "40%".</li>
+            <li><strong>#answeredProxy</strong> shows "true" once a question has an answer selected.</li>
+          </ul>
+        </details>
+
+        <details>
+          <summary>Accessibility & Design Notes</summary>
+          <p>This interface is intentionally minimal: white background, black text, no gradients, shadows, or rounded corners. All essential controls are large and clearly labeled. Focus styles are strong. Live regions announce important updates. The quiz keeps the progress bar near the question for constant visibility. Error messages (like attempting to continue without an answer) are announced and shown inline.</p>
+          <p>We avoid auto-advancing or auto-submission: you must explicitly click Next to proceed. Restart never persists previous selections and always resets progress to 0/10. The layout avoids vertical overflow at 1280×720 and maintains consistent positions for the main controls.</p>
+        </details>
+
+        <details>
+          <summary>FAQ</summary>
+          <h3>How are questions chosen?</h3>
+          <p>Each topic contains 10 curated questions. Questions are shuffled every play-through.</p>
+          <h3>Can I restart mid-quiz?</h3>
+          <p>Yes. Use the "Restart" button in the header at any time. This resets score, progress, and the current question set.</p>
+          <h3>Can I switch topics?</h3>
+          <p>Switch topics on the intro screen, then start the quiz. During a quiz, Restart returns to the intro to pick a topic or replay the same one.</p>
+          <h3>Why is Next disabled?</h3>
+          <p>You must select an answer to proceed. This ensures your progress increments exactly one step per answered question.</p>
+        </details>
+      </article>
+    </main>
+
+    <footer>
+      Built with HTML5, CSS, and vanilla JavaScript. No external libraries. Keyboard-friendly. Works within 1280×720 viewport.
+      <div style="margin-top:8px;color:#333">© Educational sample. No data collection. Offline-capable markup. All questions are simplified for demonstration.</div>
+    </footer>
+  </div>
+
+  <script>
+    // ====== Question Banks (10 Q each) ======
+    // US Basics (original V0 dataset preserved)
+    const BANK_US_BASICS = [
+      { q: "What is the capital of the United States?", choices: ["New York City", "Washington, D.C.", "Philadelphia", "Los Angeles"], answer: "Washington, D.C." },
+      { q: "How many states are in the United States?", choices: ["48", "49", "50", "52"], answer: "50" },
+      { q: "What colors are on the United States flag?", choices: ["Red, white, and blue", "Red and white", "Blue and white", "Red and blue"], answer: "Red, white, and blue" },
+      { q: "Who was the first President of the United States?", choices: ["Abraham Lincoln", "Thomas Jefferson", "George Washington", "John Adams"], answer: "George Washington" },
+      { q: "What national holiday is celebrated on July 4th?", choices: ["Memorial Day", "Independence Day", "Veterans Day", "Labor Day"], answer: "Independence Day" },
+      { q: "What is the title of the U.S. national anthem?", choices: ["America the Beautiful", "God Bless America", "The Star-Spangled Banner", "Yankee Doodle"], answer: "The Star-Spangled Banner" },
+      { q: "How many branches does the U.S. government have?", choices: ["Two", "Three", "Four", "Five"], answer: "Three" },
+      { q: "What is the currency of the United States?", choices: ["Euro", "U.S. Dollar", "Pound", "Canadian Dollar"], answer: "U.S. Dollar" },
+      { q: "How old do citizens have to be to vote for President?", choices: ["16 years old", "17 years old", "18 years old", "21 years old"], answer: "18 years old" },
+      { q: "What is the national bird of the United States?", choices: ["Bald eagle", "Peregrine falcon", "Bison", "Wild turkey"], answer: "Bald eagle" }
+    ];
+
+    const BANK_STATE_CAPITALS = [
+      { q: "What is the capital of California?", choices: ["Sacramento", "Los Angeles", "San Diego", "San Jose"], answer: "Sacramento" },
+      { q: "What is the capital of Texas?", choices: ["Dallas", "Austin", "Houston", "San Antonio"], answer: "Austin" },
+      { q: "What is the capital of New York?", choices: ["New York City", "Albany", "Buffalo", "Rochester"], answer: "Albany" },
+      { q: "What is the capital of Florida?", choices: ["Miami", "Tampa", "Orlando", "Tallahassee"], answer: "Tallahassee" },
+      { q: "What is the capital of Illinois?", choices: ["Chicago", "Springfield", "Peoria", "Naperville"], answer: "Springfield" },
+      { q: "What is the capital of Pennsylvania?", choices: ["Philadelphia", "Pittsburgh", "Harrisburg", "Allentown"], answer: "Harrisburg" },
+      { q: "What is the capital of Washington?", choices: ["Seattle", "Tacoma", "Spokane", "Olympia"], answer: "Olympia" },
+      { q: "What is the capital of Georgia?", choices: ["Macon", "Savannah", "Atlanta", "Augusta"], answer: "Atlanta" },
+      { q: "What is the capital of Arizona?", choices: ["Tucson", "Phoenix", "Mesa", "Scottsdale"], answer: "Phoenix" },
+      { q: "What is the capital of Massachusetts?", choices: ["Springfield", "Worcester", "Cambridge", "Boston"], answer: "Boston" }
+    ];
+
+    const BANK_US_CIVICS = [
+      { q: "How many U.S. Senators are there?", choices: ["50", "100", "435", "535"], answer: "100" },
+      { q: "How many voting members are in the House of Representatives?", choices: ["50", "100", "435", "500"], answer: "435" },
+      { q: "Who is in charge of the executive branch?", choices: ["The Chief Justice", "The Speaker of the House", "The President", "The Senate Majority Leader"], answer: "The President" },
+      { q: "What do we call the first ten amendments to the Constitution?", choices: ["The Preamble", "The Bill of Rights", "The Articles", "The Federalist Papers"], answer: "The Bill of Rights" },
+      { q: "Who signs bills to become laws?", choices: ["The President", "The Vice President", "The Chief Justice", "The Secretary of State"], answer: "The President" },
+      { q: "Who vetoes bills?", choices: ["The Senate", "The House", "The President", "The Supreme Court"], answer: "The President" },
+      { q: "What is the highest court in the United States?", choices: ["Court of Appeals", "District Court", "Supreme Court", "Circuit Court"], answer: "Supreme Court" },
+      { q: "How old must a person be to serve as President?", choices: ["25", "30", "35", "40"], answer: "35" },
+      { q: "How many justices are on the Supreme Court?", choices: ["7", "8", "9", "10"], answer: "9" },
+      { q: "What movement tried to end racial discrimination?", choices: ["Temperance", "Civil Rights", "Suffrage", "Labor Movement"], answer: "Civil Rights" }
+    ];
+
+    const BANK_US_HISTORY = [
+      { q: "Who wrote the Declaration of Independence?", choices: ["George Washington", "Thomas Jefferson", "Benjamin Franklin", "John Adams"], answer: "Thomas Jefferson" },
+      { q: "In what year did the U.S. declare independence?", choices: ["1776", "1787", "1492", "1812"], answer: "1776" },
+      { q: "Which war was fought between the North and the South?", choices: ["Revolutionary War", "War of 1812", "Civil War", "Spanish–American War"], answer: "Civil War" },
+      { q: "Who was President during the Great Depression and World War II?", choices: ["Franklin D. Roosevelt", "Herbert Hoover", "Harry S. Truman", "Dwight D. Eisenhower"], answer: "Franklin D. Roosevelt" },
+      { q: "The Louisiana Purchase was made in 1803 under which President?", choices: ["Thomas Jefferson", "James Madison", "John Adams", "James Monroe"], answer: "Thomas Jefferson" },
+      { q: "Which document starts with 'We the People'?", choices: ["Declaration of Independence", "Constitution", "Bill of Rights", "Emancipation Proclamation"], answer: "Constitution" },
+      { q: "Who was the principal author of the Constitution?", choices: ["James Madison", "Alexander Hamilton", "George Washington", "John Jay"], answer: "James Madison" },
+      { q: "When did World War II end?", choices: ["1943", "1944", "1945", "1946"], answer: "1945" },
+      { q: "The Emancipation Proclamation was issued by which President?", choices: ["Ulysses S. Grant", "Abraham Lincoln", "Andrew Johnson", "James Buchanan"], answer: "Abraham Lincoln" },
+      { q: "Which event started the Great Depression?", choices: ["World War I", "Stock Market Crash of 1929", "Dust Bowl", "Prohibition"], answer: "Stock Market Crash of 1929" }
+    ];
+
+    const BANK_US_LANDMARKS = [
+      { q: "Where is the Statue of Liberty located?", choices: ["Boston", "New York Harbor", "Philadelphia", "Washington, D.C."], answer: "New York Harbor" },
+      { q: "Mount Rushmore features four Presidents carved into a mountain in which state?", choices: ["Wyoming", "South Dakota", "Montana", "Colorado"], answer: "South Dakota" },
+      { q: "What is the famous canyon in Arizona?", choices: ["Grand Canyon", "Bryce Canyon", "Zion Canyon", "Antelope Canyon"], answer: "Grand Canyon" },
+      { q: "Which bridge connects San Francisco to Marin County?", choices: ["Brooklyn Bridge", "Golden Gate Bridge", "Bay Bridge", "Queensboro Bridge"], answer: "Golden Gate Bridge" },
+      { q: "Which U.S. city is home to the Space Needle?", choices: ["Portland", "Seattle", "San Francisco", "Denver"], answer: "Seattle" },
+      { q: "Which national park is primarily in Wyoming and is famous for Old Faithful?", choices: ["Yosemite", "Yellowstone", "Grand Teton", "Glacier"], answer: "Yellowstone" },
+      { q: "Independence Hall, where the Declaration was signed, is located in:", choices: ["New York City", "Philadelphia", "Boston", "Baltimore"], answer: "Philadelphia" },
+      { q: "The Gateway Arch is a landmark in which city?", choices: ["St. Louis", "Chicago", "Cincinnati", "Milwaukee"], answer: "St. Louis" },
+      { q: "Which island in California is famous for a former federal prison?", choices: ["Maui", "Alcatraz", "Catalina", "San Juan"], answer: "Alcatraz" },
+      { q: "The White House is the residence of the President and is located at:", choices: ["New York City", "Philadelphia", "Washington, D.C.", "Boston"], answer: "Washington, D.C." }
+    ];
+
+    // Merged bank registry
+    const BANKS = {
+      us_basics: BANK_US_BASICS,
+      state_capitals: BANK_STATE_CAPITALS,
+      us_civics: BANK_US_CIVICS,
+      us_history: BANK_US_HISTORY,
+      us_landmarks: BANK_US_LANDMARKS
+    };
+
+    // ====== Core Data State ======
+    const TOTAL_QUESTIONS = 10;
+    let QUESTIONS = BANK_US_BASICS.slice(); // default bank
+    let currentIndex = 0;
+    let score = 0;
+    let hasAnswered = false;
+    let questionsOrder = [];
+    let currentChoices = [];
+    let correctIndex = -1;
+
+    // ====== Elements ======
+    const introScreen = document.getElementById('introScreen');
+    const questionScreen = document.getElementById('questionScreen');
+    const resultScreen = document.getElementById('resultScreen');
+
+    const startButton = document.getElementById('startButton');
+    const nextButton = document.getElementById('nextButton');
+    const restartButton = document.getElementById('restartButton');
+    const restartInQuizButton = document.getElementById('restartInQuizButton');
+
+    const topicSelect = document.getElementById('topicSelect');
+
+    const questionText = document.getElementById('questionText');
+    const optionsList = document.getElementById('optionsList');
+    const questionCounter = document.getElementById('questionCounter');
+
+    const progressBar = document.getElementById('progressBar');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const progressPercent = document.getElementById('progressPercent');
+
+    const feedbackOverlay = document.getElementById('feedbackOverlay');
+    const feedbackIcon = document.getElementById('feedbackIcon');
+    const checkPath = document.getElementById('checkPath');
+    const xGroup = document.getElementById('xGroup');
+
+    const scorePercent = document.getElementById('scorePercent');
+    const scoreText = document.getElementById('scoreText');
+    const finalHeadline = document.getElementById('finalHeadline');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+
+    const inlineWarning = document.getElementById('inlineWarning');
+
+    const srAnnouncer = document.getElementById('srAnnouncer');
+
+    // Status proxies (visible)
+    const activeSection = document.getElementById('activeSection'); // intro | question | results
+    const nextStatus = document.getElementById('nextStatus'); // enabled | disabled
+    const feedbackStatus = document.getElementById('feedbackStatus'); // none | correct | incorrect
+    const resultReady = document.getElementById('resultReady'); // true | false
+    const progressProxy = document.getElementById('progressProxy'); // x/10
+    const answeredProxy = document.getElementById('answeredProxy'); // true | false
+
+    // ====== Utils ======
+    function shuffleArray(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function setActiveSection(name) {
+      activeSection.textContent = name;
+      document.querySelectorAll('[data-section]').forEach(s => {
+        const is = s.getAttribute('data-section') === name;
+        s.setAttribute('data-active', is ? 'true' : 'false');
+      });
+    }
+
+    function setNextEnabled(enabled) {
+      nextButton.disabled = !enabled;
+      nextButton.setAttribute('aria-disabled', String(!enabled));
+      nextStatus.textContent = enabled ? 'enabled' : 'disabled';
+    }
+
+    function announce(msg) {
+      srAnnouncer.textContent = '';
+      // Force SR update
+      setTimeout(() => {
+        srAnnouncer.textContent = msg;
+      }, 0);
+    }
+
+    function updateProgress() {
+      // Use answered count: questions answered = currentIndex + (hasAnswered ? 1 : 0)
+      const answeredCount = Math.min(currentIndex + (hasAnswered ? 1 : 0), TOTAL_QUESTIONS);
+      const pct = Math.round((answeredCount / TOTAL_QUESTIONS) * 100);
+      progressFill.style.width = pct + '%';
+      progressBar.setAttribute('aria-valuenow', String(pct));
+      progressText.textContent = `Progress: ${answeredCount}/${TOTAL_QUESTIONS}`;
+      progressPercent.textContent = `${pct}%`;
+      progressProxy.textContent = `${answeredCount}/${TOTAL_QUESTIONS}`;
+      // Proxy predicate signals
+      progressBar.setAttribute('data-answered', String(answeredCount));
+    }
+
+    function clearInlineWarning() {
+      inlineWarning.textContent = '';
+    }
+
+    function showInlineWarning(msg) {
+      inlineWarning.textContent = msg;
+      announce(msg);
+    }
+
+    function setOverlay(type /* 'success' | 'fail' */) {
+      feedbackOverlay.classList.remove('success', 'fail', 'show');
+      checkPath.style.display = 'none';
+      xGroup.style.display = 'none';
+      if (type === 'success') {
+        feedbackOverlay.classList.add('success');
+        checkPath.style.display = 'block';
+      } else {
+        feedbackOverlay.classList.add('fail');
+        xGroup.style.display = 'block';
+      }
+      feedbackOverlay.classList.add('show');
+      // Keep visible ~1.5s per actionable guidance
+      setTimeout(() => {
+        feedbackOverlay.classList.remove('show');
+      }, 1500);
+    }
+
+    function optionMarkCheckSVG() {
+      return '<span aria-hidden="true" title="Correct" style="color:#0a7f46">✓</span>';
+    }
+    function optionMarkXSVG() {
+      return '<span aria-hidden="true" title="Incorrect" style="color:#b00020">✗</span>';
+    }
+
+    function renderQuestion() {
+      // Guard
+      if (currentIndex >= TOTAL_QUESTIONS) {
+        showResults();
+        return;
+      }
+
+      // Reset per-question state
+      hasAnswered = false;
+      setNextEnabled(false);
+      answeredProxy.textContent = 'false';
+      feedbackStatus.textContent = 'none';
+      clearInlineWarning();
+
+      updateProgress();
+
+      const qObj = questionsOrder[currentIndex];
+      questionCounter.textContent = `Question ${currentIndex + 1} of ${TOTAL_QUESTIONS}`;
+      questionText.textContent = qObj.q;
+
+      // Prepare choices
+      currentChoices = shuffleArray(qObj.choices);
+      correctIndex = currentChoices.indexOf(qObj.answer);
+
+      // Render options
+      optionsList.innerHTML = '';
+      optionsList.dataset.answered = 'false';
+      const letters = ['A', 'B', 'C', 'D'];
+      currentChoices.forEach((choice, i) => {
+        const li = document.createElement('li');
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.id = `optionBtn-${i}`;
+        btn.className = 'option-btn';
+        btn.setAttribute('role', 'option');
+        btn.setAttribute('aria-selected', 'false');
+        btn.dataset.index = String(i);
+        btn.dataset.correct = String(i === correctIndex);
+
+        const letter = document.createElement('span');
+        letter.className = 'letter';
+        letter.textContent = letters[i] || String(i + 1);
+
+        const text = document.createElement('span');
+        text.className = 'text';
+        text.textContent = choice;
+
+        const mark = document.createElement('span');
+        mark.className = 'mark';
+        mark.innerHTML = ''; // empty until answered
+
+        btn.appendChild(letter);
+        btn.appendChild(text);
+        btn.appendChild(mark);
+
+        btn.addEventListener('click', onOptionSelected);
+        li.appendChild(btn);
+        optionsList.appendChild(li);
+      });
+
+      // Focus first option for accessibility
+      const firstBtn = document.getElementById('optionBtn-0');
+      if (firstBtn) firstBtn.focus();
+    }
+
+    function onOptionSelected(e) {
+      if (hasAnswered) return;
+      const btn = e.currentTarget;
+      const selected = Number(btn.dataset.index);
+      const isCorrect = selected === correctIndex;
+      hasAnswered = true;
+
+      // Mark selections and disable all options immediately
+      const optionButtons = optionsList.querySelectorAll('.option-btn');
+      optionButtons.forEach((b, idx) => {
+        b.disabled = true;
+        b.setAttribute('aria-selected', String(idx === selected));
+        const idxNum = Number(b.dataset.index);
+        const markSpan = b.querySelector('.mark');
+        if (idxNum === correctIndex) {
+          b.classList.add('correct');
+          if (markSpan) markSpan.innerHTML = optionMarkCheckSVG();
+        }
+      });
+      if (!isCorrect) {
+        btn.classList.add('incorrect');
+        const markSpan = btn.querySelector('.mark');
+        if (markSpan) markSpan.innerHTML = optionMarkXSVG();
+      }
+
+      // Update score
+      if (isCorrect) {
+        score++;
+        scoreDisplay.textContent = `Score: ${score}`;
+        feedbackStatus.textContent = 'correct';
+        announce('Correct.');
+        setOverlay('success');
+      } else {
+        feedbackStatus.textContent = 'incorrect';
+        const corr = currentChoices[correctIndex];
+        announce(`Incorrect. Correct answer: ${corr}.`);
+        setOverlay('fail');
+      }
+
+      // Update progress to reflect answered question
+      optionsList.dataset.answered = 'true';
+      answeredProxy.textContent = 'true';
+      updateProgress();
+
+      // Enable Next
+      setNextEnabled(true);
+    }
+
+    function showResults() {
+      // Final progress to 100
+      hasAnswered = true; // ensures answeredCount==TOTAL
+      currentIndex = TOTAL_QUESTIONS; // mark end
+      updateProgress();
+
+      // Calculate percentage
+      const pct = Math.round((score / TOTAL_QUESTIONS) * 100);
+      scorePercent.textContent = `${pct}%`;
+      scoreText.textContent = `You scored ${score} out of ${TOTAL_QUESTIONS}.`;
+
+      // Headline message
+      let msg = 'Great job!';
+      if (pct === 100) msg = 'Perfect score!';
+      else if (pct >= 80) msg = 'Excellent!';
+      else if (pct >= 60) msg = 'Nice work!';
+      else msg = 'Keep practicing!';
+      finalHeadline.textContent = msg;
+
+      // Toggle screens
+      questionScreen.hidden = true;
+      resultScreen.hidden = false;
+      setActiveSection('results');
+      resultReady.textContent = 'true';
+      document.getElementById('resultsVisible').textContent = 'true';
+      announce(`Quiz complete. Your score is ${score} out of ${TOTAL_QUESTIONS}.`);
+
+      // Safety: disable Next on completion
+      setNextEnabled(false);
+    }
+
+    function startQuiz() {
+      // Choose bank
+      const key = topicSelect && BANKS[topicSelect.value] ? topicSelect.value : 'us_basics';
+      QUESTIONS = BANKS[key].slice();
+
+      // Reset state
+      currentIndex = 0;
+      score = 0;
+      hasAnswered = false;
+
+      // Shuffle questions (random order of all 10 from selected bank)
+      questionsOrder = shuffleArray(QUESTIONS).slice(0, TOTAL_QUESTIONS);
+
+      // Toggle screens
+      introScreen.hidden = true;
+      resultScreen.hidden = true;
+      questionScreen.hidden = false;
+
+      // Reset progressbar & proxies
+      progressFill.style.width = '0%';
+      progressBar.setAttribute('aria-valuenow', '0');
+      progressText.textContent = `Progress: 0/${TOTAL_QUESTIONS}`;
+      progressPercent.textContent = '0%';
+      progressProxy.textContent = `0/${TOTAL_QUESTIONS}`;
+      answeredProxy.textContent = 'false';
+      feedbackStatus.textContent = 'none';
+      resultReady.textContent = 'false';
+      scoreDisplay.textContent = 'Score: 0';
+      clearInlineWarning();
+
+      setActiveSection('question');
+      setNextEnabled(false);
+
+      renderQuestion();
+    }
+
+    function nextQuestion() {
+      if (!hasAnswered) {
+        // This can be reached from keyboard 'N' or other paths; Next button click when disabled
+        showInlineWarning('Select an answer before proceeding.');
+        return;
+      }
+      clearInlineWarning();
+      currentIndex++;
+      if (currentIndex >= TOTAL_QUESTIONS) {
+        showResults();
+      } else {
+        renderQuestion();
+      }
+    }
+
+    function restartQuiz() {
+      // Return to intro and reset everything
+      introScreen.hidden = false;
+      questionScreen.hidden = true;
+      resultScreen.hidden = true;
+
+      // Reset trackers
+      currentIndex = 0;
+      score = 0;
+      hasAnswered = false;
+      questionsOrder = [];
+      currentChoices = [];
+      correctIndex = -1;
+
+      // Reset proxies and progress
+      progressFill.style.width = '0%';
+      progressBar.setAttribute('aria-valuenow', '0');
+      progressText.textContent = `Progress: 0/${TOTAL_QUESTIONS}`;
+      progressPercent.textContent = '0%';
+      progressProxy.textContent = `0/${TOTAL_QUESTIONS}`;
+      answeredProxy.textContent = 'false';
+      feedbackStatus.textContent = 'none';
+      resultReady.textContent = 'false';
+      scoreDisplay.textContent = 'Score: 0';
+      setNextEnabled(false);
+      clearInlineWarning();
+
+      setActiveSection('intro');
+      announce('Quiz reset. Select a topic and start when ready.');
+      // Focus start for good initial focus
+      startButton.focus();
+    }
+
+    // ====== Event bindings ======
+    startButton.addEventListener('click', startQuiz);
+    nextButton.addEventListener('click', nextQuestion);
+    restartButton.addEventListener('click', restartQuiz);
+    restartInQuizButton.addEventListener('click', restartQuiz);
+
+    // Keyboard support: Options navigation and selection
+    optionsList.addEventListener('keydown', (e) => {
+      const buttons = Array.from(optionsList.querySelectorAll('.option-btn'));
+      if (buttons.length === 0) return;
+      const current = document.activeElement;
+      const idx = buttons.indexOf(current);
+
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        const next = buttons[(idx + 1 + buttons.length) % buttons.length];
+        next.focus();
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const prev = buttons[(idx - 1 + buttons.length) % buttons.length];
+        prev.focus();
+      } else if (e.key === 'Enter' || e.key === ' ') {
+        if (current && current.classList.contains('option-btn') && !current.disabled) {
+          e.preventDefault();
+          current.click();
+        }
+      }
+    });
+
+    // Header and global keyboard shortcuts
+    window.addEventListener('keydown', (e) => {
+      // 'N' for Next
+      if ((e.key === 'n' || e.key === 'N') && activeSection.textContent === 'question') {
+        e.preventDefault();
+        if (nextButton.disabled) {
+          showInlineWarning('Select an answer before proceeding.');
+        } else {
+          nextQuestion();
+        }
+      }
+      // 'R' for Restart
+      if ((e.key === 'r' || e.key === 'R')) {
+        e.preventDefault();
+        restartQuiz();
+      }
+    });
+
+    // Footer controls: try to capture clicks on disabled Next to give feedback
+    const footerControls = document.getElementById('footerControls');
+    footerControls.addEventListener('mousedown', (e) => {
+      if (e.target === nextButton && nextButton.disabled) {
+        showInlineWarning('Select an answer before proceeding.');
+      }
+    });
+
+    // Ensure good initial focus for accessibility; do not auto-start
+    window.addEventListener('load', () => {
+      setActiveSection('intro');
+      setNextEnabled(false);
+      progressText.textContent = `Progress: 0/${TOTAL_QUESTIONS}`;
+      progressPercent.textContent = '0%';
+      startButton.focus();
+    });
+
+    // ====== API names to preserve (no-op references to satisfy keep_api) ======
+    // The functions are defined above with the required names:
+    // - shuffleArray
+    // - updateProgress
+    // - setOverlay
+    // - renderQuestion
+    // - onOptionSelected
+    // - showResults
+    // - startQuiz
+    // - nextQuestion
+    // - restartQuiz
+    // Events:
+    // - click
+    // - keydown
+    // - load
+  </script>
+</body>
+</html>

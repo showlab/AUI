@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artisan CSA - Hand-Drawn Farm Landing</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Quicksand:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #8B4513;
+            --secondary-color: #D2B48C;
+            --accent-color: #A0522D;
+            --light-color: #F5F5DC;
+            --dark-color: #3E2723;
+            --text-color: #5D4037;
+            --success-color: #4CAF50;
+            --warning-color: #FF9800;
+            --error-color: #F44336;
+            --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            color: var(--text-color);
+            background-color: var(--light-color);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(139, 69, 19, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(160, 82, 45, 0.05) 0%, transparent 20%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f5f5dc"/><path d="M0 50 Q 25 40, 50 50 T 100 50" stroke="%23d2b48c" stroke-width="0.5" fill="none"/><path d="M0 30 Q 25 20, 50 30 T 100 30" stroke="%23d2b48c" stroke-width="0.5" fill="none"/><path d="M0 70 Q 25 60, 50 70 T 100 70" stroke="%23d2b48c" stroke-width="0.5" fill="none"/></svg>');
+            background-size: 200px;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Playfair Display', serif;
+            color: var(--dark-color);
+            margin-bottom: 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            margin-right: 10px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 24px;
+        }
+
+        .logo-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin: 0 15px;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+
+        nav ul li a:hover {
+            background-color: var(--secondary-color);
+            color: var(--dark-color);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 80px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="20" cy="20" r="3" fill="%23d2b48c" opacity="0.3"/><circle cx="50" cy="50" r="2" fill="%23a0522d" opacity="0.3"/><circle cx="80" cy="80" r="4" fill="%238b4513" opacity="0.3"/></svg>');
+            background-size: 150px;
+            z-index: -1;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .zip-checker {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .zip-input {
+            padding: 12px 15px;
+            border: 2px solid var(--secondary-color);
+            border-radius: 4px;
+            font-size: 1rem;
+            width: 200px;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .zip-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.2);
+        }
+
+        .check-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            font-size: 1rem;
+        }
+
+        .check-btn:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .cta-button {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            font-size: 1.2rem;
+            margin-top: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .cta-button:hover {
+            background-color: #388E3C;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .basket-illustration {
+            max-width: 300px;
+            margin: 40px auto 0;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* Sections */
+        section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: "";
+            display: block;
+            width: 80px;
+            height: 3px;
+            background-color: var(--primary-color);
+            margin: 15px auto;
+            border-radius: 3px;
+        }
+
+        /* Seasonal Boxes */
+        .seasonal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .season-box {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .season-box:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .season-header {
+            padding: 20px;
+            text-align: center;
+            background-color: var(--secondary-color);
+            color: var(--dark-color);
+        }
+
+        .season-body {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--dark-color);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            width: 250px;
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            z-index: 10;
+            box-shadow: var(--shadow);
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+
+        .tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--dark-color) transparent transparent transparent;
+        }
+
+        .season-box:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .allergens {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .allergen-icon {
+            width: 24px;
+            height: 24px;
+            background-color: var(--secondary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Plans Section */
+        .plans-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .plan-toggle {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+            gap: 10px;
+        }
+
+        .toggle-btn {
+            padding: 12px 25px;
+            background-color: var(--secondary-color);
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .toggle-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .price-display {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 30px 0;
+            color: var(--primary-color);
+        }
+
+        .plan-options {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .plan-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            width: 250px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .plan-card:hover {
+            transform: scale(1.05);
+        }
+
+        .plan-name {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .plan-price {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 15px 0;
+            color: var(--accent-color);
+        }
+
+        .plan-features {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .plan-features li {
+            padding: 8px 0;
+            border-bottom: 1px dashed var(--secondary-color);
+        }
+
+        .plan-features li:last-child {
+            border-bottom: none;
+        }
+
+        .add-ons {
+            margin-top: 30px;
+        }
+
+        .addon-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--secondary-color);
+        }
+
+        .addon-item:last-child {
+            border-bottom: none;
+        }
+
+        .addon-toggle {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .addon-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Map Section */
+        .map-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .map-image {
+            flex: 1;
+            min-width: 300px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .map-image img {
+            width: 100%;
+            display: block;
+        }
+
+        .delivery-radius {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            border: 3px dashed var(--primary-color);
+            border-radius: 50%;
+            opacity: 0.7;
+        }
+
+        .pickup-locations {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .location-list {
+            list-style: none;
+        }
+
+        .location-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .distance-badge {
+            background-color: var(--success-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        /* Testimonials */
+        .testimonials-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .testimonial-carousel {
+            position: relative;
+            overflow: hidden;
+            padding: 20px 0;
+        }
+
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+
+        .testimonial-card {
+            min-width: 100%;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .farmer-portrait {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            background-color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: var(--primary-color);
+        }
+
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        .testimonial-author {
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        .carousel-nav {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .carousel-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--secondary-color);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .carousel-dot.active {
+            background-color: var(--primary-color);
+            transform: scale(1.2);
+        }
+
+        /* FAQ & Contact */
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .accordion-item {
+            margin-bottom: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .accordion-header {
+            background-color: var(--secondary-color);
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .accordion-content {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+
+        .accordion-content.active {
+            padding: 20px;
+            max-height: 500px;
+        }
+
+        .contact-form {
+            max-width: 600px;
+            margin: 30px auto 0;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--secondary-color);
+            border-radius: 4px;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .submit-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            font-size: 1rem;
+        }
+
+        .submit-btn:hover {
+            background-color: var(--accent-color);
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 50px 0 20px;
+            text-align: center;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-section {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .footer-section h3 {
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+        }
+
+        .footer-section p,
+        .footer-section a {
+            color: #ddd;
+            text-decoration: none;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .footer-section a:hover {
+            color: var(--secondary-color);
+        }
+
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .social-icon:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-3px);
+        }
+
+        .status-message {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .success {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+
+        .error {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: #F44336;
+        }
+
+        .info {
+            background-color: rgba(33, 150, 243, 0.2);
+            color: #2196F3;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .zip-checker {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .zip-input {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .plan-options {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .map-container {
+                flex-direction: column;
+            }
+            
+            nav ul {
+                display: none;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+                background: none;
+                border: none;
+                font-size: 1.5rem;
+                cursor: pointer;
+                color: var(--primary-color);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero {
+                padding: 50px 0;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .section-title {
+                font-size: 1.8rem;
+            }
+            
+            .seasonal-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <div class="logo-icon">A</div>
+                <div class="logo-text">Artisan CSA</div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#seasons">Seasons</a></li>
+                    <li><a href="#plans">Plans</a></li>
+                    <li><a href="#map">Map</a></li>
+                    <li><a href="#testimonials">Testimonials</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container hero-content">
+            <h1>Fresh, Local, Seasonal Produce</h1>
+            <p>Join our community-supported agriculture program and enjoy the freshest farm-fresh vegetables delivered directly to your doorstep.</p>
+            
+            <div class="zip-checker">
+                <input type="text" class="zip-input" id="zipInput" placeholder="Enter your ZIP code">
+                <button class="check-btn" id="checkZipBtn">Check Delivery</button>
+            </div>
+            
+            <div id="zipStatus" class="status-message"></div>
+            
+            <button class="cta-button" id="joinBtn">Join the Harvest</button>
+            
+            <div class="basket-illustration">
+                <svg width="300" height="200" viewBox="0 0 300 200">
+                    <path d="M50,150 Q150,50 250,150" fill="none" stroke="#8B4513" stroke-width="4"/>
+                    <path d="M50,150 L150,100 L250,150" fill="none" stroke="#8B4513" stroke-width="4"/>
+                    <circle cx="100" cy="120" r="10" fill="#8B4513"/>
+                    <circle cx="150" cy="110" r="12" fill="#8B4513"/>
+                    <circle cx="200" cy="130" r="8" fill="#8B4513"/>
+                    <circle cx="125" cy="140" r="15" fill="#8B4513"/>
+                    <circle cx="175" cy="145" r="10" fill="#8B4513"/>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- Seasonal Boxes -->
+    <section id="seasons">
+        <div class="container">
+            <h2 class="section-title">Our Seasonal Boxes</h2>
+            <div class="seasonal-grid">
+                <div class="season-box" role="button" tabindex="0" aria-describedby="spring-tooltip">
+                    <div class="season-header">
+                        <h3>Spring</h3>
+                    </div>
+                    <div class="season-body">
+                        <p>Delicate greens, radishes, peas, and early root vegetables</p>
+                        <div class="allergens">
+                            <div class="allergen-icon" title="Gluten">G</div>
+                            <div class="allergen-icon" title="Sulfites">S</div>
+                        </div>
+                    </div>
+                    <div class="tooltip" id="spring-tooltip">
+                        <p>Asparagus, arugula, radishes, peas, lettuce, carrots, beets</p>
+                    </div>
+                </div>
+                
+                <div class="season-box" role="button" tabindex="0" aria-describedby="summer-tooltip">
+                    <div class="season-header">
+                        <h3>Summer</h3>
+                    </div>
+                    <div class="season-body">
+                        <p>Hearty vegetables, tomatoes, herbs, and stone fruits</p>
+                        <div class="allergens">
+                            <div class="allergen-icon" title="Gluten">G</div>
+                            <div class="allergen-icon" title="Sulfites">S</div>
+                            <div class="allergen-icon" title="Nuts">N</div>
+                        </div>
+                    </div>
+                    <div class="tooltip" id="summer-tooltip">
+                        <p>Tomatoes, zucchini, peppers, corn, basil, cucumbers, berries</p>
+                    </div>
+                </div>
+                
+                <div class="season-box" role="button" tabindex="0" aria-describedby="fall-tooltip">
+                    <div class="season-header">
+                        <h3>Fall</h3>
+                    </div>
+                    <div class="season-body">
+                        <p>Root vegetables, squash, apples, and hearty greens</p>
+                        <div class="allergens">
+                            <div class="allergen-icon" title="Gluten">G</div>
+                            <div class="allergen-icon" title="Sulfites">S</div>
+                        </div>
+                    </div>
+                    <div class="tooltip" id="fall-tooltip">
+                        <p>Squash, pumpkins, sweet potatoes, apples, kale, Brussels sprouts</p>
+                    </div>
+                </div>
+                
+                <div class="season-box" role="button" tabindex="0" aria-describedby="winter-tooltip">
+                    <div class="season-header">
+                        <h3>Winter</h3>
+                    </div>
+                    <div class="season-body">
+                        <p>Storage vegetables, citrus, and preserved items</p>
+                        <div class="allergens">
+                            <div class="allergen-icon" title="Gluten">G</div>
+                        </div>
+                    </div>
+                    <div class="tooltip" id="winter-tooltip">
+                        <p>Cabbage, turnips, winter squash, citrus, onions, garlic</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Plans Section -->
+    <section id="plans">
+        <div class="container">
+            <h2 class="section-title">Membership Plans</h2>
+            
+            <div class="plans-container">
+                <div class="plan-toggle">
+                    <button class="toggle-btn active" data-plan="weekly" id="weeklyToggle">Weekly</button>
+                    <button class="toggle-btn" data-plan="biweekly" id="biweeklyToggle">Bi-Weekly</button>
+                </div>
+                
+                <div class="price-display" id="priceDisplay">$25 / week</div>
+                
+                <div class="plan-options">
+                    <div class="plan-card">
+                        <h3 class="plan-name">Basic</h3>
+                        <div class="plan-price">$25</div>
+                        <ul class="plan-features">
+                            <li>Seasonal vegetables</li>
+                            <li>2-3 varieties</li>
+                            <li>Delivery to your door</li>
+                            <li>Weekly updates</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="plan-card">
+                        <h3 class="plan-name">Premium</h3>
+                        <div class="plan-price">$40</div>
+                        <ul class="plan-features">
+                            <li>All seasonal vegetables</li>
+                            <li>5-6 varieties</li>
+                            <li>Delivery to your door</li>
+                            <li>Weekly updates</li>
+                            <li>Recipe cards included</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="add-ons">
+                    <h3>Add-Ons</h3>
+                    <div class="addon-item">
+                        <span>Eggs (1 dozen)</span>
+                        <label class="addon-toggle">
+                            <input type="checkbox" id="eggsToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="addon-item">
+                        <span>Flowers (1 bouquet)</span>
+                        <label class="addon-toggle">
+                            <input type="checkbox" id="flowersToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="addon-item">
+                        <span>Bread (1 loaf)</span>
+                        <label class="addon-toggle">
+                            <input type="checkbox" id="breadToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div id="totalPriceDisplay" class="price-display" style="margin-top: 20px;">$25.00 Total</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section id="map">
+        <div class="container">
+            <h2 class="section-title">Delivery Areas</h2>
+            
+            <div class="map-container">
+                <div class="map-image">
+                    <svg width="500" height="300" viewBox="0 0 500 300">
+                        <rect x="0" y="0" width="500" height="300" fill="#F5F5DC"/>
+                        <path d="M100,100 L150,80 L200,120 L250,100 L300,140 L350,120 L400,160 L450,140" stroke="#8B4513" stroke-width="2" fill="none"/>
+                        <circle cx="150" cy="80" r="5" fill="#8B4513"/>
+                        <circle cx="200" cy="120" r="5" fill="#8B4513"/>
+                        <circle cx="250" cy="100" r="5" fill="#8B4513"/>
+                        <circle cx="300" cy="140" r="5" fill="#8B4513"/>
+                        <circle cx="350" cy="120" r="5" fill="#8B4513"/>
+                        <circle cx="400" cy="160" r="5" fill="#8B4513"/>
+                        <circle cx="450" cy="140" r="5" fill="#8B4513"/>
+                        <rect x="50" y="50" width="400" height="200" fill="none" stroke="#A0522D" stroke-dasharray="5,5"/>
+                        <circle cx="250" cy="150" r="100" fill="none" stroke="#8B4513" stroke-opacity="0.3" stroke-dasharray="5,5"/>
+                        <text x="250" y="150" text-anchor="middle" fill="#8B4513" font-size="14">Delivery Radius</text>
+                    </svg>
+                    <div class="delivery-radius"></div>
+                </div>
+                
+                <div class="pickup-locations">
+                    <h3>Pickup Locations</h3>
+                    <ul class="location-list">
+                        <li class="location-item">
+                            <span>Central Park Community Center</span>
+                            <span class="distance-badge">2.3 miles</span>
+                        </li>
+                        <li class="location-item">
+                            <span>Riverside Elementary</span>
+                            <span class="distance-badge">4.1 miles</span>
+                        </li>
+                        <li class="location-item">
+                            <span>Downtown Farmers Market</span>
+                            <span class="distance-badge">1.8 miles</span>
+                        </li>
+                        <li class="location-item">
+                            <span>Green Valley Community Hall</span>
+                            <span class="distance-badge">6.7 miles</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section id="testimonials">
+        <div class="container">
+            <h2 class="section-title">What Our Members Say</h2>
+            
+            <div class="testimonials-container">
+                <div class="testimonial-carousel">
+                    <div class="carousel-track">
+                        <div class="testimonial-card">
+                            <div class="farmer-portrait">F</div>
+                            <p class="testimonial-text">"The quality of produce from Artisan CSA is unmatched. I've never tasted vegetables this fresh!"</p>
+                            <p class="testimonial-author">- Sarah J., Member since 2020</p>
+                        </div>
+                        
+                        <div class="testimonial-card">
+                            <div class="farmer-portrait">M</div>
+                            <p class="testimonial-text">"My family has been part of this program for two seasons now. We love the variety and the community feel."</p>
+                            <p class="testimonial-author">- Michael T., Member since 2021</p>
+                        </div>
+                        
+                        <div class="testimonial-card">
+                            <div class="farmer-portrait">L</div>
+                            <p class="testimonial-text">"The weekly newsletters with recipes and farming stories make this more than just a CSA. It's an experience."</p>
+                            <p class="testimonial-author">- Lisa K., Member since 2019</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="carousel-nav">
+                    <div class="carousel-dot active" data-slide="0"></div>
+                    <div class="carousel-dot" data-slide="1"></div>
+                    <div class="carousel-dot" data-slide="2"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ & Contact -->
+    <section id="faq">
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            
+            <div class="faq-container">
+                <div class="accordion-item">
+                    <div class="accordion-header" role="button" tabindex="0">
+                        <span>How do I sign up for a membership?</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p>Signing up is easy! Simply visit our plans page, select your preferred plan, and enter your delivery information. You'll receive a confirmation email with details about your first delivery.</p>
+                    </div>
+                </div>
+                
+                <div class="accordion-item">
+                    <div class="accordion-header" role="button" tabindex="0">
+                        <span>What happens if I miss a delivery?</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p>If you're unable to collect your delivery, please contact us at least 24 hours in advance. We can arrange for a rescheduled delivery or provide a refund for that week.</p>
+                    </div>
+                </div>
+                
+                <div class="accordion-item">
+                    <div class="accordion-header" role="button" tabindex="0">
+                        <span>Can I customize my box?</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p>While we offer standard seasonal boxes, we do allow for some customization. Please contact us to discuss options for specific dietary needs or preferences.</p>
+                    </div>
+                </div>
+                
+                <div class="accordion-item">
+                    <div class="accordion-header" role="button" tabindex="0">
+                        <span>Do you deliver to all areas?</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p>We currently serve the greater metropolitan area. Check our delivery map to see if your zip code is within our service area. If not, we may have pickup locations available near you.</p>
+                    </div>
+                </div>
+                
+                <div class="accordion-item">
+                    <div class="accordion-header" role="button" tabindex="0">
+                        <span>What if I have food allergies?</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p>We clearly indicate common allergens in each season's produce. All our products are grown organically without pesticides. For specific concerns, please contact us directly before signing up.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="contact-form">
+                <h3>Contact Us</h3>
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" required></textarea>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Artisan CSA</h3>
+                    <p>Providing fresh, locally-grown produce to our community since 2015.</p>
+                    <p>Supporting sustainable farming practices and local agriculture.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Contact Info</h3>
+                    <p>123 Farm Road, Green Valley</p>
+                    <p>Phone: (555) 123-4567</p>
+                    <p>Email: info@artisan-csa.com</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <div class="social-icons">
+                        <a href="#" class="social-icon">f</a>
+                        <a href="#" class="social-icon">t</a>
+                        <a href="#" class="social-icon">i</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                &copy; 2023 Artisan CSA. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ZIP Code Checker with enhanced functionality
+        document.getElementById('checkZipBtn').addEventListener('click', function() {
+            const zip = document.getElementById('zipInput').value.trim();
+            const statusDiv = document.getElementById('zipStatus');
+            
+            // Clear previous status
+            statusDiv.className = 'status-message';
+            
+            if (!zip) {
+                statusDiv.textContent = 'Please enter a ZIP code.';
+                statusDiv.className += ' error';
+                return;
+            }
+            
+            if (zip.length !== 5 || !/^\d+$/.test(zip)) {
+                statusDiv.textContent = 'Please enter a valid 5-digit ZIP code.';
+                statusDiv.className += ' error';
+                return;
+            }
+            
+            // Simulate API call to check delivery area
+            // In a real app, this would be an actual API call
+            setTimeout(() => {
+                // Define in-area ZIP codes for demonstration
+                const validZips = ['94110', '94111', '94112', '94113', '94114'];
+                const outOfAreaZips = ['90210', '10001', '60601', '75201'];
+                
+                if (validZips.includes(zip)) {
+                    statusDiv.textContent = `Great news! We deliver to ZIP code ${zip}.`;
+                    statusDiv.className += ' success';
+                    // Set DOM proxy for automation
+                    document.body.setAttribute('data-zip-status', 'in-area');
+                } else if (outOfAreaZips.includes(zip)) {
+                    statusDiv.textContent = `Sorry, we don't currently deliver to ZIP code ${zip}. However, you can pick up your produce at one of our nearby locations.`;
+                    statusDiv.className += ' info';
+                    // Set DOM proxy for automation
+                    document.body.setAttribute('data-zip-status', 'out-of-area');
+                    // Scroll to map section to show pickup locations
+                    document.getElementById('map').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    statusDiv.textContent = `We're expanding our delivery area. ZIP code ${zip} is not yet in our service zone, but we'll notify you when we start delivering to your area.`;
+                    statusDiv.className += ' info';
+                    // Set DOM proxy for automation
+                    document.body.setAttribute('data-zip-status', 'pending');
+                }
+            }, 500);
+        });
+
+        // Enhanced ZIP input validation on Enter key
+        document.getElementById('zipInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('checkZipBtn').click();
+            }
+        });
+
+        // Plan Toggle with price calculation
+        const toggleButtons = document.querySelectorAll('.toggle-btn');
+        const priceDisplay = document.getElementById('priceDisplay');
+        const totalPriceDisplay = document.getElementById('totalPriceDisplay');
+        const addonToggles = document.querySelectorAll('.addon-toggle input');
+        let basePrice = 25;
+        let addonsPrice = 0;
+
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                toggleButtons.forEach(btn => btn.classList.remove('active'));
+                
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                // Update price display
+                if (this.dataset.plan === 'weekly') {
+                    basePrice = 25;
+                    priceDisplay.textContent = '$25 / week';
+                    totalPriceDisplay.textContent = `$${(basePrice + addonsPrice).toFixed(2)} Total`;
+                } else {
+                    basePrice = 45;
+                    priceDisplay.textContent = '$45 / bi-week';
+                    totalPriceDisplay.textContent = `$${(basePrice + addonsPrice).toFixed(2)} Total`;
+                }
+            });
+        });
+
+        // Add-on toggles with real-time price calculation
+        addonToggles.forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                const addonName = this.parentElement.previousElementSibling.textContent;
+                const addonPrices = {
+                    'Eggs (1 dozen)': 5,
+                    'Flowers (1 bouquet)': 10,
+                    'Bread (1 loaf)': 3
+                };
+                
+                if (this.checked) {
+                    addonsPrice += addonPrices[addonName];
+                    console.log(`Added ${addonName} to your order`);
+                } else {
+                    addonsPrice -= addonPrices[addonName];
+                    console.log(`Removed ${addonName} from your order`);
+                }
+                
+                // Update total price display
+                totalPriceDisplay.textContent = `$${(basePrice + addonsPrice).toFixed(2)} Total`;
+            });
+        });
+
+        // Testimonial Carousel with keyboard navigation
+        let currentSlide = 0;
+        const slides = document.querySelector('.carousel-track').children;
+        const dots = document.querySelectorAll('.carousel-dot');
+        
+        function showSlide(index) {
+            // Hide all slides
+            for (let i = 0; i < slides.length; i++) {
+                slides[i].style.display = 'none';
+            }
+            
+            // Show current slide
+            slides[index].style.display = 'block';
+            
+            // Update dots
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+            
+            currentSlide = index;
+        }
+        
+        // Initialize carousel
+        showSlide(0);
+        
+        // Dot navigation
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                showSlide(index);
+            });
+        });
+
+        // Auto-rotate testimonials every 5 seconds
+        setInterval(() => {
+            currentSlide = (currentSlide + 1) % slides.length;
+            showSlide(currentSlide);
+        }, 5000);
+
+        // FAQ Accordion with keyboard support
+        const accordionHeaders = document.querySelectorAll('.accordion-header');
+        
+        accordionHeaders.forEach(header => {
+            header.addEventListener('click', function() {
+                const content = this.nextElementSibling;
+                const arrow = this.querySelector('.arrow');
+                
+                // Toggle active class on content
+                content.classList.toggle('active');
+                
+                // Rotate arrow
+                if (content.classList.contains('active')) {
+                    arrow.textContent = '▲';
+                } else {
+                    arrow.textContent = '▼';
+                }
+            });
+            
+            // Add keyboard support
+            header.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.click();
+                }
+            });
+        });
+
+        // Form Submission with DOM feedback
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+            
+            // Simple validation
+            if (!name || !email || !message) {
+                alert('Please fill in all fields.');
+                return;
+            }
+            
+            // Show success message
+            alert('Thank you for your message! We will get back to you soon.');
+            
+            // Reset form
+            this.reset();
+            
+            // Set DOM proxy for automation
+            document.body.setAttribute('data-form-submitted', 'true');
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    
+                    // Set DOM proxy for automation
+                    document.body.setAttribute('data-active-section', target.id);
+                }
+            });
+        });
+
+        // Enhanced tooltip behavior for keyboard users
+        const seasonBoxes = document.querySelectorAll('.season-box');
+        seasonBoxes.forEach(box => {
+            box.addEventListener('mouseenter', function() {
+                this.querySelector('.tooltip').style.opacity = '1';
+                this.querySelector('.tooltip').style.visibility = 'visible';
+            });
+            
+            box.addEventListener('mouseleave', function() {
+                this.querySelector('.tooltip').style.opacity = '0';
+                this.querySelector('.tooltip').style.visibility = 'hidden';
+            });
+            
+            // Keyboard support
+            box.addEventListener('focus', function() {
+                this.querySelector('.tooltip').style.opacity = '1';
+                this.querySelector('.tooltip').style.visibility = 'visible';
+            });
+            
+            box.addEventListener('blur', function() {
+                this.querySelector('.tooltip').style.opacity = '0';
+                this.querySelector('.tooltip').style.visibility = 'hidden';
+            });
+        });
+
+        // Enhanced CTA button functionality
+        document.getElementById('joinBtn').addEventListener('click', function() {
+            // Scroll to plans section
+            document.getElementById('plans').scrollIntoView({ behavior: 'smooth' });
+            
+            // Set DOM proxy for automation
+            document.body.setAttribute('data-cta-clicked', 'true');
+        });
+
+        // Add keyboard navigation to seasonal boxes
+        seasonBoxes.forEach((box, index) => {
+            box.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    // Toggle tooltip
+                    const tooltip = this.querySelector('.tooltip');
+                    if (tooltip.style.opacity === '1') {
+                        tooltip.style.opacity = '0';
+                        tooltip.style.visibility = 'hidden';
+                    } else {
+                        tooltip.style.opacity = '1';
+                        tooltip.style.visibility = 'visible';
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

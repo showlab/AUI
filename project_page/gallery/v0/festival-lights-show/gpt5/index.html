@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Festival Lights Show</title>
+<style>
+  :root{
+    --bg1: #0f1020;
+    --bg2: #090a16;
+    --panel: rgba(255,255,255,0.08);
+    --panel-strong: rgba(255,255,255,0.14);
+    --accent: #6cf0ff;
+    --accent2: #ff6cea;
+    --text: #eef2ff;
+    --muted: #a6b0d8;
+    --good: #34d399;
+    --warn: #f59e0b;
+    --bad: #ef4444;
+    --radius: 14px;
+    --shadow: 0 10px 30px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.08);
+  }
+
+  html, body {
+    height: 100%;
+    background: radial-gradient(1200px 800px at 20% 10%, #140e30 0%, #0b0b1b 35%, #070712 55%, #05050b 100%), linear-gradient(120deg, var(--bg1), var(--bg2));
+    color: var(--text);
+    font-family: Inter, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
+  }
+
+  /* Subtle animated background lights */
+  .bg-aurora {
+    position: fixed;
+    inset: -20vmax;
+    pointer-events: none;
+    filter: blur(60px) saturate(150%);
+    opacity: 0.5;
+    background:
+      radial-gradient(35vmax 35vmax at 20% 30%, rgba(255,0,204,0.25), transparent 65%),
+      radial-gradient(35vmax 35vmax at 80% 70%, rgba(0,200,255,0.28), transparent 65%),
+      radial-gradient(40vmax 40vmax at 60% 10%, rgba(255,200,0,0.18), transparent 70%),
+      radial-gradient(30vmax 30vmax at 10% 85%, rgba(0,255,170,0.2), transparent 70%);
+    animation: floatAurora 22s infinite linear alternate;
+    z-index: 0;
+  }
+  @keyframes floatAurora {
+    0% { transform: translate3d(0,0,0) scale(1); }
+    100% { transform: translate3d(4vmax,-3vmax,0) scale(1.05); }
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 22px;
+    position: relative;
+    z-index: 2;
+  }
+  header .title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .logo {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, #ff6cea, #ffa96c, #faff6c, #6cffb7, #6cf0ff, #a06cff, #ff6cea);
+    position: relative;
+    box-shadow: 0 0 20px rgba(255,108,234,0.35);
+  }
+  .logo::after {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9), rgba(255,255,255,0.1) 45%, rgba(0,0,0,0.25) 100%);
+  }
+  h1 {
+    font-size: 22px; margin: 0; letter-spacing: 0.5px;
+  }
+  .subtitle { color: var(--muted); font-size: 13px; }
+
+  .wrap {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    grid-template-rows: minmax(0, 1fr);
+    gap: 16px;
+    height: calc(100% - 74px);
+    padding: 0 16px 16px 16px;
+    position: relative;
+    z-index: 2;
+  }
+  @media (max-width: 1000px) {
+    .wrap {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto minmax(0, 1fr);
+      height: auto;
+      min-height: calc(100% - 74px);
+      overflow: auto;
+    }
+  }
+
+  aside {
+    background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05));
+    border-radius: var(--radius);
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(12px);
+    padding: 14px 14px 18px 14px;
+    overflow: auto;
+    max-height: 100%;
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  .panel h2 {
+    font-size: 15px; margin: 0 0 8px 0; letter-spacing: 0.4px; color: #eaf0ff;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 10px;
+    margin: 8px 0;
+  }
+  label { font-size: 12px; color: var(--muted); }
+
+  select, input[type="range"], input[type="color"], button, input[type="file"] {
+    -webkit-appearance: none; appearance: none;
+    font: inherit; color: var(--text);
+  }
+
+  select, input[type="file"], .btn {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 10px;
+    padding: 8px 10px;
+    cursor: pointer;
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 8px; min-height: 36px; user-select: none;
+    transition: transform .06s ease, box-shadow .2s ease, background .2s ease;
+    background-image: radial-gradient(125% 180% at 30% 20%, rgba(255,255,255,0.14), rgba(255,255,255,0.04));
+  }
+  .btn:hover { box-shadow: 0 8px 18px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.12) inset; }
+  .btn:active { transform: translateY(1px) scale(0.99); }
+  .btn.primary {
+    background:
+      linear-gradient(180deg, rgba(108,240,255,0.25), rgba(108,240,255,0.06)),
+      rgba(255,255,255,0.06);
+    border-color: rgba(108,240,255,0.6);
+    box-shadow: 0 0 22px rgba(108,240,255,0.25);
+  }
+  .btn.warn {
+    border-color: rgba(255,132,56,0.6);
+    background: linear-gradient(180deg, rgba(255,132,56,0.25), rgba(255,132,56,0.06)), rgba(255,255,255,0.06);
+    box-shadow: 0 0 22px rgba(255,132,56,0.2);
+  }
+  .btn.ghost {
+    background: rgba(255,255,255,0.04);
+  }
+
+  input[type="color"] {
+    width: 40px; height: 28px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);
+    padding: 0; background: transparent; cursor: pointer;
+  }
+
+  .range {
+    display: grid; grid-template-columns: 48px 1fr 42px; gap: 8px; align-items: center;
+  }
+  .range input[type="range"] {
+    width: 100%;
+    height: 8px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.3), rgba(255,255,255,0.08));
+    outline: none; cursor: pointer;
+  }
+  .range input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #fff, #bbb);
+    border: 1px solid rgba(0,0,0,0.25);
+    box-shadow: 0 0 0 6px rgba(108,240,255,0.25);
+  }
+  .range input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #fff, #bbb);
+    border: 1px solid rgba(0,0,0,0.25);
+    box-shadow: 0 0 0 6px rgba(108,240,255,0.25);
+  }
+
+  .controls-row {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-top: 8px;
+  }
+  .hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  .stage {
+    position: relative;
+    background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02));
+    border-radius: var(--radius);
+    border: 1px solid rgba(255,255,255,0.14);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+
+  .toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 12px; gap: 10px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.12));
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+  }
+  .toolbar .left, .toolbar .right { display: flex; align-items: center; gap: 8px; }
+
+  #canvasWrap {
+    position: relative;
+    width: 100%; height: 100%;
+    display: grid;
+    place-items: center;
+    background: radial-gradient(80% 90% at 50% 50%, rgba(0,0,0,0.45), rgba(0,0,0,0.75));
+  }
+  canvas {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    background: #020208; /* LED wall base */
+    display: block;
+  }
+
+  .pill {
+    padding: 4px 8px; font-size: 12px; border-radius: 999px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+
+  .meter {
+    height: 10px; border-radius: 8px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    overflow: hidden;
+  }
+  .meter > span {
+    display: block; height: 100%;
+    background: linear-gradient(90deg, #22d3ee, #a78bfa, #f472b6);
+    width: 0%;
+    transition: width 80ms linear;
+  }
+
+  footer {
+    position: absolute; left: 18px; bottom: 12px; right: 18px;
+    display: flex; align-items: center; justify-content: space-between;
+    color: var(--muted); font-size: 12px;
+    z-index: 2; pointer-events: none;
+  }
+  footer .kbd {
+    padding: 2px 6px; border-radius: 6px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    margin: 0 4px;
+  }
+
+  /* Small audio meter canvas for spectrum preview */
+  #audioMeterCanvas {
+    display: block; width: 100%; height: 42px;
+    background: rgba(0,0,0,0.35);
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+</style>
+</head>
+<body>
+  <div class="bg-aurora" aria-hidden="true"></div>
+
+  <header>
+    <div class="title">
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <h1>Festival Lights Show</h1>
+        <div class="subtitle">Control a vibrant virtual light wall with patterns, colors, and music sync</div>
+      </div>
+    </div>
+    <div class="pill">Viewport-ready: 1280 × 720</div>
+  </header>
+
+  <div class="wrap">
+    <aside>
+      <form id="controlForm" aria-label="Light show controls">
+        <div class="panel">
+          <h2>Show Controls</h2>
+          <div class="row">
+            <label for="patternSelect">Pattern</label>
+            <select id="patternSelect" title="Select a light pattern">
+              <option value="static">Static</option>
+              <option value="pulse">Pulse</option>
+              <option value="wave">Wave</option>
+              <option value="chase">Chase</option>
+              <option value="sparkle">Sparkle</option>
+              <option value="firefly">Firefly</option>
+              <option value="rainbow">Rainbow</option>
+              <option value="spectrum">Spectrum</option>
+            </select>
+          </div>
+
+          <div class="row">
+            <label for="colorPicker">Base Color</label>
+            <input id="colorPicker" type="color" value="#6cf0ff" title="Choose base color">
+          </div>
+
+          <div class="range">
+            <label for="hueSlider">Hue</label>
+            <input id="hueSlider" type="range" min="0" max="360" step="1" value="0" />
+            <span id="hueValue">0°</span>
+          </div>
+
+          <div class="range">
+            <label for="satSlider">Satur.</label>
+            <input id="satSlider" type="range" min="0" max="100" step="1" value="90" />
+            <span id="satValue">90%</span>
+          </div>
+
+          <div class="range">
+            <label for="brightnessSlider">Bright</label>
+            <input id="brightnessSlider" type="range" min="10" max="200" step="1" value="100" />
+            <span id="brightnessValue">100%</span>
+          </div>
+
+          <div class="range">
+            <label for="speedSlider">Speed</label>
+            <input id="speedSlider" type="range" min="0" max="300" step="1" value="120" />
+            <span id="speedValue">1.20x</span>
+          </div>
+
+          <div class="range">
+            <label for="densitySlider">Density</label>
+            <input id="densitySlider" type="range" min="1" max="100" step="1" value="50" />
+            <span id="densityValue">50%</span>
+          </div>
+
+          <div class="range">
+            <label for="gridSizeSlider">Grid</label>
+            <input id="gridSizeSlider" type="range" min="12" max="64" step="1" value="36" />
+            <span id="gridSizeValue">36 cols</span>
+          </div>
+
+          <div class="controls-row" style="margin-top:10px">
+            <button type="button" id="playButton" class="btn primary" title="Start animation">Start Show</button>
+            <button type="button" id="stopButton" class="btn warn" title="Stop animation">Stop Show</button>
+            <button type="button" id="resetButton" class="btn ghost" title="Reset settings">Reset</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Music Sync</h2>
+          <div class="row">
+            <label for="musicSyncToggle">Enable Sync</label>
+            <select id="musicSyncToggle" title="Turn music syncing on or off">
+              <option value="off">Off</option>
+              <option value="brightness">Brightness</option>
+              <option value="speed">Speed</option>
+              <option value="color">Color + Brightness</option>
+            </select>
+          </div>
+
+          <div class="range">
+            <label for="sensitivitySlider">Sens.</label>
+            <input id="sensitivitySlider" type="range" min="1" max="400" step="1" value="160" />
+            <span id="sensitivityValue">1.60x</span>
+          </div>
+
+          <div class="row">
+            <label for="audioSourceLabel">Source</label>
+            <div class="controls-row" style="justify-content:flex-end;">
+              <button type="button" id="micButton" class="btn" title="Use microphone">Use Mic</button>
+              <input type="file" id="audioFileInput" accept="audio/*" title="Select an audio file">
+            </div>
+          </div>
+
+          <div class="controls-row">
+            <button type="button" id="audioPlayPauseButton" class="btn" title="Play / Pause audio" disabled>Play Audio</button>
+            <span id="audioStatus" class="pill">No source</span>
+          </div>
+
+          <div class="row">
+            <label>Spectrum</label>
+            <canvas id="audioMeterCanvas" aria-hidden="true"></canvas>
+          </div>
+
+          <div class="hint">Tip: Use your microphone or load an audio file. Sync modes affect how the lights react.</div>
+        </div>
+
+        <div class="panel">
+          <h2>Shortcuts</h2>
+          <div class="hint">
+            Space: Start/Stop • R: Reset • +/-: Speed • [ ]: Brightness • Arrows: Change pattern
+          </div>
+        </div>
+      </form>
+    </aside>
+
+    <section class="stage" aria-label="Light show stage">
+      <div class="toolbar">
+        <div class="left">
+          <span class="pill" id="patternBadge">Pattern: Static</span>
+          <span class="pill" id="fpsBadge">FPS: —</span>
+        </div>
+        <div class="right" style="min-width:220px; width: 30%;">
+          <div class="meter" style="flex:1">
+            <span id="audioLevelBar" style="width:0%"></span>
+          </div>
+          <span class="pill" id="syncBadge">Sync: Off</span>
+        </div>
+      </div>
+      <div id="canvasWrap">
+        <canvas id="ledCanvas" role="img" aria-label="LED wall rendering"></canvas>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <div>Made for music lovers. No libraries, pure HTML5/CSS3/JS.</div>
+    <div><span class="kbd">Mic</span> permission required for live sync.</div>
+  </footer>
+
+<script>
+(function(){
+  'use strict';
+
+  // Utilities
+  const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+
+  function hexToRgb(hex){
+    let c = hex.replace('#','');
+    if(c.length===3) c=[c[0],c[0],c[1],c[1],c[2],c[2]].join('');
+    const num = parseInt(c,16);
+    return {r: (num>>16)&255, g:(num>>8)&255, b:num&255};
+  }
+  function rgbToHsv(r,g,b){
+    r/=255; g/=255; b/=255;
+    const max = Math.max(r,g,b), min = Math.min(r,g,b);
+    const d = max - min;
+    let h;
+    const v = max;
+    const s = max === 0 ? 0 : d / max;
+    if(max === min) {
+      h = 0;
+    } else {
+      switch(max){
+        case r: h = (g - b)/d + (g < b ? 6 : 0); break;
+        case g: h = (b - r)/d + 2; break;
+        case b: h = (r - g)/d + 4; break;
+      }
+      h /= 6;
+    }
+    return {h: h*360, s, v};
+  }
+  function hsvToRgb(h,s,v){
+    h = ((h%360)+360)%360;
+    let c = v*s;
+    let x = c*(1 - Math.abs(((h/60)%2)-1));
+    let m = v - c;
+    let r1=0,g1=0,b1=0;
+    if(0<=h && h<60){ r1=c; g1=x; b1=0; }
+    else if(60<=h && h<120){ r1=x; g1=c; b1=0; }
+    else if(120<=h && h<180){ r1=0; g1=c; b1=x; }
+    else if(180<=h && h<240){ r1=0; g1=x; b1=c; }
+    else if(240<=h && h<300){ r1=x; g1=0; b1=c; }
+    else { r1=c; g1=0; b1=x; }
+    return {r: Math.round((r1+m)*255), g: Math.round((g1+m)*255), b: Math.round((b1+m)*255)};
+  }
+  function rgbToCss({r,g,b}, a=1){
+    return `rgba(${r},${g},${b},${a})`;
+  }
+
+  // DOM elements (IDs for automation)
+  const els = {
+    patternSelect: document.getElementById('patternSelect'),
+    colorPicker: document.getElementById('colorPicker'),
+    hueSlider: document.getElementById('hueSlider'),
+    hueValue: document.getElementById('hueValue'),
+    satSlider: document.getElementById('satSlider'),
+    satValue: document.getElementById('satValue'),
+    brightnessSlider: document.getElementById('brightnessSlider'),
+    brightnessValue: document.getElementById('brightnessValue'),
+    speedSlider: document.getElementById('speedSlider'),
+    speedValue: document.getElementById('speedValue'),
+    densitySlider: document.getElementById('densitySlider'),
+    densityValue: document.getElementById('densityValue'),
+    gridSizeSlider: document.getElementById('gridSizeSlider'),
+    gridSizeValue: document.getElementById('gridSizeValue'),
+    playButton: document.getElementById('playButton'),
+    stopButton: document.getElementById('stopButton'),
+    resetButton: document.getElementById('resetButton'),
+
+    musicSyncToggle: document.getElementById('musicSyncToggle'),
+    sensitivitySlider: document.getElementById('sensitivitySlider'),
+    sensitivityValue: document.getElementById('sensitivityValue'),
+    micButton: document.getElementById('micButton'),
+    audioFileInput: document.getElementById('audioFileInput'),
+    audioPlayPauseButton: document.getElementById('audioPlayPauseButton'),
+    audioStatus: document.getElementById('audioStatus'),
+
+    audioLevelBar: document.getElementById('audioLevelBar'),
+    audioMeterCanvas: document.getElementById('audioMeterCanvas'),
+
+    canvas: document.getElementById('ledCanvas'),
+    canvasWrap: document.getElementById('canvasWrap'),
+
+    fpsBadge: document.getElementById('fpsBadge'),
+    patternBadge: document.getElementById('patternBadge'),
+    syncBadge: document.getElementById('syncBadge')
+  };
+
+  // Canvas setup with DPR
+  const ctx = els.canvas.getContext('2d', { alpha: false, desynchronized: true });
+  let DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1)); // clamp DPR for perf
+
+  function fitCanvas(){
+    const rect = els.canvasWrap.getBoundingClientRect();
+    // keep 16:9 inside container
+    const wrapW = Math.floor(rect.width);
+    const wrapH = Math.floor(rect.height);
+    const aspect = 16/9;
+    let viewW = wrapW, viewH = Math.floor(wrapW/aspect);
+    if(viewH > wrapH){ viewH = wrapH; viewW = Math.floor(viewH*aspect); }
+    els.canvas.style.width = viewW + 'px';
+    els.canvas.style.height = viewH + 'px';
+    els.canvas.width = Math.floor(viewW*DPR);
+    els.canvas.height = Math.floor(viewH*DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    recomputeGrid();
+  }
+  window.addEventListener('resize', ()=>{ DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1)); fitCanvas(); });
+
+  // State
+  const state = {
+    running: false,
+    time: 0,
+    cols: parseInt(els.gridSizeSlider.value,10),
+    rows: 20, // will recompute
+    spacing: 0,
+    cell: 0,
+    pattern: els.patternSelect.value,
+    baseHex: els.colorPicker.value,
+    hueOffset: parseFloat(els.hueSlider.value),
+    saturation: parseFloat(els.satSlider.value)/100,
+    brightness: parseFloat(els.brightnessSlider.value)/100,
+    speed: parseFloat(els.speedSlider.value)/100,
+    density: parseFloat(els.densitySlider.value)/100,
+    musicMode: els.musicSyncToggle.value,
+    sensitivity: parseFloat(els.sensitivitySlider.value)/100,
+    sparkle: [],  // for sparkle states
+    fireflies: [], // for firefly
+    lastFrameTs: 0,
+    fps: 0,
+    audio: {
+      ctx: null,
+      analyser: null,
+      sourceNode: null,
+      mediaStream: null,
+      freqData: null,
+      timeData: null,
+      level: 0,
+      smoothLevel: 0,
+      isPlaying: false,
+      usingMic: false,
+      media: null // HTMLAudioElement when using file
+    }
+  };
+
+  function recomputeGrid(){
+    const w = els.canvas.clientWidth;
+    const h = els.canvas.clientHeight;
+    // Maintain rows ~ 9/16 of cols times h/w ratio
+    state.cols = parseInt(els.gridSizeSlider.value,10);
+    const targetRows = Math.round(state.cols * (h/w));
+    state.rows = Math.max(6, targetRows);
+    const cw = Math.floor(w / state.cols);
+    const ch = Math.floor(h / state.rows);
+    state.cell = Math.max(6, Math.min(cw, ch)) - 2; // padding
+    state.spacing = Math.max(1, Math.round(state.cell * 0.12));
+    // Reinit any pattern-specific caches when grid changes
+    initSparkles();
+    initFireflies();
+  }
+
+  // Pattern helpers
+  function initSparkles(){
+    const total = state.cols * state.rows;
+    state.sparkle = new Array(total).fill(0);
+  }
+  function initFireflies(){
+    const count = Math.round(lerp(8, 40, state.density)); // number of fireflies
+    state.fireflies = Array.from({length: count}, ()=>({
+      x: Math.random()*state.cols,
+      y: Math.random()*state.rows,
+      dx: (Math.random()*2-1)*0.25,
+      dy: (Math.random()*2-1)*0.25,
+      phase: Math.random()*Math.PI*2
+    }));
+  }
+
+  // Audio setup
+  function ensureAudioContext(){
+    if(!state.audio.ctx){
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if(!Ctx) { console.warn('Web Audio not supported'); return; }
+      const ctx = new Ctx();
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 1024;
+      analyser.smoothingTimeConstant = 0.85;
+      state.audio.ctx = ctx;
+      state.audio.analyser = analyser;
+      state.audio.freqData = new Uint8Array(analyser.frequencyBinCount);
+      state.audio.timeData = new Uint8Array(analyser.fftSize);
+    }
+  }
+
+  async function connectMic(){
+    ensureAudioContext();
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: false });
+      const src = state.audio.ctx.createMediaStreamSource(stream);
+      src.connect(state.audio.analyser);
+      state.audio.sourceNode = src;
+      state.audio.mediaStream = stream;
+      state.audio.usingMic = true;
+      state.audio.isPlaying = true;
+      els.audioPlayPauseButton.disabled = true;
+      els.audioStatus.textContent = 'Mic connected';
+      els.audioStatus.style.background = 'rgba(52,211,153,0.25)';
+      els.audioStatus.style.borderColor = 'rgba(52,211,153,0.5)';
+      await state.audio.ctx.resume();
+    } catch(err){
+      console.error(err);
+      els.audioStatus.textContent = 'Mic denied';
+      els.audioStatus.style.background = 'rgba(239,68,68,0.25)';
+      els.audioStatus.style.borderColor = 'rgba(239,68,68,0.5)';
+    }
+  }
+
+  function loadAudioFile(file){
+    ensureAudioContext();
+    if(state.audio.media){
+      try { state.audio.media.pause(); } catch(e){}
+    }
+    const url = URL.createObjectURL(file);
+    const audio = new Audio();
+    audio.src = url;
+    audio.loop = true;
+    audio.crossOrigin = 'anonymous';
+    audio.addEventListener('canplay', ()=>{
+      if(state.audio.sourceNode) {
+        try { state.audio.sourceNode.disconnect(); } catch(e){}
+      }
+      const src = state.audio.ctx.createMediaElementSource(audio);
+      src.connect(state.audio.analyser);
+      state.audio.analyser.connect(state.audio.ctx.destination); // allow hearing the track
+      state.audio.sourceNode = src;
+      state.audio.media = audio;
+      state.audio.usingMic = false;
+      els.audioPlayPauseButton.disabled = false;
+      els.audioPlayPauseButton.textContent = 'Play Audio';
+      state.audio.isPlaying = false;
+      els.audioStatus.textContent = 'File loaded';
+      els.audioStatus.style.background = 'rgba(167,139,250,0.25)';
+      els.audioStatus.style.borderColor = 'rgba(167,139,250,0.5)';
+    }, {once:true});
+  }
+
+  function toggleAudioPlayback(){
+    ensureAudioContext();
+    if(state.audio.usingMic){ return; }
+    if(!state.audio.media){ return; }
+    if(state.audio.isPlaying){
+      state.audio.media.pause();
+      state.audio.isPlaying = false;
+      els.audioPlayPauseButton.textContent = 'Play Audio';
+      els.audioStatus.textContent = 'Paused';
+    } else {
+      state.audio.media.play();
+      state.audio.ctx.resume();
+      state.audio.isPlaying = true;
+      els.audioPlayPauseButton.textContent = 'Pause Audio';
+      els.audioStatus.textContent = 'Playing';
+    }
+  }
+
+  function analyzeAudio(){
+    const A = state.audio;
+    if(!A.analyser) return { level: 0, bass: 0, bands: null };
+    A.analyser.getByteFrequencyData(A.freqData);
+    A.analyser.getByteTimeDomainData(A.timeData);
+
+    // Overall level (RMS)
+    let sum = 0;
+    for(let i=0;i<A.timeData.length;i++){
+      const v = (A.timeData[i] - 128)/128;
+      sum += v*v;
+    }
+    const rms = Math.sqrt(sum / A.timeData.length);
+    const level = clamp(rms * 1.8, 0, 1); // norm
+
+    // Bass emphasis (~20-200Hz)
+    const nyquist = A.ctx ? A.ctx.sampleRate/2 : 22050;
+    const maxBassHz = 180;
+    const bassBins = Math.max(2, Math.round((maxBassHz/nyquist) * A.freqData.length));
+    let bassSum = 0;
+    for(let i=0;i<bassBins;i++) bassSum += A.freqData[i];
+    const bass = clamp((bassSum / (bassBins*255)) * 1.4, 0, 1);
+
+    // Smooth for UI
+    A.level = level;
+    A.smoothLevel = lerp(A.smoothLevel || 0, level, 0.25);
+
+    // Update UI bar
+    els.audioLevelBar.style.width = Math.round(A.smoothLevel*100) + '%';
+
+    return { level, bass, bands: A.freqData };
+  }
+
+  function drawAudioMeter(){
+    const canvas = els.audioMeterCanvas;
+    const c2d = canvas.getContext('2d');
+    const w = canvas.clientWidth|0;
+    const h = canvas.clientHeight|0;
+    if(canvas.width !== w || canvas.height !== h) {
+      canvas.width = w; canvas.height = h;
+    }
+    c2d.clearRect(0,0,w,h);
+    c2d.fillStyle = 'rgba(0,0,0,0.65)';
+    c2d.fillRect(0,0,w,h);
+
+    if(!state.audio.freqData) return;
+
+    const data = state.audio.freqData;
+    const N = data.length;
+    const barW = Math.max(1, Math.floor(w / 64)); // compress to ~64 bars
+    const stride = Math.max(1, Math.floor(N / Math.floor(w / barW)));
+    let x = 0;
+    for(let i=0;i<N;i+=stride){
+      let v = 0;
+      for(let j=0;j<stride && i+j<N;j++) v += data[i+j];
+      v = v/stride/255;
+      const barH = Math.max(1, Math.round(v * (h-2)));
+      const y = h - barH;
+      const grad = c2d.createLinearGradient(0,y,0,h);
+      grad.addColorStop(0, '#22d3ee');
+      grad.addColorStop(1, '#f472b6');
+      c2d.fillStyle = grad;
+      c2d.fillRect(x, y, barW-1, barH);
+      x += barW;
+      if(x > w) break;
+    }
+  }
+
+  // Rendering LEDs
+  function drawLED(x, y, size, color, brightness){
+    // brightness influences alpha and glow
+    const b = clamp(brightness, 0, 1);
+    const half = size/2;
+    ctx.save();
+    ctx.translate(x + half, y + half);
+    ctx.fillStyle = color;
+    ctx.globalAlpha = b;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = Math.max(4, Math.round(half * 0.9 * b));
+    // Draw circle
+    ctx.beginPath();
+    ctx.arc(0, 0, half*0.85, 0, Math.PI*2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // Pattern functions: returns brightness (0..1) and hue delta if needed
+  function patternValue(type, i, j, t, amp, data){
+    const {cols, rows, density} = state;
+    const x = i/cols, y = j/rows;
+    let val = 0, hueShift = 0;
+
+    switch(type){
+      case 'static': {
+        val = 1;
+        break;
+      }
+      case 'pulse': {
+        const s = Math.sin(t*2*Math.PI) * 0.5 + 0.5;
+        val = s;
+        break;
+      }
+      case 'wave': {
+        const waves = lerp(0.5, 6, density);
+        const phase = (i*0.5 + j*0.7) / (cols/ waves);
+        val = Math.sin(phase + t*2*Math.PI)*0.5 + 0.5;
+        hueShift = (x + y)*180 + t*120;
+        break;
+      }
+      case 'chase': {
+        const bands = lerp(1, 12, density);
+        const p = (t*bands)%bands;
+        const stripe = (i/cols)*bands;
+        const dist = Math.min(Math.abs(p - stripe), Math.abs((p+bands) - stripe), Math.abs((p-bands)-stripe));
+        val = 1 - clamp(dist,0,1);
+        break;
+      }
+      case 'sparkle': {
+        const idx = j*cols + i;
+        // probabilistic twinkle
+        const spawnChance = lerp(0.001, 0.08, density);
+        let s = state.sparkle[idx] || 0;
+        if(s <= 0 && Math.random() < spawnChance*(1+amp*2)){
+          s = 1.0; // start sparkle
+        } else if(s > 0){
+          s -= 0.02 + Math.random()*0.03;
+        }
+        state.sparkle[idx] = Math.max(0, s);
+        val = Math.pow(s, 1.25);
+        hueShift = t*360 + (x*360);
+        break;
+      }
+      case 'firefly': {
+        // brightness is sum of gaussian blobs from fireflies
+        let sum = 0;
+        const fx = i, fy = j;
+        const reach = lerp(1.0, 3.5, 1-density); // smaller with higher density
+        for(const f of state.fireflies){
+          const dx = fx - f.x, dy = fy - f.y;
+          const d2 = dx*dx + dy*dy;
+          sum += Math.exp(-d2/(reach*reach));
+        }
+        val = clamp(sum / 2.0, 0, 1);
+        hueShift = t*200;
+        break;
+      }
+      case 'rainbow': {
+        hueShift = (x*360) + (t*180);
+        val = 0.9;
+        break;
+      }
+      case 'spectrum': {
+        // map column to frequency band
+        if(data && data.bands){
+          const bands = data.bands;
+          const idx = Math.floor((i/cols) * bands.length);
+          const v = bands[idx]/255;
+          val = Math.pow(v, 0.9);
+          hueShift = 200 * y + (t*120);
+        } else {
+          val = 0.2;
+        }
+        break;
+      }
+    }
+    // Music amplitude accentuation
+    return { val: clamp(val,0,1), hueShift };
+  }
+
+  function updateFireflies(dt, amp){
+    for(const f of state.fireflies){
+      const drift = (0.5 + amp*2.5);
+      f.x += f.dx * drift * dt;
+      f.y += f.dy * drift * dt;
+      f.phase += 0.5*dt;
+      if(Math.random() < 0.02){ // subtle random walk
+        f.dx = clamp(f.dx + (Math.random()*2-1)*0.05, -0.6, 0.6);
+        f.dy = clamp(f.dy + (Math.random()*2-1)*0.05, -0.6, 0.6);
+      }
+      if(f.x < -1) f.x = state.cols+1;
+      if(f.x > state.cols+1) f.x = -1;
+      if(f.y < -1) f.y = state.rows+1;
+      if(f.y > state.rows+1) f.y = -1;
+    }
+  }
+
+  // Animation loop
+  let rafId = 0;
+  function animate(ts){
+    if(!state.running){ rafId = 0; return; }
+    if(!state.lastFrameTs) state.lastFrameTs = ts;
+    const dtMs = ts - state.lastFrameTs;
+    const dt = dtMs / 1000;
+    state.lastFrameTs = ts;
+
+    // fps
+    state.fps = lerp(state.fps || 60, 1000 / Math.max(1, dtMs), 0.08);
+    els.fpsBadge.textContent = 'FPS: ' + Math.round(state.fps);
+
+    // audio
+    let audioData = null;
+    if(state.musicMode !== 'off' && state.audio.analyser){
+      audioData = analyzeAudio();
+    } else {
+      // decay UI bar
+      state.audio.smoothLevel = lerp(state.audio.smoothLevel || 0, 0, 0.1);
+      els.audioLevelBar.style.width = Math.round((state.audio.smoothLevel||0)*100) + '%';
+    }
+    drawAudioMeter();
+
+    // time
+    const amp = audioData ? Math.pow(clamp(audioData.level * state.sensitivity, 0, 2), 0.9) : 0;
+    const speedMod = (state.musicMode === 'speed') ? (1 + amp*1.8) : 1;
+    state.time += dt * state.speed * speedMod;
+
+    // update pattern-specific dynamics
+    if(state.pattern === 'firefly'){
+      updateFireflies(dt, amp);
+    }
+
+    // clear canvas
+    ctx.fillStyle = '#020208';
+    ctx.fillRect(0,0,els.canvas.clientWidth, els.canvas.clientHeight);
+
+    // color base
+    const baseRgb = hexToRgb(state.baseHex);
+    const baseHsv = rgbToHsv(baseRgb.r, baseRgb.g, baseRgb.b);
+
+    const cell = state.cell;
+    const gap = state.spacing;
+    const startX = Math.floor((els.canvas.clientWidth - (state.cols * (cell+gap) - gap)) / 2);
+    const startY = Math.floor((els.canvas.clientHeight - (state.rows * (cell+gap) - gap)) / 2);
+
+    // precompute brightness modulation
+    const brightMod = (state.musicMode === 'brightness' || state.musicMode === 'color') ? (1 + amp*2.4) : 1;
+    const globalBrightness = clamp(state.brightness * brightMod, 0, 2);
+
+    for(let j=0;j<state.rows;j++){
+      for(let i=0;i<state.cols;i++){
+        const { val, hueShift } = patternValue(state.pattern, i, j, state.time, amp, audioData);
+
+        let b = val * globalBrightness;
+        // subtle bass punch
+        if(audioData && audioData.bass && (state.musicMode==='brightness' || state.musicMode==='color')){
+          b *= 0.9 + audioData.bass*0.6;
+        }
+        b = clamp(b, 0, 1.5);
+
+        // determine color
+        let h = baseHsv.h + state.hueOffset;
+        if(state.pattern === 'rainbow' || state.pattern === 'wave' || state.pattern === 'sparkle' || state.pattern === 'spectrum'){
+          h = (baseHsv.h + hueShift) % 360;
+        }
+        if(state.musicMode === 'color'){
+          h = (h + amp*160) % 360;
+        }
+        const s = clamp(state.saturation, 0, 1);
+        const v = clamp(0.6 + 0.4*b, 0, 1);
+        const rgb = hsvToRgb(h, s, v);
+        const color = rgbToCss(rgb, 1);
+
+        const x = startX + i*(cell+gap);
+        const y = startY + j*(cell+gap);
+        drawLED(x, y, cell, color, b);
+      }
+    }
+
+    rafId = requestAnimationFrame(animate);
+  }
+
+  // Controls
+  function updateFromControls(){
+    state.pattern = els.patternSelect.value;
+    state.baseHex = els.colorPicker.value;
+    state.hueOffset = parseFloat(els.hueSlider.value);
+    state.saturation = parseFloat(els.satSlider.value)/100;
+    state.brightness = parseFloat(els.brightnessSlider.value)/100;
+    state.speed = parseFloat(els.speedSlider.value)/100;
+    state.density = parseFloat(els.densitySlider.value)/100;
+    state.musicMode = els.musicSyncToggle.value;
+    state.sensitivity = parseFloat(els.sensitivitySlider.value)/100;
+
+    els.hueValue.textContent = Math.round(state.hueOffset) + '°';
+    els.satValue.textContent = Math.round(state.saturation*100) + '%';
+    els.brightnessValue.textContent = Math.round(state.brightness*100) + '%';
+    els.speedValue.textContent = (state.speed).toFixed(2) + 'x';
+    els.densityValue.textContent = Math.round(state.density*100) + '%';
+    els.gridSizeValue.textContent = state.cols + ' cols';
+    els.sensitivityValue.textContent = (state.sensitivity).toFixed(2) + 'x';
+
+    els.patternBadge.textContent = 'Pattern: ' + (els.patternSelect.options[els.patternSelect.selectedIndex]?.text || '—');
+    els.syncBadge.textContent = 'Sync: ' + (state.musicMode==='off' ? 'Off' : state.musicMode.charAt(0).toUpperCase()+state.musicMode.slice(1));
+
+    if(state.pattern === 'firefly'){ initFireflies(); }
+    if(state.pattern === 'sparkle'){ initSparkles(); }
+  }
+
+  // Buttons
+  function startShow(){
+    if(!state.running){
+      state.running = true;
+      state.lastFrameTs = 0;
+      rafId = requestAnimationFrame(animate);
+      // resume audio context if needed (user gesture)
+      if(state.audio.ctx && state.audio.ctx.state !== 'running'){
+        state.audio.ctx.resume();
+      }
+    }
+  }
+  function stopShow(){
+    state.running = false;
+    if(rafId) cancelAnimationFrame(rafId);
+    rafId = 0;
+  }
+  function resetAll(){
+    els.patternSelect.value = 'static';
+    els.colorPicker.value = '#6cf0ff';
+    els.hueSlider.value = 0;
+    els.satSlider.value = 90;
+    els.brightnessSlider.value = 100;
+    els.speedSlider.value = 120;
+    els.densitySlider.value = 50;
+    els.gridSizeSlider.value = 36;
+
+    els.musicSyncToggle.value = 'off';
+    els.sensitivitySlider.value = 160;
+
+    recomputeGrid();
+    updateFromControls();
+  }
+
+  // Keyboard shortcuts
+  const patternsList = Array.from(els.patternSelect.options).map(o => o.value);
+  function changePattern(delta){
+    const idx = patternsList.indexOf(state.pattern);
+    const next = (idx + delta + patternsList.length) % patternsList.length;
+    els.patternSelect.value = patternsList[next];
+    updateFromControls();
+  }
+  document.addEventListener('keydown', (e)=>{
+    if(e.target && ['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)) return;
+    switch(e.key){
+      case ' ': e.preventDefault(); (state.running ? stopShow() : startShow()); break;
+      case 'r': case 'R': resetAll(); break;
+      case '+': case '=': els.speedSlider.value = Math.min(300, parseInt(els.speedSlider.value,10)+5); updateFromControls(); break;
+      case '-': case '_': els.speedSlider.value = Math.max(0, parseInt(els.speedSlider.value,10)-5); updateFromControls(); break;
+      case '[': els.brightnessSlider.value = Math.max(10, parseInt(els.brightnessSlider.value,10)-5); updateFromControls(); break;
+      case ']': els.brightnessSlider.value = Math.min(200, parseInt(els.brightnessSlider.value,10)+5); updateFromControls(); break;
+      case 'ArrowLeft': changePattern(-1); break;
+      case 'ArrowRight': changePattern(1); break;
+    }
+  });
+
+  // Listeners
+  els.patternSelect.addEventListener('change', updateFromControls);
+  els.colorPicker.addEventListener('input', updateFromControls);
+  els.hueSlider.addEventListener('input', updateFromControls);
+  els.satSlider.addEventListener('input', updateFromControls);
+  els.brightnessSlider.addEventListener('input', updateFromControls);
+  els.speedSlider.addEventListener('input', updateFromControls);
+  els.densitySlider.addEventListener('input', ()=>{
+    updateFromControls();
+    if(state.pattern === 'firefly') initFireflies();
+  });
+  els.gridSizeSlider.addEventListener('input', ()=>{
+    recomputeGrid();
+    updateFromControls();
+  });
+
+  els.musicSyncToggle.addEventListener('change', updateFromControls);
+  els.sensitivitySlider.addEventListener('input', updateFromControls);
+
+  els.playButton.addEventListener('click', startShow);
+  els.stopButton.addEventListener('click', stopShow);
+  els.resetButton.addEventListener('click', resetAll);
+
+  els.micButton.addEventListener('click', async ()=>{
+    await connectMic();
+  });
+  els.audioFileInput.addEventListener('change', (e)=>{
+    const file = e.target.files && e.target.files[0];
+    if(file) loadAudioFile(file);
+  });
+  els.audioPlayPauseButton.addEventListener('click', toggleAudioPlayback);
+
+  // Init
+  fitCanvas();
+  updateFromControls();
+  startShow();
+
+  // Visibility handling for power saving
+  document.addEventListener('visibilitychange', ()=>{
+    if(document.hidden){
+      // keep animation running but suspend audio output if media element is used
+      if(state.audio.media && state.audio.isPlaying){
+        try { state.audio.media.muted = true; } catch(e){}
+      }
+    } else {
+      if(state.audio.media && state.audio.isPlaying){
+        try { state.audio.media.muted = false; } catch(e){}
+      }
+    }
+  });
+})();
+</script>
+</body>
+</html>

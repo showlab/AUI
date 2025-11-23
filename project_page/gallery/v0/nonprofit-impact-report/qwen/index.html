@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nonprofit Impact Report</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2c5e9e;
+            --secondary: #4a90e2;
+            --accent: #ff6b6b;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --success: #28a745;
+            --warning: #ffc107;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f0f5ff;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 15px;
+            border-radius: 20px;
+            transition: var(--transition);
+        }
+
+        nav a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(44, 94, 158, 0.85), rgba(44, 94, 158, 0.9)), url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%232c5e9e"/><path d="M0 50 Q 25 30, 50 50 T 100 50 L 100 100 0 100 Z" fill="%234a90e2"/></svg>');
+            background-size: cover;
+            color: white;
+            text-align: center;
+            padding: 5rem 0;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h2 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 15px 35px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        /* Stats Section */
+        .stats-section {
+            padding: 4rem 0;
+            background: white;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .section-title p {
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            border: 1px solid #eee;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        /* Success Stories */
+        .stories-section {
+            padding: 4rem 0;
+            background: linear-gradient(to bottom, #f0f5ff, #e6f0ff);
+        }
+
+        .stories-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .story-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            transition: var(--transition);
+        }
+
+        .story-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .story-image {
+            height: 200px;
+            background: linear-gradient(45deg, #4a90e2, #2c5e9e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
+
+        .story-content {
+            padding: 1.5rem;
+        }
+
+        .story-content h3 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .story-content p {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .story-meta {
+            display: flex;
+            justify-content: space-between;
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        /* Donation Section */
+        .donation-section {
+            padding: 4rem 0;
+            text-align: center;
+            background: white;
+        }
+
+        .donation-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: linear-gradient(135deg, #e6f0ff, #f0f5ff);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .donation-container h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .donation-container p {
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .donation-options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .donation-option {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid var(--secondary);
+            color: var(--secondary);
+        }
+
+        .donation-option:hover, .donation-option.active {
+            background: var(--secondary);
+            color: white;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 3rem 0 1.5rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 2rem;
+        }
+
+        .footer-column h3 {
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--accent);
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-column a {
+            color: #ccc;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-column a:hover {
+            color: white;
+            padding-left: 5px;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .social-icons a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .social-icons a:hover {
+            background: var(--accent);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .hero h2 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .section-title h2 {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid, .stories-container {
+                grid-template-columns: 1fr;
+            }
+
+            .donation-options {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .donation-option {
+                width: 80%;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate {
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <i class="fas fa-hand-holding-heart"></i>
+                <h1>Impact Foundation</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#stats">Impact</a></li>
+                    <li><a href="#stories">Stories</a></li>
+                    <li><a href="#donate">Donate</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container hero-content">
+            <h2>Transforming Lives Through Community Impact</h2>
+            <p>Our programs create lasting change by empowering communities and providing essential resources to those who need them most.</p>
+            <a href="#donate" id="donate-button" class="cta-button">Support Our Mission</a>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section id="stats" class="stats-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Measurable Impact</h2>
+                <p>See how our work translates into real-world results that make a difference</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card animate delay-1">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number">12,540</div>
+                    <div class="stat-label">People Impacted</div>
+                </div>
+                <div class="stat-card animate delay-2">
+                    <div class="stat-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="stat-number">8,230</div>
+                    <div class="stat-label">Students Supported</div>
+                </div>
+                <div class="stat-card animate delay-3">
+                    <div class="stat-icon">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <div class="stat-number">2,150</div>
+                    <div class="stat-label">Homes Repaired</div>
+                </div>
+                <div class="stat-card animate delay-4">
+                    <div class="stat-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stat-number">$2.4M</div>
+                    <div class="stat-label">Funds Distributed</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Success Stories -->
+    <section id="stories" class="stories-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Success Stories</h2>
+                <p>Hear from individuals whose lives have been transformed through our programs</p>
+            </div>
+            <div class="stories-container">
+                <div class="story-card animate delay-1">
+                    <div class="story-image">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <div class="story-content">
+                        <h3>Maria's Educational Journey</h3>
+                        <p>Thanks to our scholarship program, Maria graduated college with honors and now teaches mathematics at her local high school.</p>
+                        <div class="story-meta">
+                            <span><i class="fas fa-calendar"></i> 2023</span>
+                            <span><i class="fas fa-map-marker-alt"></i> Austin, TX</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="story-card animate delay-2">
+                    <div class="story-image">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <div class="story-content">
+                        <h3>James' Home Restoration</h3>
+                        <p>After our home repair initiative, James was able to move his family into a safe, stable environment after years of living in substandard housing.</p>
+                        <div class="story-meta">
+                            <span><i class="fas fa-calendar"></i> 2023</span>
+                            <span><i class="fas fa-map-marker-alt"></i> Denver, CO</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="story-card animate delay-3">
+                    <div class="story-image">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <div class="story-content">
+                        <h3>Community Garden Initiative</h3>
+                        <p>The community garden project not only provided fresh produce but also created a gathering place that strengthened neighborhood bonds.</p>
+                        <div class="story-meta">
+                            <span><i class="fas fa-calendar"></i> 2022</span>
+                            <span><i class="fas fa-map-marker-alt"></i> Portland, OR</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Donation Section -->
+    <section id="donate" class="donation-section">
+        <div class="container">
+            <div class="donation-container">
+                <h2>Make a Difference Today</h2>
+                <p>Your contribution helps us continue our vital work in communities across the nation. Every dollar makes an impact.</p>
+                
+                <div class="donation-options">
+                    <div class="donation-option active" data-amount="$25">Small Impact - $25</div>
+                    <div class="donation-option" data-amount="$50">Medium Impact - $50</div>
+                    <div class="donation-option" data-amount="$100">Large Impact - $100</div>
+                    <div class="donation-option" data-amount="$250">Major Impact - $250</div>
+                </div>
+                
+                <a href="#" id="donation-link" class="cta-button">Donate Now</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>About Us</h3>
+                    <p>Impact Foundation is dedicated to creating sustainable change in underserved communities through education, housing, and economic development programs.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#stats">Our Impact</a></li>
+                        <li><a href="#stories">Success Stories</a></li>
+                        <li><a href="#donate">Donate</a></li>
+                        <li><a href="#">Volunteer</a></li>
+                        <li><a href="#">Careers</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Contact Us</h3>
+                    <ul>
+                        <li><i class="fas fa-map-marker-alt"></i> 123 Impact Way, New York, NY</li>
+                        <li><i class="fas fa-phone"></i> (555) 123-4567</li>
+                        <li><i class="fas fa-envelope"></i> info@impactfoundation.org</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 Impact Foundation. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Donation option selection
+        document.addEventListener('DOMContentLoaded', function() {
+            const donationOptions = document.querySelectorAll('.donation-option');
+            const donateButton = document.getElementById('donation-link');
+            
+            donationOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove active class from all options
+                    donationOptions.forEach(opt => opt.classList.remove('active'));
+                    // Add active class to clicked option
+                    this.classList.add('active');
+                    
+                    // Update button text
+                    const amount = this.getAttribute('data-amount');
+                    donateButton.textContent = `Donate ${amount}`;
+                });
+            });
+            
+            // Smooth scrolling for navigation links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        window.scrollTo({
+                            top: target.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+            
+            // Animation on scroll
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate');
+                    }
+                });
+            }, observerOptions);
+            
+            // Observe stat cards and story cards
+            document.querySelectorAll('.stat-card, .story-card').forEach(card => {
+                observer.observe(card);
+            });
+            
+            // Form submission handling
+            donateButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('Thank you for your interest in donating! In a real application, this would redirect to a secure payment page.');
+            });
+        });
+    </script>
+</body>
+</html>

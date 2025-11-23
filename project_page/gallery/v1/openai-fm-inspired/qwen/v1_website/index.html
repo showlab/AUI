@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoundWave - AI Audio Generator</title>
+    <style>
+        :root {
+            --primary-color: #000000;
+            --secondary-color: #000000;
+            --background-dark: #ffffff;
+            --card-bg: #ffffff;
+            --text-light: #000000;
+            --text-gray: #666666;
+            --border-radius: 0px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: var(--background-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-gray);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .input-section {
+            background: var(--card-bg);
+            padding: 30px;
+            border: 1px solid #ccc;
+        }
+
+        .output-section {
+            background: var(--card-bg);
+            padding: 30px;
+            border: 1px solid #ccc;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--primary-color);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        textarea, input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ccc;
+            background: #fff;
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        textarea:focus, input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            background: #333;
+        }
+
+        .btn:active {
+            transform: none;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .audio-player {
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .audio-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .play-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: bold;
+        }
+
+        .play-btn:hover {
+            background: #333;
+        }
+
+        .progress-container {
+            flex: 1;
+            background: #ccc;
+            height: 5px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary-color);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .time-info {
+            font-size: 0.85rem;
+            color: var(--text-gray);
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .examples {
+            margin-top: 30px;
+        }
+
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .example-card {
+            background: #f5f5f5;
+            padding: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid #ccc;
+        }
+
+        .example-card:hover {
+            border-color: var(--primary-color);
+        }
+
+        .example-card h4 {
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .example-card p {
+            font-size: 0.85rem;
+            color: var(--text-gray);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary-color);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--text-gray);
+            font-size: 0.9rem;
+            margin-top: auto;
+            border-top: 1px solid #ccc;
+            width: 100%;
+        }
+
+        .status-message {
+            margin-top: 15px;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.9rem;
+            border: 1px solid;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--primary-color);
+            font-weight: bold;
+            padding: 8px 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        nav a:hover {
+            background: #f0f0f0;
+        }
+
+        /* Sections */
+        section {
+            padding: 40px 0;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .features-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .feature-card {
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 4px;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 10px;
+        }
+
+        .accordion {
+            margin-top: 10px;
+        }
+
+        .accordion-header {
+            cursor: pointer;
+            padding: 10px;
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+        }
+
+        .accordion-content {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+
+        /* Testimonials */
+        .testimonials {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .testimonial {
+            border: 1px solid #ccc;
+            padding: 20px;
+        }
+
+        /* Pricing */
+        .pricing-plans {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .plan {
+            border: 1px solid #ccc;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .plan h3 {
+            margin-bottom: 10px;
+        }
+
+        .plan-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        /* Team */
+        .team-members {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .member-card {
+            border: 1px solid #ccc;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .member-card img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+
+        /* FAQ */
+        .faq-item {
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .faq-question {
+            padding: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #f0f0f0;
+        }
+
+        .faq-answer {
+            padding: 15px;
+            display: none;
+        }
+
+        .faq-answer.show {
+            display: block;
+        }
+
+        /* Contact */
+        .contact-form {
+            max-width: 500px;
+            margin-top: 20px;
+        }
+
+        .contact-form input,
+        .contact-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .contact-form button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        /* Social Links */
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            line-height: 40px;
+            background: #f0f0f0;
+            border-radius: 50%;
+            text-decoration: none;
+            color: var(--primary-color);
+        }
+
+        /* Newsletter */
+        .newsletter {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .newsletter input {
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #ccc;
+        }
+
+        .newsletter button {
+            padding: 10px 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Cookie Consent */
+        .cookie-consent {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #f0f0f0;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #ccc;
+        }
+
+        .cookie-consent button {
+            padding: 8px 15px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Accessibility */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 6px;
+            background: var(--primary-color);
+            color: white;
+            padding: 8px;
+            text-decoration: none;
+            z-index: 1000;
+        }
+
+        .skip-link:focus {
+            top: 6px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            nav a {
+                width: 80%;
+                text-align: center;
+            }
+            
+            .main-content {
+                gap: 15px;
+            }
+            
+            .newsletter input {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="#main-content" class="skip-link">Skip to main content</a>
+        
+        <header id="hero">
+            <h1>SoundWave</h1>
+            <p class="subtitle">Transform your ideas into stunning audio with our AI-powered sound generator. Describe what you want to hear and let our technology bring it to life.</p>
+        </header>
+
+        <nav id="navigation">
+            <a href="#features" id="nav-features">Features</a>
+            <a href="#episodes" id="nav-episodes">Episodes</a>
+            <a href="#about" id="nav-about">About</a>
+            <a href="#contact" id="nav-contact">Contact</a>
+        </nav>
+
+        <div class="main-content">
+            <section class="input-section" id="input-section">
+                <h2 class="section-title">Create Your Sound</h2>
+                <div class="form-group">
+                    <label for="description">Describe your audio:</label>
+                    <textarea id="description" placeholder="Example: A gentle rainstorm with thunder in the distance, ambient piano notes playing softly..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="duration">Duration (seconds):</label>
+                    <input type="number" id="duration" min="1" max="300" value="60">
+                </div>
+                
+                <button id="generate-btn" class="btn">
+                    <span>Generate Audio</span>
+                </button>
+                
+                <div id="status-message" class="status-message hidden"></div>
+                
+                <div class="examples">
+                    <h3>Examples:</h3>
+                    <div class="examples-grid">
+                        <div class="example-card" data-example="ambient forest sounds with birds chirping">
+                            <h4>Ambient Forest</h4>
+                            <p>Birds chirping, rustling leaves</p>
+                        </div>
+                        <div class="example-card" data-example="uplifting orchestral music with strings and brass">
+                            <h4>Orchestral</h4>
+                            <p>Uplifting classical piece</p>
+                        </div>
+                        <div class="example-card" data-example="lo-fi hip hop beats with vinyl crackle and warm bass">
+                            <h4>Lo-Fi Beats</h4>
+                            <p>Vinyl crackle, warm bassline</p>
+                        </div>
+                        <div class="example-card" data-example="ocean waves crashing against rocks with seagulls calling">
+                            <h4>Ocean Waves</h4>
+                            <p>Crashing waves, seagulls</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="output-section" id="output-section">
+                <h2 class="section-title">Your Generated Audio</h2>
+                <div id="audio-container">
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <p>Generating your audio...</p>
+                    </div>
+                    
+                    <div id="audio-player" class="audio-player hidden">
+                        <audio id="audio-element" controls></audio>
+                        <div class="audio-controls">
+                            <button id="play-btn" class="play-btn">▶</button>
+                            <div class="progress-container">
+                                <div class="progress-bar" id="progress-bar"></div>
+                            </div>
+                            <div class="time-info" id="time-info">0:00 / 0:00</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <section id="features" class="features-section">
+            <div class="feature-card">
+                <h3>Advanced AI Synthesis</h3>
+                <p>Our cutting-edge AI creates realistic audio that captures the essence of your descriptions.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Customizable Duration</h3>
+                <p>Create audio of any length from 1 second to 5 minutes to suit your needs.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Instant Generation</h3>
+                <p>Get your audio files in seconds, not minutes, with our optimized processing pipeline.</p>
+            </div>
+        </section>
+
+        <section id="episodes">
+            <h2>Latest Episodes</h2>
+            <div class="episode-card">
+                <h3>Episode 1: Introduction to AI Audio</h3>
+                <p>In this first episode, we explore how artificial intelligence is revolutionizing audio creation.</p>
+                <button class="btn">Listen Now</button>
+            </div>
+            <div class="episode-card">
+                <h3>Episode 2: Creative Applications</h3>
+                <p>Discover how creators are using AI audio to enhance their projects and stories.</p>
+                <button class="btn">Listen Now</button>
+            </div>
+        </section>
+
+        <section id="about">
+            <h2>About SoundWave</h2>
+            <p>SoundWave is at the forefront of AI-powered audio generation technology. Our mission is to make professional-quality audio accessible to everyone.</p>
+            
+            <div class="team-members">
+                <div class="member-card">
+                    <img src="https://placehold.co/100x100?text=JD" alt="John Doe">
+                    <h3>John Doe</h3>
+                    <p>CEO & Founder</p>
+                </div>
+                <div class="member-card">
+                    <img src="https://placehold.co/100x100?text=JS" alt="Jane Smith">
+                    <h3>Jane Smith</h3>
+                    <p>Lead Developer</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="faq">
+            <h2>Frequently Asked Questions</h2>
+            <div class="faq-item">
+                <div class="faq-question">How long does it take to generate audio?</div>
+                <div class="faq-answer">Most audio files are generated in under 30 seconds, depending on complexity.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Can I use generated audio commercially?</div>
+                <div class="faq-answer">Yes, all generated audio can be used for commercial purposes with proper attribution.</div>
+            </div>
+        </section>
+
+        <section id="contact">
+            <h2>Contact Us</h2>
+            <div class="contact-form">
+                <input type="email" id="contact-email" placeholder="Your Email">
+                <textarea id="contact-message" placeholder="Your Message"></textarea>
+                <button id="submit-contact">Send Message</button>
+            </div>
+        </section>
+
+        <div class="social-links">
+            <a href="#" aria-label="Twitter">𝕏</a>
+            <a href="#" aria-label="YouTube">YT</a>
+            <a href="#" aria-label="GitHub">GH</a>
+        </div>
+
+        <div class="newsletter">
+            <h3>Subscribe to Newsletter</h3>
+            <input type="email" id="newsletter-email" placeholder="Enter your email">
+            <button id="subscribe-newsletter">Subscribe</button>
+        </div>
+
+        <footer id="footer">
+            <p>SoundWave AI Audio Generator &copy; 2023 | All generated audio is for demonstration purposes only</p>
+            <p><a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+        </footer>
+
+        <div class="cookie-consent hidden" id="cookie-consent">
+            <p>This website uses cookies to improve your experience. By continuing to use this site, you agree to our use of cookies.</p>
+            <button id="accept-cookies">Accept</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const descriptionInput = document.getElementById('description');
+            const durationInput = document.getElementById('duration');
+            const generateBtn = document.getElementById('generate-btn');
+            const audioContainer = document.getElementById('audio-container');
+            const loadingElement = document.getElementById('loading');
+            const audioPlayer = document.getElementById('audio-player');
+            const audioElement = document.getElementById('audio-element');
+            const playBtn = document.getElementById('play-btn');
+            const progressBar = document.getElementById('progress-bar');
+            const timeInfo = document.getElementById('time-info');
+            const statusMessage = document.getElementById('status-message');
+            const exampleCards = document.querySelectorAll('.example-card');
+            const navLinks = document.querySelectorAll('nav a');
+            const featuresSection = document.getElementById('features');
+            const episodesSection = document.getElementById('episodes');
+            const aboutSection = document.getElementById('about');
+            const contactSection = document.getElementById('contact');
+            const faqItems = document.querySelectorAll('.faq-item');
+            const submitContactBtn = document.getElementById('submit-contact');
+            const subscribeNewsletterBtn = document.getElementById('subscribe-newsletter');
+            const acceptCookiesBtn = document.getElementById('accept-cookies');
+            const cookieConsent = document.getElementById('cookie-consent');
+            const activeSection = document.getElementById('activeSection');
+            const downloadStatus = document.getElementById('downloadStatus');
+            const solveStatus = document.getElementById('solveStatus');
+            const previewStatus = document.getElementById('previewStatus');
+
+            // Audio state
+            let isPlaying = false;
+            let audioDuration = 0;
+
+            // Navigation
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    document.getElementById(targetId).scrollIntoView({ behavior: 'smooth' });
+                    document.getElementById('activeSection').textContent = targetId;
+                });
+            });
+
+            // Example click handlers
+            exampleCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const description = card.getAttribute('data-example');
+                    descriptionInput.value = description;
+                });
+            });
+
+            // Generate button handler
+            generateBtn.addEventListener('click', async () => {
+                const description = descriptionInput.value.trim();
+                const duration = parseInt(durationInput.value);
+
+                if (!description) {
+                    showStatus('Please enter a description for your audio.', 'error');
+                    return;
+                }
+
+                if (isNaN(duration) || duration < 1 || duration > 300) {
+                    showStatus('Please enter a valid duration between 1 and 300 seconds.', 'error');
+                    return;
+                }
+
+                // Show loading state
+                showLoading(true);
+                hideStatus();
+
+                try {
+                    // Simulate API call delay
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    
+                    // In a real app, this would be an actual API call
+                    // For demo purposes, we'll simulate successful generation
+                    generateAudio(description, duration);
+                    showStatus('Audio generated successfully!', 'success');
+                    document.getElementById('previewStatus').textContent = 'ready';
+                } catch (error) {
+                    showStatus('Failed to generate audio. Please try again.', 'error');
+                } finally {
+                    showLoading(false);
+                }
+            });
+
+            // Generate audio simulation
+            function generateAudio(description, duration) {
+                // Hide loading and show player
+                audioPlayer.classList.remove('hidden');
+                loadingElement.style.display = 'none';
+                
+                // Set up audio element
+                audioElement.src = '#'; // In a real app, this would be the generated audio URL
+                
+                // Simulate audio duration
+                audioDuration = duration;
+                updateProgress(0);
+                updateTimeInfo(0, duration);
+                
+                // Reset play button
+                playBtn.innerHTML = '▶';
+                isPlaying = false;
+            }
+
+            // Play/Pause functionality
+            playBtn.addEventListener('click', togglePlayPause);
+
+            function togglePlayPause() {
+                if (isPlaying) {
+                    audioElement.pause();
+                    playBtn.innerHTML = '▶';
+                } else {
+                    audioElement.play();
+                    playBtn.innerHTML = '⏸';
+                }
+                isPlaying = !isPlaying;
+            }
+
+            // Audio progress tracking
+            audioElement.addEventListener('timeupdate', () => {
+                if (audioDuration > 0) {
+                    const progress = (audioElement.currentTime / audioDuration) * 100;
+                    updateProgress(progress);
+                    updateTimeInfo(audioElement.currentTime, audioDuration);
+                }
+            });
+
+            // Audio ended
+            audioElement.addEventListener('ended', () => {
+                playBtn.innerHTML = '▶';
+                isPlaying = false;
+                updateProgress(0);
+                updateTimeInfo(0, audioDuration);
+            });
+
+            // Progress bar click
+            document.querySelector('.progress-container').addEventListener('click', function(e) {
+                const rect = this.getBoundingClientRect();
+                const pos = (e.clientX - rect.left) / rect.width;
+                const newTime = pos * audioDuration;
+                audioElement.currentTime = newTime;
+            });
+
+            // Update progress bar
+            function updateProgress(percent) {
+                progressBar.style.width = `${percent}%`;
+            }
+
+            // Update time info
+            function updateTimeInfo(current, total) {
+                const currentMin = Math.floor(current / 60);
+                const currentSec = Math.floor(current % 60);
+                const totalMin = Math.floor(total / 60);
+                const totalSec = Math.floor(total % 60);
+                
+                timeInfo.textContent = `${currentMin}:${currentSec.toString().padStart(2, '0')} / ${totalMin}:${totalSec.toString().padStart(2, '0')}`;
+            }
+
+            // Loading state
+            function showLoading(show) {
+                if (show) {
+                    loadingElement.style.display = 'block';
+                    audioPlayer.classList.add('hidden');
+                } else {
+                    loadingElement.style.display = 'none';
+                }
+            }
+
+            // Status messages
+            function showStatus(message, type) {
+                statusMessage.textContent = message;
+                statusMessage.className = `status-message ${type}`;
+                statusMessage.classList.remove('hidden');
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    statusMessage.classList.add('hidden');
+                }, 5000);
+            }
+
+            function hideStatus() {
+                statusMessage.classList.add('hidden');
+            }
+
+            // FAQ accordion
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question');
+                const answer = item.querySelector('.faq-answer');
+                
+                question.addEventListener('click', () => {
+                    answer.classList.toggle('show');
+                });
+            });
+
+            // Contact form submission
+            submitContactBtn.addEventListener('click', function() {
+                const email = document.getElementById('contact-email').value;
+                const message = document.getElementById('contact-message').value;
+                
+                if (!email || !message) {
+                    showStatus('Please fill in all fields.', 'error');
+                    return;
+                }
+                
+                showStatus('Message sent successfully!', 'success');
+            });
+
+            // Newsletter subscription
+            subscribeNewsletterBtn.addEventListener('click', function() {
+                const email = document.getElementById('newsletter-email').value;
+                
+                if (!email) {
+                    showStatus('Please enter your email.', 'error');
+                    return;
+                }
+                
+                showStatus('Thank you for subscribing!', 'success');
+            });
+
+            // Cookie consent
+            acceptCookiesBtn.addEventListener('click', function() {
+                cookieConsent.classList.add('hidden');
+                document.getElementById('cookieConsentAccepted').textContent = 'true';
+            });
+
+            // Initialize with sample text
+            descriptionInput.value = "A peaceful morning scene with gentle rainfall, birds singing, and soft wind through trees";
+
+            // Set initial active section
+            document.getElementById('activeSection').textContent = 'hero';
+
+            // Add keyboard support for main controls
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    if (document.activeElement.id === 'description' || 
+                        document.activeElement.id === 'duration') {
+                        generateBtn.click();
+                    }
+                }
+            });
+
+            // Add focus styles for accessibility
+            document.querySelectorAll('button, input, textarea').forEach(el => {
+                el.addEventListener('focus', function() {
+                    this.style.outline = '2px solid #000';
+                });
+                
+                el.addEventListener('blur', function() {
+                    this.style.outline = '';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

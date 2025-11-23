@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solar System Explorer</title>
+  <style>
+    /* GENERAL STYLES */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #000;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    #ui {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    #ui h1 {
+      font-size: 20px;
+      margin: 0 0 10px;
+    }
+
+    #ui label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    #ui input[type="range"] {
+      width: 100%;
+    }
+
+    #ui button {
+      background: #444;
+      color: #fff;
+      border: none;
+      padding: 7px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+
+    #ui button:hover {
+      background: #666;
+    }
+
+    #planet-info {
+      margin-top: 10px;
+      display: none;
+    }
+
+    #planet-info h2 {
+      font-size: 16px;
+      margin: 0 0 5px;
+    }
+
+    #planet-info p {
+      margin: 0;
+    }
+
+    #tooltip {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.9);
+      color: #000;
+      padding: 5px 8px;
+      border-radius: 5px;
+      font-size: 12px;
+      pointer-events: none;
+      display: none;
+    }
+
+    #controls {
+      margin-top: 15px;
+    }
+
+    #controls button {
+      font-size: 14px;
+    }
+
+    #zoom-controls {
+      margin-top: 10px;
+    }
+
+    #zoom-controls button {
+      font-size: 14px;
+      padding: 5px 10px;
+    }
+
+    #status-bar {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="ui">
+    <h1>Solar System Explorer</h1>
+    <label for="speed-control">Adjust Orbit Speed <span id="speed-value">5</span></label>
+    <input id="speed-control" type="range" min="1" max="10" value="5">
+    <div id="zoom-controls">
+      <button id="zoom-out">-</button>
+      <button id="zoom-in">+</button>
+    </div>
+    <div id="planet-info">
+      <h2 id="planet-name"></h2>
+      <p id="planet-description"></p>
+      <button id="reset-view">Reset View</button>
+    </div>
+  </div>
+  <canvas id="solar-system"></canvas>
+  <div id="tooltip"></div>
+  <div id="status-bar">
+    <span id="interaction-hint">Drag to rotate • Scroll to zoom</span>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('solar-system');
+    const ctx = canvas.getContext('2d');
+    const speedControl = document.getElementById('speed-control');
+    const planetInfo = document.getElementById('planet-info');
+    const planetName = document.getElementById('planet-name');
+    const planetDescription = document.getElementById('planet-description');
+    const tooltip = document.getElementById('tooltip');
+    const zoomInButton = document.getElementById('zoom-in');
+    const zoomOutButton = document.getElementById('zoom-out');
+    const resetViewButton = document.getElementById('reset-view');
+    const speedValue = document.getElementById('speed-value');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const planets = [
+      { name: 'Mercury', color: '#aaa', radius: 5, distance: 50, speed: 4.8, description: 'The smallest planet in our solar system.' },
+      { name: 'Venus', color: '#f5a623', radius: 8, distance: 90, speed: 3.5, description: 'The second planet from the Sun.' },
+      { name: 'Earth', color: '#4a90e2', radius: 10, distance: 130, speed: 3.0, description: 'Our home planet.' },
+      { name: 'Mars', color: '#d0021b', radius: 7, distance: 170, speed: 2.4, description: 'The red planet.' },
+      { name: 'Jupiter', color: '#f8e71c', radius: 20, distance: 220, speed: 1.3, description: 'The largest planet in the solar system.' },
+      { name: 'Saturn', color: '#f5a623', radius: 18, distance: 280, speed: 1.0, description: 'Famous for its rings.' },
+      { name: 'Uranus', color: '#50e3c2', radius: 15, distance: 340, speed: 0.7, description: 'An ice giant.' },
+      { name: 'Neptune', color: '#4a90e2', radius: 15, distance: 400, speed: 0.5, description: 'The farthest planet from the Sun.' }
+    ];
+
+    let orbitSpeed = 5;
+    let angle = 0;
+    let drag = false;
+    let offsetX = 0, offsetY = 0;
+    let zoom = 1;
+
+    speedControl.addEventListener('input', (e) => {
+      orbitSpeed = e.target.value;
+      speedValue.textContent = orbitSpeed;
+    });
+
+    canvas.addEventListener('mousedown', (e) => {
+      drag = true;
+      offsetX = e.clientX;
+      offsetY = e.clientY;
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      drag = false;
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (drag) {
+        angle += (e.clientX - offsetX) * 0.01;
+        offsetX = e.clientX;
+        offsetY = e.clientY;
+      }
+    });
+
+    canvas.addEventListener('wheel', (e) => {
+      zoom += e.deltaY * -0.001;
+      zoom = Math.min(Math.max(zoom, 0.5), 2);
+    });
+
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX - rect.width / 2) / zoom;
+      const y = (e.clientY - rect.height / 2) / zoom;
+
+      for (const planet of planets) {
+        const px = planet.distance * Math.cos(angle * planet.speed);
+        const py = planet.distance * Math.sin(angle * planet.speed);
+
+        if (Math.hypot(x - px, y - py) < planet.radius) {
+          planetName.textContent = planet.name;
+          planetDescription.textContent = planet.description;
+          planetInfo.style.display = 'block';
+          return;
+        }
+      }
+
+      planetInfo.style.display = 'none';
+    });
+
+    zoomInButton.addEventListener('click', () => {
+      zoom = Math.min(zoom + 0.1, 2);
+    });
+
+    zoomOutButton.addEventListener('click', () => {
+      zoom = Math.max(zoom - 0.1, 0.5);
+    });
+
+    resetViewButton.addEventListener('click', () => {
+      zoom = 1;
+      angle = 0;
+    });
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.save();
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.scale(zoom, zoom);
+
+      // Draw Sun
+      ctx.beginPath();
+      ctx.arc(0, 0, 30, 0, Math.PI * 2);
+      ctx.fillStyle = '#f39c12';
+      ctx.fill();
+
+      // Draw Planets
+      for (const planet of planets) {
+        const x = planet.distance * Math.cos(angle * planet.speed);
+        const y = planet.distance * Math.sin(angle * planet.speed);
+
+        ctx.beginPath();
+        ctx.arc(x, y, planet.radius, 0, Math.PI * 2);
+        ctx.fillStyle = planet.color;
+        ctx.fill();
+      }
+
+      ctx.restore();
+
+      angle += orbitSpeed * 0.001;
+      requestAnimationFrame(draw);
+    }
+
+    draw();
+  </script>
+</body>
+
+</html>

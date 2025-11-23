@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <title>Markdown → Slides</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root {
+      --bg: #0f172a;            /* slate-900 */
+      --bg-elev: #111827cc;     /* elevated glass */
+      --panel: #ffffff;
+      --text: #0f172a;
+      --muted: #5b6475;
+      --border: #e5e7eb;
+      --primary: #2563eb;       /* blue-600 */
+      --primary-contrast: #ffffff;
+
+      --slide-bg: #ffffff;
+      --slide-text: #0f172a;
+      --slide-accent: #2563eb;
+
+      --shadow-1: 0 8px 24px rgba(16, 24, 40, .12);
+      --radius: 14px;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0b1020;
+      --bg-elev: #0f172acc;
+      --panel: #0f172a;
+      --text: #e5e7eb;
+      --muted: #a3a7b2;
+      --border: #1f2937;
+      --primary: #60a5fa;         /* blue-400 */
+      --primary-contrast: #0b1020;
+
+      --slide-bg: #0f172a;
+      --slide-text: #e5e7eb;
+      --slide-accent: #60a5fa;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background:
+        radial-gradient(1200px 600px at 10% -10%, #3b82f611, transparent),
+        radial-gradient(1200px 600px at 90% 110%, #a855f711, transparent),
+        linear-gradient(180deg, var(--bg), #0a0f22 60%);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: linear-gradient(180deg, var(--bg-elev), transparent);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .header-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 18px 24px 8px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .app-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      color: var(--text);
+    }
+    .app-title .badge {
+      font-size: 12px;
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--primary), #8b5cf6);
+      color: var(--primary-contrast);
+      padding: 4px 8px;
+      border-radius: 999px;
+    }
+    .header-spacer {
+      flex: 1;
+    }
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn {
+      --bgh: rgba(37, 99, 235, 0.12);
+      appearance: none;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--panel), transparent 20%), color-mix(in srgb, var(--panel), transparent 5%));
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 1px 0 rgba(255,255,255,.1) inset, 0 1px 2px rgba(0,0,0,.04);
+      transition: transform .08s ease, background .2s ease, border-color .2s ease;
+    }
+    .btn:hover { background: color-mix(in srgb, var(--panel), var(--bgh)); }
+    .btn:active { transform: translateY(1px); }
+    .btn.primary {
+      background: linear-gradient(180deg, var(--primary), color-mix(in srgb, var(--primary), black 8%));
+      border-color: transparent;
+      color: var(--primary-contrast);
+    }
+    .btn.ghost {
+      border-color: transparent;
+      background: transparent;
+    }
+    .btn svg { width: 18px; height: 18px; }
+
+    main {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 12px 24px 28px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+    @media (max-width: 1024px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-1);
+      overflow: hidden;
+    }
+
+    /* Editor */
+    .editor-header,
+    .preview-header {
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--panel), transparent 25%), color-mix(in srgb, var(--panel), transparent 5%));
+    }
+    .editor-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .editor-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    #md-input {
+      width: 100%;
+      min-height: 520px;
+      resize: vertical;
+      padding: 16px 18px;
+      border: 0;
+      outline: none;
+      font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      background: transparent;
+      color: var(--text);
+    }
+    .editor-footer {
+      padding: 10px 16px 16px;
+      font-size: 12px;
+      color: var(--muted);
+      border-top: 1px dashed var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* Preview / Stage */
+    .preview-body {
+      padding: 14px;
+    }
+
+    .stage-wrap {
+      position: relative;
+    }
+    #preview-stage {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background:
+        radial-gradient(300px 300px at 20% 10%, rgba(99, 102, 241, .15), transparent 60%),
+        radial-gradient(300px 300px at 80% 90%, rgba(34, 197, 94, .12), transparent 60%),
+        color-mix(in srgb, var(--panel), transparent 30%);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-1);
+      outline: none;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      align-content: center;
+    }
+    .slide {
+      width: 100%;
+      height: 100%;
+      background: var(--slide-bg);
+      color: var(--slide-text);
+      padding: 56px 64px;
+      display: block;
+      overflow: hidden auto;
+      line-height: 1.3;
+      font-size: 20px;
+    }
+    .slide a { color: var(--slide-accent); text-decoration-color: color-mix(in srgb, var(--slide-accent), transparent 60%); }
+    .slide h1, .slide h2, .slide h3, .slide h4, .slide h5 {
+      margin: 0 0 16px 0;
+      line-height: 1.12;
+      font-weight: 800;
+      letter-spacing: -0.015em;
+    }
+    .slide h1 { font-size: 56px; margin-bottom: 18px; }
+    .slide h2 { font-size: 40px; }
+    .slide h3 { font-size: 30px; }
+    .slide p { margin: 0 0 12px 0; }
+    .slide ul, .slide ol { padding-left: 24px; margin: 8px 0 12px 0; }
+    .slide li { margin: 8px 0; }
+    .slide blockquote {
+      margin: 12px 0;
+      padding: 12px 16px;
+      border-left: 4px solid var(--slide-accent);
+      background: color-mix(in srgb, var(--slide-bg), var(--slide-accent) 6%);
+      border-radius: 8px;
+    }
+    .slide code {
+      font: 0.9em ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      background: color-mix(in srgb, var(--slide-bg), var(--slide-accent) 12%);
+      padding: 1px 6px;
+      border-radius: 6px;
+    }
+    .slide pre code {
+      background: transparent;
+      padding: 0;
+    }
+    .slide pre {
+      background: color-mix(in srgb, var(--slide-bg), var(--slide-accent) 10%);
+      padding: 14px 16px;
+      border-radius: 12px;
+      overflow: auto;
+      border: 1px solid color-mix(in srgb, var(--slide-accent), transparent 75%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+    .slide img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 12px;
+      border: 1px solid color-mix(in srgb, var(--slide-accent), transparent 75%);
+      box-shadow: 0 6px 20px rgba(0,0,0,.12);
+      margin: 10px 0;
+    }
+    .slide hr {
+      border: 0;
+      height: 1px;
+      background: color-mix(in srgb, var(--slide-text), transparent 75%);
+      margin: 16px 0;
+    }
+
+    /* Stage controls */
+    .stage-controls {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .stage-topbar {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      right: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .stage-topbar .cluster {
+      display: flex;
+      gap: 8px;
+      pointer-events: auto;
+    }
+    .stage-topbar .btn {
+      background: color-mix(in srgb, var(--panel), transparent 5%);
+      border-color: color-mix(in srgb, var(--border), transparent 30%);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    .slide-counter {
+      pointer-events: auto;
+      background: rgba(0,0,0,.55);
+      color: #fff;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .progress {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 4px;
+      background: color-mix(in srgb, var(--slide-bg), var(--slide-accent) 12%);
+    }
+    .progress > i {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--slide-accent), color-mix(in srgb, var(--slide-accent), white 25%));
+      transition: width .25s ease;
+    }
+
+    /* Utility */
+    .muted { color: var(--muted); }
+    .kbd {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+      border: 1px solid var(--border);
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: color-mix(in srgb, var(--panel), transparent 10%);
+    }
+
+    /* Fullscreen tweaks */
+    :fullscreen #preview-stage {
+      border-radius: 0;
+      border: 0;
+      box-shadow: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="app-title" aria-label="Application title">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+          <path fill="currentColor" d="M4 4h16a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1h-6.5l-3.6 2.7a1 1 0 0 1-1.6-.8V17H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm1 2v9h14V6H5z"/>
+        </svg>
+        <span>Markdown → Slides</span>
+        <span class="badge">Live</span>
+      </div>
+      <div class="header-spacer"></div>
+      <div class="toolbar">
+        <button class="btn" id="btn-theme" title="Toggle theme (Light/Dark)" aria-label="Toggle theme">
+          <svg id="theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 4a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V5a1 1 0 0 1 1-1zm0 13a5 5 0 1 0 0-10a5 5 0 0 0 0 10zm7-5a1 1 0 0 1 1 1h1a1 1 0 1 1 0 2h-1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1zm-14 0a1 1 0 0 1 1-1H7a1 1 0 1 1 0-2H6a1 1 0 1 1-2 0v1a1 1 0 0 1 1 1zm10.95 6.364a1 1 0 1 1 1.414-1.414l.707.707a1 1 0 0 1-1.414 1.414l-.707-.707zM5.636 6.05A1 1 0 0 1 7.05 4.636l.707.707A1 1 0 1 1 6.343 6.757l-.707-.707zm12.021.707a1 1 0 1 1-1.414 1.414l-.707-.707A1 1 0 0 1 16.95 5.636l.707.707zM5.636 17.95a1 1 0 1 1 1.414-1.414l.707.707a1 1 0 1 1-1.414 1.414l-.707-.707z"/></svg>
+          <span id="theme-label">Theme</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid">
+      <!-- Editor Panel -->
+      <section class="panel" aria-label="Markdown editor">
+        <div class="editor-header">
+          <div class="editor-title">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M4 5a2 2 0 0 1 2-2h8l6 6v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5zm12 0H6v14h12V9h-4a2 2 0 0 1-2-2V5z"/></svg>
+            <span>Markdown</span>
+          </div>
+          <div class="editor-actions">
+            <button class="btn" id="btn-sample" title="Load sample deck" aria-label="Load sample deck">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v7h7a1 1 0 1 1 0 2h-7v7a1 1 0 1 1-2 0v-7H4a1 1 0 1 1 0-2h7V4a1 1 0 0 1 1-1z"/></svg>
+              Sample
+            </button>
+            <button class="btn" id="btn-clear" title="Clear editor" aria-label="Clear editor">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 6h14a1 1 0 1 1 0 2h-1l-1 12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 8H5a1 1 0 1 1 0-2zm4 2l1 12h4l1-12H9zM9 4a1 1 0 1 1 0-2h6a1 1 0 1 1 0 2H9z"/></svg>
+              Clear
+            </button>
+          </div>
+        </div>
+        <textarea id="md-input" spellcheck="false" aria-label="Markdown input"></textarea>
+        <div class="editor-footer">
+          <div>
+            Tip: Separate slides with <span class="kbd">---</span>. Press <span class="kbd">F</span> or click Full Screen to present. Use <span class="kbd">←</span>/<span class="kbd">→</span> to navigate.
+          </div>
+          <div class="muted" id="char-count" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- Preview Panel -->
+      <section class="panel" aria-label="Slide preview">
+        <div class="preview-header">
+          <div class="editor-title">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7.5l-2.8 3.6a1 1 0 0 1-1.8-.6V16H5a2 2 0 0 1-2-2V5z"/></svg>
+            <span>Preview</span>
+          </div>
+          <div class="toolbar">
+            <button class="btn" id="btn-prev" title="Previous slide (←)" aria-label="Previous slide">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15.41 7.41L14 6l-6 6l6 6l1.41-1.41L10.83 12z"/></svg>
+              Prev
+            </button>
+            <button class="btn" id="btn-next" title="Next slide (→ or Space)" aria-label="Next slide">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8.59 16.59L10 18l6-6l-6-6l-1.41 1.41L13.17 12z"/></svg>
+              Next
+            </button>
+            <button class="btn primary" id="btn-fullscreen" title="Toggle Full Screen (F)" aria-label="Toggle Full Screen">
+              <svg id="fs-icon-enter" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 14H5v5h5v-2H7v-3zm12 0h-2v3h-3v2h5v-5zM7 7h3V5H5v5h2V7zm12 3V5h-5v2h3v3h2z"/></svg>
+              <span id="fs-label">Full Screen</span>
+            </button>
+          </div>
+        </div>
+        <div class="preview-body">
+          <div class="stage-wrap">
+            <div id="preview-stage" tabindex="0" role="region" aria-label="Slide stage">
+              <div id="slide-container" class="slide" aria-live="polite"></div>
+              <div class="stage-controls">
+                <div class="stage-topbar">
+                  <div class="cluster">
+                    <span class="slide-counter" id="slide-counter" aria-live="polite">
+                      <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="#fff" d="M7 5h14v2H7V5zm0 6h14v2H7v-2zm0 6h14v2H7v-2zM3 5h2v2H3V5zm0 6h2v2H3v-2zm0 6h2v2H3v-2z"/></svg>
+                      <span id="slide-pos">1</span>/<span id="slide-total">1</span>
+                    </span>
+                  </div>
+                  <div class="cluster">
+                    <button class="btn" id="btn-stage-prev" title="Previous (←)" aria-label="Previous on stage">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15.41 7.41L14 6l-6 6l6 6l1.41-1.41L10.83 12z"/></svg>
+                    </button>
+                    <button class="btn" id="btn-stage-next" title="Next (→)" aria-label="Next on stage">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8.59 16.59L10 18l6-6l-6-6l-1.41 1.41L13.17 12z"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="progress" aria-hidden="true"><i id="progress-bar"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    (function() {
+      const $ = (sel) => document.querySelector(sel);
+      const mdInput = $('#md-input');
+      const charCount = $('#char-count');
+      const slideContainer = $('#slide-container');
+      const stage = $('#preview-stage');
+      const btnPrev = $('#btn-prev');
+      const btnNext = $('#btn-next');
+      const btnStagePrev = $('#btn-stage-prev');
+      const btnStageNext = $('#btn-stage-next');
+      const btnFullscreen = $('#btn-fullscreen');
+      const fsLabel = $('#fs-label');
+      const slidePosEl = $('#slide-pos');
+      const slideTotalEl = $('#slide-total');
+      const progressBar = $('#progress-bar');
+      const btnSample = $('#btn-sample');
+      const btnClear = $('#btn-clear');
+      const btnTheme = $('#btn-theme');
+      const themeLabel = $('#theme-label');
+
+      const SAMPLE_MD = `# Markdown → Slides
+A minimalist way to craft polished presentations.
+
+Use three dashes on a line by itself to create a new slide:
+---
+# Agenda
+- Goals
+- Workflow
+- Tips
+
+---
+## Why Markdown?
+- Lightweight and fast
+- Version-control friendly
+- Focus on content, not tooling
+
+---
+## How it works
+1. Write markdown on the left
+2. Separate slides with \`---\`
+3. Present with Full Screen
+
+---
+## Demo Code
+\`\`\`js
+function greet(name) {
+  console.log(\`Hello, \${name}!\`);
+}
+greet('World');
+\`\`\`
+
+---
+> Great design is good business.
+>
+> — Thomas J. Watson Jr.
+
+---
+## Visuals
+![Growth Placeholder](https://dummyimage.com/1200x675/ddd/555.png&text=Growth+Projection)
+
+---
+## Thank You
+- email@example.com
+- Visit [example.com](https://example.com)
+`;
+
+      const state = {
+        slides: [],
+        index: 0
+      };
+
+      // Theme handling
+      const THEME_KEY = 'mds-theme';
+      function getSavedTheme() {
+        return localStorage.getItem(THEME_KEY);
+      }
+      function setTheme(theme) {
+        document.body.setAttribute('data-theme', theme);
+        localStorage.setItem(THEME_KEY, theme);
+        themeLabel.textContent = theme === 'dark' ? 'Dark' : 'Light';
+      }
+      function toggleTheme() {
+        const current = document.body.getAttribute('data-theme') || 'dark';
+        setTheme(current === 'dark' ? 'light' : 'dark');
+      }
+
+      // Markdown parsing (basic)
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+      function sanitizeUrl(url) {
+        const t = String(url || '').trim();
+        const lowered = t.toLowerCase();
+        if (lowered.startsWith('javascript:') || lowered.startsWith('data:text/html')) return '#';
+        return escapeHtml(t);
+      }
+
+      function processInline(text) {
+        if (!text) return '';
+        // HTML escape first
+        let out = escapeHtml(text);
+
+        // Inline code placeholders
+        const codeMap = [];
+        out = out.replace(/`([^`]+)`/g, (_, code) => {
+          codeMap.push(code);
+          return `@@CODE${codeMap.length - 1}@@`;
+        });
+
+        // Images ![alt](url "title")
+        out = out.replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]+)")?\)/g, (_, alt, src, title) => {
+          const safeSrc = sanitizeUrl(src);
+          const t = title ? ` title="${escapeHtml(title)}"` : '';
+          return `<img src="${safeSrc}" alt="${escapeHtml(alt)}"${t}>`;
+        });
+
+        // Links [text](url "title")
+        out = out.replace(/\[([^\]]+)\]\(([^)\s]+)(?:\s+"([^"]+)")?\)/g, (_, label, href, title) => {
+          const safeHref = sanitizeUrl(href);
+          const t = title ? ` title="${escapeHtml(title)}"` : '';
+          return `<a href="${safeHref}" target="_blank" rel="noopener noreferrer"${t}>${escapeHtml(label)}</a>`;
+        });
+
+        // Bold **..** or __..__
+        out = out.replace(/(\*\*|__)(.*?)\1/g, '<strong>$2</strong>');
+
+        // Italic *..* or _.._
+        out = out.replace(/(\*|_)([^*_].*?)\1/g, '<em>$2</em>');
+
+        // Restore inline code
+        out = out.replace(/@@CODE(\d+)@@/g, (m, idx) => `<code>${escapeHtml(codeMap[Number(idx)])}</code>`);
+
+        return out;
+      }
+
+      function mdToHtml(md) {
+        const lines = String(md || '').replace(/\r\n?/g, '\n').split('\n');
+
+        const out = [];
+        let inCode = false;
+        let codeLang = '';
+        let codeLines = [];
+
+        let listType = null; // 'ul' | 'ol'
+        let listItems = [];
+
+        let bqOpen = false;
+        let bqLines = [];
+
+        let paraOpen = false;
+        let paraLines = [];
+
+        function flushPara() {
+          if (paraOpen && paraLines.length) {
+            out.push(`<p>${processInline(paraLines.join(' '))}</p>`);
+          }
+          paraOpen = false;
+          paraLines = [];
+        }
+        function flushList() {
+          if (listType && listItems.length) {
+            const itemsHtml = listItems.map(li => `<li>${processInline(li)}</li>`).join('');
+            out.push(`<${listType}>${itemsHtml}</${listType}>`);
+          }
+          listType = null;
+          listItems = [];
+        }
+        function flushBQ() {
+          if (bqOpen && bqLines.length) {
+            const inner = bqLines.map(l => `<p>${processInline(l)}</p>`).join('');
+            out.push(`<blockquote>${inner}</blockquote>`);
+          }
+          bqOpen = false;
+          bqLines = [];
+        }
+        function flushCode() {
+          if (inCode) {
+            const cls = codeLang ? ` class="language-${escapeHtml(codeLang)}"` : '';
+            const code = escapeHtml(codeLines.join('\n'));
+            out.push(`<pre><code${cls}>${code}</code></pre>`);
+          }
+          inCode = false;
+          codeLang = '';
+          codeLines = [];
+        }
+
+        for (let i = 0; i < lines.length; i++) {
+          const raw = lines[i];
+          const line = raw;
+
+          // Code block fences

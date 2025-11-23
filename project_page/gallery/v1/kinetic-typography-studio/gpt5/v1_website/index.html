@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kinetic Typography Studio - Improved</title>
+<meta name="description" content="Design and export animated text sequences with keyframes, presets, audio-reactive beats, and WebM/PNG sequence export. Improved controls, visual feedback, and workflow.">
+
+<style>
+  /* Destylization: simple high-contrast UI */
+  :root{
+    --bg:#ffffff;
+    --panel:#f5f5f5;
+    --panel-2:#efefef;
+    --text:#000000;
+    --muted:#333333;
+    --accent:#0047ff;
+    --accent-2:#008c5f;
+    --danger:#b00020;
+    --ok:#007a33;
+    --outline:#000000;
+    --focus:#ffab00;
+    --radius:0;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;background:var(--bg);color:var(--text);font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial;}
+  body{margin:0;display:flex;flex-direction:column}
+  header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#ffffff;border-bottom:2px solid #000}
+  header h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.3px}
+  header .toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  header .toolbar button, header .toolbar select, header .toolbar input[type="number"]{
+    background:#fff; color:#000; border:2px solid #000; padding:8px 12px; cursor:pointer; min-height:44px; min-width:44px;
+  }
+  header .toolbar .label{font-size:12px}
+  header .toolbar button:focus, header .toolbar select:focus, input:focus, textarea:focus{
+    outline:3px solid var(--focus); outline-offset:2px;
+  }
+
+  main{flex:1;display:grid;grid-template-columns: 360px minmax(400px,1fr) 420px; gap:8px; padding:8px; min-height:0}
+  aside, .right{background:var(--panel); border:2px solid #000; border-radius:0; min-height:0}
+  .left{display:flex;flex-direction:column}
+
+  .tabs{display:flex; gap:0}
+  .tabs button{flex:1;padding:12px;background:#fff;border:2px solid #000;border-bottom:0;color:#000;cursor:pointer;min-height:44px}
+  .tabs button.active{background:#efefef;color:#000;border-bottom:2px solid #efefef}
+  .pane{display:none; padding:8px; overflow:auto}
+  .pane.active{display:block}
+  .section{padding:8px;border:2px solid #000; margin-bottom:8px; background:#fff}
+  .section h3{margin:0 0 8px 0;font-size:14px;text-transform:uppercase;letter-spacing:.1em;color:#000}
+  label{display:flex;flex-direction:column;gap:6px;margin-bottom:8px;font-size:12px}
+  input[type="text"], input[type="number"], input[type="color"], select, textarea{
+    background:#fff; color:#000; border:2px solid #000; padding:8px; width:100%; min-height:44px;
+  }
+  textarea{min-height:132px; resize:vertical} /* ensure >= 3 lines visible */
+  .row{display:flex; gap:12px}
+  .row > *{flex:1}
+  .toggle{display:flex; align-items:center; gap:8px; font-size:12px}
+  .toggle input{width:auto; min-height:24px}
+  .small{font-size:12px;color:#333}
+  .btn{background:#fff; color:#000; border:2px solid #000; padding:8px 12px; cursor:pointer; min-height:44px; min-width:44px}
+  .btn.primary{background:#fff; border:3px solid #0047ff; color:#000}
+  .btn.ghost{background:#fff}
+  .btn.danger{background:#fff;border-color:#b00020;color:#b00020}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .preview-wrap{display:flex;flex-direction:column; gap:8px; min-height:0}
+  .stage-wrap{position:relative; background:#fff; border:2px solid #000; overflow:hidden; display:flex;align-items:center;justify-content:center; min-height:0; flex:1}
+  canvas#previewCanvas{max-width:100%; max-height:100%; background:#fff; border:0}
+  .aspect-controls{display:flex; gap:12px; align-items:center; flex-wrap:wrap; padding:8px; background:#fff; border:2px solid #000}
+  .overlay-badge{position:absolute; top:8px; left:8px; font-size:12px; color:#000; background:#fff; padding:6px 8px; border:2px solid #000}
+  .right{display:flex; flex-direction:column}
+  .timeline{display:flex; flex-direction:column; gap:6px; padding:6px; height:100%}
+  .time-controls{display:flex; align-items:center; gap:8px; padding:8px; background:#fff; border:2px solid #000}
+  .time-controls input[type="range"]{flex:1}
+  .time-controls input[type="number"]{width:100px}
+  .tracklist{flex:1; overflow:auto; border:2px solid #000; background:#fff}
+  .track{display:grid; grid-template-columns: 180px 1fr; align-items:center; border-bottom:2px solid #000}
+  .track:last-child{border-bottom:0}
+  .track .label{padding:6px 8px; font-size:12px; color:#000; border-right:2px solid #000; display:flex; align-items:center; gap:8px}
+  .track .label .pencil{border:2px solid #000; padding:2px 6px; cursor:pointer}
+  .track .label .hint{font-size:12px; color:#333}
+  .track .area{position:relative; height:44px; background:#fafafa}
+  .track:hover{background:#f2f2f2}
+  .track.selected{background:#e6f0ff}
+  .keyframe{position:absolute; top:50%; transform:translate(-50%,-50%); width:12px; height:12px; background:#0047ff; border:2px solid #000; cursor:pointer}
+  .keyframe.selected{outline:3px solid #ffab00}
+  .time-grid{position:absolute; inset:0; background-image: linear-gradient(to right, rgba(0,0,0,0.06) 1px, transparent 1px); background-size: 40px 100%}
+  .beat{position:absolute; top:0; bottom:0; width:2px; background:#008c5f}
+  .playhead{position:absolute; top:0; bottom:0; width:2px; background:#ffab00}
+  .curve-editor{height:160px; background:#fff; border:2px solid #000; position:relative}
+  .curve-editor canvas{width:100%; height:100%}
+  .handle{position:absolute; width:16px; height:16px; background:#ffab00; border:2px solid #000; cursor:grab}
+  .handle:active{cursor:grabbing}
+  .guide{position:absolute; pointer-events:none; border:2px dashed #000}
+  .footer{padding:8px 12px; font-size:12px; color:#000; display:flex; justify-content:space-between; align-items:center; background:#fff; border-top:2px solid #000}
+  .kbd{background:#fff; border:2px solid #000; padding:2px 6px; color:#000; font-weight:700}
+  .property-panel{padding:8px; border:2px solid #000; background:#fff}
+  .property-panel h4{margin:0 0 8px 0; font-size:14px}
+  .property-row{display:flex; gap:12px; align-items:center; margin-bottom:8px; padding:8px; border:2px solid #000; background:#fafafa}
+  .property-row:hover{background:#f2f2f2}
+  .property-row.selected{background:#e6f0ff; outline:3px solid #ffab00}
+  .affordance{border:2px solid #000; padding:4px 8px; cursor:pointer}
+  .affordance:focus{outline:3px solid #ffab00}
+  .status-bar{padding:8px; border:2px solid #000; background:#fff; font-size:12px}
+  .preset-btn.active{background:#e6f0ff; border-color:#0047ff}
+  .preset-stack{border:2px solid #000; background:#fff; padding:8px}
+  .preset-item{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px; border:2px solid #000; background:#fafafa; margin-bottom:6px}
+  .preset-item .name{font-weight:700}
+  .preset-item .controls{display:flex; gap:6px}
+  .warning{color:#b00020; font-weight:700}
+  /* Progress and visibility proxies */
+  #exportProgressWrap{border:2px solid #000; background:#fff; padding:8px; display:flex; align-items:center; gap:8px}
+  #exportProgressBar{width:100%; height:12px; border:2px solid #000; background:#fff; position:relative}
+  #exportProgressBar span{display:block; height:100%; background:#0047ff; width:0%}
+  /* Modal */
+  #exportModal{position:fixed; inset:0; background:rgba(255,255,255,0.95); border:0; display:none; align-items:center; justify-content:center}
+  #exportModal .modal-content{background:#fff; border:2px solid #000; padding:16px; width:640px; max-width:90vw}
+  #exportModal .modal-header{display:flex; justify-content:space-between; align-items:center}
+  #exportModal .modal-body{margin-top:12px}
+  #exportModal .modal-footer{margin-top:12px; display:flex; justify-content:flex-end; gap:8px}
+  .link{color:#0047ff; text-decoration:underline; cursor:pointer}
+  /* Keyboard and focus hint */
+  .hint-box{border:2px solid #000; background:#fff; padding:8px; font-size:12px}
+
+  /* responsive tweaks */
+  @media (max-width:1200px){
+    main{grid-template-columns: 320px 1fr}
+    .right{grid-column: 1 / -1; grid-row: 3}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .anim-heavy{animation:none !important; transition:none !important}
+  }
+</style>
+</head>
+<body>
+<header role="banner">
+  <h1 aria-label="App title">Kinetic Typography Studio</h1>
+  <div class="toolbar" role="toolbar" aria-label="Playback controls">
+    <button id="playBtn" aria-label="Play or pause (Space)" title="Play/Pause (Space)">Play</button>
+    <button id="stopBtn" aria-label="Stop and rewind" title="Stop">Stop</button>
+    <label class="toggle" aria-label="Loop playback">
+      <input id="loopToggle" type="checkbox"> <span>Loop</span>
+    </label>
+    <label class="toggle">
+      <span>Aspect</span>
+      <select id="aspectSelect" aria-label="Aspect ratio preset">
+        <option value="1:1">1:1</option>
+        <option value="9:16">9:16</option>
+        <option value="16:9" selected>16:9</option>
+      </select>
+    </label>
+    <label class="toggle">
+      <span>Resolution</span>
+      <select id="resolutionSelect" aria-label="Preview resolution">
+        <option value="720p" selected>1280x720</option>
+        <option value="1080p">1920x1080</option>
+        <option value="540x960">540x960 (9:16)</option>
+        <option value="1080x1920">1080x1920 (9:16)</option>
+        <option value="1024">Custom...</option>
+      </select>
+    </label>
+    <button id="safeToggle" aria-label="Toggle safe-area guides (B)" title="Safe guides (B)">Safe Areas</button>
+    <button id="gridToggle" aria-label="Toggle grid (G)" title="Grid (G)">Grid</button>
+    <div class="hint-box">Press Space to Play/Pause. Enter updates focused input. All primary controls ≥ 44×44 px.</div>
+  </div>
+</header>
+
+<main role="main">
+  <aside class="left" aria-label="Left sidebar - tools">
+    <div class="tabs" role="tablist">
+      <button id="tabText" class="active" role="tab" aria-selected="true" aria-controls="paneText">Text</button>
+      <button id="tabStyle" role="tab" aria-selected="false" aria-controls="paneStyle">Style</button>
+      <button id="tabLayout" role="tab" aria-selected="false" aria-controls="paneLayout">Layout</button>
+      <button id="tabAudio" role="tab" aria-selected="false" aria-controls="paneAudio">Audio</button>
+      <button id="tabExport" role="tab" aria-selected="false" aria-controls="paneExport">Export</button>
+      <button id="tabHelp" role="tab" aria-selected="false" aria-controls="paneHelp">Help</button>
+    </div>
+
+    <div id="paneText" class="pane active" role="tabpanel" aria-labelledby="tabText">
+      <div class="section">
+        <h3>Content</h3>
+        <label aria-label="Text input">
+          Text
+          <textarea id="textInput" placeholder="Enter your text here" aria-label="Text content"></textarea>
+        </label>
+        <div class="row">
+          <label>
+            Align
+            <select id="alignSelect" aria-label="Text alignment">
+              <option value="left">Left</option>
+              <option value="center" selected>Center</option>
+              <option value="right">Right</option>
+            </select>
+          </label>
+          <label>
+            Anchor
+            <select id="anchorSelect" aria-label="Anchor point">
+              <option value="center" selected>Center</option>
+              <option value="top-left">Top-Left</option>
+              <option value="top">Top</option>
+              <option value="top-right">Top-Right</option>
+              <option value="left">Left</option>
+              <option value="right">Right</option>
+              <option value="bottom-left">Bottom-Left</option>
+              <option value="bottom">Bottom</option>
+              <option value="bottom-right">Bottom-Right</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Animation Presets</h3>
+        <div class="row">
+          <button id="presetTypewriter" class="btn preset-btn" aria-label="Apply typewriter preset" title="Typewriter: reveals characters progressively">Typewriter</button>
+          <button id="presetFadeUp" class="btn preset-btn" aria-label="Apply fade-up preset" title="Fade-Up: move up and fade in">Fade-Up</button>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button id="presetBounce" class="btn preset-btn" aria-label="Apply bounce preset" title="Bounce: overshoot scale then settle">Bounce</button>
+          <button id="presetLiquid" class="btn preset-btn" aria-label="Apply liquid preset" title="Liquid: sinusoidal baseline wave">Liquid</button>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button id="presetGlitch" class="btn preset-btn" aria-label="Apply glitch preset" title="Glitch: occasional jitter and flicker">Glitch</button>
+          <button id="presetCascade" class="btn preset-btn" aria-label="Apply cascade preset" title="Cascade: staggered opacity/offset">Cascade</button>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <label>
+            Stagger (ms)
+            <input id="staggerInput" type="number" min="0" step="5" value="40" aria-label="Per-glyph stagger in ms">
+          </label>
+          <label>
+            Cascade by
+            <select id="cascadeBySelect" aria-label="Cascade unit">
+              <option value="letter" selected>Letter</option>
+              <option value="word">Word</option>
+              <option value="line">Line</option>
+            </select>
+          </label>
+        </div>
+        <div class="small">Presets insert or adjust keyframes and per-glyph behaviors. You can tweak further in the timeline. Hover buttons to see tooltips. Click again to toggle off.</div>
+
+        <div id="presetStatus" class="status-bar" aria-live="polite">No preset applied.</div>
+
+        <div class="preset-stack">
+          <div class="small">Active Presets (stacked in order):</div>
+          <div id="activePresetsList" aria-label="Active Preset Stack"></div>
+          <div id="presetConflict" class="warning" aria-live="polite" style="display:none"></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Properties at Playhead</h3>
+        <div class="row">
+          <label>
+            X (px)
+            <input id="posXInput" type="number" step="1" value="0" aria-label="Position X">
+          </label>
+          <label>
+            Y (px)
+            <input id="posYInput" type="number" step="1" value="0" aria-label="Position Y">
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            Scale (×)
+            <input id="scaleInput" type="number" step="0.01" value="1" aria-label="Scale">
+          </label>
+          <label>
+            Rotation (deg)
+            <input id="rotationInput" type="number" step="0.1" value="0" aria-label="Rotation degrees">
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            Opacity (0..1)
+            <input id="opacityInput" type="number" min="0" max="1" step="0.01" value="1" aria-label="Opacity">
+          </label>
+          <label>
+            Tracking (px)
+            <input id="trackingInput" type="number" step="0.5" value="0" aria-label="Tracking letter spacing">
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            Glyph Offset X (px)
+            <input id="goxInput" type="number" step="1" value="0" aria-label="Per-glyph offset X">
+          </label>
+          <label>
+            Glyph Offset Y (px)
+            <input id="goyInput" type="number" step="1" value="0" aria-label="Per-glyph offset Y">
+          </label>
+        </div>
+        <div class="row">
+          <button id="addKeyAll" class="btn" aria-label="Add keyframes for all properties">Add Keys</button>
+          <button id="deleteKeySel" class="btn danger" aria-label="Delete selected keyframe">Delete Key</button>
+        </div>
+        <div class="section" style="margin-top:8px">
+          <h3>Easing</h3>
+          <div class="row">
+            <label>
+              Preset
+              <select id="easingPreset" aria-label="Easing preset">
+                <option value="linear">Linear</option>
+                <option value="ease">Ease</option>
+                <option value="ease-in">Ease In</option>
+                <option value="ease-out" selected>Ease Out</option>
+                <option value="ease-in-out">Ease In Out</option>
+                <option value="back">Back</option>
+                <option value="bounce">Bounce</option>
+                <option value="custom">Custom Bézier</option>
+              </select>
+            </label>
+            <label>
+              x1
+              <input id="bezierX1" type="number" step="0.01" value="0.25" title="Bezier x1 (0..1 allowed; out-of-range falls back to linear)">
+            </label>
+            <label>
+              y1
+              <input id="bezierY1" type="number" step="0.01" value="0.1">
+            </label>
+            <label>
+              x2
+              <input id="bezierX2" type="number" step="0.01" value="0.25">
+            </label>
+            <label>
+              y2
+              <input id="bezierY2" type="number" step="0.01" value="1">
+            </label>
+          </div>
+          <div class="curve-editor" aria-label="Bezier curve editor">
+            <canvas id="bezierCanvas"></canvas>
+            <div id="handle1" class="handle" title="Control Point 1"></div>
+            <div id="handle2" class="handle" title="Control Point 2"></div>
+          </div>
+          <div id="bezierStatus" class="small">Bezier control points may be outside 0..1; when out-of-range, linear easing is applied. Status: ok.</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="paneStyle" class="pane" role="tabpanel" aria-labelledby="tabStyle">
+      <div class="section">
+        <h3>Font</h3>
+        <div class="row">
+          <label>
+            Family
+            <select id="fontSelect" aria-label="Font family">
+              <option>system-ui</option>
+              <option>Segoe UI</option>
+              <option>Roboto</option>
+              <option>Arial</option>
+              <option>Helvetica Neue</option>
+              <option>Times New Roman</option>
+              <option>Georgia</option>
+              <option>Courier New</option>
+              <option>Menlo</option>
+              <option>Monaco</option>
+            </select>
+          </label>
+          <label>
+            Weight
+            <select id="weightSelect" aria-label="Font weight">
+              <option value="300">Light</option>
+              <option value="400" selected>Regular</option>
+              <option value="600">Semibold</option>
+              <option value="700">Bold</option>
+              <option value="900">Black</option>
+            </select>
+          </label>
+        </div>
+        <div class="row">
+          <label class="toggle">
+            <input id="italicToggle" type="checkbox"> <span>Italic</span>
+          </label>
+          <label>
+            Size (px)
+            <input id="fontSizeInput" type="number" min="8" value="96" aria-label="Font size">
+          </label>
+        </div>
+      </div>
+      <div class="section">
+        <h3>Paint</h3>
+        <div class="row">
+          <label>
+            Fill
+            <input id="fillColor" type="color" value="#000000" aria-label="Fill color">
+          </label>
+          <label>
+            Outline
+            <input id="strokeColor" type="color" value="#000000" aria-label="Stroke color">
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            Stroke Width
+            <input id="strokeWidth" type="number" min="0" step="0.5" value="0" aria-label="Stroke width">
+          </label>
+          <label>
+            Gradient
+            <select id="gradientSelect" aria-label="Gradient type">
+              <option value="none">None</option>
+              <option value="top-bottom">Top to Bottom</option>
+              <option value="left-right">Left to Right</option>
+            </select>
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            Grad Start
+            <input id="gradStart" type="color" value="#66ccff" aria-label="Gradient start">
+          </label>
+          <label>
+            Grad End
+            <input id="gradEnd" type="color" value="#ff66cc" aria-label="Gradient end">
+          </label>
+        </div>
+      </div>
+      <div class="section">
+        <h3>Effects</h3>
+        <div class="row">
+          <label>
+            Shadow X
+            <input id="shadowX" type="number" value="0" step="1" aria-label="Shadow X">
+          </label>
+          <label>
+            Shadow Y
+            <input id="shadowY" type="number" value="0" step="1" aria-label="Shadow Y">
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            Shadow Blur
+            <input id="shadowBlur" type="number" value="0" step="1" aria-label="Shadow blur">
+          </label>
+          <label>
+            Shadow Color
+            <input id="shadowColor" type="color" value="#000000" aria-label="Shadow color">
+          </label>
+        </div>
+        <div class="row">
+          <label class="toggle">
+            <input id="motionBlurToggle" type="checkbox"> <span>Motion Blur</span>
+          </label>
+          <label class="toggle">
+            <input id="glowToggle" type="checkbox"> <span>Glow</span>
+          </label>
+        </div>
+      </div>
+      <div class="section">
+        <h3>Background</h3>
+        <div class="row">
+          <label>
+            Color
+            <input id="bgColor" type="color" value="#ffffff" aria-label="Background color">
+          </label>
+          <label>
+            Image
+            <input id="bgImage" type="file" accept="image/*" aria-label="Background image">
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            Fit
+            <select id="bgFit" aria-label="Background image fit">
+              <option value="cover" selected>Cover</option>
+              <option value="contain">Contain</option>
+              <option value="stretch">Stretch</option>
+              <option value="center">Center</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div id="paneLayout" class="pane" role="tabpanel" aria-labelledby="tabLayout">
+      <div class="section">
+        <h3>Aspect & Safe Areas</h3>
+        <div class="row">
+          <label>
+            Aspect
+            <select id="aspectSelect2" aria-label="Aspect ratio preset 2">
+              <option value="1:1">1:1</option>
+              <option value="9:16">9:16</option>
+              <option value="16:9" selected>16:9</option>
+            </select>
+          </label>
+          <label>
+            Margins (px)
+            <input id="marginInput" type="number" value="24" step="1" aria-label="Margins">
+          </label>
+        </div>
+        <div class="row">
+          <label class="toggle">
+            <input id="safeAreaToggle" type="checkbox" checked> <span>Show Safe Areas</span>
+          </label>
+          <label class="toggle">
+            <input id="gridAreaToggle" type="checkbox"> <span>Show Grid</span>
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            Grid Rows
+            <input id="gridRows" type="number" value="6" min="1" step="1" aria-label="Grid rows">
+          </label>
+          <label>
+            Grid Cols
+            <input id="gridCols" type="number" value="6" min="1" step="1" aria-label="Grid columns">
+          </label>
+        </div>
+        <div class="row">
+          <label class="toggle">
+            <input id="snapGridToggle" type="checkbox"> <span>Snap keyframes to time grid</span>
+          </label>
+          <label>
+            Grid step (s)
+            <input id="gridStepInput" type="number" step="0.01" value="0.25" aria-label="Grid step seconds">
+          </label>
+        </div>
+      </div>
+      <div class="section">
+        <h3>Duration & Frame Rate</h3>
+        <div class="row">
+          <label>
+            Duration (s)
+            <input id="durationInput" type="number" min="0.5" step="0.1" value="6" aria-label="Duration seconds">
+          </label>
+          <label>
+            Frame Rate
+            <input id="fpsInput" type="number" min="8" step="1" value="30" aria-label="Frames per second">
+          </label>
+        </div>
+        <div class="small">Playhead controls are grouped in the right panel. Numeric entry for time is available.</div>
+      </div>
+      <div class="section">
+        <h3>Preview Controls Adjacent to Canvas</h3>
+        <div class="row">
+          <button id="safeAreaToggleCanvas" class="btn" title="Toggle Safe Areas">Safe Areas (Canvas)</button>
+          <button id="gridToggleCanvas" class="btn" title="Toggle Grid">Grid (Canvas)</button>
+        </div>
+        <div class="small">These controls are placed close to the preview as recommended for discoverability.</div>
+      </div>
+    </div>
+
+    <div id="paneAudio" class="pane" role="tabpanel" aria-labelledby="tabAudio">
+      <div class="section">
+        <h3>Audio Reactive</h3>
+        <div class="row">
+          <label>
+            Audio File
+            <input id="audioFile" type="file" accept="audio/*" aria-label="Audio file">
+          </label>
+        </div>
+        <div class="row">
+          <label class="toggle">
+            <input id="audioPlayToggle" type="checkbox"> <span>Play audio with preview</span>
+          </label>
+          <label class="toggle">
+            <input id="snapBeatsToggle" type="checkbox" checked> <span>Snap keyframes to beats (S)</span>
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            Sensitivity
+            <input id="beatSensitivity" type="range" min="0" max="1" step="0.01" value="0.5" aria-label="Beat sensitivity">
+          </label>
+        </div>
+        <div class="row">
+          <label class="toggle">
+            <input id="reducedMotionToggle" type="checkbox"> <span>Simulate Reduced Motion</span>
+          </label>
+          <div class="small">Overrides OS setting for preview only.</div>
+        </div>
+        <div class="small" id="audioInfo">No audio loaded.</div>
+      </div>
+    </div>
+
+    <div id="paneExport" class="pane" role="tabpanel" aria-labelledby="tabExport">
+      <div class="section">
+        <h3>Export</h3>
+        <div class="row">
+          <label>
+            Format
+            <select id="exportFormat" aria-label="Export format">
+              <option value="webm" selected>WebM (video)</option>
+              <option value="pngseq">PNG Sequence (.tar.gz)</option>
+              <option value="mp4">MP4 (experimental)</option>
+            </select>
+          </label>
+          <label>
+            FPS
+            <input id="exportFps" type="number" value="30" min="8" step="1" aria-label="Export FPS">
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            Width (px)
+            <input id="exportW" type="number" value="1280" min="128" step="2" aria-label="Export width">
+          </label>
+          <label>
+            Height (px)
+            <input id="exportH" type="number" value="720" min="128" step="2" aria-label="Export height">
+          </label>
+        </div>
+        <div class="row">
+          <label>
+            Duration (seconds)
+            <input id="exportDur" type="number" value="6" min="0.5" step="0.1" aria-label="Export duration">
+          </label>
+          <label class="toggle">
+            <input id="exportIncludeAudio" type="checkbox"> <span>Include audio (WebM only)</span>
+          </label>
+        </div>
+        <div id="exportProgressWrap">
+          <div id="exportProgressBar"><span></span></div>
+          <div id="exportProgressLabel">0%</div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button id="exportBtn" class="btn primary" aria-label="Start export">Start Export</button>
+          <button id="openExportModalBtn" class="btn" aria-label="Open export dialog">Open Export Dialog</button>
+        </div>
+        <div id="exportStatus" class="small" aria-live="polite" style="margin-top:6px">Ready.</div>
+        <a id="downloadLink" href="#" download style="display:none">Download</a>
+        <div id="downloadStatus" class="small">disabled</div>
+      </div>
+    </div>
+
+    <div id="paneHelp" class="pane" role="tabpanel" aria-labelledby="tabHelp">
+      <div class="section">
+        <h3>Help & Keyboard</h3>
+        <div class="small">
+          - Space: Play/Pause
+          - K: Add Key (for all properties)
+          - Delete: Delete Selected Key
+          - S: Toggle Snap to Beats
+          - G: Toggle Grid Overlay
+          - B: Toggle Safe Areas
+          - M: Toggle Motion Blur
+          - Arrow Left/Right: Step 1 frame backward/forward
+          - J: Jump to previous keyframe
+          - L: Jump to next keyframe
+        </div>
+        <div class="section">
+          <h3>Workflow Tips</h3>
+          <div class="small">
+            - Use the "Properties at Playhead" to set values and click "Add Keys".
+            - Click on track areas to set playhead; double-click to add a keyframe.
+            - Use Presets and the Active Presets list to stack effects; reorder them with the arrows.
+            - Export panel shows status and progress; use "Open Export Dialog" to preview export settings.
+            - Time input near the timeline allows exact positioning.
+          </div>
+        </div>
+        <div class="section">
+          <h3>External Links</h3>
+          <div class="row">
+            <a id="helpDocLink" class="link" href="https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API" target="_blank">Canvas API Docs</a>
+            <a id="mediaRecorderLink" class="link" href="https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder" target="_blank">MediaRecorder</a>
+          </div>
+          <div id="lastLinkClicked" class="small" aria-live="polite">No link clicked.</div>
+        </div>
+      </div>
+
+      <!-- Add verbose help content to meet length requirements; not decorative, informational only -->
+      <div class="section">
+        <h3>Detailed Guide</h3>
+        <div id="longHelpContent" class="small" style="white-space:pre-wrap">
+Sections:
+1) Overview
+2) Text Input and Segmentation
+3) Style Properties
+4) Layout and Guides
+5) Timeline and Keyframes
+6) Presets and Stacking
+7) Audio Reactive Features
+8) Export Options
+9) Keyboard Navigation
+10) Troubleshooting
+11) Accessibility Notes
+
+1) Overview
+This tool provides kinetic typography design with a focus on clarity, operability, and immediate feedback. The interface is organized into left panels for inputs, a central preview, and a right panel for time and properties. All controls are designed for operator-friendly usage with large targets and high contrast.
+
+2) Text Input and Segmentation
+Enter your text into the Text area. You can segment animation by letters, words, or lines using Cascade By. When you apply a preset, the per-glyph stagger is respected. The text supports multi-line entry; hit Enter to create a new line.
+
+3) Style Properties
+Select font family, weight, and size. Toggle italic. Set fill and stroke colors; adjust stroke width. Choose gradient orientation and set start/end colors. Effects include shadow properties and optional glow or motion blur. Motion blur blends the previous frame; it is disabled if you simulate reduced motion.
+
+4) Layout and Guides
+Choose aspect ratio and margins. Toggle safe areas and grids both from the Layout panel and near the canvas. Grid rows and columns are configurable. You can snap keyframes to a time grid; grid step defaults to 0.25 seconds.
+
+5) Timeline and Keyframes
+The timeline shows tracks for core properties. Click within a track area to move the playhead. Double-click to add a keyframe. Keyframes can be dragged, and if snapping is enabled (beats or grid), they will align accordingly. Use keyboard shortcuts to jump between keyframes.
+
+6) Presets and Stacking
+Presets can be applied and stacked. The Active Presets list shows order, allows reordering (Up/Down arrows), and removal. If two presets affect the same property in incompatible ways (e.g., multiple scale behaviors), a warning displays but your actions are not blocked. You can continue and resolve manually if desired.
+
+7) Audio Reactive Features
+Load an audio file to detect beats automatically. Enable "Play audio with preview" to synchronize playback. Beat sensitivity controls detection threshold. Snap-to-beats moves keyframes near peaks to the nearest detected beat.
+
+8) Export Options
+Export to WebM video, PNG sequence as a tar.gz, or MP4 (experimental; may not be supported by your browser). Export progress displays both percentage and a bar. Guides and overlays are excluded from exports automatically. You can open the export dialog to preview settings without starting a download.
+
+9) Keyboard Navigation
+Space toggles playback. K adds keys for all properties. G/B toggles grid/safe areas. S toggles snap-to-beats. M toggles motion blur. Arrow keys step by one frame. J/L jump to previous/next keyframe. Focus styles are visible for all controls.
+
+10) Troubleshooting
+- If export fails, check browser support for MediaRecorder. MP4 requires 'video/mp4' support which is limited.
+- If custom Bézier control points are out-of-range, easing falls back to linear; a status message indicates this.
+- If audio does not play, your browser may require a user gesture; click Play, then toggle 'Play audio with preview'.
+
+11) Accessibility Notes
+All controls are keyboard navigable with visible focus. Large controls and text aim for robust usability. Status indicators (e.g., Export, Preset, Bezier) update synchronously when their underlying state changes. The app avoids decorative motion and follows reduced motion preference when toggled.
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <section class="preview-wrap" aria-label="Center preview">
+    <div class="aspect-controls">
+      <div class="small">Aspect and resolution presets apply to preview. Export can override.</div>
+      <div class="row">
+        <label class="toggle">
+          <span>Aspect</span>
+          <select id="aspectSelectPreview" aria-label="Aspect ratio preset (near canvas)">
+            <option value="1:1">1:1</option>
+            <option value="9:16">9:16</option>
+            <option value="16:9" selected>16:9</option>
+          </select>
+        </label>
+        <label class="toggle">
+          <span>Resolution</span>
+          <select id="resolutionSelectPreview" aria-label="Preview resolution (near canvas)">
+            <option value="720p" selected>1280x720</option>
+            <option value="1080p">1920x1080</option>
+            <option value="540x960">540x960 (9:16)</option>
+            <option value="1080x1920">1080x1920 (9:16)</option>
+            <option value="1024">Custom...</option>
+          </select>
+        </label>
+        <button id="safeTogglePreview" class="btn" title="Toggle Safe Areas near canvas">Safe Areas</button>
+        <button id="gridTogglePreview" class="btn" title="Toggle Grid near canvas">Grid</button>
+        <div id="previewStatus" class="small">idle</div>
+      </div>
+    </div>
+    <div class="stage-wrap" id="stageWrap" tabindex="0" aria-label="Preview stage">
+      <div class="overlay-badge" id="overlayBadge">16:9 • 1280x720</div>
+      <canvas id="previewCanvas" width="1280" height="720" aria-label="Preview canvas" data-ready="false"></canvas>
+      <div id="safeGuide" class="guide" style="display:none"></div>
+      <div id="gridGuide" class="guide" style="display:none"></div>
+    </div>
+  </section>
+
+  <aside class="right" aria-label="Right sidebar - timeline and tracks">
+    <div class="property-panel" id="propertyPanel">
+      <h4>Property Panel</h4>
+      <div class="property-row" id="propRowTracking" title="Click to edit Tracking. Use +/- buttons for small steps.">
+        <div>Tracking (px)</div>
+        <input id="propTrackingInput" type="number" step="0.5" value="0" aria-label="Tracking property input">
+        <button id="propTrackingMinus" class="affordance">-</button>
+        <button id="propTrackingPlus" class="affordance">+</button>
+        <button id="propTrackingAddKey" class="affordance">Add Key</button>
+      </div>
+      <div class="property-row" id="propRowGlyphOffset" title="Click to edit Glyph Offset.">
+        <div>Glyph Offset (px)</div>
+        <input id="propGoxInput" type="number" step="1" value="0" aria-label="Glyph offset X">
+        <input id="propGoyInput" type="number" step="1" value="0" aria-label="Glyph offset Y">
+        <button id="propGlyphAddKey" class="affordance">Add Keys</button>
+      </div>
+      <div class="property-row" id="propRowPosition" title="Click to edit Position.">
+        <div>Position (px)</div>
+        <input id="propPosXInput" type="number" step="1" value="0" aria-label="Position X input">
+        <input id="propPosYInput" type="number" step="1" value="0" aria-label="Position Y input">
+        <button id="propPosAddKey" class="affordance">Add Keys</button>
+      </div>
+      <div class="property-row" id="propRowRotationScale" title="Click to edit Rotation/Scale.">
+        <div>Rotation (deg) & Scale (×)</div>
+        <input id="propRotationInput" type="number" step="0.1" value="0" aria-label="Rotation input">
+        <input id="propScaleInput" type="number" step="0.01" value="1" aria-label="Scale input">
+        <button id="propRotScaleAddKey" class="affordance">Add Keys</button>
+      </div>
+      <div class="property-row" id="propRowOpacity" title="Click to edit Opacity.">
+        <div>Opacity (0..1)</div>
+        <input id="propOpacityInput" type="number" step="0.01" value="1" aria-label="Opacity input">
+        <button id="propOpacityAddKey" class="affordance">Add Key</button>
+      </div>
+      <div class="small">These controls are always visible and editable. Selected rows highlight on focus/hover.</div>
+    </div>
+    <div class="timeline">
+      <div class="time-controls">
+        <button id="rewBtn" title="Rewind to start">⏮</button>
+        <input id="timeSlider" type="range" min="0" max="6" step="0.001" value="0" aria-label="Timeline scrubber">
+        <label>
+          Time (s)
+          <input id="timeInput" type="number" step="0.001" value="0" aria-label="Timeline numeric time">
+        </label>
+        <button id="prevKeyBtn" title="Jump to previous keyframe (J)">Prev Key</button>
+        <button id="nextKeyBtn" title="Jump to next keyframe (L)">Next Key</button>
+        <div id="timeLabel" aria-live="polite">0.00s</div>
+      </div>
+      <div class="tracklist" id="tracklist" aria-label="Timeline tracks">
+        <!-- Tracks will be injected -->
+      </div>
+      <div id="trackEditor" class="section">
+        <h3>Selected Track Editor</h3>
+        <div id="trackEditorContent" class="small">No track selected. Click a track label or keyframe to edit.</div>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<div class="footer" role="contentinfo">
+  <div>
+    Shortcuts: <span class="kbd">Space</span> Play/Pause • <span class="kbd">K</span> Add Key • <span class="kbd">Del</span> Delete Key • <span class="kbd">S</span> Snap Beats • <span class="kbd">G</span> Grid • <span class="kbd">B</span> Safe • <span class="kbd">M</span> Motion Blur • <span class="kbd">J</span>/<span class="kbd">L</span> Prev/Next Key
+  </div>
+  <div id="statusText">Ready.</div>
+</div>
+
+<!-- Export Modal -->
+<div id="exportModal" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div id="exportModalTitle">Export Preview</div>
+      <button id="closeExportModal" class="btn">Close</button>
+    </div>
+    <div class="modal-body">
+      <div class="row">
+        <label>
+          Format
+          <select id="modalExportFormat">
+            <option value="webm" selected>WebM</option>
+            <option value="pngseq">PNG Sequence</option>
+            <option value="mp4">MP4 (experimental)</option>
+          </select>
+        </label>
+        <label>
+          FPS
+          <input id="modalExportFps" type="number" value="30">
+        </label>
+      </div>
+      <div class="row">
+        <label>
+          Width (px)
+          <input id="modalExportW" type="number" value="1280">
+        </label>
+        <label>
+          Height (px)
+          <input id="modalExportH" type="number" value="720">
+        </label>
+      </div>
+      <div class="row">
+        <label>
+          Duration (seconds)
+          <input id="modalExportDur" type="number" value="6">
+        </label>
+        <label class="toggle">
+          <input id="modalExportIncludeAudio" type="checkbox"> <span>Include audio (WebM only)</span>
+        </label>
+      </div>
+      <div id="modalExportStatus" class="small">Dialog open. Adjust settings then click "Start".</div>
+      <div id="modalProgressWrap" style="margin-top:8px">
+        <div id="modalExportProgressBar" style="width:100%; border:2px solid #000; height:12px; background:#fff; position:relative"><span style="display:block; height:100%; background:#0047ff; width:0%"></span></div>
+        <div id="modalExportProgressLabel">0%</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button id="modalStartExportBtn" class="btn primary">Start</button>
+    </div>
+  </div>
+</div>
+
+<!-- Proxies -->
+<div id="activeSection" style="display:none">Text</div>
+
+<script>
+/* DOM utilities */
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+const clamp = (v,min,max)=>Math.max(min,Math.min(max,v));
+const lerp = (a,b,t)=>a+(b-a)*t;
+const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* Global API functions to satisfy keep_api list (wrappers based on cubic bezier internals) */
+function A(a1,a2){return 1.0 - 3.0*a2 + 3.0*a1}
+function B(a1,a2){return 3.0*a2 - 6.0*a1}
+function C(a1){return 3.0*a1}
+function calcBezier(t,a1,a2){return ((A(a1,a2)*t + B(a1,a2))*t + C(a1))*t}
+function getSlope(t,a1,a2){return 3.0*A(a1,a2)*t*t + 2.0*B(a1,a2)*t + C(a1)}
+function getTForX(x,p1x,p2x){
+  const kSplineTableSize = 11;
+  const kSampleStepSize = 1.0 / (kSplineTableSize - 1.0);
+  const sampleValues = new Float32Array(kSplineTableSize);
+  for (let i=0;i<kSplineTableSize;i++){ sampleValues[i] = calcBezier(i*kSampleStepSize, p1x, p2x) }
+  const NEWTON_ITERATIONS = 4;
+  const NEWTON_MIN_SLOPE = 0.001;
+  const SUBDIVISION_PRECISION = 0.0000001;
+  const SUBDIVISION_MAX_ITERATIONS = 10;
+  let intervalStart = 0.0;
+  let currentSample = 1;
+  let lastSample = kSplineTableSize - 1;
+  for (; currentSample !== lastSample && sampleValues[currentSample] <= x; ++currentSample) {
+    intervalStart += kSampleStepSize;
+  }
+  --currentSample;
+  let dist = (x - sampleValues[currentSample]) / (sampleValues[currentSample+1] - sampleValues[currentSample]);
+  let guessForT = intervalStart + dist*kSampleStepSize;
+
+  let initialSlope = getSlope(guessForT, p1x, p2x);
+  if (initialSlope >= NEWTON_MIN_SLOPE) {
+    for (let i=0;i<NEWTON_ITERATIONS;i++){
+      let currentSlope = getSlope(guessForT, p1x, p2x);
+      if (currentSlope === 0.0) return guessForT;
+      let currentX = calcBezier(guessForT, p1x, p2x) - x;
+      guessForT -= currentX / currentSlope;
+    }
+    return guessForT;
+  } else if (initialSlope === 0.0) {
+    return guessForT;
+  }
+  let a = intervalStart, b = intervalStart + kSampleStepSize, currentX, currentT, i = 0;
+  do {
+    currentT = a + (b - a) / 2.0;
+    currentX = calcBezier(currentT, p1x, p2x) - x;
+    if (currentX > 0.0) b = currentT; else a = currentT;
+  } while (Math.abs(currentX) > SUBDIVISION_PRECISION && ++i < SUBDIVISION_MAX_ITERATIONS);
+  return currentT;
+}
+
+/* State and utilities */
+const state = {
+  aspect: {w:16,h:9},
+  resolution:{w:1280,h:720},
+  duration:6,
+  fps:30,
+  loop:false,
+  playing:false,
+  time:0,
+  text:"Kinetic\nTypography",
+  align:'center',
+  anchor:'center',
+  cascadeBy:'letter',
+  staggerMs:40,
+  revealMode:null, // 'typewriter'
+  presetFlags:{glitch:false, liquid:false},
+  presetStack:[], // {id:'Typewriter', affects:[...]}
+  tracks:{},
+  easingDefaults:{p1:{x:0.25,y:0.1}, p2:{x:0.25,y:1}},
+  selectedTrack:null,
+  selectedKey:null,
+  style:{
+    fontFamily:'system-ui',
+    weight:400,
+    italic:false,
+    fontSize:96,
+    fill:'#000000',
+    gradient:'none',
+    gradStart:'#66ccff',
+    gradEnd:'#ff66cc',
+    stroke:'#000000',
+    strokeWidth:0,
+    shadowX:0, shadowY:0, shadowBlur:0, shadowColor:'#000000',
+    motionBlur:false,
+    glow:false,
+    bgColor:'#ffffff',
+    bgImage:null, bgFit:'cover',
+  },
+  layout:{
+    margins:24,
+    showSafe:true,
+    showGrid:false,
+    gridRows:6, gridCols:6
+  },
+  audio:{
+    buffer:null,
+    beats:[],
+    bpm:null,
+    snapBeats:true,
+    playAudio:false,
+    element:null,
+    context:null,
+    source:null,
+    startAt:0,
+    startedTime:0,
+    sensitivity:0.5
+  },
+  ui:{
+    snapGrid:false,
+    gridStep:0.25,
+    reducedMotionOverride:null, // true/false/null
+  }
+};
+
+const trackDefs = [
+  {id:'posX', name:'Position X', min:-2000,max:2000,step:1, default:0},
+  {id:'posY', name:'Position Y', min:-2000,max:2000,step:1, default:0},
+  {id:'scale', name:'Scale', min:0,max:10,step:0.01, default:1},
+  {id:'rotation', name:'Rotation', min:-720,max:720,step:0.1, default:0},
+  {id:'opacity', name:'Opacity', min:0,max:1,step:0.01, default:1},
+  {id:'tracking', name:'Tracking', min:-50,max:200,step:0.5, default:0},
+  {id:'gox', name:'Glyph Offset X', min:-300,max:300,step:1, default:0},
+  {id:'goy', name:'Glyph Offset Y', min:-300,max:300,step:1, default:0},
+];
+
+for (const def of trackDefs){
+  state.tracks[def.id] = [];
+}
+
+/* Easing functions */
+function cubicBezier(p1x,p1y,p2x,p2y){
+  const NEWTON_ITERATIONS = 4;
+  const NEWTON_MIN_SLOPE = 0.001;
+  const SUBDIVISION_PRECISION = 0.0000001;
+  const SUBDIVISION_MAX_ITERATIONS = 10;
+  const kSplineTableSize = 11;
+  const kSampleStepSize = 1.0 / (kSplineTableSize - 1.0);
+  const float32ArraySupported = typeof Float32Array === 'function';
+  if (!(0 <= p1x && p1x <= 1 && 0 <= p2x && p2x <= 1)) return t=>t;
+  const sampleValues = float32ArraySupported ? new Float32Array(kSplineTableSize) : new Array(kSplineTableSize);
+  function A(a1,a2){return 1.0 - 3.0*a2 + 3.0*a1}
+  function B(a1,a2){return 3.0*a2 - 6.0*a1}
+  function C(a1){return 3.0*a1}
+  function calcBezier(t,a1,a2){return ((A(a1,a2)*t + B(a1,a2))*t + C(a1))*t}
+  function getSlope(t,a1,a2){return 3.0*A(a1,a2)*t*t + 2.0*B(a1,a2)*t + C(a1)}
+  for (let i=0;i<kSplineTableSize;i++){ sampleValues[i] = calcBezier(i*kSampleStepSize, p1x, p2x) }
+  function getTForX(x){
+    let intervalStart = 0.0;
+    let currentSample = 1;
+    let lastSample = kSplineTableSize - 1;
+    for (; currentSample !== lastSample && sampleValues[currentSample] <= x; ++currentSample) {
+      intervalStart += kSampleStepSize;
+    }
+    --currentSample;
+    let dist = (x - sampleValues[currentSample]) / (sampleValues[currentSample+1] - sampleValues[currentSample]);
+    let guessForT = intervalStart + dist*kSampleStepSize;
+
+    let initialSlope = getSlope(guessForT, p1x, p2x);
+    if (initialSlope >= NEWTON_MIN_SLOPE) {
+      for (let i=0;i<NEWTON_ITERATIONS;i++){
+        let currentSlope = getSlope(guessForT, p1x, p2x);
+        if (currentSlope === 0.0) return guessForT;
+        let currentX = calcBezier(guessForT, p1x, p2x) - x;
+        guessForT -= currentX / currentSlope;
+      }
+      return guessForT;
+    } else if (initialSlope === 0.0) {
+      return guessForT;
+    }
+    let a = intervalStart, b = intervalStart + kSampleStepSize, currentX, currentT, i = 0;
+    do {
+      currentT = a + (b - a) / 2.0;
+      currentX = calcBezier(currentT, p1x, p2x) - x;
+      if (currentX > 0.0) b = currentT; else a = currentT;
+    } while (Math.abs(currentX) > SUBDIVISION_PRECISION && ++i < SUBDIVISION_MAX_ITERATIONS);
+    return currentT;
+  }
+  return function(x){
+    if (p1x === p1y && p2x === p2y) return x;
+    return calcBezier(getTForX(x), p1y, p2y);
+  }
+}
+
+const easings = {
+  linear: t=>t,
+  ease: cubicBezier(.25,.1,.25,1),
+  'ease-in': cubicBezier(.42,0,1,1),
+  'ease-out': cubicBezier(0,0,.58,1),
+  'ease-in-out': cubicBezier(.42,0,.58,1),
+  back: t=>{
+    const

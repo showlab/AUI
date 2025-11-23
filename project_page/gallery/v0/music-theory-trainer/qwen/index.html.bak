@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Theory Trainer</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #6b8cbc;
+            --accent-color: #ff6b6b;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            color: var(--light-color);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(to right, #ff9966, #ff5858);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #ffd166;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .piano-container {
+            position: relative;
+            height: 200px;
+            margin: 20px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .white-keys {
+            display: flex;
+            height: 100%;
+        }
+
+        .white-key {
+            flex: 1;
+            background: linear-gradient(to bottom, #fff 0%, #f5f5f5 100%);
+            border: 1px solid #ddd;
+            border-radius: 0 0 5px 5px;
+            cursor: pointer;
+            position: relative;
+            z-index: 1;
+            transition: all 0.1s ease;
+        }
+
+        .white-key.active {
+            background: linear-gradient(to bottom, #ffd166, #ffb347);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .black-keys {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60%;
+            display: flex;
+            z-index: 2;
+        }
+
+        .black-key {
+            width: 0;
+            height: 100%;
+            background: linear-gradient(to bottom, #000 0%, #333 100%);
+            border: 1px solid #222;
+            border-radius: 0 0 5px 5px;
+            cursor: pointer;
+            position: relative;
+            margin-left: -10px;
+            transition: all 0.1s ease;
+        }
+
+        .black-key.active {
+            background: linear-gradient(to bottom, #ff6b6b, #ff5252);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            background: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            background: var(--secondary-color);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .exercise-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .exercise-display {
+            font-size: 2.5rem;
+            margin: 20px 0;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .feedback {
+            font-size: 1.5rem;
+            margin: 20px 0;
+            min-height: 40px;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .correct {
+            background: rgba(40, 167, 69, 0.2);
+            color: var(--success-color);
+        }
+
+        .incorrect {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+
+        .instructions h3 {
+            color: #ffd166;
+            margin-bottom: 10px;
+        }
+
+        .notes-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .note-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .key-label {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .black-key .key-label {
+            color: #fff;
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+        }
+
+        .active-note {
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .difficulty-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 15px 0;
+        }
+
+        .difficulty-btn {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+        }
+
+        .active-difficulty {
+            background: var(--accent-color);
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎵 Music Theory Trainer 🎵</h1>
+            <p class="subtitle">Master notes, scales, and chords through interactive learning and ear training</p>
+        </header>
+
+        <div class="app-container">
+            <section class="panel">
+                <h2 class="panel-title">🎹 Interactive Piano</h2>
+                <div class="piano-container" id="pianoContainer">
+                    <div class="white-keys" id="whiteKeys"></div>
+                    <div class="black-keys" id="blackKeys"></div>
+                </div>
+                
+                <div class="controls">
+                    <button id="playBtn">Play Scale</button>
+                    <button id="stopBtn">Stop</button>
+                </div>
+                
+                <div class="instructions">
+                    <h3>How to Play</h3>
+                    <p>Click on piano keys to play notes. Try playing simple scales like C Major or A Minor.</p>
+                </div>
+            </section>
+
+            <section class="panel">
+                <h2 class="panel-title">👂 Ear Training</h2>
+                <div class="exercise-container">
+                    <div class="exercise-display" id="exerciseDisplay">Press Start to Begin</div>
+                    <div class="feedback" id="feedback"></div>
+                    
+                    <div class="difficulty-selector">
+                        <button class="difficulty-btn active-difficulty" data-level="easy">Easy</button>
+                        <button class="difficulty-btn" data-level="medium">Medium</button>
+                        <button class="difficulty-btn" data-level="hard">Hard</button>
+                    </div>
+                    
+                    <div class="controls">
+                        <button id="startExerciseBtn">Start Exercise</button>
+                        <button id="nextBtn">Next Note</button>
+                    </div>
+                </div>
+                
+                <div class="instructions">
+                    <h3>Ear Training Tips</h3>
+                    <p>Listen carefully to the note played. Select the correct note from the options below.</p>
+                    <p>Practice regularly to improve your musical hearing!</p>
+                </div>
+                
+                <div class="notes-list" id="notesList">
+                    <!-- Notes will be populated by JavaScript -->
+                </div>
+            </section>
+        </div>
+
+        <footer>
+            <p>Music Theory Trainer &copy; 2023 | Learn music fundamentals through interactive exercises</p>
+        </footer>
+    </div>
+
+    <script>
+        // Piano configuration
+        const pianoKeys = [
+            { note: 'C', frequency: 261.63, type: 'white' },
+            { note: 'C#', frequency: 277.18, type: 'black' },
+            { note: 'D', frequency: 293.66, type: 'white' },
+            { note: 'D#', frequency: 311.13, type: 'black' },
+            { note: 'E', frequency: 329.63, type: 'white' },
+            { note: 'F', frequency: 349.23, type: 'white' },
+            { note: 'F#', frequency: 369.99, type: 'black' },
+            { note: 'G', frequency: 392.00, type: 'white' },
+            { note: 'G#', frequency: 415.30, type: 'black' },
+            { note: 'A', frequency: 440.00, type: 'white' },
+            { note: 'A#', frequency: 466.16, type: 'black' },
+            { note: 'B', frequency: 493.88, type: 'white' }
+        ];
+
+        // Scales configuration
+        const scales = {
+            'C Major': ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
+            'A Minor': ['A', 'B', 'C', 'D', 'E', 'F', 'G'],
+            'G Major': ['G', 'A', 'B', 'C', 'D', 'E', 'F#']
+        };
+
+        // Audio context for sound generation
+        let audioContext;
+        let oscillator = null;
+
+        // Ear training variables
+        let currentExercise = null;
+        let currentNote = null;
+        let difficulty = 'easy';
+        let score = 0;
+        let totalQuestions = 0;
+
+        // DOM Elements
+        const pianoContainer = document.getElementById('pianoContainer');
+        const whiteKeysContainer = document.getElementById('whiteKeys');
+        const blackKeysContainer = document.getElementById('blackKeys');
+        const playBtn = document.getElementById('playBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const exerciseDisplay = document.getElementById('exerciseDisplay');
+        const feedback = document.getElementById('feedback');
+        const startExerciseBtn = document.getElementById('startExerciseBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const notesList = document.getElementById('notesList');
+        const difficultyButtons = document.querySelectorAll('.difficulty-btn');
+
+        // Initialize the app
+        function init() {
+            createPiano();
+            setupEventListeners();
+            populateNotesList();
+            updateDifficultyButtons();
+        }
+
+        // Create piano keys
+        function createPiano() {
+            pianoKeys.forEach((key, index) => {
+                if (key.type === 'white') {
+                    const whiteKey = document.createElement('div');
+                    whiteKey.className = 'white-key';
+                    whiteKey.dataset.note = key.note;
+                    whiteKey.dataset.frequency = key.frequency;
+                    whiteKey.id = `key-${key.note}`;
+                    whiteKey.innerHTML = `<span class="key-label">${key.note}</span>`;
+                    whiteKeysContainer.appendChild(whiteKey);
+                } else {
+                    const blackKey = document.createElement('div');
+                    blackKey.className = 'black-key';
+                    blackKey.dataset.note = key.note;
+                    blackKey.dataset.frequency = key.frequency;
+                    blackKey.id = `key-${key.note}`;
+                    blackKey.style.marginLeft = `${index * 100 / 12}%`;
+                    blackKey.innerHTML = `<span class="key-label">${key.note}</span>`;
+                    blackKeysContainer.appendChild(blackKey);
+                }
+            });
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Piano key events
+            document.querySelectorAll('.white-key, .black-key').forEach(key => {
+                key.addEventListener('click', () => playNote(key));
+                key.addEventListener('mousedown', () => key.classList.add('active'));
+                key.addEventListener('mouseup', () => key.classList.remove('active'));
+                key.addEventListener('mouseleave', () => key.classList.remove('active'));
+            });
+
+            // Control buttons
+            playBtn.addEventListener('click', playScale);
+            stopBtn.addEventListener('click', stopSound);
+            startExerciseBtn.addEventListener('click', startExercise);
+            nextBtn.addEventListener('click', nextExercise);
+
+            // Difficulty selection
+            difficultyButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    difficulty = btn.dataset.level;
+                    updateDifficultyButtons();
+                });
+            });
+        }
+
+        // Play a note
+        function playNote(keyElement) {
+            const note = keyElement.dataset.note;
+            const frequency = parseFloat(keyElement.dataset.frequency);
+            
+            // Stop any currently playing sound
+            stopSound();
+            
+            // Create audio context if it doesn't exist
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            // Create oscillator
+            oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.value = frequency;
+            gainNode.gain.value = 0.3;
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.start();
+            
+            // Visual feedback
+            keyElement.classList.add('active');
+            setTimeout(() => keyElement.classList.remove('active'), 300);
+            
+            // Show active note
+            showActiveNote(note);
+        }
+
+        // Stop current sound
+        function stopSound() {
+            if (oscillator) {
+                oscillator.stop();
+                oscillator = null;
+            }
+        }
+
+        // Play a scale
+        function playScale() {
+            const scaleName = Object.keys(scales)[Math.floor(Math.random() * Object.keys(scales).length)];
+            const scaleNotes = scales[scaleName];
+            
+            let delay = 0;
+            scaleNotes.forEach((note, index) => {
+                setTimeout(() => {
+                    const keyElement = document.querySelector(`[data-note="${note}"]`);
+                    if (keyElement) {
+                        playNote(keyElement);
+                    }
+                }, delay);
+                delay += 500;
+            });
+            
+            exerciseDisplay.textContent = `Playing ${scaleName} Scale`;
+        }
+
+        // Show active note visually
+        function showActiveNote(note) {
+            exerciseDisplay.textContent = `Playing: ${note}`;
+            exerciseDisplay.classList.add('active-note');
+            setTimeout(() => exerciseDisplay.classList.remove('active-note'), 500);
+        }
+
+        // Populate notes list
+        function populateNotesList() {
+            notesList.innerHTML = '';
+            pianoKeys.forEach(key => {
+                const noteItem = document.createElement('div');
+                noteItem.className = 'note-item';
+                noteItem.textContent = key.note;
+                noteItem.id = `note-${key.note}`;
+                notesList.appendChild(noteItem);
+            });
+        }
+
+        // Start ear training exercise
+        function startExercise() {
+            currentExercise = 'note';
+            totalQuestions++;
+            generateRandomNote();
+            feedback.textContent = '';
+            feedback.className = 'feedback';
+        }
+
+        // Generate random note based on difficulty
+        function generateRandomNote() {
+            let availableNotes;
+            
+            switch(difficulty) {
+                case 'easy':
+                    availableNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+                    break;
+                case 'medium':
+                    availableNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+                    break;
+                case 'hard':
+                    availableNotes = pianoKeys.map(key => key.note);
+                    break;
+                default:
+                    availableNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+            }
+            
+            const randomIndex = Math.floor(Math.random() * availableNotes.length);
+            currentNote = availableNotes[randomIndex];
+            
+            // Play the note
+            const keyElement = document.querySelector(`[data-note="${currentNote}"]`);
+            if (keyElement) {
+                playNote(keyElement);
+            }
+            
+            exerciseDisplay.textContent = 'What note is this?';
+        }
+
+        // Next exercise
+        function nextExercise() {
+            if (currentExercise === 'note') {
+                generateRandomNote();
+            }
+        }
+
+        // Update difficulty buttons
+        function updateDifficultyButtons() {
+            difficultyButtons.forEach(btn => {
+                if (btn.dataset.level === difficulty) {
+                    btn.classList.add('active-difficulty');
+                } else {
+                    btn.classList.remove('active-difficulty');
+                }
+            });
+        }
+
+        // Initialize the app when page loads
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "model": "qwen",
+  "app": "escape-the-maze",
+  "variant": "integrated",
+  "v0_signature": null,
+  "analyzed_failures": null,
+  "destylized": true,
+  "generated_at": "2025-09-23T02:31:42.632088"
+}

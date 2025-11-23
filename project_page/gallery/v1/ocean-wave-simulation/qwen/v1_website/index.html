@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ocean Wave Simulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 1280px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 1280px;
+            gap: 20px;
+        }
+
+        .simulation-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            border: 1px solid #444444;
+            background: #000000;
+            overflow: hidden;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            width: 100%;
+            background: #111111;
+            padding: 20px;
+            border: 1px solid #444444;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-weight: 500;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #333333;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4fc3f7;
+            cursor: pointer;
+            border: 1px solid #ffffff;
+        }
+
+        .value-display {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            text-align: right;
+        }
+
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            width: 100%;
+            max-width: 1280px;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .simulation-container {
+                height: 400px;
+            }
+        }
+
+        .wave-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .ocean-gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center bottom, 
+                rgba(0, 0, 0, 0.8) 0%, 
+                rgba(30, 58, 95, 0.9) 70%, 
+                rgba(0, 0, 0, 1) 100%);
+            z-index: 5;
+        }
+
+        /* Additional styling for improved layout */
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            gap: 20px;
+        }
+
+        .control-section {
+            flex: 1;
+        }
+
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slider-value {
+            font-weight: bold;
+            min-width: 60px;
+            text-align: right;
+        }
+
+        .slider-wrapper {
+            position: relative;
+            height: 30px;
+            display: flex;
+            align-items: center;
+        }
+
+        .slider-handle {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #4fc3f7;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 1px solid #ffffff;
+            z-index: 2;
+        }
+
+        .slider-track {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #333333;
+            transform: translateY(-50%);
+            border-radius: 2px;
+        }
+
+        .slider-fill {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            height: 4px;
+            background: #4fc3f7;
+            transform: translateY(-50%);
+            border-radius: 2px;
+            z-index: 1;
+        }
+
+        .slider-min-max {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-top: 2px;
+        }
+
+        .status-indicator {
+            padding: 8px 12px;
+            background: #111111;
+            border: 1px solid #444444;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .parameter-display {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            background: #111111;
+            border: 1px solid #444444;
+            border-radius: 4px;
+        }
+
+        .parameter-item {
+            text-align: center;
+        }
+
+        .parameter-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .parameter-value {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 id="app-title">Ocean Wave Simulation</h1>
+        <p class="subtitle">Experience realistic ocean waves with adjustable parameters</p>
+    </header>
+
+    <div class="container">
+        <div class="simulation-container">
+            <canvas id="waveCanvas"></canvas>
+            <div class="ocean-gradient"></div>
+            <div class="wave-effect" id="waveEffect"></div>
+        </div>
+
+        <div class="parameter-display">
+            <div class="parameter-item">
+                <div class="parameter-label">Wind Speed</div>
+                <div class="parameter-value" id="windSpeedDisplay">5.0 m/s</div>
+            </div>
+            <div class="parameter-item">
+                <div class="parameter-label">Wave Height</div>
+                <div class="parameter-value" id="waveHeightDisplay">3.0 m</div>
+            </div>
+            <div class="parameter-item">
+                <div class="parameter-label">Lighting</div>
+                <div class="parameter-value" id="lightingDisplay">70%</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="windSpeedSlider">
+                    <span>💨 Wind Speed</span>
+                </label>
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Low</span>
+                        <span class="slider-value" id="windSpeedValue">5.0 m/s</span>
+                        <span>High</span>
+                    </div>
+                    <div class="slider-wrapper">
+                        <div class="slider-track"></div>
+                        <div class="slider-fill" id="windSpeedFill"></div>
+                        <div class="slider-handle" id="windSpeedHandle"></div>
+                    </div>
+                    <div class="slider-min-max">
+                        <span>0</span>
+                        <span>20</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="waveHeightSlider">
+                    <span>🌊 Wave Height</span>
+                </label>
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Low</span>
+                        <span class="slider-value" id="waveHeightValue">3.0 m</span>
+                        <span>High</span>
+                    </div>
+                    <div class="slider-wrapper">
+                        <div class="slider-track"></div>
+                        <div class="slider-fill" id="waveHeightFill"></div>
+                        <div class="slider-handle" id="waveHeightHandle"></div>
+                    </div>
+                    <div class="slider-min-max">
+                        <span>0</span>
+                        <span>10</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="lightingSlider">
+                    <span>☀️ Lighting</span>
+                </label>
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Soft</span>
+                        <span class="slider-value" id="lightingValue">70%</span>
+                        <span>Bright</span>
+                    </div>
+                    <div class="slider-wrapper">
+                        <div class="slider-track"></div>
+                        <div class="slider-fill" id="lightingFill"></div>
+                        <div class="slider-handle" id="lightingHandle"></div>
+                    </div>
+                    <div class="slider-min-max">
+                        <span>0</span>
+                        <span>100</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-indicator" id="statusIndicator">
+            Simulation ready - Adjust parameters to see changes
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Adjust parameters to create your perfect ocean simulation</p>
+    </div>
+
+    <script>
+        // Main application logic
+        document.addEventListener('DOMContentLoaded', () => {
+            // Canvas setup
+            const canvas = document.getElementById('waveCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size to match container
+            function resizeCanvas() {
+                const container = canvas.parentElement;
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+            }
+            
+            // Initial resize
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Control elements
+            const windSpeedSlider = document.getElementById('windSpeedSlider');
+            const waveHeightSlider = document.getElementById('waveHeightSlider');
+            const lightingSlider = document.getElementById('lightingSlider');
+            
+            const windSpeedValue = document.getElementById('windSpeedValue');
+            const waveHeightValue = document.getElementById('waveHeightValue');
+            const lightingValue = document.getElementById('lightingValue');
+            
+            const windSpeedDisplay = document.getElementById('windSpeedDisplay');
+            const waveHeightDisplay = document.getElementById('waveHeightDisplay');
+            const lightingDisplay = document.getElementById('lightingDisplay');
+            
+            const windSpeedHandle = document.getElementById('windSpeedHandle');
+            const waveHeightHandle = document.getElementById('waveHeightHandle');
+            const lightingHandle = document.getElementById('lightingHandle');
+            
+            const windSpeedFill = document.getElementById('windSpeedFill');
+            const waveHeightFill = document.getElementById('waveHeightFill');
+            const lightingFill = document.getElementById('lightingFill');
+            
+            const statusIndicator = document.getElementById('statusIndicator');
+            
+            // State variables
+            let windSpeed = parseFloat(windSpeedSlider ? windSpeedSlider.value : 5);
+            let waveHeight = parseFloat(waveHeightSlider ? waveHeightSlider.value : 3);
+            let lighting = parseFloat(lightingSlider ? lightingSlider.value : 70);
+            
+            // Update display values
+            function updateDisplayValues() {
+                windSpeedValue.textContent = windSpeed.toFixed(1) + ' m/s';
+                waveHeightValue.textContent = waveHeight.toFixed(1) + ' m';
+                lightingValue.textContent = lighting.toFixed(0) + '%';
+                
+                windSpeedDisplay.textContent = windSpeed.toFixed(1) + ' m/s';
+                waveHeightDisplay.textContent = waveHeight.toFixed(1) + ' m';
+                lightingDisplay.textContent = lighting.toFixed(0) + '%';
+                
+                // Update slider fills
+                updateSliderFill('windSpeed', windSpeed);
+                updateSliderFill('waveHeight', waveHeight);
+                updateSliderFill('lighting', lighting);
+                
+                statusIndicator.textContent = `Parameters updated - Wind: ${windSpeed.toFixed(1)} m/s, Wave: ${waveHeight.toFixed(1)} m, Lighting: ${lighting.toFixed(0)}%`;
+            }
+            
+            // Update slider fill progress
+            function updateSliderFill(type, value) {
+                const sliderWidth = 250; // Approximate width of slider
+                let percent = 0;
+                
+                switch(type) {
+                    case 'windSpeed':
+                        percent = (value - 0) / (20 - 0);
+                        windSpeedFill.style.width = `${percent * 100}%`;
+                        break;
+                    case 'waveHeight':
+                        percent = (value - 0) / (10 - 0);
+                        waveHeightFill.style.width = `${percent * 100}%`;
+                        break;
+                    case 'lighting':
+                        percent = (value - 0) / (100 - 0);
+                        lightingFill.style.width = `${percent * 100}%`;
+                        break;
+                }
+            }
+            
+            // Event listeners for controls
+            if (windSpeedSlider) {
+                windSpeedSlider.addEventListener('input', () => {
+                    windSpeed = parseFloat(windSpeedSlider.value);
+                    updateDisplayValues();
+                });
+            }
+            
+            if (waveHeightSlider) {
+                waveHeightSlider.addEventListener('input', () => {
+                    waveHeight = parseFloat(waveHeightSlider.value);
+                    updateDisplayValues();
+                });
+            }
+            
+            if (lightingSlider) {
+                lightingSlider.addEventListener('input', () => {
+                    lighting = parseFloat(lightingSlider.value);
+                    updateDisplayValues();
+                });
+            }
+            
+            // Slider handle interaction for custom implementation
+            function setupSliderInteraction(handle, fill, slider, minValue, maxValue) {
+                let isDragging = false;
+                const sliderRect = handle.parentElement.getBoundingClientRect();
+                
+                handle.addEventListener('mousedown', (e) => {
+                    isDragging = true;
+                    e.preventDefault();
+                });
+                
+                document.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+                    
+                    const rect = sliderRect;
+                    const offsetX = e.clientX - rect.left;
+                    const percent = Math.max(0, Math.min(1, offsetX / rect.width));
+                    const value = minValue + (maxValue - minValue) * percent;
+                    
+                    // Update slider value
+                    slider.value = value;
+                    updateDisplayValues();
+                });
+                
+                document.addEventListener('mouseup', () => {
+                    isDragging = false;
+                });
+                
+                // Touch events for mobile
+                handle.addEventListener('touchstart', (e) => {
+                    isDragging = true;
+                    e.preventDefault();
+                });
+                
+                document.addEventListener('touchmove', (e) => {
+                    if (!isDragging) return;
+                    const touch = e.touches[0];
+                    const rect = sliderRect;
+                    const offsetX = touch.clientX - rect.left;
+                    const percent = Math.max(0, Math.min(1, offsetX / rect.width));
+                    const value = minValue + (maxValue - minValue) * percent;
+                    
+                    slider.value = value;
+                    updateDisplayValues();
+                    e.preventDefault();
+                });
+                
+                document.addEventListener('touchend', () => {
+                    isDragging = false;
+                });
+            }
+            
+            // Setup custom slider interactions
+            setupSliderInteraction(windSpeedHandle, windSpeedFill, windSpeedSlider, 0, 20);
+            setupSliderInteraction(waveHeightHandle, waveHeightFill, waveHeightSlider, 0, 10);
+            setupSliderInteraction(lightingHandle, lightingFill, lightingSlider, 0, 100);
+            
+            // Wave simulation parameters
+            const waveParams = {
+                time: 0,
+                frequency: 0.02,
+                amplitude: 0.05,
+                speed: 0.01,
+                resolution: 20
+            };
+            
+            // Animation loop
+            function animate() {
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Update time
+                waveParams.time += waveParams.speed * windSpeed;
+                
+                // Draw ocean base
+                drawOceanBase();
+                
+                // Draw waves
+                drawWaves();
+                
+                // Draw reflections
+                drawReflections();
+                
+                // Continue animation
+                requestAnimationFrame(animate);
+            }
+            
+            // Draw the ocean base
+            function drawOceanBase() {
+                const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                const baseColor = `rgba(0, 0, 0, ${lighting/100})`;
+                const deepColor = `rgba(30, 58, 95, ${lighting/100})`;
+                
+                gradient.addColorStop(0, baseColor);
+                gradient.addColorStop(0.7, deepColor);
+                gradient.addColorStop(1, '#000000');
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+            
+            // Draw animated waves
+            function drawWaves() {
+                const waveCount = 5;
+                const waveColors = [
+                    `rgba(100, 180, 255, ${0.1 + lighting/300})`,
+                    `rgba(79, 195, 247, ${0.15 + lighting/250})`,
+                    `rgba(50, 150, 255, ${0.2 + lighting/200})`
+                ];
+                
+                for (let i = 0; i < waveCount; i++) {
+                    const waveOffset = i * 0.5;
+                    const waveAmplitude = waveHeight * (0.5 + i * 0.2);
+                    const waveFrequency = waveParams.frequency * (0.8 + i * 0.1);
+                    const waveSpeed = waveParams.speed * (0.8 + i * 0.1);
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(0, canvas.height / 2);
+                    
+                    for (let x = 0; x <= canvas.width; x += waveParams.resolution) {
+                        const y = canvas.height / 2 + 
+                                 Math.sin((x * waveFrequency) / 100 + waveParams.time * waveSpeed + waveOffset) * 
+                                 waveAmplitude * (1 + i * 0.1);
+                        
+                        if (x === 0) {
+                            ctx.moveTo(x, y);
+                        } else {
+                            ctx.lineTo(x, y);
+                        }
+                    }
+                    
+                    ctx.lineTo(canvas.width, canvas.height);
+                    ctx.lineTo(0, canvas.height);
+                    ctx.closePath();
+                    
+                    ctx.fillStyle = waveColors[i % waveColors.length];
+                    ctx.fill();
+                }
+            }
+            
+            // Draw reflections and highlights
+            function drawReflections() {
+                const reflectionCount = 3;
+                const highlightIntensity = lighting / 100;
+                
+                for (let i = 0; i < reflectionCount; i++) {
+                    const offset = i * 0.3;
+                    const intensity = 0.1 + (i * 0.05) * highlightIntensity;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(0, canvas.height / 2 - 20);
+                    
+                    for (let x = 0; x <= canvas.width; x += 20) {
+                        const y = canvas.height / 2 - 20 + 
+                                 Math.sin((x * 0.03) + waveParams.time * 0.5 + offset) * 
+                                 5 * (1 + i * 0.2);
+                        
+                        if (x === 0) {
+                            ctx.moveTo(x, y);
+                        } else {
+                            ctx.lineTo(x, y);
+                        }
+                    }
+                    
+                    ctx.strokeStyle = `rgba(255, 255, 255, ${intensity})`;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+                
+                // Draw sun effect
+                if (lighting > 50) {
+                    const sunX = canvas.width * 0.8;
+                    const sunY = canvas.height * 0.2;
+                    const sunRadius = 40 + (lighting - 50) * 0.5;
+                    
+                    const sunGradient = ctx.createRadialGradient(
+                        sunX, sunY, 0,
+                        sunX, sunY, sunRadius
+                    );
+                    sunGradient.addColorStop(0, 'rgba(255, 255, 200, 0.8)');
+                    sunGradient.addColorStop(1, 'rgba(255, 200, 100, 0.1)');
+                    
+                    ctx.beginPath();
+                    ctx.arc(sunX, sunY, sunRadius, 0, Math.PI * 2);
+                    ctx.fillStyle = sunGradient;
+                    ctx.fill();
+                }
+            }
+            
+            // Start animation
+            animate();
+            
+            // Initialize display values
+            updateDisplayValues();
+            
+            // Add accessibility enhancements
+            document.querySelectorAll('input[type="range"]').forEach(slider => {
+                slider.setAttribute('role', 'slider');
+                slider.setAttribute('aria-valuemin', slider.min || 0);
+                slider.setAttribute('aria-valuemax', slider.max || 100);
+                slider.setAttribute('aria-valuenow', slider.value);
+                
+                slider.addEventListener('input', () => {
+                    slider.setAttribute('aria-valuenow', slider.value);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

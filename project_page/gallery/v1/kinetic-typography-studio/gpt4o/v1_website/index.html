@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kinetic Typography Studio - Improved</title>
+  <style>
+    /* General Styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #ffffff;
+      color: #000000;
+    }
+
+    header {
+      background-color: #000000;
+      color: white;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 320px;
+      background-color: #f4f4f4;
+      padding: 15px;
+      overflow-y: auto;
+      border-right: 1px solid #ddd;
+    }
+
+    .sidebar h2 {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+    }
+
+    .sidebar label {
+      display: block;
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+
+    .sidebar input, .sidebar select, .sidebar button {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      font-size: 0.9rem;
+      box-sizing: border-box;
+    }
+
+    .sidebar button {
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #000000;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .sidebar button:hover {
+      background-color: #333;
+    }
+
+    .sidebar .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .sidebar .row input {
+      flex: 1;
+    }
+
+    /* Canvas Area */
+    .canvas-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background-color: #222;
+    }
+
+    .canvas {
+      width: 720px;
+      height: 405px;
+      background-color: white;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid #ddd;
+    }
+
+    .canvas .text {
+      position: absolute;
+      font-size: 2rem;
+      font-weight: bold;
+      color: black;
+      transform-origin: center;
+    }
+
+    /* Timeline */
+    .timeline {
+      height: 100px;
+      background-color: #444;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-top: 1px solid #333;
+    }
+
+    .timeline span {
+      font-size: 0.9rem;
+    }
+
+    .timeline .controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .timeline button {
+      padding: 5px 10px;
+      background-color: #000000;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .timeline button:hover {
+      background-color: #555;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1280px) {
+      .canvas {
+        width: 100%;
+        height: auto;
+      }
+
+      .sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid #ddd;
+      }
+
+      main {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Kinetic Typography Studio</h1>
+    <button id="export-btn">Export</button>
+  </header>
+  <main>
+    <aside class="sidebar">
+      <h2>Controls</h2>
+      <label for="text-input">Text</label>
+      <input type="text" id="text-input" placeholder="Enter your text here">
+
+      <label for="font-picker">Font</label>
+      <select id="font-picker">
+        <option value="Arial">Arial</option>
+        <option value="Verdana">Verdana</option>
+        <option value="Times New Roman">Times New Roman</option>
+        <option value="Georgia">Georgia</option>
+      </select>
+
+      <label for="font-size">Font Size</label>
+      <input type="number" id="font-size" value="32">
+
+      <label for="color-picker">Color</label>
+      <input type="color" id="color-picker" value="#000000">
+
+      <label for="bg-color-picker">Background Color</label>
+      <input type="color" id="bg-color-picker" value="#ffffff">
+
+      <button id="add-keyframe-btn">Add Keyframe</button>
+    </aside>
+    <div class="canvas-container">
+      <div class="canvas" id="canvas">
+        <div class="text" id="animated-text">Your Text Here</div>
+      </div>
+    </div>
+  </main>
+  <footer class="timeline">
+    <span>Timeline Editor (Coming Soon)</span>
+    <div class="controls">
+      <button id="play-btn">Play</button>
+      <button id="pause-btn">Pause</button>
+      <button id="stop-btn">Stop</button>
+    </div>
+  </footer>
+
+  <script>
+    // JavaScript for interactivity
+    const textInput = document.getElementById('text-input');
+    const fontPicker = document.getElementById('font-picker');
+    const fontSizeInput = document.getElementById('font-size');
+    const colorPicker = document.getElementById('color-picker');
+    const bgColorPicker = document.getElementById('bg-color-picker');
+    const animatedText = document.getElementById('animated-text');
+    const canvas = document.getElementById('canvas');
+
+    // Update text content
+    textInput.addEventListener('input', () => {
+      animatedText.textContent = textInput.value;
+    });
+
+    // Update font family
+    fontPicker.addEventListener('change', () => {
+      animatedText.style.fontFamily = fontPicker.value;
+    });
+
+    // Update font size
+    fontSizeInput.addEventListener('input', () => {
+      animatedText.style.fontSize = `${fontSizeInput.value}px`;
+    });
+
+    // Update text color
+    colorPicker.addEventListener('input', () => {
+      animatedText.style.color = colorPicker.value;
+    });
+
+    // Update background color
+    bgColorPicker.addEventListener('input', () => {
+      canvas.style.backgroundColor = bgColorPicker.value;
+    });
+
+    // Placeholder for export functionality
+    document.getElementById('export-btn').addEventListener('click', () => {
+      alert('Export functionality is not implemented yet.');
+    });
+
+    // Placeholder for adding keyframes
+    document.getElementById('add-keyframe-btn').addEventListener('click', () => {
+      alert('Keyframe functionality is not implemented yet.');
+    });
+
+    // Timeline Controls (Play, Pause, Stop)
+    document.getElementById('play-btn').addEventListener('click', () => {
+      alert('Play functionality is not implemented yet.');
+    });
+
+    document.getElementById('pause-btn').addEventListener('click', () => {
+      alert('Pause functionality is not implemented yet.');
+    });
+
+    document.getElementById('stop-btn').addEventListener('click', () => {
+      alert('Stop functionality is not implemented yet.');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Academy</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4cc9f0;
+            --warning: #f72585;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --border-radius: 0;
+            --box-shadow: none;
+            --transition: none;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #ffffff;
+            color: #000000;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: var(--dark);
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 1rem;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+        }
+
+        nav ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        nav ul li a.active {
+            background-color: var(--accent);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(67, 97, 238, 0.9), rgba(58, 12, 163, 0.9)), url('https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-4.0.3') no-repeat center center/cover;
+            color: white;
+            text-align: center;
+            padding: 5rem 0;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--accent);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            min-width: 160px;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: #e11d74;
+        }
+
+        /* Sections */
+        section {
+            padding: 4rem 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+
+        .section-title p {
+            color: var(--gray);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Course Cards */
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .course-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .course-card:hover {
+            border-color: var(--primary);
+        }
+
+        .course-image {
+            height: 200px;
+            background-color: var(--light-gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray);
+            font-size: 3rem;
+        }
+
+        .course-content {
+            padding: 1.5rem;
+        }
+
+        .course-content h3 {
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .course-content p {
+            color: var(--gray);
+            margin-bottom: 1rem;
+        }
+
+        .course-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--gray);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--light-gray);
+            padding-top: 1rem;
+        }
+
+        /* Syllabus Section */
+        .syllabus-container {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+        }
+
+        .syllabus-section {
+            margin-bottom: 2rem;
+        }
+
+        .syllabus-section h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        .syllabus-list {
+            list-style-type: none;
+        }
+
+        .syllabus-list li {
+            padding: 0.8rem 0;
+            border-bottom: 1px solid var(--light-gray);
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .syllabus-list li:last-child {
+            border-bottom: none;
+        }
+
+        .syllabus-number {
+            background-color: var(--primary);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        /* Instructor Section */
+        .instructor-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .instructor-image {
+            flex: 1;
+            min-width: 300px;
+            height: 400px;
+            background-color: var(--light-gray);
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray);
+            font-size: 5rem;
+        }
+
+        .instructor-info {
+            flex: 2;
+            min-width: 300px;
+        }
+
+        .instructor-info h3 {
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+
+        .instructor-info h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background-color: var(--light-gray);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .social-links a:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* Enrollment Form */
+        .form-container {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 3rem 0 1.5rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-column h3 {
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background-color: var(--accent);
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-column ul li a {
+            color: #adb5bd;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-column ul li a:hover {
+            color: white;
+            padding-left: 5px;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #adb5bd;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            nav ul {
+                margin-top: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            nav ul li {
+                margin: 0.5rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .section-title h2 {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .courses-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .instructor-container {
+                flex-direction: column;
+            }
+
+            .instructor-image {
+                height: 250px;
+            }
+        }
+
+        /* Additional styles for improved functionality */
+        #activeSection {
+            display: none;
+        }
+
+        .contact-section {
+            padding: 4rem 0;
+            background-color: #f0f4ff;
+        }
+
+        .contact-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .contact-info {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .contact-form {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .enroll-button {
+            display: inline-block;
+            background-color: var(--accent);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+
+        .enroll-button:hover {
+            background-color: #e11d74;
+        }
+
+        .syllabus-link {
+            color: var(--primary);
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .syllabus-link:hover {
+            color: var(--secondary);
+        }
+
+        .view-syllabus-btn {
+            background: none;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 1rem;
+        }
+
+        .view-syllabus-btn:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .read-more {
+            color: var(--primary);
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .read-more:hover {
+            color: var(--secondary);
+        }
+
+        .course-details {
+            display: none;
+        }
+
+        .course-details.visible {
+            display: block;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background-color: var(--success);
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none;
+        }
+
+        .notification.show {
+            display: block;
+            animation: fadeInOut 3s forwards;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-20px); }
+            10% { opacity: 1; transform: translateY(0); }
+            90% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-20px); }
+        }
+
+        .form-error {
+            color: var(--warning);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .form-group.error input,
+        .form-group.error select,
+        .form-group.error textarea {
+            border-color: var(--warning);
+        }
+
+        .form-group.error .form-error {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-content">
+            <div class="logo">Online<span>Academy</span></div>
+            <nav>
+                <ul>
+                    <li><a href="#courses" id="nav-courses">Courses</a></li>
+                    <li><a href="#syllabus" id="nav-syllabus">Syllabus</a></li>
+                    <li><a href="#instructor" id="nav-instructor">Instructor</a></li>
+                    <li><a href="#enrollment" id="nav-enrollment">Enroll</a></li>
+                    <li><a href="#contact" id="nav-contact">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1 class="fade-in">Expand Your Skills Online</h1>
+            <p class="fade-in delay-1">Join thousands of students learning coding, design, marketing, and more with our expert-led courses.</p>
+            <a href="#courses" class="btn fade-in delay-2" id="explore-courses-btn">Explore Courses</a>
+        </div>
+    </section>
+
+    <!-- Courses Section -->
+    <section id="courses">
+        <div class="container">
+            <div class="section-title">
+                <h2>Our Popular Courses</h2>
+                <p>Discover our comprehensive curriculum designed by industry experts</p>
+            </div>
+            <div class="courses-grid">
+                <div class="course-card fade-in" id="course-card-webdev">
+                    <div class="course-image">💻</div>
+                    <div class="course-content">
+                        <h3>Web Development Bootcamp</h3>
+                        <p>Master HTML, CSS, JavaScript, and modern frameworks to build professional websites.</p>
+                        <div class="course-meta">
+                            <span>12 Weeks</span>
+                            <span>Beginner</span>
+                        </div>
+                        <button class="view-syllabus-btn" data-course="webdev">View Syllabus</button>
+                        <a href="#enrollment" class="enroll-button" data-course="webdev">Enroll Now</a>
+                    </div>
+                </div>
+                <div class="course-card fade-in delay-1" id="course-card-uiux">
+                    <div class="course-image">🎨</div>
+                    <div class="course-content">
+                        <h3>UI/UX Design Fundamentals</h3>
+                        <p>Learn design principles and tools to create beautiful, user-centered interfaces.</p>
+                        <div class="course-meta">
+                            <span>8 Weeks</span>
+                            <span>Intermediate</span>
+                        </div>
+                        <button class="view-syllabus-btn" data-course="uiux">View Syllabus</button>
+                        <a href="#enrollment" class="enroll-button" data-course="uiux">Enroll Now</a>
+                    </div>
+                </div>
+                <div class="course-card fade-in delay-2" id="course-card-marketing">
+                    <div class="course-image">📈</div>
+                    <div class="course-content">
+                        <h3>Digital Marketing Mastery</h3>
+                        <p>Grow your business with proven digital marketing strategies and analytics.</p>
+                        <div class="course-meta">
+                            <span>10 Weeks</span>
+                            <span>Beginner</span>
+                        </div>
+                        <button class="view-syllabus-btn" data-course="marketing">View Syllabus</button>
+                        <a href="#enrollment" class="enroll-button" data-course="marketing">Enroll Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Syllabus Section -->
+    <section id="syllabus" style="background-color: var(--light);">
+        <div class="container">
+            <div class="section-title">
+                <h2>Course Syllabus</h2>
+                <p>Comprehensive curriculum covering essential topics and practical skills</p>
+            </div>
+            <div class="syllabus-container">
+                <div class="syllabus-section" id="syllabus-webdev">
+                    <h3>Web Development Bootcamp</h3>
+                    <ul class="syllabus-list">
+                        <li>
+                            <span class="syllabus-number">1</span>
+                            <div>
+                                <strong>HTML & CSS Fundamentals</strong>
+                                <p>Learn semantic HTML and responsive CSS techniques</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="syllabus-number">2</span>
+                            <div>
+                                <strong>JavaScript Essentials</strong>
+                                <p>Variables, functions, DOM manipulation, and ES6 features</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="syllabus-number">3</span>
+                            <div>
+                                <strong>React Framework</strong>
+                                <p>Building modern UIs with React components and hooks</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="syllabus-number">4</span>
+                            <div>
+                                <strong>Node.js Backend</strong>
+                                <p>Server-side development with Express and MongoDB</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="syllabus-number">5</span>
+                            <div>
+                                <strong>Deployment & Optimization</strong>
+                                <p>Hosting, performance optimization, and security best practices</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="syllabus-section" id="syllabus-uiux" style="display: none;">
+                    <h3>UI/UX Design Fundamentals</h3>
+                    <ul class="syllabus-list">
+                        <li>
+                            <span class="syllabus-number">1</span>
+                            <div>
+                                <strong>Design Principles</strong>
+                                <p>Understanding visual hierarchy, typography, and color theory</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="syllabus-number">2</span>
+                            <div>
+                                <strong>User Research</strong>
+                                <p>Conducting user interviews, surveys, and usability testing</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="syllabus-number">3</span>
+                            <div>
+                                <strong>Wireframing & Prototyping</strong>
+                                <p>Creating low-fidelity mockups and interactive prototypes</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="syllabus-number">4</span>
+                            <div>
+                                <strong>Design Tools</strong>
+                                <p>Mastering Figma, Sketch, and Adobe XD</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="syllabus-number">5</span>
+                            <div>
+                                <strong>Design Systems</strong>
+                                <p>Building scalable design systems and component libraries</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="syllabus-section" id="syllabus-marketing" style="display: none;">
+                    <h3>Digital Marketing Mastery</h3>
+                    <ul class="syllabus-list">
+                        <li>
+                            <span class="syllabus-number">1</span>
+                            <div>
+                                <strong>Marketing Fundamentals</strong>
+                                <p>Understanding marketing channels and customer journey</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="syllabus-number">2</span>
+                            <div>
+                                <strong>SEO Strategy</strong>
+                                <p>Optimizing content for search engines and user experience</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="syllabus-number">3</span>
+                            <div>
+                                <strong>Social Media Marketing</strong>
+                                <p>Creating engaging content and managing campaigns</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="syllabus-number">4</span>
+                            <div>
+                                <strong>Email Marketing</strong>
+                                <p>Building email sequences and automating campaigns</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="syllabus-number">5</span>
+                            <div>
+                                <strong>Analytics & Reporting</strong>
+                                <p>Measuring ROI and optimizing marketing efforts</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Instructor Section -->
+    <section id="instructor">
+        <div class="container">
+            <div class="section-title">
+                <h2>Meet Your Instructor</h2>
+                <p>Learn from industry professionals with real-world experience</p>
+            </div>
+            <div class="instructor-container">
+                <div class="instructor-image">
+                    👨‍🏫
+                </div>
+                <div class="instructor-info">
+                    <h3>Alex Morgan</h3>
+                    <h4>Senior Web Developer & Educator</h4>
+                    <p id="instructor-bio">Alex has over 10 years of experience in web development and has taught thousands of students worldwide. He specializes in full-stack development with a focus on modern JavaScript frameworks and responsive design principles.</p>
+                    <p>Previously worked at TechCorp and StartupLab, Alex brings both corporate and entrepreneurial perspectives to his teaching.</p>
+                    <div class="social-links">
+                        <a href="https://linkedin.com/in/alexmorgan" target="_blank" aria-label="LinkedIn">in</a>
+                        <a href="https://twitter.com/alexmorgan" target="_blank" aria-label="Twitter">t</a>
+                        <a href="https://github.com/alexmorgan" target="_blank" aria-label="GitHub">gh</a>
+                    </div>
+                    <button class="read-more" id="read-more-btn">Read More</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Contact Us</h2>
+                <p>Have questions? Get in touch with our team</p>
+            </div>
+            <div class="contact-container">
+                <div class="contact-info">
+                    <h3>Contact Information</h3>
+                    <p>Email: info@onlineacademy.com</p>
+                    <p>Phone: (123) 456-7890</p>
+                    <p>Address: 123 Education St, Learning City</p>
+                    <h3>Office Hours</h3>
+                    <p>Monday - Friday: 9AM - 5PM</p>
+                    <p>Saturday: 10AM - 2PM</p>
+                </div>
+                <div class="contact-form">
+                    <div class="form-container">
+                        <form id="contact-form">
+                            <div class="form-group">
+                                <label for="contact-name">Full Name</label>
+                                <input type="text" id="contact-name" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-email">Email Address</label>
+                                <input type="email" id="contact-email" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-subject">Subject</label>
+                                <input type="text" id="contact-subject" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-message">Message</label>
+                                <textarea id="contact-message" class="form-control" placeholder="Your message..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Enrollment Form -->
+    <section id="enrollment" style="background-color: var(--light);">
+        <div class="container">
+            <div class="section-title">
+                <h2>Enroll Now</h2>
+                <p>Join our next cohort and start your learning journey today</p>
+            </div>
+            <div class="form-container">
+                <form id="enrollment-form">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" class="form-control" name="name" required>
+                        <div class="form-error" id="name-error">Please enter your full name</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" class="form-control" name="email" required>
+                        <div class="form-error" id="email-error">Please enter a valid email address</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" class="form-control" name="phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="course">Select Course</label>
+                        <select id="course" class="form-control" name="course" required>
+                            <option value="">Choose a course</option>
+                            <option value="web-dev">Web Development Bootcamp</option>
+                            <option value="ui-ux">UI/UX Design Fundamentals</option>
+                            <option value="marketing">Digital Marketing Mastery</option>
+                        </select>
+                        <div class="form-error" id="course-error">Please select a course</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Why do you want to join this course?</label>
+                        <textarea id="message" class="form-control" name="message" placeholder="Tell us about your goals and interests..."></textarea>
+                    </div>
+                    <button type="submit" class="btn" id="submit-btn">Submit Application</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>Online Academy</h3>
+                    <p>Empowering learners worldwide with high-quality online education and practical skills.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#courses">Courses</a></li>
+                        <li><a href="#syllabus">Syllabus</a></li>
+                        <li><a href="#instructor">Instructor</a></li>
+                        <li><a href="#enrollment">Enrollment</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Contact Us</h3>
+                    <ul>
+                        <li>Email: info@onlineacademy.com</li>
+                        <li>Phone: (123) 456-7890</li>
+                        <li>Address: 123 Education St, Learning City</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 Online Academy. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">Form submitted successfully!</div>
+
+    <!-- Hidden element for tracking active section -->
+    <div id="activeSection"></div>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    
+                    // Update active section tracking
+                    document.getElementById('activeSection').textContent = targetId.substring(1);
+                    
+                    // Update active nav link
+                    updateActiveNavLink(targetId.substring(1));
+                }
+            });
+        });
+
+        // Update active navigation link
+        function updateActiveNavLink(activeId) {
+            const navLinks = document.querySelectorAll('nav a');
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').substring(1) === activeId) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        // Add active class to navigation items on scroll
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('nav a');
+            
+            let current = '';
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                
+                if (pageYOffset >= (sectionTop - 100)) {
+                    current = section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').substring(1) === current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Form submission handling
+        const form = document.getElementById('enrollment-form');
+        const submitBtn = document.getElementById('submit-btn');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Reset errors
+            resetErrors();
+            
+            // Get form data
+            const formData = new FormData(form);
+            const name = formData.get('name');
+            const email = formData.get('email');
+            const course = formData.get('course');
+            
+            // Simple validation
+            let isValid = true;
+            
+            if (!name) {
+                showError('name-error');
+                isValid = false;
+            }
+            
+            if (!email) {
+                showError('email-error');
+                isValid = false;
+            } else if (!isValidEmail(email)) {
+                showError('email-error');
+                isValid = false;
+            }
+            
+            if (!course) {
+                showError('course-error');
+                isValid = false;
+            }
+            
+            if (isValid) {
+                // Show success notification
+                showNotification('Form submitted successfully!');
+                
+                // Reset form
+                form.reset();
+                
+                // Show success message
+                alert(`Thank you ${name}! Your enrollment request for ${course} has been submitted successfully. We'll contact you shortly.`);
+            }
+        });
+
+        // Email validation helper
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        // Show error helper
+        function showError(errorId) {
+            const errorElement = document.getElementById(errorId);
+            const formGroup = errorElement.parentElement;
+            formGroup.classList.add('error');
+        }
+
+        // Reset errors helper
+        function resetErrors() {
+            const errorElements = document.querySelectorAll('.form-error');
+            const formGroups = document.querySelectorAll('.form-group.error');
+            
+            errorElements.forEach(el => el.style.display = 'none');
+            formGroups.forEach(group => group.classList.remove('error'));
+        }
+
+        // Show notification helper
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // View syllabus functionality
+        document.querySelectorAll('.view-syllabus-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const course = this.getAttribute('data-course');
+                
+                // Hide all syllabi
+                document.querySelectorAll('.syllabus-section').forEach(section => {
+                    section.style.display = 'none';
+                });
+                
+                // Show the selected syllabus
+                document.getElementById(`syllabus-${course}`).style.display = 'block';
+                
+                // Scroll to syllabus section
+                document.getElementById('syllabus').scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // Enroll button functionality
+        document.querySelectorAll('.enroll-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const course = this.getAttribute('data-course');
+                
+                // Pre-fill the course in the enrollment form
+                const courseSelect = document.getElementById('course');
+                courseSelect.value = course;
+                
+                // Scroll to enrollment section
+                document.getElementById('enrollment').scrollIntoView({ behavior: 'smooth' });
+                
+                // Focus on the course dropdown
+                courseSelect.focus();
+            });
+        });
+
+        // Read more functionality for instructor bio
+        document.getElementById('read-more-btn').addEventListener('click', function() {
+            const bio = document.getElementById('instructor-bio');
+            if (bio.textContent.length > 150) {
+                bio.textContent = bio.textContent.substring(0, 150) + '...';
+                this.textContent = 'Read More';
+            } else {
+                bio.textContent = 'Alex has over 10 years of experience in web development and has taught thousands of students worldwide. He specializes in full-stack development with a focus on modern JavaScript frameworks and responsive design principles. Previously worked at TechCorp and StartupLab, Alex brings both corporate and entrepreneurial perspectives to his teaching.';
+                this.textContent = 'Read Less';
+            }
+        });
+
+        // Contact form submission
+        document.getElementById('contact-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const name = formData.get('contact-name');
+            const email = formData.get('contact-email');
+            const subject = formData.get('contact-subject');
+            
+            if (name && email && subject) {
+                alert(`Thank you ${name}! Your message has been sent. We'll get back to you soon.`);
+                this.reset();
+            } else {
+                alert('Please fill in all required fields.');
+            }
+        });
+
+        // Set initial active section
+        document.getElementById('activeSection').textContent = 'home';
+
+        // Add focus styles for accessibility
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                document.body.classList.add('user-is-tabbing');
+            }
+        });
+
+        document.addEventListener('mousedown', function() {
+            document.body.classList.remove('user-is-tabbing');
+        });
+    </script>
+</body>
+</html>

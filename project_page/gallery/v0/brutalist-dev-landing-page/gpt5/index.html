@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <title>Brutalist Dev Platform Landing</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#ffffff;
+      --ink:#000000;
+      --muted:#555555;
+      --accent:#000000;
+      --gap:8px;
+      --row-size:24px; /* for cursor grid rows */
+      --maxw:1200px;
+      --outline:1px solid var(--ink);
+    }
+    body.theme-dark{
+      --bg:#000000;
+      --ink:#ffffff;
+      --muted:#aaaaaa;
+      --accent:#ffffff;
+    }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      line-height:1.45;
+      cursor: crosshair;
+    }
+    a{ color:inherit; text-decoration: none; }
+    a:focus, button:focus, [tabindex]:focus{
+      outline:2px dashed var(--ink);
+      outline-offset:2px;
+    }
+    h1,h2,h3{ margin:0 0 8px 0; }
+    h1{ font-size: clamp(36px, 8vw, 96px); letter-spacing:-1px; }
+    h2{ font-size: clamp(20px, 2.5vw, 32px); }
+    p{ margin:0 0 8px 0; color:var(--ink); }
+    small, .muted{ color:var(--muted); }
+    .container{ max-width:var(--maxw); margin:0 auto; padding:16px; }
+    .grid{ display:grid; grid-template-columns: repeat(12, minmax(0,1fr)); gap:var(--gap); }
+    .span-12{ grid-column: span 12; }
+    .span-8{ grid-column: span 8; }
+    .span-6{ grid-column: span 6; }
+    .span-4{ grid-column: span 4; }
+    .span-3{ grid-column: span 3; }
+    .span-2{ grid-column: span 2; }
+    .box{ border:var(--outline); background:var(--bg); }
+    .btn{
+      appearance:none; border:var(--outline); padding:12px 16px;
+      background:var(--bg); color:var(--ink); text-transform:uppercase;
+      font-weight:700; letter-spacing:0.5px; border-radius:0; cursor:pointer;
+    }
+    .btn.primary{ background:var(--ink); color:var(--bg); }
+    .btn:hover{ opacity:0.9; }
+    header.site-header{
+      position:sticky; top:0; z-index:10; background:var(--bg);
+      border-bottom:var(--outline);
+    }
+    header .brand{ font-weight:900; font-size:18px; letter-spacing:2px; }
+    header nav{ display:flex; gap:8px; justify-content:flex-end; align-items:center; }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px; padding:8px 12px;
+      border:var(--outline);
+    }
+
+    /* Hero */
+    .hero{
+      position:relative; overflow:hidden;
+      min-height:60vh; display:flex; align-items:center;
+    }
+    .hero .content{ position:relative; z-index:2; }
+    #terminalWrap{
+      position:absolute; inset:0; z-index:1; border-top:var(--outline); border-bottom:var(--outline);
+      display:block; pointer-events:none; opacity:0.8;
+    }
+    #terminal{
+      position:absolute; inset:0; margin:0; padding:24px;
+      font-size:14px; line-height:1.5; color:var(--bg);
+      background:var(--ink);
+      mix-blend-mode:normal;
+      overflow:hidden;
+      white-space:pre-wrap;
+    }
+    #termOverlayMask{
+      position:absolute; inset:0; background:repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent calc(var(--row-size) - 1px),
+        rgba(255,255,255,0.04) calc(var(--row-size) - 1px),
+        rgba(255,255,255,0.04) var(--row-size)
+      );
+      pointer-events:none;
+    }
+    .cta-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+    .tagline{ font-size: clamp(14px, 1.5vw, 18px); }
+
+    /* Proof: logo wall */
+    .logo-wall{
+      display:grid; grid-template-columns: repeat(6, 1fr); gap:var(--gap);
+    }
+    .logo{
+      aspect-ratio: 3 / 1; display:flex; align-items:center; justify-content:center;
+      border:var(--outline);
+      background:var(--bg);
+    }
+    .logo svg{ width:70%; height:70%; }
+    .invert-toggle{ display:flex; justify-content:flex-end; }
+
+    /* Features: code cards */
+    .card{ padding:0; display:flex; flex-direction:column; }
+    .tabs{ display:flex; border-bottom:var(--outline); }
+    .tab{
+      flex:1; padding:10px; text-align:center; cursor:pointer;
+      background:var(--bg); border-right:var(--outline);
+    }
+    .tab:last-child{ border-right:none; }
+    .tab[aria-selected="true"]{ background:var(--ink); color:var(--bg); }
+    .code-wrap{ position:relative; }
+    pre.code{
+      margin:0; padding:16px; min-height:200px; overflow:auto; font-size:13px; line-height:1.5;
+      white-space:pre; background:var(--bg);
+    }
+    .copy-btn{
+      position:absolute; top:8px; right:8px; display:inline-flex; align-items:center; gap:6px;
+      background:var(--bg); border:var(--outline); padding:6px 8px; cursor:pointer;
+    }
+    .tooltip{
+      position:absolute; top:-28px; right:0; background:var(--ink); color:var(--bg);
+      padding:2px 6px; font-size:12px; border:var(--outline); display:none;
+      white-space:nowrap;
+    }
+    .copy-btn[data-copied="true"] .tooltip{ display:block; }
+
+    /* Pricing */
+    .pricing-table{ width:100%; border-collapse:collapse; }
+    .pricing-table th, .pricing-table td{
+      border:var(--outline); padding:12px; text-align:center; vertical-align:top;
+    }
+    .pricing-table thead th{
+      position:sticky; top:0; background:var(--bg); z-index:5;
+    }
+    .pricing-name{ font-weight:800; font-size:18px; text-transform:uppercase; }
+    .price{ font-size:24px; font-weight:900; }
+    .check{ font-weight:700; }
+    .strike{ color:var(--muted); text-decoration: line-through; }
+    .plan-cta{ width:100%; }
+
+    /* Modal */
+    .modal-backdrop{
+      position:fixed; inset:0; background:rgba(0,0,0,0.5);
+      display:none; align-items:center; justify-content:center; z-index:50;
+    }
+    .modal-backdrop.active{ display:flex; }
+    .modal{
+      background:var(--bg); color:var(--ink); border:var(--outline);
+      width:min(560px, 92vw); max-width:560px; padding:16px;
+    }
+    .modal header{ display:flex; justify-content:space-between; align-items:center; border-bottom:var(--outline); padding-bottom:8px; margin-bottom:8px; }
+    .modal .close{ background:var(--bg); border:var(--outline); padding:6px 10px; cursor:pointer; }
+    .modal form .row{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .modal label{ display:block; font-weight:700; margin:8px 0 4px; }
+    .modal input, .modal select{
+      width:100%; padding:10px; border:var(--outline); background:var(--bg); color:var(--ink);
+    }
+
+    /* Footer */
+    footer{ border-top:var(--outline); margin-top:24px; }
+    .footer-grid{ display:grid; grid-template-columns: repeat(6, 1fr); gap:var(--gap); }
+    .footer-col{ border:var(--outline); padding:12px; }
+    .footer-col a{ display:block; padding:4px 0; }
+    .social{ display:flex; gap:8px; }
+    .social a{ display:inline-flex; align-items:center; justify-content:center; border:var(--outline); padding:8px; }
+
+    /* Cursor HUD */
+    #cursorHUD{
+      position:fixed; left:0; top:0; transform:translate(12px, 12px);
+      background:var(--bg); color:var(--ink); border:var(--outline);
+      padding:2px 6px; font-size:12px; pointer-events:none; z-index:1000; opacity:0.9;
+    }
+
+    /* Responsive */
+    @media (max-width: 960px){
+      .span-8{ grid-column: span 12; }
+      .span-6{ grid-column: span 12; }
+      .span-4{ grid-column: span 12; }
+      .span-3{ grid-column: span 6; }
+      .logo-wall{ grid-template-columns: repeat(4, 1fr); }
+      .footer-grid{ grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 560px){
+      .grid{ grid-template-columns: repeat(4, 1fr); }
+      .span-3{ grid-column: span 4; }
+      .footer-grid{ grid-template-columns: repeat(2, 1fr); }
+      .modal form .row{ grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div id="cursorHUD" aria-hidden="true">col:- row:-</div>
+
+  <header class="site-header">
+    <div class="container grid">
+      <div class="span-6 box pill" aria-label="Site brand">
+        <div class="brand">DEVPLAT</div>
+        <span class="muted" style="margin-left:auto;">Monochrome. Fast. Brutal.</span>
+      </div>
+      <nav class="span-6 box" aria-label="Top navigation">
+        <div style="display:flex; gap:8px; justify-content:flex-end; align-items:center; height:100%;">
+          <a class="btn" href="#features" id="topDocsLink">Docs</a>
+          <button class="btn" id="themeToggle" aria-pressed="false" title="Toggle light/dark">Toggle Theme</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="mainContent" class="container grid" tabindex="-1">
+    <!-- Hero -->
+    <section class="hero span-12 box" aria-labelledby="heroTitle">
+      <div id="terminalWrap" aria-hidden="true">
+        <pre id="terminal"></pre>
+        <div id="termOverlayMask"></div>
+      </div>
+      <div class="content container">
+        <div class="grid">
+          <div class="span-8">
+            <h1 id="heroTitle">Ship APIs like a machine.</h1>
+            <p class="tagline">A brutalist developer platform with zero distractions: predictable APIs, honest docs, and tools that stay out of your way.</p>
+            <div class="cta-row">
+              <button class="btn primary" id="startCTA" aria-label="Start free">Start free</button>
+              <a class="btn" id="docsCTA" href="#features" aria-label="Read the docs">Docs</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Proof: logos + invert toggle -->
+    <section class="span-12 box" aria-labelledby="proofTitle" style="padding:16px;">
+      <div class="grid">
+        <div class="span-8">
+          <h2 id="proofTitle">Trusted by teams who ship.</h2>
+          <p class="muted">Proof without the fluff. We work for builders.</p>
+        </div>
+        <div class="span-4 invert-toggle" style="align-items:center;">
+          <button class="btn" id="invertToggle" aria-pressed="false" title="Invert light/dark">Invert</button>
+        </div>
+        <div class="span-12 logo-wall" role="list" aria-label="Logo wall">
+          <!-- Simple inline SVG “logos” -->
+          <div role="listitem" class="logo">
+            <svg viewBox="0 0 100 30" aria-label="Logo A">
+              <rect x="2" y="2" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"/>
+              <text x="40" y="20" fill="currentColor" font-size="14" font-weight="900">ALPHA</text>
+            </svg>
+          </div>
+          <div role="listitem" class="logo">
+            <svg viewBox="0 0 100 30" aria-label="Logo B">
+              <circle cx="15" cy="15" r="13" fill="none" stroke="currentColor" stroke-width="2"/>
+              <text x="40" y="20" fill="currentColor" font-size="14" font-weight="900">BYTE</text>
+            </svg>
+          </div>
+          <div role="listitem" class="logo">
+            <svg viewBox="0 0 100 30" aria-label="Logo C">
+              <polygon points="2,28 50,2 98,28" fill="none" stroke="currentColor" stroke-width="2"/>
+              <text x="10" y="20" fill="currentColor" font-size="14" font-weight="900">TRIWORKS</text>
+            </svg>
+          </div>
+          <div role="listitem" class="logo">
+            <svg viewBox="0 0 100 30" aria-label="Logo D">
+              <rect x="2" y="2" width="96" height="26" fill="none" stroke="currentColor" stroke-width="2" />
+              <text x="10" y="20" fill="currentColor" font-size="14" font-weight="900">PLAIN INC</text>
+            </svg>
+          </div>
+          <div role="listitem" class="logo">
+            <svg viewBox="0 0 100 30" aria-label="Logo E">
+              <path d="M2 28 L20 2 L38 28 Z" fill="none" stroke="currentColor" stroke-width="2"/>
+              <text x="46" y="20" fill="currentColor" font-size="14" font-weight="900">STACKED</text>
+            </svg>
+          </div>
+          <div role="listitem" class="logo">
+            <svg viewBox="0 0 100 30" aria-label="Logo F">
+              <rect x="2" y="2" width="28" height="26" fill="none" stroke="currentColor" stroke-width="2"/>
+              <rect x="36" y="2" width="28" height="26" fill="none" stroke="currentColor" stroke-width="2"/>
+              <text x="70" y="20" fill="currentColor" font-size="14" font-weight="900">IO</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="span-12 box" aria-labelledby="featuresTitle" style="padding:16px;">
+      <h2 id="featuresTitle" style="margin-bottom:8px;">Minimal features, maximum control.</h2>
+      <div class="grid">
+        <!-- Card 1 -->
+        <article class="span-4 box card" aria-labelledby="card1Title">
+          <div class="tabs" role="tablist" aria-label="Auth Examples">
+            <button class="tab" role="tab" id="tabJS1" aria-controls="panel1" aria-selected="true" data-lang="js">JS</button>
+            <button class="tab" role="tab" id="tabPY1" aria-controls="panel1" aria-selected="false" data-lang="py">Python</button>
+            <button class="tab" role="tab" id="tabCURL1" aria-controls="panel1" aria-selected="false" data-lang="curl">cURL</button>
+          </div>
+          <h3 id="card1Title" style="padding:12px; border-bottom:var(--outline);">Authenticate</h3>
+          <div class="code-wrap" role="tabpanel" id="panel1" aria-labelledby="tabJS1">
+            <button class="copy-btn" id="copyBtn1" aria-describedby="tip1">
+              <span aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <rect x="9" y="9" width="12" height="12" stroke-width="2"></rect>
+                  <rect x="3" y="3" width="12" height="12" stroke-width="2"></rect>
+                </svg>
+              </span>
+              Copy
+              <span class="tooltip" role="tooltip" id="tip1">Copied</span>
+            </button>
+            <pre class="code" id="code1"></pre>
+          </div>
+        </article>
+
+        <!-- Card 2 -->
+        <article class="span-4 box card" aria-labelledby="card2Title">
+          <div class="tabs" role="tablist" aria-label="Request Examples">
+            <button class="tab" role="tab" id="tabJS2" aria-controls="panel2" aria-selected="true" data-lang="js">JS</button>
+            <button class="tab" role="tab" id="tabPY2" aria-controls="panel2" aria-selected="false" data-lang="py">Python</button>
+            <button class="tab" role="tab" id="tabCURL2" aria-controls="panel2" aria-selected="false" data-lang="curl">cURL</button>
+          </div>
+          <h3 id="card2Title" style="padding:12px; border-bottom:var(--outline);">Make a Request</h3>
+          <div class="code-wrap" role="tabpanel" id="panel2" aria-labelledby="tabJS2">
+            <button class="copy-btn" id="copyBtn2" aria-describedby="tip2">
+              <span aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <rect x="9" y="9" width="12" height="12" stroke-width="2"></rect>
+                  <rect x="3" y="3" width="12" height="12" stroke-width="2"></rect>
+                </svg>
+              </span>
+              Copy
+              <span class="tooltip" role="tooltip" id="tip2">Copied</span>
+            </button>
+            <pre class="code" id="code2"></pre>
+          </div>
+        </article>
+
+        <!-- Card 3 -->
+        <article class="span-4 box card" aria-labelledby="card3Title">
+          <div class="tabs" role="tablist" aria-label="Streaming Examples">
+            <button class="tab" role="tab" id="tabJS3" aria-controls="panel3" aria-selected="true" data-lang="js">JS</button>
+            <button class="tab" role="tab" id="tabPY3" aria-controls="panel3" aria-selected="false" data-lang="py">Python</button>
+            <button class="tab" role="tab" id="tabCURL3" aria-controls="panel3" aria-selected="false" data-lang="curl">cURL</button>
+          </div>
+          <h3 id="card3Title" style="padding:12px; border-bottom:var(--outline);">Stream Responses</h3>
+          <div class="code-wrap" role="tabpanel" id="panel3" aria-labelledby="tabJS3">
+            <button class="copy-btn" id="copyBtn3" aria-describedby="tip3">
+              <span aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <rect x="9" y="9" width="12" height="12" stroke-width="2"></rect>
+                  <rect x="3" y="3" width="12" height="12" stroke-width="2"></rect>
+                </svg>
+              </span>
+              Copy
+              <span class="tooltip" role="tooltip" id="tip3">Copied</span>
+            </button>
+            <pre class="code" id="code3"></pre>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="span-12 box" aria-labelledby="pricingTitle" style="padding:16px;">
+      <h2 id="pricingTitle" style="margin-bottom:8px;">Simple pricing. No surprises.</h2>
+      <div class="grid">
+        <div class="span-12">
+          <table class="pricing-table" aria-describedby="pricingTitle">
+            <thead>
+              <tr>
+                <th scope="col">Features</th>
+                <th scope="col">
+                  <div class="pricing-name">Free</div>
+                  <div class="price">$0</div>
+                </th>
+                <th scope="col">
+                  <div class="pricing-name">Pro</div>
+                  <div class="price">$29</div>
+                </th>
+                <th scope="col">
+                  <div class="pricing-name">Enterprise</div>
+                  <div class="price">Talk to us</div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row" style="text-align:left;">Rate limit</th>
+                <td>100 req/day</td>
+                <td>100k req/mo</td>
+                <td>Unlimited</td>
+              </tr>
+              <tr>
+                <th scope="row" style="text-align:left;">SLA</th>
+                <td class="muted">Community</td>
+                <td>99.9%</td>
+                <td>99.99% + SSO</td>
+              </tr>
+              <tr>
+                <th scope="row" style="text-align:left;">Support</th>
+                <td>Email</td>
+                <td>Email + Chat</td>
+                <td>Dedicated</td>
+              </tr>
+              <tr>
+                <th scope="row" style="text-align:left;">Extras</th>
+                <td class="strike">Audit logs</td>
+                <td>Audit logs</td>
+                <td>Custom terms</td>
+              </tr>
+              <tr>
+                <th scope="row" style="text-align:left;"></th>
+                <td><button class="btn plan-cta" id="pricingCTAF" data-plan="Free">Choose Free</button></td>
+                <td><button class="btn plan-cta primary" id="pricingCTAP" data-plan="Pro">Choose Pro</button></td>
+                <td><button class="btn plan-cta" id="pricingCTAE" data-plan="Enterprise">Contact Sales</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" id="signupModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal">
+      <header>
+        <h3 id="modalTitle">Create your account</h3>
+        <button class="close" id="closeModal" aria-label="Close modal">X</button>
+      </header>
+      <form id="modalForm">
+        <label for="planSelect">Plan</label>
+        <select id="planSelect" name="plan">
+          <option>Free</option>
+          <option>Pro</option>
+          <option>Enterprise</option>
+        </select>
+        <div class="row">
+          <div>
+            <label for="emailInput">Email</label>
+            <input id="emailInput" type="email" required placeholder="you@example.com" />
+          </div>
+          <div>
+            <label for="passwordInput">Password</label>
+            <input id="passwordInput" type="password" required placeholder="••••••••" minlength="6" />
+          </div>
+        </div>
+        <div style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end;">
+          <button type="button" class="btn" id="cancelModal">Cancel</button>
+          <button type="submit" class="btn primary" id="submitModal">Continue</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <nav class="footer-col" aria-label="Site map">
+          <strong>Product</strong>
+          <a href="#features" tabindex="0">Features</a>
+          <a href="#pricingTitle" tabindex="0">Pricing</a>
+          <a href="#proofTitle" tabindex="0">Customers</a>
+        </nav>
+        <nav class="footer-col" aria-label="Developers">
+          <strong>Developers</strong>
+          <a href="#features" tabindex="0">Docs</a>
+          <a href="#" tabindex="0" onclick="event.preventDefault(); window.scrollTo({top:0,behavior:'smooth'});">Status</a>
+          <a href="#" tabindex="0">Changelog</a>
+        </nav>
+        <nav class="footer-col" aria-label="Company">
+          <strong>Company</strong>
+          <a href="#" tabindex="0">About</a>
+          <a href="#" tabindex="0">Careers</a>
+          <a href="#" tabindex="0">Contact</a>
+        </nav>
+        <div class="footer-col" aria-label="Legal">
+          <strong>Legal</strong>
+          <a href="#" tabindex="0">Terms</a>
+          <a href="#" tabindex="0">Privacy</a>
+          <a href="#" tabindex="0">Security</a>
+        </div>
+        <div class="footer-col" aria-label="Social">
+          <strong>Social</strong>
+          <div class="social">
+            <a href="#" aria-label="GitHub" title="GitHub">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.52 2.87 8.35 6.84 9.7.5.09.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.1-1.5-1.1-1.5-.9-.63.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.57 2.34 1.12 2.91.85.09-.66.35-1.12.64-1.38-2.22-.26-4.56-1.13-4.56-5 0-1.1.38-1.99 1.02-2.69-.1-.26-.45-1.3.1-2.71 0 0 .84-.27 2.75 1.03a9.21 9.21 0 0 1 5 0c1.9-1.3 2.74-1.03 2.74-1.03.55 1.41.2 2.45.1 2.71.64.7 1.02 1.59 1.02 2.69 0 3.88-2.34 4.74-4.57 5 .36.31.69.92.69 1.86 0 1.34-.01 2.42-.01 2.75 0 .27.18.58.69.48A10 10 0 0 0 22 12.26C22 6.58 17.52 2 12 2z" />
+              </svg>
+            </a>
+            <a href="#" aria-label="X (Twitter)" title="X">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <path d="M3 3l18 18M20.5 3H16l-4 5.5L8.5 6 3 12l6 6 5.5-4L21 20.5" />
+              </svg>
+            </a>
+            <a href="#" aria-label="LinkedIn" title="LinkedIn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" stroke-width="2"></rect>
+                <rect x="6" y="10" width="3" height="7"></rect>
+                <circle cx="7.5" cy="7.5" r="1.5"></circle>
+                <rect x="11" y="10" width="7" height="7"></rect>
+              </svg>
+            </a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <strong>Keyboard</strong>
+          <p class="muted">Use Tab to navigate. Arrow keys switch tabs. Esc closes modals.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Theme toggle (global + proof invert)
+    (function(){
+      const body = document.body;
+      const themeToggle = document.getElementById('themeToggle');
+      const invertToggle = document.getElementById('invertToggle');
+      const stored = localStorage.getItem('theme');
+      if(stored === 'dark'){ body.classList.add('theme-dark'); themeToggle.setAttribute('aria-pressed','true'); invertToggle.setAttribute('aria-pressed','true'); }
+      function toggleTheme(){
+        body.classList.toggle('theme-dark');
+        const isDark = body.classList.contains('theme-dark');
+        themeToggle.setAttribute('aria-pressed', String(isDark));
+        invertToggle.setAttribute('aria-pressed', String(isDark));
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      }
+      themeToggle.addEventListener('click', toggleTheme);
+      invertToggle.addEventListener('click', toggleTheme);
+    })();
+
+    // Hero terminal typing demo
+    (function(){
+      const term = document.getElementById('terminal');
+      const demoLines = [
+`$ curl -s https://api.devplat.io/v1/chat \\
+  -H "Authorization: Bearer dp_test_123" \\
+  -H "Content-Type: application/json" \\
+  -d '{"message":"ping"}'`,
+`{"id":"msg_01","data":"pong","latency_ms":42}`,
+`$ devplat logs tail --filter service=chat`,
+`2025-08-30T12:00:00Z info request_id=req_11 status=200 bytes=54`,
+      ];
+      let iLine = 0, iChar = 0;
+      function step(){
+        if(iLine >= demoLines.length){
+          setTimeout(()=>{ term.textContent = ''; iLine=0; iChar=0; }, 800);
+          return;
+        }
+        const current = demoLines[iLine];
+        if(iChar <= current.length){
+          // Render all previous lines + current slice + cursor block
+          const prev = demoLines.slice(0, iLine).join('\n') + (iLine>0?'\n':'');
+          const cursor = (Math.floor(Date.now()/400)%2===0) ? '▊' : ' ';
+          term.textContent = prev + current.slice(0, iChar) + cursor;
+          iChar++;
+          setTimeout(step, 12 + Math.random()*24);
+        } else {
+          // Finish line, move to next after small pause
+          const prev = demoLines.slice(0, iLine+1).join('\n');
+          term.textContent = prev + '\n';
+          iLine++;
+          iChar = 0;
+          setTimeout(step, 400);
+        }
+      }
+      step();
+    })();
+
+    // Code snippets data
+    const snippets = {
+      card1: { // Authenticate
+        js: `import DevPlat from '@devplat/sdk';
+
+const client = new DevPlat({ apiKey: 'dp_test_123' });
+// Token is sent via Authorization: Bearer
+console.log('Ready:', !!client);`,
+        py: `from devplat import Client
+
+client = Client('dp_test_123')
+print('Ready:', client is not None)`,
+        curl: `curl -X GET https://api.devplat.io/v1/ping \\
+  -H "Authorization: Bearer dp_test_123"`
+      },
+      card2: { // Make a Request
+        js: `const res = await fetch('https://api.devplat.io/v1/chat', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer dp_test_123', 'Content-Type': 'application/json' },
+  body: JSON.stringify({ message: 'ping' })
+});
+console.log(await res.json());`,
+        py: `import requests, json
+
+r = requests.post('https://api.devplat.io/v1/chat',
+  headers={'Authorization': 'Bearer dp_test_123'},
+  json={'message':'ping'})
+print(r.json())`,
+        curl: `curl -s https://api.devplat.io/v1/chat \\
+  -H "Authorization: Bearer dp_test_123" \\
+  -H "Content-Type: application/json" \\
+  -d '{"message":"ping"}'`
+      },
+      card3: { // Stream Responses
+        js: `const rsp = await fetch('https://api.devplat.io/v1/stream', {
+  headers: { 'Authorization': 'Bearer dp_test_123' }
+});
+const reader = rsp.body.getReader();
+let chunk; while (!(chunk = await reader.read()).done) {
+  const text = new TextDecoder().decode(chunk.value);
+  console.log(text);
+}`,
+        py: `import requests
+
+with requests.get('https://api.devplat.io/v1/stream',
+                  headers={'Authorization':'Bearer dp_test_123'},
+                  stream=True) as r:
+  for line in r.iter_lines():
+    if line:
+      print(line.decode('utf-8'))`,
+        curl: `curl -N https://api.devplat.io/v1/stream \\
+  -H "Authorization: Bearer dp_test_123"`
+      }
+    };
+
+    function setCode(cardIndex, lang){
+      const pre = document.getElementById('code'+cardIndex);
+      const map = {1:'card1', 2:'card2', 3:'card3'};
+      pre.textContent = snippets[map[cardIndex]][lang];
+    }
+
+    // Initialize code content
+    setCode(1,'js'); setCode(2,'js'); setCode(3,'js');
+
+    // Tabs behavior (click + keyboard)
+    document.querySelectorAll('.tabs').forEach((tabs, idx)=>{
+      tabs.addEventListener('click', (e)=>{
+        const btn = e.target.closest('.tab'); if(!btn) return;
+        const group = btn.parentElement.querySelectorAll('.tab');
+        group.forEach(t=>t.setAttribute('aria-selected', 'false'));
+        btn.setAttribute('aria-selected','true');
+        const lang = btn.dataset.lang;
+        const cardIndex = idx+1;
+        const panel = document.getElementById('panel'+cardIndex);
+        panel.setAttribute('aria-labelledby', btn.id);
+        setCode(cardIndex, lang);
+      });
+      tabs.addEventListener('keydown', (e)=>{
+        const keys = ['ArrowLeft','ArrowRight','Home','End'];
+        if(!keys.includes(e.key)) return;
+        e.preventDefault();
+        const tabsArr = Array.from(tabs.querySelectorAll('.tab'));
+        let current = tabsArr.findIndex(t=>t.getAttribute('aria-selected')==='true');
+        if(e.key==='ArrowLeft') current = (current-1+tabsArr.length)%tabsArr.length;
+        if(e.key==='ArrowRight') current = (current+1)%tabsArr.length;
+        if(e.key==='Home') current = 0;
+        if(e.key==='End') current = tabsArr.length-1;
+        tabsArr.forEach(t=>t.setAttribute('aria-selected','false'));
+        const next = tabsArr[current];
+        next.setAttribute('aria-selected','true');
+        next.focus();
+        const lang = next.dataset.lang;
+        const groupIndex = Array.from(document.querySelectorAll('.tabs')).indexOf(tabs)+1;
+        const panel = document.getElementById('panel'+groupIndex);
+        panel.setAttribute('aria-labelledby', next.id);
+        setCode(groupIndex, lang);
+      });
+    });
+
+    // Copy-to-clipboard for 3 cards
+    function setupCopy(idBtn, idCode){
+      const btn = document.getElementById(idBtn);
+      const pre = document.getElementById(idCode);
+      btn.addEventListener('click', async ()=>{
+        try{
+          await navigator.clipboard.writeText(pre.textContent);
+          btn.setAttribute('data-copied','true');
+          setTimeout(()=>btn.removeAttribute('data-copied'), 1000);
+        }catch(e){ console.warn('Copy failed', e); }
+      });
+    }
+    setupCopy('copyBtn1','code1');
+    setupCopy('copyBtn2','code2');
+    setupCopy('copyBtn3','code3');
+
+    // Pricing CTAs -> Modal
+    const modal = document.getElementById('signupModal');
+    const planSelect = document.getElementById('planSelect');
+    const openers = ['pricingCTAF','pricingCTAP','pricingCTAE','startCTA'].map(id=>document.getElementById(id));
+    function openModal(plan){
+      planSelect.value = plan || 'Free';
+      modal.classList.add('active');
+      modal.removeAttribute('aria-hidden');
+      // Focus first field
+      setTimeout(()=>document.getElementById('emailInput').focus(), 10);
+      // prevent body scroll
+      document.body.style.overflow='hidden';
+    }
+    function closeModal(){
+      modal.classList.remove('active');
+      modal.setAttribute('aria-hidden','true');
+      document.body.style.overflow='';
+    }
+    openers.forEach(el=>{
+      el && el.addEventListener('click', (e)=>{
+        e.preventDefault();
+        const plan = el.dataset.plan || 'Free';
+        openModal(plan);
+      });
+    });
+    document.getElementById('closeModal').addEventListener('click', closeModal);
+    document.getElementById('cancelModal').addEventListener('click', closeModal);
+    modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
+    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && modal.classList.contains('active')) closeModal(); });
+    document.getElementById('modalForm').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const email = document.getElementById('emailInput').value.trim();
+      const plan = planSelect.value;
+      alert('Signed up ' + email + ' for ' + plan + ' (demo)');
+      closeModal();
+    });
+
+    // Docs buttons smooth scroll
+    document.getElementById('docsCTA').addEventListener('click', (e)=>{
+      // default anchor works; enhance with smooth scroll
+      e.preventDefault();
+      document.getElementById('features').scrollIntoView({behavior:'smooth', block:'start'});
+    });
+    document.getElementById('topDocsLink').addEventListener('click', (e)=>{
+      e.preventDefault();
+      document.getElementById('features').scrollIntoView({behavior:'smooth', block:'start'});
+    });
+
+    // Cursor HUD with grid coordinates
+    (function(){
+      const hud = document.getElementById('cursorHUD');
+      const rowSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--row-size')) || 24;
+      function handleMove(event){
+        const x = event.clientX;
+        const y = event.clientY + window.scrollY;
+        const container = document.querySelector('.container');
+        const rect = container.getBoundingClientRect();
+        let col = '–';
+        if(x >= rect.left && x <= rect.right){
+          const relX = x - rect.left;
+          const colWidth = rect.width / 12;
+          col = Math.min(12, Math.max(1, Math.floor(relX / colWidth)+1));
+        }
+        const row = Math.max(1, Math.floor(y / rowSize)+1);
+        hud.style.transform = `translate(${event.clientX + 12}px, ${event.clientY + 12}px)`;
+        hud.textContent = `col:${col} row:${row}`;
+      }
+      window.addEventListener('mousemove', handleMove, {passive:true});
+      window.addEventListener('scroll', (e)=>{ /* keep HUD readable */ }, {passive:true});
+    })();
+
+    // Ensure 1280x720 looks good: center focusable content on load
+    window.addEventListener('load', ()=>{
+      // No-op; all styles are responsive. Keep for potential future enhancements.
+    });
+  </script>
+</body>
+</html>

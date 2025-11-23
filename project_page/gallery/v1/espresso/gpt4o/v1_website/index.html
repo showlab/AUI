@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoffeeCraft - Master the Art of Coffee</title>
+  <style>
+    /* General Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      line-height: 1.6;
+      color: #000;
+      background-color: #fff;
+    }
+
+    header {
+      background-color: #6f4e37;
+      color: #fff;
+      padding: 20px 10%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      font-size: 2rem;
+    }
+
+    header nav {
+      display: flex;
+      gap: 15px;
+    }
+
+    header nav a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    header nav a:hover {
+      text-decoration: underline;
+    }
+
+    .hero-section {
+      text-align: center;
+      padding: 40px 10%;
+      background: #f9f9f9;
+    }
+
+    .hero-section h2 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
+
+    .hero-section p {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+    }
+
+    .hero-section button {
+      background: #ffcc00;
+      color: #6f4e37;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background 0.3s ease;
+    }
+
+    .hero-section button:hover {
+      background: #e6b800;
+    }
+
+    .main-content {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      padding: 40px 10%;
+      gap: 20px;
+    }
+
+    .text-content, .faq-content {
+      flex: 1;
+      max-width: 600px;
+    }
+
+    .image-content {
+      flex: 1;
+      max-width: 500px;
+    }
+
+    .image-content img {
+      max-width: 100%;
+      border-radius: 5px;
+    }
+
+    .faq-section {
+      background: #f9f9f9;
+      padding: 40px 10%;
+    }
+
+    .faq-section h2 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+
+    .faq-section .faq-item {
+      margin-bottom: 15px;
+    }
+
+    .faq-section .faq-item button {
+      background: none;
+      border: none;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: left;
+      padding: 0;
+      margin: 0;
+      color: #6f4e37;
+    }
+
+    .faq-section .faq-item button:focus {
+      outline: 2px solid #6f4e37;
+    }
+
+    .faq-section .faq-item p {
+      display: none;
+      margin-top: 10px;
+      font-size: 1rem;
+    }
+
+    footer {
+      background: #3e2723;
+      color: #fff;
+      text-align: center;
+      padding: 20px 10%;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>CoffeeCraft</h1>
+    <nav>
+      <a href="#hero">Home</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <section id="hero" class="hero-section">
+    <h2>Master the Art of Coffee</h2>
+    <p>Join CoffeeCraft for just $200/month. Unlock the secrets of coffee mastery and elevate your coffee experience today.</p>
+    <button id="cta-button">Sign Up Now</button>
+  </section>
+
+  <section id="how-it-works" class="main-content">
+    <div class="text-content">
+      <h2>How It Works</h2>
+      <p>Our process is simple and designed to make you a coffee expert:</p>
+      <ul>
+        <li>Receive professional-grade coffee equipment.</li>
+        <li>Get personalized coaching from our coffee experts.</li>
+        <li>Learn to roast, grind, and brew the perfect cup.</li>
+      </ul>
+    </div>
+    <div class="image-content">
+      <img src="https://source.unsplash.com/500x500/?coffee,espresso" alt="CoffeeCraft Experience">
+    </div>
+  </section>
+
+  <section id="faq" class="faq-section">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-content">
+      <div class="faq-item">
+        <button>What is included in the subscription?</button>
+        <p>Each subscription includes equipment, coaching, and guidance to master coffee brewing.</p>
+      </div>
+      <div class="faq-item">
+        <button>Can I cancel at any time?</button>
+        <p>Yes, you can cancel your subscription anytime with no penalties.</p>
+      </div>
+      <div class="faq-item">
+        <button>Do you ship internationally?</button>
+        <p>Currently, we only ship within the United States.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2023 CoffeeCraft. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Interactivity for FAQ section
+    document.querySelectorAll('.faq-item button').forEach(button => {
+      button.addEventListener('click', () => {
+        const paragraph = button.nextElementSibling;
+        if (paragraph.style.display === 'block') {
+          paragraph.style.display = 'none';
+        } else {
+          paragraph.style.display = 'block';
+        }
+      });
+    });
+
+    // CTA button functionality
+    document.getElementById('cta-button').addEventListener('click', () => {
+      alert('Thank you for your interest! Please contact us to proceed.');
+    });
+  </script>
+</body>
+
+</html>

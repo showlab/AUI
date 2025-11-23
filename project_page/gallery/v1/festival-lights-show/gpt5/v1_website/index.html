@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Festival Lights Show - Destylized Edition</title>
+<style>
+/* Destylization And Viewport Optimization
+   - White background
+   - Black text
+   - No gradients, shadows, rounded corners, or decorative effects
+   - Clear visual hierarchy via size/weight/spacing
+   - All primary controls at least 44x44 pixels
+   - Compact two-column layout suitable for 1280x720
+*/
+
+/* Color tokens (kept simple) */
+:root{
+  --bg: #ffffff;
+  --text: #000000;
+  --muted: #333333;
+  --line: #000000;
+  --surface: #f4f4f4;
+  --surface-2: #eaeaea;
+  --ok: #007e33;
+  --warn: #a55b00;
+  --bad: #a30000;
+  --accent: #0044cc;
+
+  --focus: #1a73e8;
+}
+
+/* Reset and base */
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.35;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+/* Focus styles for accessibility */
+:focus {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Layout */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 2px solid var(--line);
+}
+header .title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo {
+  width: 44px; height: 44px; background: #000000; /* destylized simple */
+}
+h1 { font-size: 20px; margin: 0; font-weight: 700; }
+.subtitle { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+.pill {
+  display: inline-block;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  font-size: 12px;
+  background: var(--surface);
+}
+
+/* Two-column wrap */
+.wrap {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 12px;
+  height: calc(100% - 62px);
+  padding: 12px;
+}
+@media (max-width: 1100px) {
+  .wrap { grid-template-columns: 1fr; height: auto; overflow: auto; }
+}
+
+/* Side panel */
+aside {
+  background: var(--surface);
+  border: 2px solid var(--line);
+  padding: 10px;
+  overflow: auto;
+}
+.panel {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  padding: 10px;
+  margin-bottom: 10px;
+}
+.panel h2 { font-size: 16px; margin: 0 0 8px 0; }
+
+.row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0;
+}
+label { font-size: 13px; }
+
+/* Controls */
+select, input[type="file"], input[type="color"], input[type="text"] {
+  min-height: 44px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  padding: 0 10px;
+  font: inherit;
+  color: var(--text);
+}
+input[type="color"] {
+  padding: 0; width: 60px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  height: 44px; min-width: 44px;
+  padding: 0 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+}
+.btn[aria-disabled="true"], .btn:disabled {
+  opacity: 0.5; cursor: not-allowed;
+}
+.btn.primary { background: #e6efff; border-color: var(--accent); }
+.btn.warn { background: #fff1e0; border-color: var(--warn); }
+.btn.ghost { background: var(--bg); }
+
+.controls-row {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+}
+
+/* Range with step buttons */
+.range {
+  display: grid;
+  grid-template-columns: 80px 40px 1fr 40px 72px;
+  align-items: center;
+  gap: 8px;
+}
+.range input[type="range"]{
+  width: 100%; height: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  appearance: none;
+}
+.range input[type="range"]::-webkit-slider-thumb{
+  appearance: none;
+  width: 20px; height: 20px; background: var(--bg); border: 1px solid var(--line);
+}
+.range input[type="range"]::-moz-range-thumb{
+  width: 20px; height: 20px; background: var(--bg); border: 1px solid var(--line);
+}
+.step-btn { width: 44px; height: 44px; text-align: center; }
+.value-label { text-align: right; font-size: 12px; }
+
+/* Stage */
+.stage {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  border: 2px solid var(--line);
+  background: var(--bg);
+  overflow: hidden;
+}
+.toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.toolbar .left, .toolbar .right { display: flex; align-items: center; gap: 8px; }
+
+#canvasWrap {
+  position: relative;
+  width: 100%; height: 100%;
+  display: grid;
+  place-items: center;
+  background: #f9f9f9;
+}
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #000000; /* LED wall base */
+}
+
+/* Audio meter */
+#audioMeterCanvas {
+  display: block;
+  width: 100%; height: 44px;
+  background: #f0f0f0;
+  border: 1px solid var(--line);
+}
+
+/* Spectrum/level meter bar */
+.meter { height: 14px; border: 1px solid var(--line); background: #f0f0f0; width: 100%; }
+.meter > span { display: block; height: 100%; background: #000000; width: 0%; }
+
+/* Custom dropdown for patterns */
+#patternDropdown {
+  border: 1px solid var(--line);
+  background: var(--bg);
+  padding: 10px;
+}
+#patternDropdownButton {
+  width: 100%;
+}
+#patternDropdownMenu {
+  border-top: 1px solid var(--line);
+  max-height: 220px;
+  overflow: auto;
+  display: none;
+}
+#patternDropdownMenu[aria-expanded="true"] { display: block; }
+.pattern-item {
+  display: flex; justify-content: space-between; align-items: center;
+  min-height: 44px; padding: 0 10px; border-top: 1px solid var(--line);
+  cursor: pointer;
+}
+.pattern-item[aria-selected="true"] { background: #e6e6e6; }
+.pattern-item .check { font-weight: 700; }
+
+/* Toggle switches (simple checkbox style) */
+.toggle {
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 44px; padding: 0 10px; border: 1px solid var(--line); background: var(--bg);
+}
+.toggle input { width: 20px; height: 20px; }
+
+/* Info/Hint */
+.hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+/* Active slider highlight */
+.range.active { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* Status proxies (visible) */
+.statusline {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 8px;
+  font-size: 12px;
+}
+
+/* Footer */
+footer {
+  position: absolute; left: 12px; right: 12px; bottom: 8px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 12px; color: var(--muted);
+  pointer-events: none;
+}
+
+.kbd {
+  display: inline-block; border: 1px solid var(--line); padding: 2px 6px; margin: 0 4px;
+}
+
+/* Ensure primary controls are above the fold */
+#primaryControlCluster { display: grid; gap: 10px; }
+
+/* Hidden but accessible large documentation; scrollable inside panel */
+#userGuide {
+  max-height: 200px; overflow: auto; border: 1px solid var(--line); background: #fafafa; padding: 8px; white-space: pre-wrap;
+}
+
+/* Simple legend labels for proxies */
+.legend { font-size: 11px; color: var(--muted); }
+
+/* Ensure id stability elements exist even if not used */
+.hidden-proxy {
+  position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; overflow: hidden;
+}
+
+/* Keep elements visible and spacing comfortable */
+.spacer-8 { height: 8px; }
+.spacer-12 { height: 12px; }
+.spacer-16 { height: 16px; }
+
+/* Ensure minimum clickable size for some inline items */
+.inline-btn { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); background: var(--surface-2); padding: 0 10px; cursor: pointer; }
+.inline-input { min-height: 44px; border: 1px solid var(--line); background: var(--bg); padding: 0 10px; }
+
+/* Palette editor */
+#paletteSwatches { display: flex; gap: 6px; flex-wrap: wrap; }
+.swatch {
+  border: 1px solid var(--line);
+  width: 32px; height: 32px;
+}
+#paletteSelect { min-height: 44px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title">
+    <div class="logo" aria-hidden="true"></div>
+    <div>
+      <h1>Festival Lights Show</h1>
+      <div class="subtitle">Control a virtual light wall with patterns, palettes, and music sync</div>
+    </div>
+  </div>
+  <div class="pill">Viewport: 1280 × 720</div>
+</header>
+
+<div class="wrap">
+  <aside>
+    <form id="controlForm" aria-label="Light show controls">
+      <div id="primaryControlCluster">
+        <div class="panel" id="showControlsPanel">
+          <h2>Show Controls</h2>
+
+          <!-- Pattern: native select kept + custom dropdown for larger targets -->
+          <div class="row">
+            <label for="patternSelect">Pattern</label>
+            <select id="patternSelect" title="Select a light pattern">
+              <option value="static">Static</option>
+              <option value="pulse">Pulse</option>
+              <option value="wave">Wave</option>
+              <option value="chase">Chase</option>
+              <option value="sparkle">Sparkle</option>
+              <option value="firefly">Firefly</option>
+              <option value="rainbow">Rainbow</option>
+              <option value="spectrum">Spectrum</option>
+              <option value="spiral">Spiral</option>
+              <option value="bars">Bars</option>
+            </select>
+          </div>
+
+          <div id="patternDropdown" aria-label="Pattern menu">
+            <button type="button" id="patternDropdownButton" class="btn">Choose Pattern (Large Menu)</button>
+            <div id="patternDropdownMenu" aria-expanded="false" role="listbox" aria-label="Patterns">
+              <div class="pattern-item" data-value="static" role="option" aria-selected="false"><span>Static</span><span class="check" aria-hidden="true">✓</span></div>
+              <div class="pattern-item" data-value="pulse" role="option" aria-selected="false"><span>Pulse</span><span class="check" aria-hidden="true">✓</span></div>
+              <div class="pattern-item" data-value="wave" role="option" aria-selected="false"><span>Wave</span><span class="check" aria-hidden="true">✓</span></div>
+              <div class="pattern-item" data-value="chase" role="option" aria-selected="false"><span>Chase</span><span class="check" aria-hidden="true">✓</span></div>
+              <div class="pattern-item" data-value="sparkle" role="option" aria-selected="false"><span>Sparkle</span><span class="check" aria-hidden="true">✓</span></div>
+              <div class="pattern-item" data-value="firefly" role="option" aria-selected="false"><span>Firefly</span><span class="check" aria-hidden="true">✓</span></div>
+              <div class="pattern-item" data-value="rainbow" role="option" aria-selected="false"><span>Rainbow</span><span class="check" aria-hidden="true">✓</span></div>
+              <div class="pattern-item" data-value="spectrum" role="option" aria-selected="false"><span>Spectrum</span><span class="check" aria-hidden="true">✓</span></div>
+              <div class="pattern-item" data-value="spiral" role="option" aria-selected="false"><span>Spiral</span><span class="check" aria-hidden="true">✓</span></div>
+              <div class="pattern-item" data-value="bars" role="option" aria-selected="false"><span>Bars</span><span class="check" aria-hidden="true">✓</span></div>
+            </div>
+            <div class="hint">Large pattern menu improves selection. Selection applies immediately and closes menu.</div>
+            <div id="patternDropdownStatus" class="statusline">pattern: static</div>
+          </div>
+
+          <div class="row">
+            <label for="colorPicker">Base Color</label>
+            <input id="colorPicker" type="color" value="#6cf0ff" title="Choose base color">
+          </div>
+
+          <div class="range" id="hueRangeRow">
+            <label for="hueSlider">Hue</label>
+            <button type="button" class="btn step-btn" id="hueMinus">-</button>
+            <input id="hueSlider" type="range" min="0" max="360" step="1" value="0" />
+            <button type="button" class="btn step-btn" id="huePlus">+</button>
+            <span id="hueValue" class="value-label">0°</span>
+          </div>
+
+          <div class="range" id="satRangeRow">
+            <label for="satSlider">Satur.</label>
+            <button type="button" class="btn step-btn" id="satMinus">-</button>
+            <input id="satSlider" type="range" min="0" max="100" step="1" value="90" />
+            <button type="button" class="btn step-btn" id="satPlus">+</button>
+            <span id="satValue" class="value-label">90%</span>
+          </div>
+
+          <div class="range" id="brightnessRangeRow">
+            <label for="brightnessSlider" title="Controls overall light output. When 'Auto Brightness' is on, brightness will follow music peaks.">Bright</label>
+            <button type="button" class="btn step-btn" id="brightnessMinus">-</button>
+            <input id="brightnessSlider" type="range" min="10" max="200" step="1" value="100" />
+            <button type="button" class="btn step-btn" id="brightnessPlus">+</button>
+            <span id="brightnessValue" class="value-label">100%</span>
+          </div>
+          <div class="toggle">
+            <input type="checkbox" id="autoBrightnessToggle" aria-label="Auto Brightness (sync to peaks)">
+            <label for="autoBrightnessToggle">Auto Brightness (sync to peaks)</label>
+          </div>
+          <div class="hint">Auto Brightness uses peaks from the audio to modulate brightness in real time.</div>
+
+          <div class="range" id="speedRangeRow">
+            <label for="speedSlider">Speed</label>
+            <button type="button" class="btn step-btn" id="speedMinus">-</button>
+            <input id="speedSlider" type="range" min="0" max="300" step="1" value="120" />
+            <button type="button" class="btn step-btn" id="speedPlus">+</button>
+            <span id="speedValue" class="value-label">1.20x</span>
+          </div>
+
+          <div class="row">
+            <label for="directionToggle">Direction</label>
+            <div class="controls-row">
+              <button type="button" id="directionToggle" class="btn">Forward</button>
+              <div class="hint">Toggle direction of motion.</div>
+            </div>
+          </div>
+
+          <div class="row">
+            <label for="colorTransitionMode">Color Mode</label>
+            <select id="colorTransitionMode" title="Color transition mode">
+              <option value="fade">Fade</option>
+              <option value="snap">Snap</option>
+            </select>
+          </div>
+
+          <div class="range" id="densityRangeRow">
+            <label for="densitySlider">Density</label>
+            <button type="button" class="btn step-btn" id="densityMinus">-</button>
+            <input id="densitySlider" type="range" min="1" max="100" step="1" value="50" />
+            <button type="button" class="btn step-btn" id="densityPlus">+</button>
+            <span id="densityValue" class="value-label">50%</span>
+          </div>
+
+          <div class="range" id="gridRangeRow">
+            <label for="gridSizeSlider">Grid</label>
+            <button type="button" class="btn step-btn" id="gridMinus">-</button>
+            <input id="gridSizeSlider" type="range" min="12" max="64" step="1" value="36" />
+            <button type="button" class="btn step-btn" id="gridPlus">+</button>
+            <span id="gridSizeValue" class="value-label">36 cols</span>
+          </div>
+
+          <div class="toggle">
+            <input type="checkbox" id="autoHueToggle" aria-label="Auto Hue Rotation">
+            <label for="autoHueToggle">Auto Hue Rotation</label>
+          </div>
+          <div class="range">
+            <label for="autoHueSpeed">Hue Speed</label>
+            <button type="button" class="btn step-btn" id="autoHueMinus">-</button>
+            <input id="autoHueSpeed" type="range" min="0" max="60" step="1" value="10" />
+            <button type="button" class="btn step-btn" id="autoHuePlus">+</button>
+            <span id="autoHueLabel" class="value-label">10°/s</span>
+          </div>
+
+          <div class="controls-row" style="margin-top:10px">
+            <button type="button" id="playButton" class="btn primary" title="Start animation">Start Show</button>
+            <button type="button" id="stopButton" class="btn warn" title="Stop animation">Stop Show</button>
+            <button type="button" id="resetButton" class="btn" title="Reset settings">Reset</button>
+            <button type="button" id="applyControls" class="btn" title="Apply current parameters">Apply</button>
+          </div>
+          <div id="applyStatus" class="statusline">apply: idle</div>
+        </div>
+
+        <div class="panel" id="musicSyncPanel">
+          <h2>Music Sync</h2>
+          <div class="toggle" id="musicSyncEnableGroup">
+            <input type="checkbox" id="musicSyncEnableSwitch" aria-label="Enable Sync">
+            <label for="musicSyncEnableSwitch">Enable Sync</label>
+          </div>
+
+          <div class="row">
+            <label for="musicSyncToggle">Mode</label>
+            <select id="musicSyncToggle" title="Turn music syncing on or off">
+              <option value="off">Off</option>
+              <option value="brightness">Brightness</option>
+              <option value="speed">Speed</option>
+              <option value="color">Color + Brightness</option>
+            </select>
+          </div>
+
+          <div class="range">
+            <label for="sensitivitySlider">Sens.</label>
+            <button type="button" class="btn step-btn" id="sensMinus">-</button>
+            <input id="sensitivitySlider" type="range" min="1" max="400" step="1" value="160" />
+            <button type="button" class="btn step-btn" id="sensPlus">+</button>
+            <span id="sensitivityValue" class="value-label">1.60x</span>
+          </div>
+
+          <div class="row">
+            <label>Source</label>
+            <div class="controls-row">
+              <button type="button" id="micButton" class="btn" title="Use microphone">Use Mic</button>
+              <input type="file" id="audioFileInput" accept="audio/*" title="Select an audio file">
+            </div>
+          </div>
+
+          <div class="row">
+            <label for="builtInTrackSelect">Built-in Track</label>
+            <div class="controls-row" style="flex-wrap: nowrap;">
+              <select id="builtInTrackSelect" title="Choose a built-in track">
+                <option value="festival-beat">Festival Beat (120 BPM)</option>
+                <option value="festival-fast">Festival Fast (140 BPM)</option>
+                <option value="festival-slow">Festival Slow (90 BPM)</option>
+              </select>
+              <button type="button" id="loadBuiltInTrackButton" class="btn">Load Track</button>
+            </div>
+          </div>
+
+          <div class="controls-row">
+            <button type="button" id="audioPlayPauseButton" class="btn" title="Play / Pause audio" disabled>Play Audio</button>
+            <button type="button" id="muteAudioButton" class="btn" title="Mute audio output">Mute Audio</button>
+            <span id="audioStatus" class="pill">No source</span>
+          </div>
+
+          <div class="row">
+            <label>Spectrum</label>
+            <canvas id="audioMeterCanvas" aria-hidden="true"></canvas>
+          </div>
+
+          <div class="row">
+            <label for="tapTempoButton">Tap Tempo</label>
+            <div class="controls-row">
+              <button type="button" id="tapTempoButton" class="btn">Tap</button>
+              <span id="tempoBpmLabel" class="pill">BPM: 120</span>
+            </div>
+          </div>
+
+          <div class="toggle">
+            <input type="checkbox" id="strobeToggle" aria-label="Enable strobe overlay">
+            <label for="strobeToggle">Strobe overlay</label>
+          </div>
+          <div class="range">
+            <label for="strobeRateSlider">Pulses/Beat</label>
+            <button type="button" class="btn step-btn" id="strobeMinus">-</button>
+            <input type="range" id="strobeRateSlider" min="1" max="8" step="1" value="1">
+            <button type="button" class="btn step-btn" id="strobePlus">+</button>
+            <span id="strobeRateLabel" class="value-label">1x</span>
+          </div>
+
+          <div class="hint">Sync modes and Auto Brightness interact. Enable Sync switch provides clear ON/OFF control.</div>
+        </div>
+
+        <div class="panel" id="palettePanel">
+          <h2>Palette</h2>
+          <div class="row">
+            <label for="paletteSelect">Palette</label>
+            <select id="paletteSelect" title="Choose a palette">
+              <option value="none">None (use Base Color)</option>
+              <option value="sunset">Sunset</option>
+              <option value="neon">Neon</option>
+              <option value="mono">Monochrome</option>
+            </select>
+          </div>
+          <div class="row">
+            <label for="paletteHexInput">Add Swatch</label>
+            <div class="controls-row">
+              <input type="text" id="paletteHexInput" class="inline-input" placeholder="#FF4500">
+              <button type="button" id="addSwatchButton" class="inline-btn">Add</button>
+            </div>
+          </div>
+          <div class="row">
+            <label>Swatches</label>
+            <div id="paletteSwatches" aria-live="polite"></div>
+          </div>
+          <div class="row">
+            <label for="paletteNameInput">Name</label>
+            <input type="text" id="paletteNameInput" placeholder="My Palette">
+          </div>
+          <div class="controls-row">
+            <button type="button" id="savePaletteButton" class="btn">Save Palette</button>
+            <button type="button" id="applyPaletteButton" class="btn">Apply</button>
+            <div class="toggle">
+              <input type="checkbox" id="lockPaletteToggle">
+              <label for="lockPaletteToggle">Lock palette</label>
+            </div>
+          </div>
+          <div id="paletteStatus" class="statusline">palette: none</div>
+        </div>
+
+        <div class="panel">
+          <h2>Shortcuts</h2>
+          <div class="hint">Space: Start/Stop • R: Reset • +/-: Speed • [ ]: Brightness • Arrows: Change pattern • Press Enter to Apply</div>
+          <div class="hint">Swipe left/right on the canvas to change pattern. Pinch not required.</div>
+        </div>
+
+        <div class="panel" id="presetsPanel">
+          <h2>Presets</h2>
+          <div class="row">
+            <label for="presetNameInput">Preset Name</label>
+            <input type="text" id="presetNameInput" placeholder="Club Night">
+          </div>
+          <div class="controls-row">
+            <button type="button" id="savePresetButton" class="btn">Save Preset</button>
+            <select id="loadPresetSelect" title="Load preset">
+              <option value="">-- Load Preset --</option>
+            </select>
+            <button type="button" id="loadPresetButton" class="btn">Load</button>
+          </div>
+          <div id="presetStatus" class="statusline">preset: none</div>
+        </div>
+
+        <div class="panel" id="helpPanel">
+          <h2>Help & User Guide</h2>
+          <div id="userGuide">
+This tool renders a grid of virtual LEDs on the right. Use the controls to pick a pattern, color, speed, density, and grid size. Music Sync can drive brightness, speed, or color.
+
+Key points:
+- Pattern menu: Use the large menu or the native dropdown. The active pattern is shown in the toolbar as "Pattern: Name".
+- Base Color: Controls the default hue. With palettes, colors blend across the grid; the base color still influences certain effects.
+- Brightness: Updates live. When Auto Brightness is ON and Music Sync is enabled, the LEDs respond to peaks.
+- Speed: Animation speed; can also be driven by Music Sync.
+- Direction: Reverse motion for compatible patterns.
+- Color Mode: Fade or Snap. Snap quantizes hues for a choppier, more stroboscopic feel.
+- Density: Affects the pattern's internal complexity (e.g., number of waves or fireflies).
+- Grid: Number of columns; rows follow automatically to maintain aspect ratio.
+
+Music Sync:
+- Enable Sync switch: Global ON/OFF.
+- Modes: Brightness, Speed, or Color + Brightness.
+- Sensitivity: Adjusts responsiveness to audio level.
+- Sources: Microphone, audio file, or built-in beat track.
+- Tap Tempo: Tap 8 times steadily to set BPM; used for Strobe overlay and some timing features.
+
+Palettes:
+- Choose a preset palette, or build your own by adding hex swatches.
+- Save the palette with a name, then Apply to affect patterns.
+- Lock palette to keep it fixed while shuffling patterns.
+
+Presets:
+- Save all current controls as a named preset.
+- Load any saved preset later.
+
+Canvas:
+- Swipe left/right changes pattern.
+- Pointer Trails overlay can be enabled for cursor effects (see Advanced).
+
+Accessibility:
+- Keyboard navigation supported. Focusable elements show outlines.
+- Primary controls are minimum 44×44 px.
+
+Status Proxies:
+- Preview Status, Apply Status, Palette Status, Preset Status, and Active Section proxies update immediately with actions for testing/automation.
+
+No auto-start:
+- The show does not start automatically. Click "Start Show" or press Space to begin.
+          </div>
+        </div>
+      </div>
+    </form>
+  </aside>
+
+  <section class="stage" aria-label="Light show stage">
+    <div class="toolbar">
+      <div class="left">
+        <span class="pill" id="patternBadge">Pattern: Static</span>
+        <span class="pill" id="fpsBadge">FPS: —</span>
+        <span class="pill" id="previewStatus">preview: idle</span>
+      </div>
+      <div class="right" style="min-width:260px; width: 40%;">
+        <div class="meter" style="flex:1">
+          <span id="audioLevelBar" style="width:0%"></span>
+        </div>
+        <span class="pill" id="syncBadge">Sync: Off</span>
+      </div>
+    </div>
+    <div id="canvasWrap">
+      <canvas id="ledCanvas" role="img" aria-label="LED wall rendering" data-ready="false"></canvas>
+    </div>
+    <div class="spacer-8"></div>
+  </section>
+</div>
+
+<footer>
+  <div>Made for music lovers. No libraries, pure HTML5/CSS3/JS. Minimal design for testing and clarity.</div>
+  <div><span class="kbd">Mic</span> permission required for live sync. <span class="kbd">Enter</span> Apply</div>
+</footer>
+
+<!-- Hidden proxies required by guidelines -->
+<div class="hidden-proxy" id="activeSection">Show Controls</div>
+<div class="hidden-proxy" id="downloadStatus">disabled</div>
+<div class="hidden-proxy" id="lastLinkClicked"></div>
+<div class="hidden-proxy" id="chartTypeLabel">N/A</div>
+
+<script>
+(function(){
+  'use strict';
+
+  // Utilities
+  const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+
+  function hexToRgb(hex){
+    let c = hex.replace('#','');
+    if(c.length===3) c=[c[0],c[0],c[1],c[1],c[2],c[2]].join('');
+    const num = parseInt(c,16);
+    return {r: (num>>16)&255, g:(num>>8)&255, b:num&255};
+  }
+  function rgbToHsv(r,g,b){
+    r/=255; g/=255; b/=255;
+    const max = Math.max(r,g,b), min = Math.min(r,g,b);
+    const d = max - min;
+    let h;
+    const v = max;
+    const s = max === 0 ? 0 : d / max;
+    if(max === min) {
+      h = 0;
+    } else {
+      switch(max){
+        case r: h = (g - b)/d + (g < b ? 6 : 0); break;
+        case g: h = (b - r)/d + 2; break;
+        case b: h = (r - g)/d + 4; break;
+      }
+      h /= 6;
+    }
+    return {h: h*360, s, v};
+  }
+  function hsvToRgb(h,s,v){
+    h = ((h%360)+360)%360;
+    let c = v*s;
+    let x = c*(1 - Math.abs(((h/60)%2)-1));
+    let m = v - c;
+    let r1=0,g1=0,b1=0;
+    if(0<=h && h<60){ r1=c; g1=x; b1=0; }
+    else if(60<=h && h<120){ r1=x; g1=c; b1=0; }
+    else if(120<=h && h<180){ r1=0; g1=c; b1=x; }
+    else if(180<=h && h<240){ r1=0; g1=x; b1=c; }
+    else if(240<=h && h<300){ r1=x; g1=0; b1=c; }
+    else { r1=c; g1=0; b1=x; }
+    return {r: Math.round((r1+m)*255), g: Math.round((g1+m)*255), b: Math.round((b1+m)*255)};
+  }
+  function rgbToCss({r,g,b}, a=1){
+    return `rgba(${r},${g},${b},${a})`;
+  }
+
+  // DOM elements
+  const els = {
+    // Existing controls
+    patternSelect: document.getElementById('patternSelect'),
+    colorPicker: document.getElementById('colorPicker'),
+    hueSlider: document.getElementById('hueSlider'),
+    hueValue: document.getElementById('hueValue'),
+    satSlider: document.getElementById('satSlider'),
+    satValue: document.getElementById('satValue'),
+    brightnessSlider: document.getElementById('brightnessSlider'),
+    brightnessValue: document.getElementById('brightnessValue'),
+    speedSlider: document.getElementById('speedSlider'),
+    speedValue: document.getElementById('speedValue'),
+    densitySlider: document.getElementById('densitySlider'),
+    densityValue: document.getElementById('densityValue'),
+    gridSizeSlider: document.getElementById('gridSizeSlider'),
+    gridSizeValue: document.getElementById('gridSizeValue'),
+    playButton: document.getElementById('playButton'),
+    stopButton: document.getElementById('stopButton'),
+    resetButton: document.getElementById('resetButton'),
+    musicSyncToggle: document.getElementById('musicSyncToggle'),
+    sensitivitySlider: document.getElementById('sensitivitySlider'),
+    sensitivityValue: document.getElementById('sensitivityValue'),
+    micButton: document.getElementById('micButton'),
+    audioFileInput: document.getElementById('audioFileInput'),
+    audioPlayPauseButton: document.getElementById('audioPlayPauseButton'),
+    audioStatus: document.getElementById('audioStatus'),
+    audioLevelBar: document.getElementById('audioLevelBar'),
+    audioMeterCanvas: document.getElementById('audioMeterCanvas'),
+    canvas: document.getElementById('ledCanvas'),
+    canvasWrap: document.getElementById('canvasWrap'),
+    fpsBadge: document.getElementById('fpsBadge'),
+    patternBadge: document.getElementById('patternBadge'),
+    syncBadge: document.getElementById('syncBadge'),
+
+    // New/extended controls
+    hueMinus: document.getElementById('hueMinus'),
+    huePlus: document.getElementById('huePlus'),
+    satMinus: document.getElementById('satMinus'),
+    satPlus: document.getElementById('satPlus'),
+    brightnessMinus: document.getElementById('brightnessMinus'),
+    brightnessPlus: document.getElementById('brightnessPlus'),
+    speedMinus: document.getElementById('speedMinus'),
+    speedPlus: document.getElementById('speedPlus'),
+    densityMinus: document.getElementById('densityMinus'),
+    densityPlus: document.getElementById('densityPlus'),
+    gridMinus: document.getElementById('gridMinus'),
+    gridPlus: document.getElementById('gridPlus'),
+
+    autoBrightnessToggle: document.getElementById('autoBrightnessToggle'),
+    directionToggle: document.getElementById('directionToggle'),
+    colorTransitionMode: document.getElementById('colorTransitionMode'),
+
+    musicSyncEnableSwitch: document.getElementById('musicSyncEnableSwitch'),
+    builtInTrackSelect: document.getElementById('builtInTrackSelect'),
+    loadBuiltInTrackButton: document.getElementById('loadBuiltInTrackButton'),
+    muteAudioButton: document.getElementById('muteAudioButton'),
+
+    tapTempoButton: document.getElementById('tapTempoButton'),
+    tempoBpmLabel: document.getElementById('tempoBpmLabel'),
+
+    strobeToggle: document.getElementById('strobeToggle'),
+    strobeRateSlider: document.getElementById('strobeRateSlider'),
+    strobeRateLabel: document.getElementById('strobeRateLabel'),
+    strobeMinus: document.getElementById('strobeMinus'),
+    strobePlus: document.getElementById('strobePlus'),
+
+    applyControls: document.getElementById('applyControls'),
+    applyStatus: document.getElementById('applyStatus'),
+
+    paletteSelect: document.getElementById('paletteSelect'),
+    paletteHexInput: document.getElementById('paletteHexInput'),
+    addSwatchButton: document.getElementById('addSwatchButton'),
+    paletteSwatches: document.getElementById('paletteSwatches'),
+    savePaletteButton: document.getElementById('savePaletteButton'),
+    applyPaletteButton: document.getElementById('applyPaletteButton'),
+    paletteNameInput: document.getElementById('paletteNameInput'),
+    paletteStatus: document.getElementById('paletteStatus'),
+    lockPaletteToggle: document.getElementById('lockPaletteToggle'),
+
+    presetNameInput: document.getElementById('presetNameInput'),
+    savePresetButton: document.getElementById('savePresetButton'),
+    loadPresetSelect: document.getElementById('loadPresetSelect'),
+    loadPresetButton: document.getElementById('loadPresetButton'),
+    presetStatus: document.getElementById('presetStatus'),
+
+    patternDropdownButton: document.getElementById('patternDropdownButton'),
+    patternDropdownMenu: document.getElementById('patternDropdownMenu'),
+    patternDropdownStatus: document.getElementById('patternDropdownStatus'),
+
+    previewStatus: document.getElementById('previewStatus'),
+    activeSection: document.getElementById('activeSection'),
+
+    // Auto Hue
+    autoHueToggle: document.getElementById('autoHueToggle'),
+    autoHueSpeed: document.getElementById('autoHueSpeed'),
+    autoHueLabel: document.getElementById('autoHueLabel')
+  };
+
+  // Canvas context (no alpha)
+  const ctx = els.canvas.getContext('2d', { alpha: false, desynchronized: true });
+  let DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1)); // clamp DPR for perf
+
+  function fitCanvas(){
+    const rect = els.canvasWrap.getBoundingClientRect();
+    const wrapW = Math.floor(rect.width);
+    const wrapH = Math.floor(rect.height);
+    const aspect = 16/9;
+    let viewW = wrapW, viewH = Math.floor(wrapW/aspect);
+    if(viewH > wrapH){ viewH = wrapH; viewW = Math.floor(viewH*aspect); }
+    els.canvas.style.width = viewW + 'px';
+    els.canvas.style.height = viewH + 'px';
+    els.canvas.width = Math.floor(viewW*DPR);
+    els.canvas.height = Math.floor(viewH*DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    recomputeGrid();
+    // Preview proxies
+    els.canvas.setAttribute('data-ready', 'true');
+    els.previewStatus.textContent = 'preview: ready';
+  }
+  window.addEventListener('resize', ()=>{ DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1)); fitCanvas(); });
+
+  // App State
+  const state = {
+    running: false,
+    time: 0,
+    timeReal: 0,
+    cols: parseInt(els.gridSizeSlider.value,10),
+    rows: 20,
+    spacing: 0,
+    cell: 0,
+    pattern: els.patternSelect.value,
+    baseHex: els.colorPicker.value,
+    hueOffset: parseFloat(els.hueSlider.value),
+    saturation: parseFloat(els.satSlider.value)/100,
+    brightness: parseFloat(els.brightnessSlider.value)/100,
+    speed: parseFloat(els.speedSlider.value)/100,
+    density: parseFloat(els.densitySlider.value)/100,
+    musicMode: els.musicSyncToggle.value,
+    sensitivity: parseFloat(els.sensitivitySlider.value)/100,
+    autoBrightness: false,
+    direction: 1,
+    colorMode: 'fade',
+    sparkle: [],
+    fireflies: [],
+    lastFrameTs: 0,
+    fps: 0,
+    bpm: 120,
+    strobe: {
+      enabled: false,
+      rate: 1, // pulses per beat
+    },
+    autoHue: {
+      enabled: false,
+      degPerSec: 10
+    },
+    palette: {
+      active: 'none',
+      lock: false,
+      swatches: [],
+      saved: {}
+    },
+    pointerTrails: {
+      enabled: false,
+      points: []
+    },
+    audio: {
+      ctx: null,
+      analyser: null,
+      sourceNode: null,
+      mediaStream: null,
+      freqData: null,
+      timeData: null,
+      level: 0,
+      smoothLevel: 0,
+      isPlaying: false,
+      usingMic: false,
+      media: null,
+      usingBuiltIn: false,
+      builtIn: {
+        kickOsc: null,
+        hatOsc: null,
+        kickGain: null,
+        hatGain: null,
+        tickInterval: null,
+        hatInterval: null
+      },
+      masterGain: null,
+      muted: false
+    }
+  };
+
+  function recomputeGrid(){
+    const w = els.canvas.clientWidth;
+    const h = els.canvas.clientHeight;
+    state.cols = parseInt(els.gridSizeSlider.value,10);
+    const targetRows = Math.round(state.cols * (h/w));
+    state.rows = Math.max(6, targetRows);
+    const cw = Math.floor(w / state.cols);
+    const ch = Math.floor(h / state.rows);
+    state.cell = Math.max(6, Math.min(cw, ch)) - 2;
+    state.spacing = Math.max(1, Math.round(state.cell * 0.12));
+    initSparkles();
+    initFireflies();
+    els.gridSizeValue.textContent = state.cols + ' cols';
+  }
+
+  function initSparkles(){
+    const total = state.cols * state.rows;
+    state.sparkle = new Array(total).fill(0);
+  }
+  function initFireflies(){
+    const count = Math.round(lerp(8, 40, state.density));
+    state.fireflies = Array.from({length: count}, ()=>({
+      x: Math.random()*state.cols,
+      y: Math.random()*state.rows,
+      dx: (Math.random()*2-1)*0.25,
+      dy: (Math.random()*2-1)*0.25,
+      phase: Math.random()*Math.PI*2
+    }));
+  }
+
+  function ensureAudioContext(){
+    if(!state.audio.ctx){
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if(!Ctx) { console.warn('Web Audio not supported'); return; }
+      const ctx = new Ctx();
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 1024;
+      analyser.smoothingTimeConstant = 0.85;
+
+      const masterGain = ctx.createGain();
+      masterGain.gain.value = 1;
+
+      // Route: source -> masterGain -> analyser -> (destination if not muted)
+      analyser.connect(ctx.destination);
+
+      state.audio.ctx = ctx;
+      state.audio.analyser = analyser;
+      state.audio.masterGain = masterGain;
+      state.audio.freqData = new Uint8Array(analyser.frequencyBinCount);
+      state.audio.timeData = new Uint8Array(analyser.fftSize);
+    }
+  }
+
+  async function connectMic(){
+    ensureAudioContext();
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: false });
+      const src = state.audio.ctx.createMediaStreamSource(stream);
+      safeDisconnect(state.audio.sourceNode);
+      src.connect(state.audio.masterGain);
+      safeDisconnect(state.audio.masterGain);
+      state.audio.masterGain.connect(state.audio.analyser);
+      // Do not connect to destination for mic to prevent feedback
+      state.audio.sourceNode = src;
+      state.audio.mediaStream = stream;
+      state.audio.usingMic = true;
+      state.audio.usingBuiltIn = false;
+      state.audio.media = null;
+      state.audio.isPlaying = true;
+      els.audioPlayPauseButton.disabled = true;
+      els.audioStatus.textContent = 'Mic connected';
+      setAudioStatusOk();
+      await state.audio.ctx.resume();
+    } catch(err){
+      console.error(err);
+      els.audioStatus.textContent = 'Mic denied';
+      setAudioStatusBad();
+    }
+  }
+
+  function safeDisconnect(node){
+    if(!node) return;
+    try { node.disconnect(); } catch(e){}
+  }
+
+  function loadAudioFile(file){
+    ensureAudioContext();
+    if(state.audio.media){
+      try { state.audio.media.pause(); } catch(e){}
+    }
+    stopBuiltInTrack();
+    const url = URL.createObjectURL(file);
+    const audio = new Audio();
+    audio.src = url;
+    audio.loop = true;
+    audio.crossOrigin = 'anonymous';
+    audio.addEventListener('canplay', ()=>{
+      if(state.audio.sourceNode) {
+        safeDisconnect(state.audio.sourceNode);
+      }
+      const src = state.audio.ctx.createMediaElementSource(audio);
+      safeDisconnect(state.audio.masterGain);
+      src.connect(state.audio.masterGain);
+      state.audio.masterGain.connect(state.audio.analyser);
+      // Connect to destination if not muted
+      if(!state.audio.muted) state.audio.analyser.connect(state.audio.ctx.destination);
+      state.audio.sourceNode = src;
+      state.audio.media = audio;
+      state.audio.usingMic = false;
+      state.audio.usingBuiltIn = false;
+      els.audioPlayPauseButton.disabled = false;
+      els.audioPlayPauseButton.textContent = 'Play Audio';
+      state.audio.isPlaying = false;
+      els.audioStatus.textContent = 'File loaded';
+      setAudioStatusInfo();
+    }, {once:true});
+  }
+
+  function loadBuiltInTrack(){
+    ensureAudioContext();
+    // Stop existing sources
+    if(state.audio.media){
+      try { state.audio.media.pause(); } catch(e){}
+      state.audio.media = null;
+    }
+    if(state.audio.usingMic && state.audio.mediaStream){
+      try { state.audio.mediaStream.getTracks().forEach(t => t.stop()); } catch(e){}
+      state.audio.mediaStream = null;
+    }
+    stopBuiltInTrack();
+
+    // Create oscillators
+    const ctxA = state.audio.ctx;
+    const kickOsc = ctxA.createOscillator();
+    const hatOsc = ctxA.createOscillator();
+    kickOsc.type = 'sine';
+    hatOsc.type = 'square';
+    kickOsc.frequency.value = 100;
+    hatOsc.frequency.value = 800;
+
+    const kickGain = ctxA.createGain();
+    const hatGain = ctxA.createGain();
+    kickGain.gain.value = 0;
+    hatGain.gain.value = 0;
+
+    kickOsc.connect(kickGain);
+    hatOsc.connect(hatGain);
+
+    // Route to master
+    kickGain.connect(state.audio.masterGain);
+    hatGain.connect(state.audio.masterGain);
+
+    // Ensure analyser chain
+    safeDisconnect(state.audio.masterGain);
+    state.audio.masterGain.connect(state.audio.analyser);
+    if(!state.audio.muted) {
+      try { state.audio.analyser.connect(ctxA.destination); } catch(e){}
+    }
+
+    kickOsc.start();
+    hatOsc.start();
+
+    // Schedule pulses using setInterval aligned to BPM
+    const bpm = state.bpm;
+    const beatMs = 60000 / bpm;
+    const now = ctxA.currentTime;
+
+    // For smoother envelope, schedule using audio param curves in intervals
+    const kickTicker = setInterval(()=>{
+      const t = ctxA.currentTime;
+      kickGain.gain.cancelScheduledValues(t);
+      kickGain.gain.setValueAtTime(0, t);
+      kickGain.gain.linearRampToValueAtTime(1.0, t + 0.005);
+      kickGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+    }, beatMs);
+
+    const hatTicker = setInterval(()=>{
+      const t = ctxA.currentTime;
+      hatGain.gain.cancelScheduledValues(t);
+      hatGain.gain.setValueAtTime(0, t);
+      hatGain.gain.linearRampToValueAtTime(0.4, t + 0.003);
+      hatGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+    }, beatMs/2);
+
+    state.audio.usingBuiltIn = true;
+    state.audio.usingMic = false;
+    state.audio.sourceNode = null;
+    state.audio.isPlaying = true;
+    state.audio.builtIn.kickOsc = kickOsc;
+    state.audio.builtIn.hatOsc = hatOsc;
+    state.audio.builtIn.kickGain = kickGain;
+    state.audio.builtIn.hatGain = hatGain;
+    state.audio.builtIn.tickInterval = kickTicker;
+    state.audio.builtIn.hatInterval = hatTicker;
+
+    els.audioPlayPauseButton.disabled = false;
+    els.audioPlayPauseButton.textContent = 'Pause Audio';
+    els.audioStatus.textContent = 'Built-in track playing';
+    setAudioStatusOk();
+  }
+
+  function stopBuiltInTrack(){
+    const bi = state.audio.builtIn;
+    if(bi.tickInterval) { clearInterval(bi.tickInterval); bi.tickInterval = null; }
+    if(bi.hatInterval) { clearInterval(bi.hatInterval); bi.hatInterval = null; }
+    try { bi.kickOsc && bi.kickOsc.stop(); } catch(e){}
+    try { bi.hatOsc && bi.hatOsc.stop(); } catch(e){}
+    bi.kickOsc = null; bi.hatOsc = null;
+    if(bi.kickGain) { try { bi.kickGain.disconnect(); } catch(e){} bi.kickGain = null; }
+    if(bi.hatGain) { try { bi.hatGain.disconnect(); } catch(e){} bi.hatGain = null; }
+    state.audio.usingBuiltIn = false;
+  }
+
+  function toggleAudioPlayback(){
+    ensureAudioContext();
+    // If using mic, do nothing
+    if(state.audio.usingMic){ return; }
+    // Built-in
+    if(state.audio.usingBuiltIn){
+      if(state.audio.isPlaying){
+        stopBuiltInTrack();
+        state.audio.isPlaying = false;
+        els.audioPlayPauseButton.textContent = 'Play Audio';
+        els.audioStatus.textContent = 'Built-in paused';
+      }else{
+        loadBuiltInTrack(); // reload and play
+        state.audio.isPlaying = true;
+        els.audioPlayPauseButton.textContent = 'Pause Audio';
+        els.audioStatus.textContent = 'Built-in playing';
+      }
+      return;
+    }
+    // File
+    if(!state.audio.media){ return; }
+    if(state.audio.isPlaying){
+      try { state.audio.media.pause(); } catch(e){}
+      state.audio.isPlaying = false;
+      els.audioPlayPauseButton.textContent = 'Play Audio';
+      els.audioStatus.textContent = 'Paused';
+    } else {
+      state.audio.media.play();
+      state.audio.ctx.resume();
+      state.audio.isPlaying = true;
+      els.audioPlayPauseButton.textContent = 'Pause Audio';
+      els.audioStatus.textContent = 'Playing';
+    }
+  }
+
+  function setAudioStatusOk(){
+    els.audioStatus.style.borderColor = '#000';
+    els.audioStatus.style.background = '#ddffdd';
+  }
+  function setAudioStatusInfo(){
+    els.audioStatus.style.borderColor = '#000';
+    els.audioStatus.style.background = '#eeeeee';
+  }
+  function setAudioStatusBad(){
+    els.audioStatus.style.borderColor = '#000';
+    els.audioStatus.style.background = '#ffe3e3';
+  }
+
+  function muteAudioOutputToggle(){
+    ensureAudioContext();
+    state.audio.muted = !state.audio.muted;
+    if(!state.audio.analyser || !state.audio.ctx) return;
+    try { state.audio.analyser.disconnect(); } catch

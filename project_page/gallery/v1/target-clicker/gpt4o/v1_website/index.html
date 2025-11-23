@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enhanced Target Clicking Challenge</title>
+  <style>
+    /* General Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
+      color: #000000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #game-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .target {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background-color: #ff4e7a;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 16px;
+      color: #ffffff;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    #scoreboard {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 10px 20px;
+      border: 1px solid #000000;
+      font-size: 18px;
+    }
+
+    #timer {
+      margin-left: 20px;
+    }
+
+    #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #ffffff;
+      font-size: 24px;
+      text-align: center;
+      z-index: 10;
+      display: none;
+    }
+
+    #overlay button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 18px;
+      background: #ff4e7a;
+      border: none;
+      color: #ffffff;
+      cursor: pointer;
+    }
+
+    #overlay button:hover {
+      background: #d13c5e;
+    }
+
+    #countdown {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 10px 20px;
+      border: 1px solid #000000;
+      font-size: 18px;
+    }
+
+    #retry-info {
+      margin-top: 10px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <div id="scoreboard">
+      <span id="score">Score: 0</span>
+      <span id="accuracy">Accuracy: 0%</span>
+      <span id="timer">Time Left: 20s</span>
+    </div>
+    <div id="countdown">Get Ready: 3</div>
+    <div id="overlay">
+      <div id="final-score"></div>
+      <button id="restart-button">Restart</button>
+      <div id="retry-info">Try to beat your previous score!</div>
+    </div>
+  </div>
+
+  <script>
+    const gameContainer = document.getElementById('game-container');
+    const scoreboard = document.getElementById('scoreboard');
+    const scoreDisplay = document.getElementById('score');
+    const accuracyDisplay = document.getElementById('accuracy');
+    const timerDisplay = document.getElementById('timer');
+    const countdownDisplay = document.getElementById('countdown');
+    const overlay = document.getElementById('overlay');
+    const finalScoreDisplay = document.getElementById('final-score');
+    const restartButton = document.getElementById('restart-button');
+
+    let score = 0;
+    let totalClicks = 0;
+    let targetClicks = 0;
+    let gameDuration = 20000; // Game duration in milliseconds
+    let targetInterval = 1000; // Interval for spawning targets
+    let countdownDuration = 3; // Countdown duration in seconds
+    let gameTimer, targetTimer, countdownTimer;
+    let previousScore = null;
+
+    function startCountdown() {
+      let countdown = countdownDuration;
+      countdownDisplay.textContent = `Get Ready: ${countdown}`;
+      countdownDisplay.style.display = 'block';
+
+      countdownTimer = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+          countdownDisplay.textContent = `Get Ready: ${countdown}`;
+        } else {
+          clearInterval(countdownTimer);
+          countdownDisplay.style.display = 'none';
+          startGame();
+        }
+      }, 1000);
+    }
+
+    function startGame() {
+      score = 0;
+      totalClicks = 0;
+      targetClicks = 0;
+      updateScoreboard();
+      overlay.style.display = 'none';
+
+      let timeLeft = gameDuration / 1000; // Convert to seconds
+      timerDisplay.textContent = `Time Left: ${timeLeft}s`;
+
+      gameTimer = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = `Time Left: ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          endGame();
+        }
+      }, 1000);
+
+      targetTimer = setInterval(spawnTarget, targetInterval);
+    }
+
+    function endGame() {
+      clearInterval(gameTimer);
+      clearInterval(targetTimer);
+
+      overlay.style.display = 'flex';
+      const accuracy = totalClicks > 0 ? ((targetClicks / totalClicks) * 100).toFixed(2) : 0;
+      previousScore = score;
+
+      finalScoreDisplay.innerHTML = `
+        <p>Game Over!</p>
+        <p>Final Score: ${score}</p>
+        <p>Accuracy: ${accuracy}%</p>
+      `;
+    }
+
+    function spawnTarget() {
+      const target = document.createElement('div');
+      target.classList.add('target');
+      target.style.top = `${Math.random() * (gameContainer.clientHeight - 60)}px`;
+      target.style.left = `${Math.random() * (gameContainer.clientWidth - 60)}px`;
+      target.textContent = '+1';
+
+      target.addEventListener('click', () => {
+        score++;
+        targetClicks++;
+        updateScoreboard();
+        target.remove();
+      });
+
+      gameContainer.appendChild(target);
+
+      setTimeout(() => {
+        if (target.parentElement) {
+          target.remove();
+        }
+      }, 800); // Target disappears after 800ms
+    }
+
+    function updateScoreboard() {
+      const accuracy = totalClicks > 0 ? ((targetClicks / totalClicks) * 100).toFixed(2) : 0;
+      scoreDisplay.textContent = `Score: ${score}`;
+      accuracyDisplay.textContent = `Accuracy: ${accuracy}%`;
+    }
+
+    gameContainer.addEventListener('click', (event) => {
+      if (!event.target.classList.contains('target')) {
+        totalClicks++;
+        updateScoreboard();
+      }
+    });
+
+    restartButton.addEventListener('click', startCountdown);
+
+    // Start the countdown on page load
+    startCountdown();
+  </script>
+</body>
+</html>
