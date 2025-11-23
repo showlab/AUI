@@ -23,7 +23,11 @@
 <a id="overview"></a>
 ## 📘 Overview
 
-**AUI** (Automatic User Interface) is a framework where **Computer-Use Agents (CUA)** act as judges to assist **Coders** in automatic GUI design. We introduce **AUI-Gym**, a benchmark of 52 applications with 1560 tasks. In our **Coder-CUA Collaboration**, the CUA evaluates interface functionality and solvability to guide the Coder's design refinements. This approach shifts interface design toward agent-native efficiency and reliability.
+Overview of the **Coder-CUA** in Collaboration framework. The process begins with the
+**Coder as Designer**, which initializes and iteratively revises the UI based on queries and feedback. In
+parallel, the **CUA as Judge** executes task-driven navigation within the testing environment, generating trajectories and error logs to evaluate task solvability. A verifier ensures functional correctness,
+while feedback from CUA navigation informs subsequent UI revisions. This collaboration yields a
+finalized **agent-centric UI** optimized for both functionality and execution success.
 
 <div align="center">
   <img src="assets/workflow.png" width="100%" alt="AUI Framework"/>
