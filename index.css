@@ -10,31 +10,43 @@ body {
   color: #0f172a;
 }
 
-body::before {
+body::before,
+body::after {
   content: "";
   position: fixed;
-  inset: -20%;
-  background:
-    radial-gradient(40% 35% at 20% 25%, rgba(125, 211, 252, 0.5), transparent 60%),
-    radial-gradient(35% 30% at 80% 20%, rgba(199, 210, 254, 0.45), transparent 60%),
-    radial-gradient(50% 40% at 50% 70%, rgba(165, 243, 252, 0.4), transparent 65%);
-  filter: blur(70px);
-  opacity: 0.75;
-  animation: auiFlow 16s ease-in-out infinite alternate;
-  z-index: -1;
+  inset: -25%;
   pointer-events: none;
+  z-index: -1;
+  filter: blur(90px);
+  opacity: 0.85;
+  animation: auiFlowA 14s ease-in-out infinite alternate;
 }
 
-@keyframes auiFlow {
-  0% {
-    transform: translate3d(-20px, -10px, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(20px, 15px, 0) scale(1.05);
-  }
-  100% {
-    transform: translate3d(-15px, 25px, 0) scale(1.02);
-  }
+body::before {
+  background:
+    radial-gradient(40% 35% at 20% 25%, rgba(125, 211, 252, 0.6), transparent 60%),
+    radial-gradient(35% 30% at 80% 20%, rgba(199, 210, 254, 0.55), transparent 60%),
+    radial-gradient(55% 45% at 50% 70%, rgba(165, 243, 252, 0.5), transparent 65%);
+}
+
+body::after {
+  background:
+    radial-gradient(35% 30% at 25% 70%, rgba(147, 197, 253, 0.5), transparent 60%),
+    radial-gradient(30% 25% at 75% 65%, rgba(59, 130, 246, 0.35), transparent 65%),
+    radial-gradient(50% 40% at 55% 35%, rgba(125, 211, 252, 0.45), transparent 60%);
+  animation: auiFlowB 18s ease-in-out infinite alternate;
+}
+
+@keyframes auiFlowA {
+  0% { transform: translate3d(-40px, -20px, 0) scale(1.02); }
+  50% { transform: translate3d(30px, 25px, 0) scale(1.08); }
+  100% { transform: translate3d(-25px, 35px, 0) scale(1.04); }
+}
+
+@keyframes auiFlowB {
+  0% { transform: translate3d(35px, -15px, 0) scale(1.03); }
+  50% { transform: translate3d(-25px, 20px, 0) scale(1.07); }
+  100% { transform: translate3d(40px, 40px, 0) scale(1.05); }
 }
 
 body.theme-agent {
@@ -479,8 +491,8 @@ body.mode-agent .aui-gallery-thumb-wrapper {
 
 .aui-mode-switch {
   position: relative;
-  width: 72px;
-  height: 34px;
+  width: 90px;
+  height: 40px;
   display: inline-block;
 }
 
@@ -507,9 +519,9 @@ body.mode-agent .aui-gallery-thumb-wrapper {
 .aui-mode-switch-slider::before {
   position: absolute;
   content: "";
-  height: 28px;
-  width: 28px;
-  left: 3px;
+  height: 32px;
+  width: 32px;
+  left: 4px;
   top: 50%;
   transform: translate(0, -50%);
   background-color: #ffffff;
@@ -524,7 +536,7 @@ body.mode-agent .aui-gallery-thumb-wrapper {
 }
 
 .aui-mode-switch input:checked + .aui-mode-switch-slider::before {
-  transform: translate(36px, -50%);
+  transform: translate(50px, -50%);
 }
 
 .aui-gallery-overlay {
