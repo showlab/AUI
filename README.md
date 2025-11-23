@@ -27,10 +27,8 @@ Can Computer-Use Agents offer feedback to assist Coders to Generate UI?
 ---
 
 <a id="quick-start"></a>
-## 🚀 Quick Start
 
-Run the following commands from the project root directory.
-
+## ⚙️ Environments
 ### 1. Requirements
 - Use Python 3.10+ in an isolated environment:
   ```bash
@@ -46,23 +44,27 @@ Run the following commands from the project root directory.
 ### 2. Configure Models
 - Local model servers are recommended (e.g., using [VLLM](https://docs.vllm.ai/en/latest/serving/openai_compatible_server.html)).
 - Edit `configs/models.yaml` to point to your endpoints:
-  - **Coder**: Qwen3-Coder-30B (`http://localhost:8001/v1`)
-  - **CUA**: UI-TARS 1.5 7B (`http://localhost:8002/v1`)
-  - **Judge/Commenter**: GPT-5 / Qwen2.5-VL-72B
+  - **Coder**: `Qwen3-Coder-30B` (`http://localhost:8001/v1`)
+  - **CUA**: `UI-TARS-1.5-7B` (`http://localhost:8002/v1`)
+  - **Verifier**: `GPT-5` or `Qwen2.5-VL-72B`
 - Export API keys (if using proprietary models):
   ```bash
   export AZURE_OPENAI_API_KEY="YOUR_KEY"
   ```
 
-### 3. Run Pipeline
+## 🚀 Quick Start
+
+Our AUI contains the following stages.
+
 **Pipeline:**
-- **Stage 0 (Preparation)**: Generate initial websites and tasks per app.
-- **Stage 1 (Task Solvability Check)**: Judge extracts task-state rules on initial websites to determine task validity.
-- **Stage 2 (CUA Navigation Test)**: CUA executes supported tasks; oracle evaluation is rule-based.
-- **Stage 3 (Iterative Refinement)**:
-    - **3.0 Revise**: Update websites based on unsupported tasks (Task Solvability Feedback) and CUA failures (Navigation Feedback via Dashboard).
-    - **3.1 Re-Judge**: Re-evaluate task solvability on revised websites.
-    - **3.2 Re-Test**: CUA executes tasks on revised websites.
+- **0️⃣ Preparation**: Generate initial websites and tasks per app.
+- **1️⃣ Task Solvability Check**: Judge extracts task-state rules on initial websites to determine task validity.
+- **2️⃣ CUA Navigation Test**: CUA executes supported tasks; oracle evaluation is rule-based.
+- **3️⃣ Iterative Refinement**:
+  1. **Revise**: Update websites based on unsupported tasks (Task Solvability Feedback) and CUA failures (Navigation Feedback via Dashboard).
+  2. **ReJudge**: Re-evaluate task solvability on revised websites.
+  3. **ReTest**: CUA executes tasks on revised websites.
+  
 For normal usage, you only need the single entrypoint `run.py` from the repo root:
 
 ```bash
@@ -213,7 +215,7 @@ experiments/{experiment}/
 ---
 
 <a id="metrics-components"></a>
-## 📏 Metrics & Components
+## 📏 Evaluations
 
 1.  **Function Completeness (FC)**: Percentage of tasks that are functionally supported by the UI (determined by the Judge).
 2.  **CUA Success Rate (SR)**: Percentage of valid tasks successfully completed by the CUA.
@@ -229,12 +231,12 @@ experiments/{experiment}/
 ---
 
 <a id="citation"></a>
-## 📖 Citation
+## 🎓 Citations
 
 If you find this project helpful, please consider citing our paper:
 
 ```bibtex
-@misc{lin2025computeruse,
+@misc{lin2025aui,
       title={Computer-Use Agents as Judges for Generative User Interface}, 
       author={Kevin Qinghong Lin and Siyuan Hu and Linjie Li and Zhengyuan Yang and Lijuan Wang and Philip Torr and Mike Zheng Shou},
       year={2025},
