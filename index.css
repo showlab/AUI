@@ -285,9 +285,9 @@ h6 {
 
 .aui-gallery-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(260px, 1fr));
-  gap: 1rem;
-  max-width: 1100px;
+  grid-template-columns: repeat(2, minmax(320px, 1fr));
+  gap: 1.25rem;
+  max-width: 1250px;
   margin: 0 auto;
 }
 
@@ -306,7 +306,7 @@ h6 {
 .aui-gallery-card {
   position: relative;
   width: 100%;
-  max-width: 320px;
+  max-width: 360px;
   overflow: hidden;
   background: #020617;
   border: 1px solid rgba(15, 23, 42, 0.6);
@@ -385,9 +385,9 @@ body.mode-agent .aui-gallery-thumb-wrapper {
 }
 
 .aui-gallery-arrow {
-  width: 40px;
-  height: 40px;
-  border-radius: 999px !important;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px !important;
   padding: 0;
   display: inline-flex;
   align-items: center;
@@ -510,8 +510,6 @@ body.mode-agent .aui-gallery-thumb-wrapper {
 body.mode-agent {
   background: #fdfdfd;
   color: #0f172a;
-  font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas,
-    "Liberation Mono", "Courier New", monospace;
 }
 
 body.mode-agent .hero,
@@ -537,8 +535,9 @@ body.mode-agent .content p {
 
 body.mode-agent .button {
   border-radius: 0 !important;
-  box-shadow: none;
+  box-shadow: 6px 6px 0 #000000;
   background: #0f172a !important;
+  border: 2px solid #000000 !important;
 }
 
 body.mode-agent .table {
@@ -573,7 +572,7 @@ body.mode-agent .aui-gallery-qa-answer {
 body.mode-agent .aui-gallery-overlay-content {
   border-radius: 0;
   border: 2px solid #0f172a;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+  box-shadow: 10px 10px 0 #000000;
 }
 
 body.mode-agent .aui-gallery-toggle-label {
@@ -583,6 +582,17 @@ body.mode-agent .aui-gallery-toggle-label {
 body.mode-agent .aui-gallery-overlay-backdrop {
   background: radial-gradient(circle at top, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.92));
   backdrop-filter: blur(6px);
+}
+
+body.mode-agent .aui-gallery-card {
+  background: #ffffff;
+  border: 2px solid #0f172a;
+  box-shadow: 10px 10px 0 #000000;
+  border-radius: 0;
+}
+
+body.mode-agent .aui-gallery-thumb-wrapper {
+  background: #0f172a;
 }
 
 .aui-gallery-overlay-content {
