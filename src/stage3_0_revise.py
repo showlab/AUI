@@ -10,10 +10,9 @@ import json
 import sys
 from pathlib import Path
 
-# Add parent directory to path
-THIS_DIR = Path(__file__).resolve().parent
-REPO_ROOT = THIS_DIR.parents[1]
-sys.path.append(str(THIS_DIR))
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from utils.logging_utils import ts_print
 from utils.non_regression import extract_contract, format_contract_prompt, validate_revised, save_json

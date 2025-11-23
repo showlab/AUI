@@ -11,8 +11,9 @@ import yaml
 import sys
 from pathlib import Path
 
-# Add parent directory to path
-sys.path.append(str(Path(__file__).parent))
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from utils.model_client import ModelClient
 from utils.parallel_runner import ParallelRunner
