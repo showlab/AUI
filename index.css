@@ -1,6 +1,8 @@
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
     "Segoe UI", sans-serif;
+  position: relative;
+  overflow-x: hidden;
   background:
     radial-gradient(120% 90% at 15% 10%, rgba(199, 210, 254, 0.55), transparent 55%),
     radial-gradient(120% 90% at 80% 0%, rgba(125, 211, 252, 0.45), transparent 60%),
@@ -16,7 +18,7 @@ body::after {
   position: fixed;
   inset: -25%;
   pointer-events: none;
-  z-index: -1;
+  z-index: 0;
 }
 
 body::before {
@@ -42,6 +44,13 @@ body::after {
   filter: blur(6px);
   background-size: 200px 260px;
   animation: auiStreak 8s linear infinite;
+}
+
+.hero,
+.section,
+.footer {
+  position: relative;
+  z-index: 1;
 }
 
 @keyframes auiFlowA {
