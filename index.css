@@ -320,8 +320,8 @@ h6 {
 
 body.mode-agent .aui-gallery-card {
   background: #ffffff;
-  border: 1px solid #0f172a;
-  box-shadow: none;
+  border: 2px solid #000000;
+  box-shadow: 10px 10px 0 #000000;
   border-radius: 0;
 }
 
@@ -536,7 +536,8 @@ body.mode-agent .content p {
 body.mode-agent .button {
   border-radius: 0 !important;
   box-shadow: 6px 6px 0 #000000;
-  background: #0f172a !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
   border: 2px solid #000000 !important;
 }
 
