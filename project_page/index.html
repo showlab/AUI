@@ -127,7 +127,7 @@
         <div class="column is-four-fifths">
           <h2 class="title">AUI-Gym Gallery</h2>
           <p class="caption">
-            52 apps &times; 3 coder models. Hover to preview initial vs revised UI, click to open the full HTML demo.
+            Selected examples from 3 coder models. Hover to preview initial vs revised UI, click to open the full HTML demo.
           </p>
           <div class="aui-gallery-model-menu">
             <button type="button" class="button aui-gallery-model-button" data-model="gpt5">GPT-5</button>
@@ -151,6 +151,14 @@
         <div class="column is-four-fifths">
           <h2 class="title">What is AUI?</h2>
           <img class="teaser-image" src="figures/teaser.png" alt="AUI Teaser" data-zoom-image />
+          <div class="content has-text-justified is-size-6">
+            <p>
+              <b>Illustration of Humans Collaboration <i>vs.</i> our Coder-CUA Collaboration in term of UI designs.</b>
+              <br>
+              <b>Left:</b> Most GUIs are designed by humans and optimized for user experience (e.g. aesthetics), forcing trained agents to adapt to human-oriented behaviors.
+              <b>Right:</b> Our Coder-CUA Collaboration framework leverages Coder as Designer and CUA as Judge together, enabling more reliable task execution and improved usability for agents.
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -161,6 +169,11 @@
       <div class="columns is-centered has-text-centered">
         <div class="column is-four-fifths">
           <h2 class="title">Coder&ndash;CUA Collaboration</h2>
+          <div class="content has-text-justified is-size-6">
+            <p>
+              We propose a framework where the <b>Coder acts as Designer</b>, responsible for initializing and iteratively refining the UI, while the <b>CUA serves as Judge</b>, exploring the interface and providing feedback. This collaboration is driven by two feedback signals: <b>Task Solvability</b>, ensuring all features are functional, and <b>Navigation Success</b>, optimizing the layout for agent execution.
+            </p>
+          </div>
           <img src="figures/workflow.png" alt="AUI Framework" data-zoom-image />
         </div>
       </div>
@@ -171,17 +184,21 @@
     <div class="container is-max-desktop">
       <div class="columns is-centered has-text-centered">
         <div class="column is-four-fifths">
-          <h3 class="title">Agent-Centric Revisions</h3>
+          <h3 class="title">Qualitative Analysis</h3>
         </div>
       </div>
       <div class="columns is-centered has-text-centered">
         <div class="column is-two-fifths">
-          <img src="figures/coder_revision.png" alt="Coder Refinement" data-zoom-image />
-          <div class="caption">Coder as Designer: extend functionality from CUA feedback.</div>
+          <img src="figures/coder_revision.png" alt="Task Solvability Revision" data-zoom-image />
+          <div class="caption">
+            <b>Revision from Task Solvability Feedback:</b> Addressing missing functionalities to ensure task feasibility.
+          </div>
         </div>
         <div class="column is-two-fifths">
-          <img src="figures/cua_revision.png" alt="CUA Refinement" data-zoom-image />
-          <div class="caption">CUA as Judge: surface usability bottlenecks for agents.</div>
+          <img src="figures/cua_revision.png" alt="CUA Navigation Revision" data-zoom-image />
+          <div class="caption">
+            <b>Revision from CUA Navigation Feedback:</b> Enhancing agent accessibility via de-stylization and simplified layouts (e.g., adding buttons with clear boundaries).
+          </div>
         </div>
       </div>
     </div>
@@ -192,6 +209,11 @@
       <div class="columns is-centered has-text-centered">
         <div class="column is-four-fifths">
           <h2 class="title">CUA Dashboard</h2>
+          <div class="content has-text-justified is-size-6">
+            <p>
+              To efficiently process long agent trajectories, we introduce the <b>CUA Dashboard</b>. This single-image visualization compresses multi-step interactions by highlighting only key interactive regions and their temporal order. It reduces visual token redundancy by over 76% while preserving essential context, enabling the Coder to quickly identify and fix navigation bottlenecks.
+            </p>
+          </div>
           <img src="figures/dashboard.png" alt="CUA Dashboard" data-zoom-image />
         </div>
       </div>
