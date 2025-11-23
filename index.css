@@ -20,8 +20,8 @@ body::after {
 }
 
 body::before {
-  filter: blur(90px);
-  opacity: 0.85;
+  filter: blur(70px);
+  opacity: 0.6;
   background:
     radial-gradient(40% 35% at 20% 25%, rgba(125, 211, 252, 0.6), transparent 60%),
     radial-gradient(35% 30% at 80% 20%, rgba(199, 210, 254, 0.55), transparent 60%),
@@ -30,18 +30,18 @@ body::before {
 }
 
 body::after {
-  opacity: 0.45;
+  opacity: 0.7;
   mix-blend-mode: screen;
   background: repeating-linear-gradient(
     120deg,
-    rgba(59, 130, 246, 0.18) 0%,
-    rgba(59, 130, 246, 0.18) 14%,
-    rgba(255, 255, 255, 0) 18%,
-    rgba(255, 255, 255, 0) 32%
+    rgba(59, 130, 246, 0.28) 0%,
+    rgba(59, 130, 246, 0.28) 12%,
+    rgba(255, 255, 255, 0) 16%,
+    rgba(255, 255, 255, 0) 30%
   );
-  filter: blur(12px);
-  background-size: 240px 320px;
-  animation: auiStreak 10s linear infinite;
+  filter: blur(6px);
+  background-size: 200px 260px;
+  animation: auiStreak 8s linear infinite;
 }
 
 @keyframes auiFlowA {
