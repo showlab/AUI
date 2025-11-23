@@ -292,14 +292,21 @@
     (function () {
       var bodyEl = document.body;
       var modeSwitch = document.getElementById("aui-mode-switch-input");
+      var currentMode = "human";
+      var chartInitialized = false;
       if (modeSwitch && bodyEl) {
         var applyMode = function () {
           if (modeSwitch.checked) {
             bodyEl.classList.add("mode-agent");
             bodyEl.classList.remove("mode-human");
+            currentMode = "agent";
           } else {
             bodyEl.classList.add("mode-human");
             bodyEl.classList.remove("mode-agent");
+            currentMode = "human";
+          }
+          if (chartInitialized && typeof renderLeaderboard === "function") {
+            renderLeaderboard(currentMetric, currentMode);
           }
         };
         modeSwitch.addEventListener("change", applyMode);
@@ -677,7 +684,7 @@
       }
 
       function renderLeaderboard(metric, mode) {
-        var m = mode || (bodyEl.classList.contains("mode-agent") ? "agent" : "human");
+        var m = mode || currentMode || (bodyEl.classList.contains("mode-agent") ? "agent" : "human");
         chart.setOption(buildOption(metric, m), true);
       }
 
@@ -697,7 +704,8 @@
         });
       });
 
-      renderLeaderboard(currentMetric);
+      chartInitialized = true;
+      renderLeaderboard(currentMetric, currentMode);
     })();
   </script>
 
