@@ -285,9 +285,9 @@ h6 {
 
 .aui-gallery-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(320px, 1fr));
-  gap: 1.25rem;
-  max-width: 1250px;
+  grid-template-columns: repeat(2, minmax(360px, 1fr));
+  gap: 1.35rem;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
@@ -306,7 +306,7 @@ h6 {
 .aui-gallery-card {
   position: relative;
   width: 100%;
-  max-width: 360px;
+  max-width: 420px;
   overflow: hidden;
   background: #020617;
   border: 1px solid rgba(15, 23, 42, 0.6);
