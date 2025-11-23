@@ -1,7 +1,12 @@
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
     "Segoe UI", sans-serif;
-  background: linear-gradient(to bottom, #f9fafb, #e0f2fe);
+  background:
+    radial-gradient(120% 90% at 15% 10%, rgba(199, 210, 254, 0.55), transparent 55%),
+    radial-gradient(120% 90% at 80% 0%, rgba(125, 211, 252, 0.45), transparent 60%),
+    radial-gradient(100% 80% at 50% 65%, rgba(165, 243, 252, 0.35), transparent 60%),
+    linear-gradient(180deg, #f8fafc 0%, #e0f2fe 50%, #f8fafc 100%);
+  backdrop-filter: blur(4px);
   color: #0f172a;
 }
 
