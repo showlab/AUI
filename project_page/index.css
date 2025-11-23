@@ -321,10 +321,10 @@ h6 {
 .aui-gallery-qa-box {
   margin-top: 1.25rem;
   text-align: left;
-  background-color: #f8f9fa;
+  background-color: #f9fafb;
   padding: 12px 18px;
   border-radius: 8px;
-  border-left: 4px solid #0d6efd;
+  border-left: 4px solid #111827;
 }
 
 .aui-gallery-qa-question {
@@ -341,7 +341,7 @@ h6 {
 }
 
 .aui-gallery-qa-qtag {
-  color: #dc3545;
+  color: #111827;
   font-weight: 700;
   margin-right: 6px;
 }

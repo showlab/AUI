@@ -6,11 +6,6 @@
 </p> -->
 
 <p align="center">
-  <a href="#overview">📘 Overview</a> &nbsp; | &nbsp;
-  <a href="#quick-start">🚀 Quick Start</a> &nbsp; | &nbsp;
-  <a href="#data-layout">🗂️ Data Layout</a> &nbsp; | &nbsp;
-  <a href="#metrics-components">📏 Metrics & Components</a>
-  <br>
   <a href="https://huggingface.co/spaces/showlab/AUI">🤗 Hugging Face</a> &nbsp; | &nbsp;
   <a href="https://arxiv.org/abs/2511.15567">📄 Paper</a> &nbsp; | &nbsp;
   <a href="https://showlab.github.io/AUI">🌐 Project Website</a> &nbsp; | &nbsp;
@@ -22,19 +17,6 @@
 - [x] [2025.11.20] HuggingFace Demo is released.
 - [x] [2025.11.19] Arxiv paper is released.
 - [x] [2025.10.30] Code is released.
-
----
-
-### Table of Contents
-- [📘 Overview](#overview)
-- [🚀 Quick Start](#quick-start)
-  - [1. Requirements](#1-requirements)
-  - [2. Configure Models](#2-configure-models)
-  - [3. Run Pipeline (Stage 0 → 3)](#3-run-pipeline-stage-0--3)
-- [🗂️ Data Layout](#data-layout)
-- [📏 Metrics & Components](#metrics-components)
-- [📖 Citation](#-citation)
-- [🙏 Acknowledgements](#-acknowledgements)
 
 ---
 
@@ -87,7 +69,25 @@ Run the following commands from the project root directory.
   export AZURE_OPENAI_API_KEY="YOUR_KEY"
   ```
 
-### 3. Run Pipeline (Stage 0 → 3)
+### 3. Run Pipeline
+
+For normal usage, you only need the single entrypoint `run.py` from the repo root:
+
+```bash
+cd betterui_release
+/users/husiyuan/miniconda3/envs/ui/bin/python run.py \
+  --models gpt5,qwen,gpt4o \
+  --apps all \
+  --v0-dir full_52_apps \
+  --experiment exp_integrated \
+  --revision-type integrated \
+  --cua-models uitars
+```
+
+This command sequentially runs Stage 0 → Stage 3. Advanced users who want full control over each stage can expand the section below to see the individual commands.
+
+<details>
+<summary><strong>Show individual Stage 0–3 commands</strong></summary>
 
 **1) Generate Initial Websites** (3 coder models × 52 apps)
 ```bash
@@ -143,7 +143,7 @@ python stage2_cua_test_v0.py \
       --v0-dir full_52_apps
     ```
 
-*   **Option C: Integrated Revision** (Combine both - Recommended)
+*   **Option C: Integrated Revision** (Combine both – Recommended)
     ```bash
     python stage3_0_revise.py \
       --experiment exp_integrated \
@@ -172,6 +172,8 @@ python stage3_2_cua_test_v1.py \
   --cua-models uitars \
   --v0-dir full_52_apps
 ```
+
+</details>
 
 ---
 
