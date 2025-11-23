@@ -141,11 +141,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .aui-gallery-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
-  max-width: calc(2 * 320px + 1 * 1rem);
+  max-width: 720px;
   margin: 0 auto;
 }
 
@@ -156,7 +155,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .aui-gallery-card {
   position: relative;
-  width: 320px;
+  width: 100%;
+  max-width: 320px;
   overflow: hidden;
   background: #ffffff;
   border: 2px solid #000000;
