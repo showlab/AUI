@@ -84,23 +84,23 @@ This command sequentially runs Stage 0 → Stage 3. Advanced users who want full
 <summary><strong>Show Stage 0–3 details</strong></summary>
 
 **Stage 0 – Preparation**
-- `stage0_generate_websites.py`: generate initial v0 websites for all apps and coder models.
-- `stage0_generate_tasks.py`: generate 30 tasks per app (GPT-5) based on app labels.
+- `src/stage0_generate_websites.py`: generate initial v0 websites for all apps and coder models.
+- `src/stage0_generate_tasks.py`: generate 30 tasks per app (GPT-5) based on app labels.
 
 **Stage 1 – Judge v0 (Task Solvability)**
-- `stage1_judge_v0.py`: Judge extracts state and completion rules for each task on v0 websites.
+- `src/stage1_judge_v0.py`: Judge extracts state and completion rules for each task on v0 websites.
 
 **Stage 2 – CUA Test v0 (Navigation)**
-- `stage2_cua_test_v0.py`: CUA runs only supported tasks (with rules) on v0 websites; success is evaluated by rules (oracle).
+- `src/stage2_cua_test_v0.py`: CUA runs only supported tasks (with rules) on v0 websites; success is evaluated by rules (oracle).
 
 **Stage 3 – Revision + Re-eval**
-- `stage3_0_revise.py`: revise websites using unsupported-task feedback, CUA failures, or integrated signals.
-- `stage3_1_judge_v1.py`: re-run judge on v1 websites to update task support.
-- `stage3_2_cua_test_v1.py`: re-run CUA on v1 websites with oracle evaluation.
+- `src/stage3_0_revise.py`: revise websites using unsupported-task feedback, CUA failures, or integrated signals.
+- `src/stage3_1_judge_v1.py`: re-run judge on v1 websites to update task support.
+- `src/stage3_2_cua_test_v1.py`: re-run CUA on v1 websites with oracle evaluation.
 
 **1) Generate Initial Websites** (3 coder models × 52 apps)
 ```bash
-python stage0_generate_websites.py \
+python src/stage0_generate_websites.py \
   --models gpt5,qwen,gpt4o \
   --apps all \
   --v0-dir full_52_apps
@@ -108,14 +108,14 @@ python stage0_generate_websites.py \
 
 **2) Generate Tasks** (30 tasks per app via GPT-5)
 ```bash
-python stage0_generate_tasks.py \
+python src/stage0_generate_tasks.py \
   --apps all \
   --v0-dir full_52_apps
 ```
 
 **3) Metric 1: Judge Initial Websites** (Task Solvability)
 ```bash
-python stage1_judge_v0.py \
+python src/stage1_judge_v0.py \
   --models gpt5,qwen,gpt4o \
   --apps all \
   --v0-dir full_52_apps
@@ -123,7 +123,7 @@ python stage1_judge_v0.py \
 
 **4) Metric 2: CUA Navigation Test** (Initial)
 ```bash
-python stage2_cua_test_v0.py \
+python src/stage2_cua_test_v0.py \
   --models gpt5,qwen,gpt4o \
   --apps all \
   --v0-dir full_52_apps \
@@ -134,7 +134,7 @@ python stage2_cua_test_v0.py \
 
 *   **Option A: CUA Revision** (Fix based on navigation failures)
     ```bash
-    python stage3_0_revise.py \
+    python src/stage3_0_revise.py \
       --experiment exp_cua_fix \
       --models gpt5,qwen,gpt4o \
       --apps all \
@@ -144,7 +144,7 @@ python stage2_cua_test_v0.py \
 
 *   **Option B: Unsupported Task Revision** (Fix based on missing features)
     ```bash
-    python stage3_0_revise.py \
+    python src/stage3_0_revise.py \
       --experiment exp_func_fix \
       --models gpt5,qwen,gpt4o \
       --apps all \
@@ -154,7 +154,7 @@ python stage2_cua_test_v0.py \
 
 *   **Option C: Integrated Revision** (Combine both – Recommended)
     ```bash
-    python stage3_0_revise.py \
+    python src/stage3_0_revise.py \
       --experiment exp_integrated \
       --models gpt5,qwen,gpt4o \
       --apps all \
@@ -165,7 +165,7 @@ python stage2_cua_test_v0.py \
 **6) Re-evaluate Revised Websites**
 ```bash
 # Re-Judge Task Solvability
-python stage3_1_judge_v1.py \
+python src/stage3_1_judge_v1.py \
   --experiment exp_integrated \
   --models gpt5,qwen,gpt4o \
   --apps all \
@@ -173,7 +173,7 @@ python stage3_1_judge_v1.py \
   --v0-dir full_52_apps
 
 # Re-Run CUA Navigation Test
-python stage3_2_cua_test_v1.py \
+python src/stage3_2_cua_test_v1.py \
   --experiment exp_integrated \
   --models gpt5,qwen,gpt4o \
   --apps all \
