@@ -1,9 +1,0 @@
-{
-  "model": "qwen",
-  "app": "tic-tac-toe-game",
-  "variant": "integrated",
-  "v0_signature": null,
-  "analyzed_failures": null,
-  "destylized": true,
-  "generated_at": "2025-09-23T03:30:30.402683"
-}

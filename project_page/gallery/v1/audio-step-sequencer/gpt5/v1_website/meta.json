@@ -1,9 +1,0 @@
-{
-  "model": "gpt5",
-  "app": "audio-step-sequencer",
-  "variant": "integrated",
-  "v0_signature": null,
-  "analyzed_failures": null,
-  "destylized": true,
-  "generated_at": "2025-09-23T00:09:01.787818"
-}

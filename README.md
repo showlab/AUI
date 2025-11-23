@@ -84,10 +84,25 @@ cd betterui_release
   --cua-models uitars
 ```
 
-This command sequentially runs Stage 0 → Stage 3. Advanced users who want full control over each stage can expand the section below to see the individual commands.
+This command sequentially runs Stage 0 → Stage 3. Advanced users who want full control over each stage can expand the section below to see what each stage does and the corresponding commands.
 
 <details>
-<summary><strong>Show individual Stage 0–3 commands</strong></summary>
+<summary><strong>Show Stage 0–3 details</strong></summary>
+
+**Stage 0 – Preparation**
+- `stage0_generate_websites.py`: generate initial v0 websites for all apps and coder models.
+- `stage0_generate_tasks.py`: generate 30 tasks per app (GPT-5) based on app labels.
+
+**Stage 1 – Judge v0 (Task Solvability)**
+- `stage1_judge_v0.py`: Judge extracts state and completion rules for each task on v0 websites.
+
+**Stage 2 – CUA Test v0 (Navigation)**
+- `stage2_cua_test_v0.py`: CUA runs only supported tasks (with rules) on v0 websites; success is evaluated by rules (oracle).
+
+**Stage 3 – Revision + Re-eval**
+- `stage3_0_revise.py`: revise websites using unsupported-task feedback, CUA failures, or integrated signals.
+- `stage3_1_judge_v1.py`: re-run judge on v1 websites to update task support.
+- `stage3_2_cua_test_v1.py`: re-run CUA on v1 websites with oracle evaluation.
 
 **1) Generate Initial Websites** (3 coder models × 52 apps)
 ```bash

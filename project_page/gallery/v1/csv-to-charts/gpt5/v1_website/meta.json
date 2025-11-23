@@ -1,9 +1,0 @@
-{
-  "model": "gpt5",
-  "app": "csv-to-charts",
-  "variant": "integrated",
-  "v0_signature": null,
-  "analyzed_failures": null,
-  "destylized": true,
-  "generated_at": "2025-09-23T00:40:39.635253"
-}
