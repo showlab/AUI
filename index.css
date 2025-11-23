@@ -17,24 +17,31 @@ body::after {
   inset: -25%;
   pointer-events: none;
   z-index: -1;
-  filter: blur(90px);
-  opacity: 0.85;
-  animation: auiFlowA 14s ease-in-out infinite alternate;
 }
 
 body::before {
+  filter: blur(90px);
+  opacity: 0.85;
   background:
     radial-gradient(40% 35% at 20% 25%, rgba(125, 211, 252, 0.6), transparent 60%),
     radial-gradient(35% 30% at 80% 20%, rgba(199, 210, 254, 0.55), transparent 60%),
     radial-gradient(55% 45% at 50% 70%, rgba(165, 243, 252, 0.5), transparent 65%);
+  animation: auiFlowA 14s ease-in-out infinite alternate;
 }
 
 body::after {
-  background:
-    radial-gradient(35% 30% at 25% 70%, rgba(147, 197, 253, 0.5), transparent 60%),
-    radial-gradient(30% 25% at 75% 65%, rgba(59, 130, 246, 0.35), transparent 65%),
-    radial-gradient(50% 40% at 55% 35%, rgba(125, 211, 252, 0.45), transparent 60%);
-  animation: auiFlowB 18s ease-in-out infinite alternate;
+  opacity: 0.45;
+  mix-blend-mode: screen;
+  background: repeating-linear-gradient(
+    120deg,
+    rgba(59, 130, 246, 0.18) 0%,
+    rgba(59, 130, 246, 0.18) 14%,
+    rgba(255, 255, 255, 0) 18%,
+    rgba(255, 255, 255, 0) 32%
+  );
+  filter: blur(12px);
+  background-size: 240px 320px;
+  animation: auiStreak 10s linear infinite;
 }
 
 @keyframes auiFlowA {
@@ -47,6 +54,11 @@ body::after {
   0% { transform: translate3d(35px, -15px, 0) scale(1.03); }
   50% { transform: translate3d(-25px, 20px, 0) scale(1.07); }
   100% { transform: translate3d(40px, 40px, 0) scale(1.05); }
+}
+
+@keyframes auiStreak {
+  0% { background-position: 0 0; }
+  100% { background-position: 320px 520px; }
 }
 
 body.theme-agent {
@@ -491,8 +503,8 @@ body.mode-agent .aui-gallery-thumb-wrapper {
 
 .aui-mode-switch {
   position: relative;
-  width: 90px;
-  height: 40px;
+  width: 78px;
+  height: 36px;
   display: inline-block;
 }
 
@@ -519,9 +531,9 @@ body.mode-agent .aui-gallery-thumb-wrapper {
 .aui-mode-switch-slider::before {
   position: absolute;
   content: "";
-  height: 32px;
-  width: 32px;
-  left: 4px;
+  height: 30px;
+  width: 30px;
+  left: 3px;
   top: 50%;
   transform: translate(0, -50%);
   background-color: #ffffff;
@@ -536,7 +548,7 @@ body.mode-agent .aui-gallery-thumb-wrapper {
 }
 
 .aui-mode-switch input:checked + .aui-mode-switch-slider::before {
-  transform: translate(50px, -50%);
+  transform: translate(42px, -50%);
 }
 
 .aui-gallery-overlay {
