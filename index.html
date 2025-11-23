@@ -573,6 +573,7 @@
 
       function buildOption(metric, mode) {
         var pal = paletteFor(mode);
+        var isAgent = mode === "agent";
         var coderNames = leaderboardData.map(function (row) {
           return row.coder;
         });
@@ -597,6 +598,9 @@
           tooltip: {
             trigger: "item",
             ...baseTooltipStyle,
+            backgroundColor: isAgent ? "rgba(255,255,255,0.98)" : baseTooltipStyle.backgroundColor,
+            borderColor: isAgent ? "#111827" : baseTooltipStyle.borderColor,
+            textStyle: { color: pal.label },
             formatter: function (p) {
               var row = leaderboardData[p.dataIndex];
               var label = p.seriesName;
@@ -615,6 +619,7 @@
           legend: {
             data: ["Baseline", "+ Ours"],
             top: 30,
+            show: !isAgent,
           },
           grid: {
             containLabel: true,
@@ -652,6 +657,7 @@
               barWidth: "30%",
               data: baselineVals,
               itemStyle: { color: pal.baseline },
+              emphasis: { disabled: isAgent },
             },
             {
               name: "+ Ours",
@@ -660,10 +666,10 @@
               data: oursVals,
               itemStyle: { color: pal.ours },
               label: {
-                show: true,
+                show: !isAgent,
                 position: "top",
-                fontWeight: "bold",
-                fontSize: 11,
+                fontWeight: isAgent ? 600 : "bold",
+                fontSize: isAgent ? 10 : 11,
                 formatter: function (p) {
                   return p.value.toFixed(1);
                 },

@@ -275,12 +275,7 @@ h6 {
 }
 
 .aui-gallery-app-title {
-  font-family: 'Courier New', Courier, monospace;
-  font-weight: bold;
-  font-size: 1rem;
-  padding: 0.3rem 0.8rem;
-  border: 2px solid #000000;
-  background-color: #FFFFFF;
+  display: none;
 }
 
 .aui-gallery-grid {
