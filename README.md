@@ -1,4 +1,4 @@
-# Agent-centric Generative UI
+# Agent for UI
 
 <!-- <p align="center">
   <b>AUI: Computer-Use Agents as Judges for Automatic GUI Design</b><br>
