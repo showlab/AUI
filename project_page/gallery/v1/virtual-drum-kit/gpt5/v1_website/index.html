@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Virtual Drum Kit</title>
+  <style>
+    /* =====================================================================
+       Destylized, operator-friendly UI — simplified for clarity and testing
+       =====================================================================
+
+       Visual Simplification rules enforced:
+       - White background, black text
+       - No gradients, no shadows, no rounded corners
+       - Clear outlines and borders only
+       - Minimum touch targets 44px
+       - Dense but readable layout that fits in 1280×720
+
+       Accessibility:
+       - High-contrast focus styles
+       - aria-live regions for state changes
+       - Keyboard navigation across all controls and pads
+       - Synchronous UI updates for all actions
+
+       Layout:
+       - Single screen within 1280×720 without scrolling for core controls
+       - Two-column approach at desktop widths: controls + pads
+       - Pads grid responsive down to small screens
+
+       NOTE:
+       The CSS below intentionally avoids fancy visuals in favor of clarity.
+    */
+
+    :root{
+      --bg:#ffffff;
+      --text:#000000;
+      --muted:#333333;
+      --line:#000000;
+      --accent:#0057ff;
+      --accent-2:#ff0000;
+      --accent-3:#008000;
+      --warn:#c00000;
+      --ok:#007a00;
+      --pad-idle:#f2f2f2;
+      --pad-active:#e0e0ff;
+      --pad-playback:#e8ffe0;
+      --pad-kbd:#fff0e0;
+      --pad-border:#000000;
+      --focus:#ff9900;
+      --control-bg:#f5f5f5;
+      --dim:#666666;
+      --grid-gap:12px;
+      --pad-min:110px;
+      --button-size:44px;
+      --timeline-height:12px;
+      --progress-height:8px;
+      --border:1px solid var(--line);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial; }
+    a { color: var(--accent); text-decoration: underline; }
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+    img, svg { display: block; }
+
+    header {
+      border-bottom: var(--border);
+      padding: 8px 12px;
+      position: sticky; top: 0; background: var(--bg); z-index: 10;
+    }
+    .container { max-width:1200px; margin:0 auto; padding: 0 12px; }
+    .header-bar { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .brand { display:flex; align-items:flex-start; gap:12px; }
+    .brand .logo { width:36px; height:36px; background:#000000; }
+    .brand h1 { font-size: 20px; margin:0; line-height: 1.2; }
+    .tagline { font-size: 12px; color: var(--dim); }
+
+    .help-actions { display:flex; align-items:center; gap:8px; }
+    button, input, select { color: inherit; font: inherit; }
+    button {
+      background: var(--control-bg);
+      border: var(--border);
+      min-width: var(--button-size);
+      min-height: var(--button-size);
+      padding: 6px 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+    button[disabled] {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .btn-icon { display:inline-flex; align-items:center; gap:8px; }
+    .btn-red { background: #ffe5e5; border-color: var(--warn); }
+    .btn-green { background: #e5ffe8; border-color: var(--ok); }
+
+    main { padding: 12px 0 16px; }
+
+    /* Studio layout */
+    .studio {
+      border: var(--border);
+      padding: 8px;
+      background: var(--bg);
+    }
+
+    /* Top control panel with transport and meters */
+    .top-panel {
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      border-bottom: var(--border);
+      padding: 8px 8px;
+    }
+    .transport { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .transport .led { width:10px; height:10px; background:#ccc; border: var(--border); }
+    .transport .led.on { background: var(--warn); }
+
+    .status { color: var(--dim); font-size: 13px; white-space: nowrap; }
+
+    .meters { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+    .meter-group { display:flex; align-items:center; gap:8px; }
+    .meter-group label { font-size: 12px; color: var(--muted); }
+    .range { -webkit-appearance:none; appearance:none; width: 180px; height: 4px; background:#ccc; border: var(--border); }
+    .range::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width: 18px; height:18px; border: var(--border); background: #ffffff; }
+    .range::-moz-range-thumb { width:18px; height:18px; border: var(--border); background: #ffffff; }
+
+    /* Helper readouts and step controls */
+    .inline { display:inline-flex; align-items:center; gap:8px; }
+    .pill { display:inline-block; padding: 6px 8px; border: var(--border); background: #fafafa; font-size: 12px; }
+    .kbd { display:inline-block; min-width:1.5em; padding: 1px 6px; border: var(--border); background: #fff; font-weight:600; font-size:12px; }
+
+    .controls-wrap { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+
+    /* Stage and pad grid */
+    .stage { display:grid; grid-template-columns: 1fr; gap: 12px; padding: 8px; }
+    .pad-grid {
+      display:grid; grid-template-columns: repeat(3, minmax(var(--pad-min), 1fr)); gap: var(--grid-gap);
+      user-select: none;
+      touch-action: none; /* prevent scrolling while drumming */
+    }
+
+    .pad {
+      position: relative;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      min-width: var(--pad-min);
+      min-height: var(--pad-min);
+      background: var(--pad-idle);
+      border: var(--border);
+      color: var(--text);
+      text-align: center;
+      padding: 8px;
+      cursor: pointer;
+      outline: none;
+      touch-action: none;
+    }
+    .pad .label { font-weight: 700; }
+    .pad .small { font-size: 12px; color: var(--muted); }
+    .pad .keycap { font-weight: 700; border: var(--border); padding: 2px 4px; }
+    .pad .rim, .pad .head, .pad .pulse, .pad .color-ring { display:none; } /* simplified: no decorative layers */
+    .pad.active { background: var(--pad-active); }
+    .pad.kbd-source { outline: 2px solid #ff8800; outline-offset: -2px; }
+    .pad.playback-source { outline: 2px solid #00aa00; outline-offset: -2px; }
+
+    /* Multi-hit flash overlays — ephemeral elements injected by JS */
+    .flash {
+      position:absolute; inset:0;
+      background: rgba(0,0,0,0.06);
+      pointer-events: none;
+    }
+
+    .legend { font-size: 13px; color: var(--muted); }
+
+    /* Bottom panel with recording info and timeline/progress */
+    .bottom-panel {
+      display:flex; align-items:center; gap:12px; justify-content:space-between;
+      border-top: var(--border);
+      padding: 8px;
+    }
+    .rec-info { display:flex; align-items:center; gap: 10px; color: var(--muted); font-size: 13px; }
+    .rec-indicator { display:inline-flex; align-items:center; gap:8px; padding: 4px 8px; border: var(--border); background: #fafafa; }
+    .rec-dot { width:10px; height:10px; border: var(--border); background:#ccc; }
+    .rec-dot.on { background: var(--accent-2); }
+
+    .progress-wrap { flex: 1; height: var(--progress-height); border: var(--border); background: #eee; position: relative; }
+    .progress-bar { position:absolute; left:0; top:0; height:100%; width:0%; background: #0057ff; }
+    .progress-bar[data-active="true"] { border-right: var(--border); }
+
+    /* Timeline with markers and playhead */
+    .timeline-wrap {
+      width: 100%; height: var(--timeline-height); border: var(--border); background: #fafafa; position: relative;
+      display:flex; align-items:center;
+    }
+    .timeline-marker {
+      position:absolute; top:0; bottom:0; width: 2px; background: #000; opacity: 0.7;
+    }
+    .timeline-playhead {
+      position:absolute; top:-2px; bottom:-2px; width: 2px; background: var(--accent);
+    }
+    .timeline-bar-labels { display:flex; align-items:center; gap:8px; font-size: 12px; color: var(--muted); }
+
+    /* Help modal destylized */
+    .modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); }
+    .modal[open] { display: flex; }
+    .modal-card {
+      width: min(820px, 96vw);
+      max-height: 85vh;
+      overflow: auto;
+      background: #fff;
+      border: var(--border);
+      padding: 12px;
+    }
+    .modal-grid { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px; }
+    .modal-grid div { border: var(--border); background: #fafafa; padding: 8px; font-size: 14px; }
+
+    /* Sticky keyboard hint and proxies bar */
+    .utility-bar {
+      display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+      padding: 8px; border-bottom: var(--border);
+      font-size: 12px; color: var(--muted);
+    }
+    #activeSection, #recordStatusProxy, #playbackStatus, #timelineStatus, #tempoApplyStatus, #volumeValueProxy, #playSpeedProxy {
+      border: var(--border); padding: 2px 6px; background: #fafafa; color:#000;
+    }
+
+    /* Toast notifications */
+    #toast {
+      position: fixed; left: 12px; bottom: 12px; border: var(--border); background:#ffffdd; color: #000;
+      padding: 8px 10px; display: none; z-index: 100;
+    }
+    #toast[data-show="true"] { display: block; }
+
+    /* Step buttons */
+    .step-btn { min-width: 44px; min-height: 44px; }
+    .apply-btn { min-height: 44px; }
+
+    /* Grouping controls to keep above the fold */
+    .controls-row { display:flex; align-items:center; gap: 8px; flex-wrap:wrap; }
+    .group { display:flex; flex-direction:column; gap:6px; border: var(--border); padding: 8px; background: #f9f9f9; }
+    .group h4 { margin:0; font-size: 14px; }
+    .note-hint { font-size: 12px; color: var(--muted); }
+
+    /* Responsive grid layout for pads at wider screens */
+    @media (min-width: 980px) {
+      .stage {
+        grid-template-columns: 380px 1fr;
+        align-items:start;
+      }
+      .controls-panel {
+        display: grid;
+        grid-template-rows: auto auto auto;
+        gap: 12px;
+      }
+    }
+
+    /* Accessibility helper for visually hidden text if needed */
+    .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0}
+
+    /* Strong focus indicator on pads and critical buttons */
+    .pad:focus-visible, #btn-record:focus-visible, #btn-play:focus-visible, #btn-stop:focus-visible, #btn-clear:focus-visible, #btn-help:focus-visible, .step-btn:focus-visible, #btn-tempo-apply:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+
+    /* Ensure stop button is visually prioritized when recording or playing */
+    #btn-stop[data-priority="true"] { border-color: #000; background:#fff0f0; }
+
+    /* Ensure #btn-record shows active state clearly */
+    #btn-record[aria-pressed="true"] { background: #ffe5e5; border-color: #c00000; }
+
+    /* Provide visible speed badge near play */
+    #play-speed-label { border: var(--border); background:#f0f8ff; padding: 4px 6px; min-height: 28px; display:inline-flex; align-items:center; }
+
+    /* Ensure minimum tap targets for pads and controls */
+    .pad, button { min-width: 44px; min-height: 44px; }
+
+    /* Prevent overlap and keep everything visible at 1280x720 */
+    .layout-row { display:flex; gap:12px; align-items:stretch; flex-wrap:wrap; }
+  </style>
+</head>
+<body>
+  <!-- Utility/proxies bar for deterministic automation and visible state -->
+  <div class="utility-bar container" aria-label="Proxies and Hints">
+    <span>Hint: Press Space or V for Kick. Use F (Closed Hat), G (Open Hat), J (Snare), Y (High Tom), H (Low Tom), U (Crash), O (Ride), N (Clap).</span>
+    <span id="activeSection" aria-live="polite">main</span>
+    <span id="recordStatusProxy" aria-live="polite">record: off</span>
+    <span id="playbackStatus" aria-live="polite">playback: idle</span>
+    <span id="timelineStatus" aria-live="polite">timeline: empty</span>
+    <span id="tempoApplyStatus" aria-live="polite">tempo: unapplied</span>
+    <span id="volumeValueProxy" aria-live="polite">volume: 80%</span>
+    <span id="playSpeedProxy" aria-live="polite">speed: 1.00x</span>
+  </div>
+
+  <header>
+    <div class="container header-bar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Virtual Drum Kit</h1>
+          <div class="tagline">Play with keyboard or tap the pads. Record and play back your beats.</div>
+        </div>
+      </div>
+      <div class="help-actions">
+        <button id="btn-help" class="btn-icon" type="button" aria-haspopup="dialog" aria-controls="help-modal">
+          <span aria-hidden="true">Help</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="studio" aria-label="Drum Studio">
+      <div class="top-panel">
+        <div class="transport">
+          <div class="led" id="power-led" aria-hidden="true"></div>
+
+          <button id="btn-record" class="btn-icon btn-red" type="button" aria-pressed="false" aria-label="Record">
+            ⏺ Record
+          </button>
+
+          <button id="btn-play" class="btn-icon btn-green" type="button" disabled aria-pressed="false" aria-label="Play">
+            ▶ Play
+          </button>
+
+          <button id="btn-stop" class="btn-icon" type="button" disabled aria-label="Stop">
+            ⏹ Stop
+          </button>
+
+          <button id="btn-clear" class="btn-icon" type="button" disabled title="Clear recording" aria-label="Clear">
+            🗑 Clear
+          </button>
+
+          <span id="play-speed-label" aria-live="polite" class="pill">1.00x</span>
+
+          <div class="status" id="display-status" aria-live="polite">
+            Ready
+          </div>
+        </div>
+        <div class="meters">
+          <div class="meter-group">
+            <label for="slider-volume">Master Volume</label>
+            <div class="controls-row">
+              <button id="btn-volume-minus" class="step-btn" type="button" aria-label="Decrease volume">−</button>
+              <input id="slider-volume" class="range" type="range" min="0" max="100" value="80" />
+              <button id="btn-volume-plus" class="step-btn" type="button" aria-label="Increase volume">+</button>
+              <span id="volume-readout" class="pill" aria-live="polite">80%</span>
+            </div>
+          </div>
+          <div class="meter-group">
+            <label for="slider-tempo">Tempo</label>
+            <div class="controls-row">
+              <button id="btn-tempo-minus" class="step-btn" type="button" aria-label="Decrease tempo">−</button>
+              <input id="slider-tempo" class="range" type="range" min="60" max="180" value="120" />
+              <button id="btn-tempo-plus" class="step-btn" type="button" aria-label="Increase tempo">+</button>
+              <span id="tempo-readout" class="pill">120 BPM</span>
+              <button id="btn-tempo-apply" class="apply-btn" type="button" aria-label="Apply tempo">Apply</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <!-- Left column controls (desktop) -->
+        <div class="controls-panel">
+          <div class="group">
+            <h4>Transport</h4>
+            <div class="controls-row">
+              <button id="btn-record-2" class="btn-icon btn-red" type="button" aria-pressed="false" aria-label="Record (duplicate)">
+                ⏺ Record
+              </button>
+              <button id="btn-play-2" class="btn-icon btn-green" type="button" disabled aria-pressed="false" aria-label="Play (duplicate)">
+                ▶ Play
+              </button>
+              <button id="btn-stop-2" class="btn-icon" type="button" disabled aria-label="Stop (duplicate)">
+                ⏹ Stop
+              </button>
+              <button id="btn-clear-2" class="btn-icon" type="button" disabled aria-label="Clear (duplicate)">
+                🗑 Clear
+              </button>
+            </div>
+            <div class="note-hint">Press Enter on focused pad to trigger. Press Space/V for Kick.</div>
+          </div>
+
+          <div class="group">
+            <h4>Timeline</h4>
+            <div class="timeline-bar-labels">
+              <span>Markers show recorded hits</span>
+              <span id="timeline-count" class="pill">0 markers</span>
+            </div>
+            <div id="timeline-bar" class="timeline-wrap" aria-label="Timeline with markers">
+              <div id="timeline-playhead" class="timeline-playhead" style="left:0%"></div>
+            </div>
+          </div>
+
+          <div class="group">
+            <h4>States</h4>
+            <div class="controls-row">
+              <span class="pill">Recording state: <span id="recording-state">Idle</span></span>
+              <span id="display-events-count" class="pill" title="Number of recorded notes">0 events</span>
+              <span id="display-recording-length" class="pill" title="Recording length">00:00.000</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right column pads -->
+        <div>
+          <div class="pad-grid" id="drum-pad-area" role="group" aria-label="Drum pads">
+            <button id="pad-crash" class="pad" data-drum="crash" aria-label="Crash cymbal (Key U)">
+              <span class="label">Crash</span>
+              <span class="small"><span class="keycap">U</span></span>
+            </button>
+
+            <button id="pad-tom-high" class="pad" data-drum="tom-high" aria-label="High tom (Key Y)">
+              <span class="label">High Tom</span>
+              <span class="small"><span class="keycap">Y</span></span>
+            </button>
+
+            <button id="pad-ride" class="pad" data-drum="ride" aria-label="Ride cymbal (Key O)">
+              <span class="label">Ride</span>
+              <span class="small"><span class="keycap">O</span></span>
+            </button>
+
+            <button id="pad-hihat-closed" class="pad" data-drum="hihat-closed" aria-label="Closed hi-hat (Key F)">
+              <span class="label">Hi-Hat Closed</span>
+              <span class="small"><span class="keycap">F</span></span>
+            </button>
+
+            <button id="pad-snare" class="pad" data-drum="snare" aria-label="Snare (Key J)">
+              <span class="label">Snare</span>
+              <span class="small"><span class="keycap">J</span></span>
+            </button>
+
+            <button id="pad-tom-low" class="pad" data-drum="tom-low" aria-label="Low tom (Key H)">
+              <span class="label">Low Tom</span>
+              <span class="small"><span class="keycap">H</span></span>
+            </button>
+
+            <button id="pad-hihat-open" class="pad" data-drum="hihat-open" aria-label="Open hi-hat (Key G)">
+              <span class="label">Hi-Hat Open</span>
+              <span class="small"><span class="keycap">G</span></span>
+            </button>
+
+            <button id="pad-clap" class="pad" data-drum="clap" aria-label="Clap (Key N)">
+              <span class="label">Clap</span>
+              <span class="small"><span class="keycap">N</span></span>
+            </button>
+
+            <button id="pad-kick" class="pad" data-drum="kick" aria-label="Kick (Key V or Space)">
+              <span class="label">Kick</span>
+              <span class="small"><span class="keycap">V</span> / <span class="keycap">Space</span></span>
+            </button>
+          </div>
+          <div class="legend" id="legend">
+            Tip: Use your keyboard to play. Mapped keys — F: Closed Hat, G: Open Hat, J: Snare, V or Space: Kick, Y: High Tom, H: Low Tom, U: Crash, O: Ride, N: Clap. Other keys are inactive.
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom-panel">
+        <div class="rec-info">
+          <span class="rec-indicator">
+            <span id="rec-dot" class="rec-dot" aria-hidden="true"></span>
+            <span id="record-state-text">Idle</span>
+          </span>
+          <span id="display-events-count-bottom" class="pill" title="Number of recorded notes">0 events</span>
+          <span id="display-recording-length-bottom" class="pill" title="Recording length">00:00.000</span>
+        </div>
+        <div class="progress-wrap" aria-label="Playback progress">
+          <div id="record-progress" class="progress-bar" data-active="false"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container" style="border-top:1px solid #000; padding:8px; font-size:12px; color:#333;">
+    Virtual Drum Kit • No external libraries. Built with HTML5, CSS3, and Web Audio API. Works best on modern browsers.
+  </footer>
+
+  <dialog id="help-modal" class="modal" aria-labelledby="help-title">
+    <div class="modal-card">
+      <h3 id="help-title">How to play</h3>
+      <p>- Click or tap any drum pad to play.</p>
+      <p>- Use your keyboard: F (Closed Hat), G (Open Hat), J (Snare), V or Space (Kick), Y (High Tom), H (Low Tom), U (Crash), O (Ride), N (Clap).</p>
+      <p>- Press Record to capture your performance, then Play to hear it back. Adjust the BPM slider to change playback speed. Use Clear to reset.</p>
+      <div class="modal-grid" style="margin-top:12px">
+        <div><b>Record</b> Start capturing drum hits. A red dot indicates recording is in progress.</div>
+        <div><b>Play</b> Plays back your last take. Stop to halt playback/recording.</div>
+        <div><b>Tempo</b> Adjusts playback speed (BPM). Default is 120. Changes apply immediately; you can also press the Apply button for confirmation.</div>
+        <div><b>Master Volume</b> Controls the output loudness. Step buttons adjust by 5%.</div>
+      </div>
+      <div class="modal-actions" style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px;">
+        <button id="btn-help-close" class="btn-icon" type="button">Close</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Toast -->
+  <div id="toast" role="status" aria-live="polite">Notice</div>
+
+  <script>
+    /* ======================================================================================
+       Audio Engine using Web Audio API
+       ====================================================================================== */
+    const audio = {
+      ctx: null,
+      master: null,
+      comp: null,
+      noiseBuffer: null,
+      openHatNodes: new Set(), // to allow choke by closed hat
+      started: false
+    };
+
+    const state = {
+      isRecording: false,
+      isPlaying: false,
+      recordStart: 0,
+      events: [], // {time:ms, id, vel}
+      timeouts: [],
+      progressTimer: null,
+      lastLength: 0,
+      tempo: 120,
+      refTempo: 120,
+      pointerDown: false,
+      currentPlaybackStart: 0
+    };
+
+    const DRUMS = [
+      { id:'crash', name:'Crash', keys:['u'], color:'#ef476f' },
+      { id:'tom-high', name:'High Tom', keys:['y'], color:'#9b5de5' },
+      { id:'ride', name:'Ride', keys:['o'], color:'#26547c' },
+      { id:'hihat-closed', name:'Hi-Hat Closed', keys:['f'], color:'#06d6a0' },
+      { id:'snare', name:'Snare', keys:['j'], color:'#ffd166' },
+      { id:'tom-low', name:'Low Tom', keys:['h'], color:'#f15bb5' },
+      { id:'hihat-open', name:'Hi-Hat Open', keys:['g'], color:'#118ab2' },
+      { id:'clap', name:'Clap', keys:['n'], color:'#ffa600' },
+      { id:'kick', name:'Kick', keys:['v',' '], color:'#ff6b6b' }
+    ];
+    const keyMap = {};
+    DRUMS.forEach(d => d.keys.forEach(k => keyMap[k] = d.id));
+
+    function initAudio() {
+      if (audio.ctx) return;
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const master = ctx.createGain();
+      const comp = ctx.createDynamicsCompressor();
+      comp.threshold.value = -18;
+      comp.knee.value = 24;
+      comp.ratio.value = 4;
+      comp.attack.value = 0.003;
+      comp.release.value = 0.25;
+
+      master.gain.value = parseInt(document.getElementById('slider-volume').value, 10) / 100;
+      comp.connect(master);
+      master.connect(ctx.destination);
+
+      const bufferSize = Math.floor(ctx.sampleRate * 2); // 2 seconds
+      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+      audio.ctx = ctx;
+      audio.master = master;
+      audio.comp = comp;
+      audio.noiseBuffer = noiseBuffer;
+      setPowerLed(true);
+    }
+
+    function setPowerLed(on) {
+      const led = document.getElementById('power-led');
+      if (led) led.classList.toggle('on', !!on);
+    }
+
+    function resumeAudio() {
+      initAudio();
+      if (audio.ctx.state === 'suspended') audio.ctx.resume();
+    }
+
+    function createNoise() {
+      const src = audio.ctx.createBufferSource();
+      src.buffer = audio.noiseBuffer;
+      src.loop = true;
+      return src;
+    }
+
+    function toMaster(node) {
+      node.connect(audio.comp);
+    }
+
+    function playKick(vel=1) {
+      const t = audio.ctx.currentTime;
+      const osc = audio.ctx.createOscillator();
+      const g = audio.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(150, t);
+      osc.frequency.exponentialRampToValueAtTime(45, t + 0.48);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(1.0 * vel, t + 0.005);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
+
+      osc.connect(g);
+      toMaster(g);
+      osc.start(t);
+      osc.stop(t + 0.52);
+
+      const click = audio.ctx.createOscillator();
+      const cg = audio.ctx.createGain();
+      click.type = 'triangle';
+      click.frequency.setValueAtTime(100, t);
+      cg.gain.setValueAtTime(0.0, t);
+      cg.gain.linearRampToValueAtTime(0.25 * vel, t + 0.005);
+      cg.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+      click.connect(cg);
+      toMaster(cg);
+      click.start(t);
+      click.stop(t + 0.06);
+    }
+
+    function playSnare(vel=1) {
+      const t = audio.ctx.currentTime;
+      const noise = createNoise();
+      const bp = audio.ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = 1800;
+      bp.Q.value = 0.8;
+
+      const hp = audio.ctx.createBiquadFilter();
+      hp.type = 'highpass';
+      hp.frequency.value = 650;
+
+      const ng = audio.ctx.createGain();
+      ng.gain.setValueAtTime(0.0001, t);
+      ng.gain.linearRampToValueAtTime(0.8 * vel, t + 0.002);
+      ng.gain.exponentialRampToValueAtTime(0.0001, t + 0.24);
+
+      noise.connect(bp).connect(hp).connect(ng);
+      toMaster(ng);
+      noise.start(t);
+      noise.stop(t + 0.3);
+
+      const osc = audio.ctx.createOscillator();
+      const og = audio.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(180, t);
+      osc.frequency.exponentialRampToValueAtTime(140, t + 0.1);
+      og.gain.setValueAtTime(0.0001, t);
+      og.gain.linearRampToValueAtTime(0.4 * vel, t + 0.002);
+      og.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+      osc.connect(og);
+      toMaster(og);
+      osc.start(t);
+      osc.stop(t + 0.18);
+    }
+
+    function playHat(closed=true, vel=1) {
+      const t = audio.ctx.currentTime;
+      const noise = createNoise();
+      const hp = audio.ctx.createBiquadFilter();
+      hp.type = 'highpass';
+      hp.frequency.value = 7000;
+      const bp = audio.ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = 10000;
+      bp.Q.value = 0.8;
+      const g = audio.ctx.createGain();
+
+      const decay = closed ? 0.08 : 0.6;
+      const peak = closed ? 0.6 : 0.45;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(peak * vel, t + 0.004);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+
+      noise.connect(hp).connect(bp).connect(g);
+      toMaster(g);
+
+      noise.start(t);
+      noise.stop(t + decay + 0.05);
+
+      if (!closed) {
+        audio.openHatNodes.add(g);
+        g.onended = () => audio.openHatNodes.delete(g);
+      } else {
+        audio.openHatNodes.forEach(node => {
+          try { node.gain.cancelScheduledValues(t); node.gain.exponentialRampToValueAtTime(0.0001, t + 0.02); } catch(e){}
+        });
+      }
+    }
+    function playHatClosed(vel=1){ playHat(true, vel); }
+    function playHatOpen(vel=1){ playHat(false, vel); }
+
+    function playTom(freq=150, vel=1) {
+      const t = audio.ctx.currentTime;
+      const osc = audio.ctx.createOscillator();
+      const g = audio.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, t);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.6, t + 0.24);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(0.9 * vel, t + 0.004);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
+      osc.connect(g);
+      toMaster(g);
+      osc.start(t);
+      osc.stop(t + 0.32);
+    }
+    function playTomHigh(vel=1){ playTom(200, vel); }
+    function playTomLow(vel=1){ playTom(130, vel); }
+
+    function playCrash(vel=1) {
+      const t = audio.ctx.currentTime;
+      const noise = createNoise();
+      const hp = audio.ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value = 5500;
+      const bp = audio.ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value = 10000; bp.Q.value=0.6;
+      const g = audio.ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(0.8 * vel, t + 0.003);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 1.2);
+      noise.connect(hp).connect(bp).connect(g);
+      toMaster(g);
+      noise.start(t);
+      noise.stop(t + 1.25);
+
+      const osc = audio.ctx.createOscillator();
+      const og = audio.ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(600, t);
+      og.gain.setValueAtTime(0.15 * vel, t);
+      og.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+      osc.connect(og);
+      toMaster(og);
+      osc.start(t);
+      osc.stop(t + 0.14);
+    }
+
+    function playRide(vel=1) {
+      const t = audio.ctx.currentTime;
+      const noise = createNoise();
+      const hp = audio.ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value = 5000;
+      const g = audio.ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(0.55 * vel, t + 0.004);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
+      noise.connect(hp).connect(g); toMaster(g);
+      noise.start(t); noise.stop(t + 0.95);
+
+      const bell = audio.ctx.createOscillator();
+      const bg = audio.ctx.createGain();
+      bell.type='triangle'; bell.frequency.setValueAtTime(880, t);
+      bg.gain.setValueAtTime(0.12*vel, t);
+      bg.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+      bell.connect(bg); toMaster(bg);
+      bell.start(t); bell.stop(t + 0.32);
+    }
+
+    function playClap(vel=1) {
+      const t = audio.ctx.currentTime;
+      const noise = createNoise();
+      const hp = audio.ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value = 1200;
+      const g = audio.ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      const a = 0.25 * vel;
+      g.gain.linearRampToValueAtTime(a, t + 0.005);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.025);
+      g.gain.setValueAtTime(0.18 * vel, t + 0.035);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
+      g.gain.setValueAtTime(0.1 * vel, t + 0.075);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
+      noise.connect(hp).connect(g); toMaster(g);
+      noise.start(t);
+      noise.stop(t + 0.16);
+    }
+
+    const PLAY = {
+      'kick': playKick,
+      'snare': playSnare,
+      'hihat-closed': playHatClosed,
+      'hihat-open': playHatOpen,
+      'tom-low': playTomLow,
+      'tom-high': playTomHigh,
+      'crash': playCrash,
+      'ride': playRide,
+      'clap': playClap
+    };
+
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => document.querySelectorAll(sel);
+
+    function formatTime(ms) {
+      const m = Math.floor(ms / 60000);
+      const s = Math.floor((ms % 60000) / 1000);
+      const msr = Math.floor(ms % 1000);
+      return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(msr).padStart(3,'0')}`;
+    }
+
+    function setStatus(msg) {
+      $('#display-status').textContent = msg;
+    }
+
+    function setRecordUI(on) {
+      state.isRecording = on;
+      const val = on ? 'true' : 'false';
+      $('#btn-record').setAttribute('aria-pressed', val);
+      $('#btn-record-2').setAttribute('aria-pressed', val);
+      $('#rec-dot').classList.toggle('on', on);
+      $('#recording-state').textContent = on ? 'Recording...' : 'Idle';
+      $('#record-state-text').textContent = on ? 'Recording...' : 'Idle';
+      document.getElementById('recordStatusProxy').textContent = 'record: ' + (on ? 'on' : 'off');
+      // Prioritize Stop during recording
+      $('#btn-stop').dataset.priority = on ? 'true' : 'false';
+      $('#btn-stop-2').dataset.priority = on ? 'true' : 'false';
+    }
+
+    function updatePlaybackButtons() {
+      const noEvents = state.events.length === 0;
+      $('#btn-play').disabled = noEvents || state.isRecording || state.isPlaying;
+      $('#btn-play-2').disabled = $('#btn-play').disabled;
+      $('#btn-stop').disabled = !state.isRecording && !state.isPlaying;
+      $('#btn-stop-2').disabled = $('#btn-stop').disabled;
+      $('#btn-clear').disabled = noEvents || state.isRecording || state.isPlaying;
+      $('#btn-clear-2').disabled = $('#btn-clear').disabled;
+
+      // Visual priority for Stop when playing
+      const pr = state.isRecording || state.isPlaying;
+      $('#btn-stop').dataset.priority = pr ? 'true' : 'false';
+      $('#btn-stop-2').dataset.priority = pr ? 'true' : 'false';
+
+      // Play aria-pressed to indicate state
+      $('#btn-play').setAttribute('aria-pressed', state.isPlaying ? 'true' : 'false');
+      $('#btn-play-2').setAttribute('aria-pressed', state.isPlaying ? 'true' : 'false');
+    }
+
+    // Visual feedback for a pad. Distinguish source with class.
+    function animatePad(drumId, source='user') {
+      const pad = document.querySelector(`.pad[data-drum="${drumId}"]`);
+      if (!pad) return;
+      pad.classList.add('active');
+      if (source === 'keyboard') pad.classList.add('kbd-source');
+      if (source === 'playback') pad.classList.add('playback-source');
+
+      // ensure multi-hit feedback: inject ephemeral flash element per trigger
+      const flash = document.createElement('div');
+      flash.className = 'flash';
+      pad.appendChild(flash);
+      setTimeout(() => { flash.remove(); }, 180);
+
+      // schedule clear of active classes after a fixed minimal time
+      setTimeout(() => {
+        pad.classList.remove('active');
+        pad.classList.remove('kbd-source');
+        pad.classList.remove('playback-source');
+      }, 220);
+    }
+
+    function velocityFromEvent(e) {
+      if (e && 'pressure' in e && e.pressure > 0) {
+        return Math.min(1, 0.5 + (e.pressure * 0.5));
+      }
+      return 1;
+    }
+
+    function trigger(drumId, source='user', vel=1) {
+      resumeAudio();
+      if (!PLAY[drumId]) return;
+      PLAY[drumId](vel * ($('#slider-volume').value / 100));
+      animatePad(drumId, source);
+      if (state.isRecording && (source === 'user' || source === 'keyboard')) {
+        const now = performance.now();
+        state.events.push({ time: now - state.recordStart, id: drumId, vel: vel });
+        const c = `${state.events.length} event${state.events.length===1?'':'s'}`;
+        $('#display-events-count').textContent = c;
+        $('#display-events-count-bottom').textContent = c;
+        if (state.events.length > 0) {
+          const len = state.events[state.events.length - 1].time;
+          state.lastLength = len;
+          const t = formatTime(len);
+          $('#display-recording-length').textContent = t;
+          $('#display-recording-length-bottom').textContent = t;
+          updatePlaybackButtons();
+          renderTimelineMarkers(); // live update markers during recording
+        }
+      }
+    }
+
+    function startRecording() {
+      if (state.isPlaying) stopPlayback();
+      state.events = [];
+      state.lastLength = 0;
+      $('#display-events-count').textContent = '0 events';
+      $('#display-events-count-bottom').textContent = '0 events';
+      $('#display-recording-length').textContent = '00:00.000';
+      $('#display-recording-length-bottom').textContent = '00:00.000';
+      clearTimelineMarkers();
+      $('#timeline-count').textContent = '0 markers';
+      state.recordStart = performance.now();
+      setRecordUI(true);
+      setStatus('Recording... Play the pads or use your keyboard.');
+      $('#record-progress').style.width = '0%';
+      $('#record-progress').dataset.active = 'true';
+      updatePlaybackButtons();
+      document.getElementById('playbackStatus').textContent = 'playback: idle';
+    }
+
+    function stopRecording() {
+      if (!state.isRecording) return;
+      setRecordUI(false);
+      $('#record-progress').dataset.active = 'false';
+      updatePlaybackButtons();
+      const len = state.events.length ? state.events[state.events.length - 1].time : 0;
+      state.lastLength = len;
+      setStatus(state.events.length ? `Recorded ${state.events.length} events` : 'Nothing recorded');
+      if (state.events.length) {
+        $('#record-progress').style.width = '0%';
+        renderTimelineMarkers();
+      } else {
+        clearTimelineMarkers();
+      }
+    }
+
+    function clearRecording() {
+      if (state.isPlaying || state.isRecording) return;
+      state.events = [];
+      state.lastLength = 0;
+      $('#display-events-count').textContent = '0 events';
+      $('#display-events-count-bottom').textContent = '0 events';
+      $('#display-recording-length').textContent = '00:00.000';
+      $('#display-recording-length-bottom').textContent = '00:00.000';
+      $('#record-progress').style.width = '0%';
+      $('#record-progress').dataset.active = 'false';
+      setStatus('Cleared recording');
+      updatePlaybackButtons();
+      clearTimelineMarkers();
+    }
+
+    function stopPlayback() {
+      state.isPlaying = false;
+      state.timeouts.forEach(id => clearTimeout(id));
+      state.timeouts = [];
+      if (state.progressTimer) { cancelAnimationFrame(state.progressTimer); state.progressTimer = null; }
+      $('#btn-stop').disabled = true;
+      $('#btn-stop-2').disabled = true;
+      $('#btn-play').disabled = state.events.length === 0 || state.isRecording;
+      $('#btn-play-2').disabled = $('#btn-play').disabled;
+      setStatus('Stopped');
+      document.getElementById('playbackStatus').textContent = 'playback: stopped';
+      $('#record-progress').dataset.active = 'false';
+      updatePlayhead(0);
+      updatePlaybackButtons();
+    }
+
+    function playRecording() {
+      if (!state.events.length) {
+        setStatus('No recording yet');
+        showToast('No recording yet');
+        updatePlaybackButtons();
+        return;
+      }
+      if (state.isRecording) stopRecording();
+      stopPlayback();
+
+      const tempo = state.tempo;
+      const scale = state.refTempo / tempo;
+      const scaledLen = (state.lastLength || state.events[state.events.length - 1].time) * scale;
+
+      state.isPlaying = true;
+      $('#btn-stop').disabled = false;
+      $('#btn-stop-2').disabled = false;
+      $('#btn-play').disabled = true;
+      $('#btn-play-2').disabled = true;
+      $('#btn-play').setAttribute('aria-pressed', 'true');
+      $('#btn-play-2').setAttribute('aria-pressed', 'true');
+      $('#record-progress').dataset.active = 'true';
+      setStatus('Playing back...');
+      document.getElementById('playbackStatus').textContent = 'playback: playing';
+
+      // speed readout
+      const ratio = (state.refTempo / state.tempo);
+      const speed = (1/ratio);
+      $('#play-speed-label').textContent = `${speed.toFixed(2)}x`;
+      document.getElementById('playSpeedProxy').textContent = `speed: ${speed.toFixed(2)}x`;
+
+      const start = performance.now();
+      state.currentPlaybackStart = start;
+
+      // progress and playhead animation
+      function localTick() {
+        if (!state.isPlaying) return;
+        const elapsed = performance.now() - start;
+        const pct = Math.min(100, (elapsed / scaledLen) * 100);
+        $('#record-progress').style.width = `${pct}%`;
+        updatePlayhead(pct / 100);
+        if (pct >= 100) return;
+        state.progressTimer = requestAnimationFrame(localTick);
+      }
+      state.progressTimer = requestAnimationFrame(localTick);
+
+      // schedule events
+      for (const ev of state.events) {
+        const when = ev.time * scale;
+        const id = setTimeout(() => {
+          trigger(ev.id, 'playback', ev.vel);
+        }, Math.max(0, Math.floor(when)));
+        state.timeouts.push(id);
+      }
+      // finalize
+      const doneId = setTimeout(() => {
+        if (!state.isPlaying) return;
+        $('#record-progress').style.width = '100%';
+        state.isPlaying = false;
+        updatePlaybackButtons();
+        setStatus('Playback finished');
+        document.getElementById('playbackStatus').textContent = 'playback: finished';
+        $('#record-progress').dataset.active = 'false';
+        setTimeout(() => { $('#record-progress').style.width = '0%'; updatePlayhead(0); }, 50);
+      }, Math.max(0, Math.floor(scaledLen + 10)));
+      state.timeouts.push(doneId);
+    }
+
+    // A globally-available tick function (API preservation + optional diagnostics)
+    function tick() {
+      // This function is intentionally no-op for external hooks/tests.
+      // Progress animation uses an internal loop inside playRecording().
+    }
+
+    function onPadPointerDown(e) {
+      const pad = e.currentTarget;
+      const id = pad.getAttribute('data-drum');
+      const vel = velocityFromEvent(e);
+      trigger(id, 'user', vel);
+      e.preventDefault();
+      state.pointerDown = true;
+      try { pad.setPointerCapture?.(e.pointerId); } catch(_){}
+    }
+
+    function onPadPointerEnter(e) {
+      if (!state.pointerDown) return; // support swipe-to-hit
+      const pad = e.currentTarget;
+      const id = pad.getAttribute('data-drum');
+      trigger(id, 'user', 1);
+    }
+
+    function onPadPointerUp(e) {
+      state.pointerDown = false;
+    }
+
+    function onKeyDown(e) {
+      const code = e.code;
+      const k = e.key.toLowerCase();
+      if (keyMap[k]) {
+        e.preventDefault();
+        trigger(keyMap[k], 'keyboard', 1);
+      } else if (code === 'Space') {
+        e.preventDefault();
+        trigger('kick', 'keyboard', 1);
+      } else {
+        // Unmapped key feedback
+        if (e.key.length === 1 || e.key === 'Enter' || e.key === 'Tab' || e.key === 'Escape') {
+          // Provide unobtrusive feedback; do not trigger any pad
+          setStatus(`Unmapped key: "${e.key}"`);
+          showToast(`Unmapped key: "${e.key}"`);
+        }
+      }
+    }
+
+    function setupUI() {
+      // Pads
+      $$('.pad').forEach(p => {
+        p.addEventListener('pointerdown', onPadPointerDown, { passive:false });
+        p.addEventListener('pointerenter', onPadPointerEnter);
+        p.addEventListener('pointerup', onPadPointerUp);
+        p.addEventListener('pointercancel', onPadPointerUp);
+        p.addEventListener('pointerleave', onPadPointerUp);
+        p.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); trigger(p.dataset.drum, 'keyboard', 1); }});
+        p.setAttribute('tabindex', '0'); // accessibility
+      });
+
+      // Prevent scrolling when interacting with pads on touch devices
+      const padArea = document.getElementById('drum-pad-area');
+      padArea.addEventListener('touchmove', (ev) => { ev.preventDefault(); }, { passive:false });
+
+      // Transport main
+      $('#btn-record').addEventListener('click', () => {
+        if (!state.isRecording) startRecording(); else stopRecording();
+        updatePlaybackButtons();
+      });
+      $('#btn-play').addEventListener('click', () => playRecording());
+      $('#btn-stop').addEventListener('click', () => {
+        if (state.isRecording) stopRecording();
+        if (state.isPlaying) stopPlayback();
+      });
+      $('#btn-clear').addEventListener('click', () => clearRecording());
+
+      // Transport duplicates (left panel) to keep accessible on desktop
+      $('#btn-record-2').addEventListener('click', () => { if (!state.isRecording) startRecording(); else stopRecording(); updatePlaybackButtons(); });
+      $('#btn-play-2').addEventListener('click', () => playRecording());
+      $('#btn-stop-2').addEventListener('click', () => { if (state.isRecording) stopRecording(); if (state.isPlaying) stopPlayback(); });
+      $('#btn-clear-2').addEventListener('click', () => clearRecording());
+
+      // Volume slider + step buttons
+      const volSlider = $('#slider-volume');
+      const volReadout = $('#volume-readout');
+      const volProxy = $('#volumeValueProxy');
+      function setVolume(v) {
+        v = Math.max(0, Math.min(100, v|0));
+        volSlider.value = String(v);
+        volReadout.textContent = `${v}%`;
+        volProxy.textContent = `volume: ${v}%`;
+        resumeAudio();
+        if (audio.master) audio.master.gain.value = v / 100;
+      }
+      volSlider.addEventListener('input', () => setVolume(parseInt(volSlider.value, 10)));
+      $('#btn-volume-minus').addEventListener('click', () => setVolume(parseInt(volSlider.value, 10) - 5));
+      $('#btn-volume-plus').addEventListener('click', () => setVolume(parseInt(volSlider.value, 10) + 5));
+
+      // Tempo slider + step + apply
+      const tempoEl = $('#slider-tempo');
+      const tempoReadout = $('#tempo-readout');
+      function updateTempoReadout() {
+        tempoReadout.textContent = `${tempoEl.value} BPM`;
+      }
+      tempoEl.addEventListener('input', () => {
+        state.tempo = parseInt(tempoEl.value, 10);
+        updateTempoReadout();
+        // update speed label preview
+        const ratio = (state.refTempo / state.tempo);
+        const speed = (1/ratio);
+        $('#play-speed-label').textContent = `${speed.toFixed(2)}x`;
+        document.getElementById('playSpeedProxy').textContent = `speed: ${speed.toFixed(2)}x`;
+      });
+      $('#btn-tempo-minus').addEventListener('click', () => {
+        tempoEl.value = String(Math.max(60, parseInt(tempoEl.value, 10) - 1));
+        tempoEl.dispatchEvent(new Event('input', { bubbles:true }));
+      });
+      $('#btn-tempo-plus').addEventListener('click', () => {
+        tempoEl.value = String(Math.min(180, parseInt(tempoEl.value, 10) + 1));
+        tempoEl.dispatchEvent(new Event('input', { bubbles:true }));
+      });
+      $('#btn-tempo-apply').addEventListener('click', () => {
+        document.getElementById('tempoApplyStatus').textContent = 'tempo: done';
+        showToast(`Tempo set to ${state.tempo} BPM`);
+      });
+
+      // Help modal
+      const modal = $('#help-modal');
+      const btnHelp = $('#btn-help');
+      const btnHelpClose = $('#btn-help-close');
+      btnHelp.addEventListener('click', () => {
+        modal.setAttribute('open', '');
+        modal.showModal?.();
+        document.getElementById('activeSection').textContent = 'help';
+      });
+      btnHelpClose.addEventListener('click', () => {
+        modal.close?.();
+        modal.removeAttribute('open');
+        document.getElementById('activeSection').textContent = 'main';
+     

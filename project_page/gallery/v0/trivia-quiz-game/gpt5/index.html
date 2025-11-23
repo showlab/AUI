@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Stars & Stripes Trivia — US Basics Quiz</title>
+  <style>
+    :root{
+      --bg1: #0b1d39;
+      --bg2: #0e2a57;
+      --card: #ffffff;
+      --ink: #0b1d39;
+      --muted: #5a6b89;
+      --accent: #1e68ff;
+      --accent-2: #e11d48;
+      --ok: #10b981;
+      --bad: #ef4444;
+      --ring: rgba(30,104,255,0.35);
+      --shadow: 0 10px 24px rgba(0,0,0,0.25), 0 1px 0 rgba(255,255,255,0.08) inset;
+      --radius: 18px;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 600px at 10% -20%, rgba(255,255,255,0.08), transparent 70%),
+        radial-gradient(1000px 500px at 110% 120%, rgba(255,255,255,0.06), transparent 70%),
+        linear-gradient(160deg, var(--bg1), var(--bg2));
+      background-attachment: fixed;
+    }
+
+    .page {
+      min-height: 100%;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      align-items: start;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      padding: 16px 20px 8px;
+      background: linear-gradient(to bottom, rgba(11,29,57,0.9), rgba(11,29,57,0.6), transparent);
+      backdrop-filter: blur(6px);
+    }
+
+    .topbar {
+      max-width: 960px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #f3f7ff;
+    }
+
+    #progressBar {
+      grid-column: 1 / -1;
+      width: 100%;
+      height: 10px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 999px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.25);
+    }
+
+    #progressFill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #60a5fa, #22d3ee);
+      transition: width 350ms ease;
+    }
+
+    #progressText {
+      font-size: 0.95rem;
+      color: #e2e8f0;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    }
+
+    main {
+      display: grid;
+      place-items: start center;
+      padding: 24px;
+    }
+
+    .card {
+      position: relative;
+      width: min(940px, calc(100% - 24px));
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px;
+      overflow: hidden;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.2px;
+    }
+
+    .intro {
+      display: grid;
+      gap: 18px;
+    }
+
+    .intro p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.5;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      appearance: none;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease, color 120ms ease, opacity 120ms ease;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.65;
+    }
+
+    #startButton, #restartButton {
+      background: linear-gradient(180deg, #1e68ff, #1b57d8);
+      color: white;
+      box-shadow: 0 8px 20px rgba(30,104,255,0.35);
+    }
+    #startButton:hover:not(:disabled),
+    #restartButton:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(30,104,255,0.45);
+    }
+
+    #nextButton {
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+    #nextButton:hover:not(:disabled) { transform: translateY(-1px); }
+
+    .question-wrap {
+      display: grid;
+      gap: 18px;
+    }
+
+    #questionCounter {
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    #questionText {
+      margin: 0;
+      font-size: clamp(1.35rem, 1.2rem + 0.8vw, 1.75rem);
+      line-height: 1.3;
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    #optionsList {
+      list-style: none;
+      padding: 0;
+      margin: 8px 0 4px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .option-btn {
+      width: 100%;
+      text-align: left;
+      border: 2px solid #e5e7eb;
+      background: #f8fafc;
+      color: #0b1d39;
+      padding: 16px 18px;
+      border-radius: 14px;
+      font-size: clamp(1rem, 0.9rem + 0.4vw, 1.15rem);
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+    }
+
+    .option-btn .letter {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 0.95rem;
+      background: #e6eefc;
+      color: #1e40af;
+    }
+
+    .option-btn .text {
+      line-height: 1.35;
+    }
+
+    .option-btn .mark {
+      opacity: 0;
+      transform: scale(0.6);
+      transition: transform 180ms ease, opacity 180ms ease;
+    }
+
+    .option-btn:hover:not(:disabled),
+    .option-btn:focus-visible:not(:disabled) {
+      border-color: var(--ring);
+      outline: 0;
+      box-shadow: 0 0 0 6px rgba(30,104,255,0.12);
+      transform: translateY(-1px);
+      background: #ffffff;
+    }
+
+    .option-btn.correct {
+      border-color: #10b981;
+      background: #ecfdf5;
+      color: #064e3b;
+    }
+    .option-btn.correct .letter {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .option-btn.correct .mark {
+      opacity: 1;
+      transform: scale(1);
+      color: #10b981;
+    }
+
+    .option-btn.incorrect {
+      border-color: #ef4444;
+      background: #fef2f2;
+      color: #7f1d1d;
+    }
+    .option-btn.incorrect .letter {
+      background: #fee2e2;
+      color: #7f1d1d;
+    }
+    .option-btn.incorrect .mark {
+      opacity: 1;
+      transform: scale(1);
+      color: #ef4444;
+    }
+
+    .footer-controls {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+
+    /* Feedback overlay */
+    #feedbackOverlay {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 120ms ease;
+    }
+    #feedbackOverlay.show { opacity: 1; }
+    #feedbackIcon {
+      width: 132px;
+      height: 132px;
+      filter: drop-shadow(0 12px 18px rgba(0,0,0,0.25));
+      animation: pop 520ms ease-out;
+    }
+    .success #feedbackIcon path,
+    .success #feedbackIcon circle {
+      stroke: var(--ok);
+    }
+    .fail #feedbackIcon path,
+    .fail #feedbackIcon line,
+    .fail #feedbackIcon circle {
+      stroke: var(--bad);
+    }
+    @keyframes pop {
+      0% { transform: scale(0.7); opacity: 0; }
+      50% { transform: scale(1.08); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Results */
+    .results {
+      display: grid;
+      gap: 16px;
+      text-align: center;
+      padding: 10px 0 2px;
+    }
+    .score-ring {
+      margin: 10px auto 2px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background:
+        conic-gradient(#22d3ee var(--pct), #e5e7eb 0);
+      display: grid;
+      place-items: center;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .score-ring span {
+      display: grid;
+      place-items: center;
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      background: white;
+      font-weight: 900;
+      font-size: 1.5rem;
+      color: var(--ink);
+    }
+    .small {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    footer {
+      padding: 16px 20px 28px;
+      text-align: center;
+      color: #cbd5e1;
+      font-size: 0.9rem;
+    }
+
+    /* Responsive focus improvements */
+    @media (hover: none) {
+      .option-btn:hover { transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="topbar">
+        <h1 aria-label="Stars and Stripes Trivia">🇺🇸 Stars & Stripes Trivia</h1>
+        <div id="progressText" aria-live="polite">Ready</div>
+        <div id="progressBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Quiz progress">
+          <div id="progressFill"></div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <article id="quizCard" class="card" aria-live="polite">
+        <!-- Intro Screen -->
+        <section id="introScreen" class="intro" aria-labelledby="introTitle">
+          <span class="badge" aria-hidden="true">Beginner • US Basics</span>
+          <h2 id="introTitle" style="margin:0;font-size:1.6rem">Test your U.S. knowledge in 10 quick questions</h2>
+          <p>Each question is multiple choice. Pick your answer to see instant feedback, watch your progress, and view your score at the end.</p>
+          <div class="controls">
+            <button id="startButton" type="button" aria-label="Start quiz">Start Quiz</button>
+          </div>
+        </section>
+
+        <!-- Question Screen -->
+        <section id="questionScreen" class="question-wrap" hidden>
+          <div id="questionCounter" aria-live="polite">Question 1 of 10</div>
+          <h2 id="questionText">Question text goes here</h2>
+          <ul id="optionsList" role="listbox" aria-labelledby="questionText">
+            <!-- Options injected here -->
+          </ul>
+          <div class="footer-controls">
+            <button id="nextButton" type="button" disabled>Next Question</button>
+          </div>
+        </section>
+
+        <!-- Results Screen -->
+        <section id="resultScreen" class="results" hidden>
+          <span class="badge" aria-hidden="true">Quiz Complete</span>
+          <div class="score-ring" style="--pct: 0deg" aria-hidden="true">
+            <span id="scorePercent">0%</span>
+          </div>
+          <h2 id="finalHeadline">Great job!</h2>
+          <p id="scoreText" class="small">You scored 0 out of 10.</p>
+          <div class="controls" style="justify-content:center;margin-top:6px">
+            <button id="restartButton" type="button">Play Again</button>
+          </div>
+        </section>
+
+        <!-- Feedback Overlay -->
+        <div id="feedbackOverlay" aria-hidden="true">
+          <!-- Success (check) -->
+          <svg id="feedbackIcon" class="icon" viewBox="0 0 120 120" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="10">
+            <!-- We will dynamically toggle success/fail styles -->
+            <circle cx="60" cy="60" r="48" opacity="0.25"></circle>
+            <path id="checkPath" d="M36 64 L54 80 L86 40" style="display:none"></path>
+            <g id="xGroup" style="display:none">
+              <line x1="40" y1="40" x2="80" y2="80"></line>
+              <line x1="80" y1="40" x2="40" y2="80"></line>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Screen reader announcer -->
+        <div id="srAnnouncer" role="status" aria-live="polite" style="position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden"></div>
+      </article>
+    </main>
+
+    <footer>
+      Built with HTML5, CSS3, and vanilla JavaScript • Works best at 1280×720 or wider
+    </footer>
+  </div>
+
+  <script>
+    // Data: 10 basic US trivia questions
+    const QUESTIONS = [
+      {
+        q: "What is the capital of the United States?",
+        choices: ["New York City", "Washington, D.C.", "Philadelphia", "Los Angeles"],
+        answer: "Washington, D.C."
+      },
+      {
+        q: "How many states are in the United States?",
+        choices: ["48", "49", "50", "52"],
+        answer: "50"
+      },
+      {
+        q: "What colors are on the United States flag?",
+        choices: ["Red, white, and blue", "Red and white", "Blue and white", "Red and blue"],
+        answer: "Red, white, and blue"
+      },
+      {
+        q: "Who was the first President of the United States?",
+        choices: ["Abraham Lincoln", "Thomas Jefferson", "George Washington", "John Adams"],
+        answer: "George Washington"
+      },
+      {
+        q: "What national holiday is celebrated on July 4th?",
+        choices: ["Memorial Day", "Independence Day", "Veterans Day", "Labor Day"],
+        answer: "Independence Day"
+      },
+      {
+        q: "What is the title of the U.S. national anthem?",
+        choices: ["America the Beautiful", "God Bless America", "The Star-Spangled Banner", "Yankee Doodle"],
+        answer: "The Star-Spangled Banner"
+      },
+      {
+        q: "How many branches does the U.S. government have?",
+        choices: ["Two", "Three", "Four", "Five"],
+        answer: "Three"
+      },
+      {
+        q: "What is the currency of the United States?",
+        choices: ["Euro", "U.S. Dollar", "Pound", "Canadian Dollar"],
+        answer: "U.S. Dollar"
+      },
+      {
+        q: "How old do citizens have to be to vote for President?",
+        choices: ["16 years old", "17 years old", "18 years old", "21 years old"],
+        answer: "18 years old"
+      },
+      {
+        q: "What is the national bird of the United States?",
+        choices: ["Bald eagle", "Peregrine falcon", "Bison", "Wild turkey"],
+        answer: "Bald eagle"
+      }
+    ];
+
+    // Elements
+    const introScreen = document.getElementById('introScreen');
+    const questionScreen = document.getElementById('questionScreen');
+    const resultScreen = document.getElementById('resultScreen');
+
+    const startButton = document.getElementById('startButton');
+    const nextButton = document.getElementById('nextButton');
+    const restartButton = document.getElementById('restartButton');
+
+    const questionText = document.getElementById('questionText');
+    const optionsList = document.getElementById('optionsList');
+    const questionCounter = document.getElementById('questionCounter');
+
+    const progressBar = document.getElementById('progressBar');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+
+    const feedbackOverlay = document.getElementById('feedbackOverlay');
+    const feedbackIcon = document.getElementById('feedbackIcon');
+    const checkPath = document.getElementById('checkPath');
+    const xGroup = document.getElementById('xGroup');
+
+    const scorePercent = document.getElementById('scorePercent');
+    const scoreText = document.getElementById('scoreText');
+    const finalHeadline = document.getElementById('finalHeadline');
+
+    const srAnnouncer = document.getElementById('srAnnouncer');
+
+    // State
+    const TOTAL_QUESTIONS = 10;
+    let currentIndex = 0;
+    let score = 0;
+    let hasAnswered = false;
+    let questionsOrder = [];
+    let currentChoices = [];
+    let correctIndex = -1;
+
+    // Utils
+    function shuffleArray(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function updateProgress() {
+      const pct = Math.round((currentIndex / TOTAL_QUESTIONS) * 100);
+      progressFill.style.width = pct + '%';
+      progressBar.setAttribute('aria-valuenow', String(pct));
+      progressText.textContent = `Progress: ${currentIndex}/${TOTAL_QUESTIONS}`;
+    }
+
+    function setOverlay(type /* 'success' | 'fail' */) {
+      feedbackOverlay.classList.remove('success', 'fail', 'show');
+      checkPath.style.display = 'none';
+      xGroup.style.display = 'none';
+      void feedbackIcon.offsetWidth; // reflow to restart animation
+      if (type === 'success') {
+        feedbackOverlay.classList.add('success');
+        checkPath.style.display = 'block';
+      } else {
+        feedbackOverlay.classList.add('fail');
+        xGroup.style.display = 'block';
+      }
+      feedbackOverlay.classList.add('show');
+      setTimeout(() => {
+        feedbackOverlay.classList.remove('show');
+      }, 650);
+    }
+
+    function renderQuestion() {
+      // Guard
+      if (currentIndex >= TOTAL_QUESTIONS) {
+        showResults();
+        return;
+      }
+
+      updateProgress();
+
+      const qObj = questionsOrder[currentIndex];
+      questionCounter.textContent = `Question ${currentIndex + 1} of ${TOTAL_QUESTIONS}`;
+      questionText.textContent = qObj.q;
+
+      // Prepare choices
+      currentChoices = shuffleArray(qObj.choices);
+      correctIndex = currentChoices.indexOf(qObj.answer);
+
+      // Render options
+      optionsList.innerHTML = '';
+      const letters = ['A', 'B', 'C', 'D'];
+      currentChoices.forEach((choice, i) => {
+        const li = document.createElement('li');
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.id = `optionBtn-${i}`;
+        btn.className = 'option-btn';
+        btn.setAttribute('role', 'option');
+        btn.setAttribute('aria-selected', 'false');
+        btn.dataset.index = String(i);
+        btn.dataset.correct = String(i === correctIndex);
+
+        // Content
+        const letter = document.createElement('span');
+        letter.className = 'letter';
+        letter.textContent = letters[i] || String(i + 1);
+
+        const text = document.createElement('span');
+        text.className = 'text';
+        text.textContent = choice;
+
+        const mark = document.createElement('span');
+        mark.className = 'mark';
+        mark.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>';
+
+        btn.appendChild(letter);
+        btn.appendChild(text);
+        btn.appendChild(mark);
+
+        btn.addEventListener('click', onOptionSelected);
+        li.appendChild(btn);
+        optionsList.appendChild(li);
+      });
+
+      // Reset controls
+      hasAnswered = false;
+      nextButton.disabled = true;
+      nextButton.textContent = (currentIndex === TOTAL_QUESTIONS - 1) ? 'See Results' : 'Next Question';
+
+      // Focus first option for accessibility
+      const firstBtn = document.getElementById('optionBtn-0');
+      if (firstBtn) firstBtn.focus();
+    }
+
+    function onOptionSelected(e) {
+      if (hasAnswered) return;
+      const btn = e.currentTarget;
+      const selected = Number(btn.dataset.index);
+      const isCorrect = selected === correctIndex;
+      hasAnswered = true;
+
+      // Mark selections and disable all options
+      const optionButtons = optionsList.querySelectorAll('.option-btn');
+      optionButtons.forEach((b, idx) => {
+        b.disabled = true;
+        b.setAttribute('aria-selected', String(idx === selected));
+        const idxNum = Number(b.dataset.index);
+        if (idxNum === correctIndex) {
+          b.classList.add('correct');
+        }
+      });
+      if (!isCorrect) {
+        btn.classList.add('incorrect');
+      }
+
+      // Update score
+      if (isCorrect) {
+        score++;
+        srAnnouncer.textContent = 'Correct.';
+        setOverlay('success');
+      } else {
+        srAnnouncer.textContent = `Incorrect. Correct answer: ${currentChoices[correctIndex]}.`;
+        // Change icon to "X"
+        setOverlay('fail');
+      }
+
+      nextButton.disabled = false;
+      nextButton.focus();
+
+      // Update progress text to show answered count
+      progressText.textContent = `Progress: ${currentIndex + 1}/${TOTAL_QUESTIONS}`;
+    }
+
+    function showResults() {
+      // Final progress to 100
+      progressFill.style.width = '100%';
+      progressBar.setAttribute('aria-valuenow', '100');
+      progressText.textContent = `Progress: ${TOTAL_QUESTIONS}/${TOTAL_QUESTIONS}`;
+
+      // Calculate percentage
+      const pct = Math.round((score / TOTAL_QUESTIONS) * 100);
+      scorePercent.textContent = `${pct}%`;
+      document.querySelector('.score-ring').style.setProperty('--pct', `${pct * 3.6}deg`);
+      scoreText.textContent = `You scored ${score} out of ${TOTAL_QUESTIONS}.`;
+
+      // Headline message
+      let msg = 'Great job!';
+      if (pct === 100) msg = 'Perfect score! 🎉';
+      else if (pct >= 80) msg = 'Excellent!';
+      else if (pct >= 60) msg = 'Nice work!';
+      else msg = 'Keep practicing!';
+      finalHeadline.textContent = msg;
+
+      // Toggle screens
+      questionScreen.hidden = true;
+      resultScreen.hidden = false;
+      srAnnouncer.textContent = `Quiz complete. Your score is ${score} out of ${TOTAL_QUESTIONS}.`;
+      restartButton.focus();
+    }
+
+    function startQuiz() {
+      // Reset state
+      currentIndex = 0;
+      score = 0;
+      hasAnswered = false;
+
+      // Shuffle questions (random order of all 10)
+      questionsOrder = shuffleArray(QUESTIONS).slice(0, TOTAL_QUESTIONS);
+
+      // Toggle screens
+      introScreen.hidden = true;
+      resultScreen.hidden = true;
+      questionScreen.hidden = false;
+
+      // Reset progressbar
+      progressFill.style.width = '0%';
+      progressBar.setAttribute('aria-valuenow', '0');
+      progressText.textContent = `Progress: 0/${TOTAL_QUESTIONS}`;
+
+      renderQuestion();
+    }
+
+    function nextQuestion() {
+      if (!hasAnswered) return; // Require an answer before moving on
+      currentIndex++;
+      if (currentIndex >= TOTAL_QUESTIONS) {
+        showResults();
+      } else {
+        renderQuestion();
+      }
+    }
+
+    function restartQuiz() {
+      startQuiz();
+    }
+
+    // Event bindings
+    startButton.addEventListener('click', startQuiz);
+    nextButton.addEventListener('click', nextQuestion);
+    restartButton.addEventListener('click', restartQuiz);
+
+    // Keyboard support: Enter/Space to trigger focused option; Arrow keys to navigate options
+    optionsList.addEventListener('keydown', (e) => {
+      const buttons = Array.from(optionsList.querySelectorAll('.option-btn'));
+      if (buttons.length === 0) return;
+      const current = document.activeElement;
+      const idx = buttons.indexOf(current);
+
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        const next = buttons[(idx + 1 + buttons.length) % buttons.length];
+        next.focus();
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const prev = buttons[(idx - 1 + buttons.length) % buttons.length];
+        prev.focus();
+      } else if (e.key === 'Enter' || e.key === ' ') {
+        if (current && current.classList.contains('option-btn') && !current.disabled) {
+          e.preventDefault();
+          current.click();
+        }
+      }
+    });
+
+    // Ensure good initial focus for accessibility
+    window.addEventListener('load', () => {
+      startButton.focus();
+    });
+  </script>
+</body>
+</html>

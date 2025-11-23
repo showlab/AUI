@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Nonprofit Impact Report</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Nonprofit Impact Report - measurable results of programs with infographics, success stories, and donation links.">
+  <style>
+    /* Destylized, operator-friendly theme */
+    :root{
+      --bg: #ffffff;
+      --text: #000000;
+      --muted: #333333;
+      --line: #cccccc;
+      --accent: #0055ff;
+      --accent-2: #008a2e;
+      --danger: #d60000;
+      --warn: #cc7a00;
+      --ok: #007a00;
+      --focus: #000000;
+      --control-size: 44px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; color:var(--text); background:var(--bg);
+      font:16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      overflow-x:hidden;
+    }
+    a{color:var(--accent); text-decoration:underline}
+    a:focus, button:focus, select:focus, input:focus, [tabindex]:focus{
+      outline:3px solid var(--focus); outline-offset:2px;
+    }
+    .container{max-width:1180px; margin:0 auto; padding:0 16px}
+
+    /* Header and nav */
+    header{
+      position:sticky; top:0; z-index:50; background:#fff; border-bottom:1px solid var(--line);
+    }
+    .nav{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      padding:10px 0;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text);
+    }
+    .logo{
+      width:44px; height:44px; background:#000; color:#fff; display:flex; align-items:center; justify-content:center;
+      font-weight:700; font-size:12px;
+    }
+    .brand h1{font-size:18px; margin:0}
+    nav{display:flex; align-items:center; gap:10px}
+    nav ul{display:flex; gap:8px; list-style:none; margin:0; padding:0}
+    nav a{
+      display:inline-flex; align-items:center; justify-content:center;
+      min-height:var(--control-size); padding:0 12px;
+      color:var(--text); text-decoration:none; border:1px solid transparent;
+    }
+    nav a:hover{background:#f3f3f3}
+    nav a[aria-current="page"]{border:1px solid var(--text); background:#f3f3f3}
+    #menuToggle{
+      display:none; min-height:var(--control-size); min-width:var(--control-size);
+    }
+
+    /* Buttons */
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      min-height:var(--control-size); padding:0 16px; border:1px solid var(--text); background:#fff; color:var(--text);
+      cursor:pointer;
+    }
+    .btn.primary{background:#000; color:#fff}
+    .btn.secondary{background:#fff; color:#000; border:1px solid #000}
+    .btn.ghost{background:#fff; border:1px solid var(--line); color:#000}
+    .btn.block{width:100%}
+    .btn:disabled{opacity:0.5; cursor:not-allowed}
+
+    /* Badges, tags, helper text */
+    .chip{display:inline-block; border:1px solid var(--text); padding:4px 8px; font-weight:700}
+    .tag{display:inline-block; border:1px solid var(--text); padding:4px 8px; font-size:12px; font-weight:700}
+    .muted{color:var(--muted)}
+    .small{font-size:12px}
+
+    /* Layout sections, spacing */
+    section{padding:18px 0; scroll-margin-top:80px}
+    h2{margin:0 0 8px; font-size:28px}
+    h3{margin:0 0 6px; font-size:18px}
+    p{margin:8px 0}
+    .row{display:grid; grid-template-columns: 1fr 1fr; gap:16px}
+    .row3{display:grid; grid-template-columns: repeat(3, 1fr); gap:16px}
+    .row4{display:grid; grid-template-columns: repeat(4, 1fr); gap:16px}
+    .panel{border:1px solid var(--text); padding:12px}
+    .panel-title{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px}
+
+    /* Hero */
+    .hero-inner{display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:center}
+    .visual{border:1px solid var(--text); padding:8px}
+    svg{width:100%; height:260px; display:block}
+
+    /* KPI grid */
+    .kpigrid{display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:10px}
+    .kpi{border:1px solid var(--text); padding:10px}
+    .kpi .num{font-size:22px; font-weight:800}
+
+    /* Controls */
+    .controls{display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:10px 0}
+    .control{display:flex; align-items:center; gap:8px; border:1px solid var(--line); padding:8px}
+    label{font-size:14px}
+    select, input[type="range"], input[type="text"], input[type="number"]{
+      border:1px solid var(--text); min-height:var(--control-size); padding:0 8px; background:#fff; color:#000;
+    }
+    input[type="range"]{min-height:auto; padding:0}
+    .segmented{display:flex; border:1px solid var(--text)}
+    .segmented button{border:0; border-right:1px solid var(--text); background:#fff; color:#000; min-height:var(--control-size); padding:0 12px}
+    .segmented button:last-child{border-right:0}
+    .segmented button.active{background:#000; color:#fff}
+
+    /* Charts */
+    .infographics{display:grid; grid-template-columns: 1.2fr .8fr; gap:16px; margin-top:8px}
+    .chartwrap{position:relative; min-height:260px; border:1px solid var(--line); padding:6px}
+    .tooltip{
+      position:absolute; background:#000; color:#fff; padding:6px 8px; font-size:12px; pointer-events:none;
+      opacity:0; transform:translate(-50%, -100%); transition:none; /* no animation per destylization */
+      z-index:5; border:1px solid #fff;
+    }
+    .bar-interactive{cursor:pointer}
+    .bar-interactive:focus{outline:3px solid var(--focus)}
+    .donut-center{
+      position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; pointer-events:none;
+      text-align:center;
+    }
+    .donut-center .big{font-size:24px; font-weight:800}
+    .donut-center .small{font-size:12px; color:#000}
+
+    /* Carousel */
+    .carousel{border:1px solid var(--text)}
+    .slides{display:grid; grid-auto-flow:column; grid-auto-columns:100%; transition:none}
+    .slide{display:grid; grid-template-columns: .8fr 1.2fr; gap:12px; padding:12px; border-bottom:1px solid var(--line)}
+    .thumb{min-height:220px; border:1px solid var(--text)}
+    .slide .more{max-height:0; overflow:hidden}
+    .slide.expanded .more{max-height:1000px}
+    .carousel-controls{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px; border-top:1px solid var(--line)}
+    .dots{display:flex; gap:8px}
+    .dotbtn{width:16px; height:16px; border:1px solid var(--text); background:#fff; cursor:pointer}
+    .dotbtn.active{background:#000; color:#fff}
+    .dotbtn[aria-current="true"]{background:#000; color:#fff}
+    .read-more-btn{border:1px solid var(--text); background:#fff; color:#000; min-height:var(--control-size); padding:0 12px; display:inline-flex; align-items:center; gap:6px}
+    .read-more-btn .chev{display:inline-block; transform:rotate(0deg)}
+    .slide.expanded .read-more-btn .chev{transform:rotate(180deg)}
+    .story-actions{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
+
+    /* CTA/Donate */
+    .cta{display:grid; grid-template-columns: 1.2fr .8fr; gap:16px}
+    .progress{height:10px; border:1px solid var(--text); overflow:hidden}
+    .progress > span{display:block; height:100%; background:#000; width:0%}
+    .pledge{display:grid; gap:8px}
+    .pledge .impact-note{color:var(--muted); font-size:14px}
+
+    /* Partners strip */
+    .partners-grid{display:grid; grid-template-columns: repeat(6, 1fr); gap:8px}
+    .partner{border:1px solid var(--text); display:flex; align-items:center; justify-content:center; min-height:60px}
+
+    /* Footer */
+    footer{border-top:1px solid var(--line); padding:16px 0; color:#000}
+    .footer-columns{display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px}
+    .socials{display:flex; gap:10px}
+    .sitemap{display:grid; gap:6px}
+
+    /* Sticky tools & proxies */
+    .to-top{position:fixed; right:16px; bottom:16px; opacity:0; transform:translateY(8px); transition:none}
+    .to-top.show{opacity:1; transform:translateY(0)}
+    .proxies{border:1px dashed var(--line); padding:8px; margin:10px 0; background:#f9f9f9}
+    .proxy-item{display:flex; align-items:center; gap:8px}
+
+    /* Modals (Methodology, Story) */
+    .modal-backdrop{position:fixed; inset:0; background:rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; z-index:100}
+    .modal{background:#fff; color:#000; border:2px solid #000; width:min(860px, 94vw); max-height:90vh; overflow:auto; padding:16px}
+    .modal-header{display:flex; align-items:center; justify-content:space-between; gap:8px; border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:10px}
+    .modal-footer{border-top:1px solid var(--line); padding-top:8px; margin-top:10px; display:flex; justify-content:flex-end; gap:8px}
+    .modal-close{min-height:var(--control-size); min-width:var(--control-size)}
+    .hidden{display:none !important}
+
+    /* Additional sections */
+    #programs .cards{display:grid; grid-template-columns: repeat(3, 1fr); gap:12px}
+    .program-card{border:1px solid var(--text); padding:12px}
+    .program-card h3{margin:0 0 6px}
+    .program-card .actions{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
+
+    /* Range helper buttons */
+    .inline-steps{display:inline-flex; gap:6px}
+    .step-btn{min-height:var(--control-size); min-width:var(--control-size); border:1px solid #000; background:#fff; color:#000}
+
+    /* Mobile */
+    @media (max-width: 1000px){
+      .hero-inner, .infographics, .stories, .cta, .row{grid-template-columns: 1fr}
+      .slides{grid-auto-columns:100%}
+      .slide{grid-template-columns: 1fr}
+      .kpigrid{grid-template-columns: 1fr 1fr 1fr}
+      .footer-columns{grid-template-columns: 1fr}
+      #menuToggle{display:inline-flex}
+      nav ul{display:none; position:absolute; top:64px; left:0; right:0; background:#fff; border-top:1px solid var(--line); padding:8px}
+      nav ul.open{display:flex; flex-direction:column}
+      nav a{justify-content:flex-start}
+    }
+    @media (max-width: 640px){
+      .kpigrid{grid-template-columns: 1fr 1fr}
+      .partners-grid{grid-template-columns: repeat(3, 1fr)}
+      #donateHeaderBtn{display:none} /* keep within viewport density */
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav" role="navigation" aria-label="Main">
+      <a href="#" class="brand" id="brandLink">
+        <div class="logo" aria-hidden="true">NIR</div>
+        <h1>Nonprofit Impact Report</h1>
+      </a>
+
+      <button id="menuToggle" class="btn" aria-label="Toggle menu" aria-expanded="false">Menu</button>
+
+      <nav>
+        <ul id="mainNav">
+          <li><a id="navImpact" class="focusable" href="#impact">Impact</a></li>
+          <li><a id="navPrograms" class="focusable" href="#programs">Programs</a></li>
+          <li><a id="navStories" class="focusable" href="#stories">Success Stories</a></li>
+          <li><a id="navPartners" class="focusable" href="#partners">Partners</a></li>
+          <li><a id="navDonate" class="focusable" href="#donate">Get Involved</a></li>
+          <li><a id="navContact" class="focusable" href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div style="display:flex; gap:8px; align-items:center">
+        <button id="donateHeaderBtn" class="btn primary" aria-label="Donate from header" title="Scroll to Get Involved section">Donate</button>
+        <a id="donateHeaderLink" class="btn secondary" href="https://example.org/donate" target="_blank" rel="noopener" aria-label="Donate externally (new tab)">Donate (External)</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="hero">
+      <div class="container hero-inner">
+        <div>
+          <span class="chip" aria-hidden="true">Impact that inspires</span>
+          <h2>Real change. Measurable results.</h2>
+          <p>We invest in education, health, and the environment to help communities thrive. Explore our data, meet the people behind the numbers, and join us in making a difference.</p>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center">
+            <button id="exploreImpactBtn" class="btn primary" aria-label="Explore Impact">Explore Impact</button>
+            <button id="learnMoreBtn" class="btn" aria-label="Learn more">Read Stories</button>
+            <a id="heroGetInvolved" class="btn" href="#donate" aria-label="Jump to Get Involved">Get Involved</a>
+          </div>
+
+          <div class="kpigrid" aria-label="Key performance indicators">
+            <div class="kpi" tabindex="0" aria-label="People Reached (year to date) with tooltip" aria-describedby="kpiPeopleTip">
+              <h3>People Reached (YTD)</h3>
+              <div id="kpiPeople" class="num" aria-live="polite">—</div>
+              <div id="kpiPeopleTip" class="small muted">Total beneficiaries reached across regions.</div>
+            </div>
+            <div class="kpi" tabindex="0" aria-label="Communities Served with tooltip" aria-describedby="kpiCommunitiesTip">
+              <h3>Communities Served</h3>
+              <div id="kpiCommunities" class="num" aria-live="polite">—</div>
+              <div id="kpiCommunitiesTip" class="small muted">Number of towns, villages, or districts with active programming.</div>
+            </div>
+            <div class="kpi" tabindex="0" aria-label="Volunteers engaged with tooltip" aria-describedby="kpiVolunteersTip">
+              <h3>Volunteers</h3>
+              <div id="kpiVolunteers" class="num" aria-live="polite">—</div>
+              <div id="kpiVolunteersTip" class="small muted">People who contributed their time during the period.</div>
+            </div>
+          </div>
+        </div>
+        <div class="visual" aria-hidden="true">
+          <svg viewBox="0 0 420 260" role="img" aria-label="Decorative wave">
+            <path d="M0,170 C60,120 120,190 180,150 C240,110 300,170 360,140 C380,130 400,120 420,120 L420,260 L0,260 Z" fill="#dddddd"/>
+            <path d="M0,140 C60,100 120,160 180,120 C240,80 300,140 360,110 C380,100 400,90 420,90" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="square"/>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section id="impact" class="container" aria-labelledby="impactTitle">
+      <div class="panel">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px">
+          <h2 id="impactTitle" style="margin:0">Impact Explorer</h2>
+          <a id="methodologyLink" href="#methodology" class="small" role="button" aria-haspopup="dialog">Methodology</a>
+        </div>
+
+        <div class="controls" role="group" aria-label="Impact controls">
+          <div class="control">
+            <label for="programSelect">Program</label>
+            <select id="programSelect" class="focusable" aria-label="Choose program">
+              <option>Education</option>
+              <option>Health</option>
+              <option>Environment</option>
+            </select>
+          </div>
+
+          <div class="control">
+            <label for="yearRange">Year</label>
+            <div class="inline-steps" role="group" aria-label="Year stepper">
+              <button id="yearMinus" class="step-btn" aria-label="Decrease year">-</button>
+              <input id="yearRange" class="focusable" type="range" min="2019" max="2025" step="1" value="2024" aria-label="Year range" />
+              <button id="yearPlus" class="step-btn" aria-label="Increase year">+</button>
+            </div>
+            <strong id="yearLabel">2024</strong>
+          </div>
+
+          <div class="segmented" role="tablist" aria-label="Metric toggle">
+            <button id="metricTogglePeople" role="tab" aria-selected="true" class="active">People Reached</button>
+            <button id="metricToggleFunds" role="tab" aria-selected="false">Funds Utilized</button>
+          </div>
+
+          <button id="applyBtn" class="btn" aria-label="Apply selected filters">Apply Changes</button>
+          <span id="keyboardHint" class="small muted">Hint: Press Enter while focused on "Apply Changes".</span>
+        </div>
+
+        <div class="infographics" aria-label="Program infographics">
+          <article class="panel" aria-labelledby="barTitle">
+            <div class="panel-title">
+              <h3 id="barTitle" style="margin:0">Impact by Region</h3>
+              <div class="small muted">Hover or focus bars for details.</div>
+            </div>
+            <div id="barChartWrap" class="chartwrap">
+              <div id="barTooltip" class="tooltip" role="tooltip" aria-hidden="true">people</div>
+              <svg id="barChart" aria-labelledby="barTitle" role="img"></svg>
+            </div>
+
+            <div style="display:flex; gap:8px; align-items:center; margin-top:8px">
+              <button id="prepareExport" class="btn" aria-label="Prepare CSV export">Prepare Export</button>
+              <a id="downloadData" class="btn" href="#" download="impact-data.csv" aria-label="Download CSV (prepare first)" aria-disabled="true">Download CSV</a>
+              <span id="downloadStatus" class="small muted">disabled</span>
+              <span id="previewStatus" class="small muted">not ready</span>
+            </div>
+          </article>
+
+          <aside class="panel" aria-labelledby="donutTitle">
+            <div class="panel-title">
+              <h3 id="donutTitle" style="margin:0">Goal Progress</h3>
+            </div>
+            <div class="chartwrap" style="min-height:240px; position:relative">
+              <svg id="donutChart" viewBox="0 0 240 240" role="img" aria-labelledby="donutTitle">
+                <circle cx="120" cy="120" r="88" stroke="#cccccc" stroke-width="20" fill="none"/>
+                <circle id="donutArc" cx="120" cy="120" r="88" stroke="#000000" stroke-width="20" stroke-linecap="butt" fill="none" transform="rotate(-90 120 120)" stroke-dasharray="0 999"/>
+              </svg>
+              <div class="donut-center">
+                <div id="donutBig" class="big">0%</div>
+                <div id="donutSmall" class="small">of annual target</div>
+              </div>
+            </div>
+            <div class="small muted">
+              Target reflects yearly goals for each program. Progress updates with selected year and metric.
+            </div>
+          </aside>
+        </div>
+
+        <div class="proxies" aria-label="State proxies">
+          <div class="proxy-item">Active section: <strong id="activeSection">hero</strong></div>
+          <div class="proxy-item">Apply status: <strong id="applyStatus">idle</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="programs" class="container" aria-labelledby="programsTitle">
+      <h2 id="programsTitle">Programs</h2>
+      <p class="muted">Open a program card to view details and jump to related stories.</p>
+      <div class="cards">
+        <article class="program-card" id="progEducation">
+          <h3>Education</h3>
+          <p>From early literacy to advanced STEM pathways, our education initiatives expand opportunity.</p>
+          <ul class="small">
+            <li>Teacher training and mentorship</li>
+            <li>Digital inclusion and devices</li>
+            <li>Scholarships and learning hubs</li>
+          </ul>
+          <div class="actions">
+            <a class="btn" href="#stories" data-program="Education" id="progEduStories">See Stories</a>
+            <button class="btn" id="progEduKPI">View KPIs</button>
+          </div>
+        </article>
+
+        <article class="program-card" id="progHealth">
+          <h3>Health</h3>
+          <p>Community-led care, prevention programs, and rapid response to emerging needs.</p>
+          <ul class="small">
+            <li>Mobile clinics and screenings</li>
+            <li>Nutrition and clean water</li>
+            <li>Mental health and counseling</li>
+          </ul>
+          <div class="actions">
+            <a class="btn" href="#stories" data-program="Health" id="progHealthStories">See Stories</a>
+            <button class="btn" id="progHealthKPI">View KPIs</button>
+          </div>
+        </article>
+
+        <article class="program-card" id="progEnvironment">
+          <h3>Environment</h3>
+          <p>Resilience through restoration, renewable solutions, and circular economies.</p>
+          <ul class="small">
+            <li>Reforestation and mangroves</li>
+            <li>Clean energy pilots</li>
+            <li>Waste reduction and composting</li>
+          </ul>
+          <div class="actions">
+            <a class="btn" href="#stories" data-program="Environment" id="progEnvStories">See Stories</a>
+            <button class="btn" id="progEnvKPI">View KPIs</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="stories" class="container stories" aria-labelledby="storyTitle">
+      <div class="panel">
+        <h2 id="storyTitle" style="margin:0 0 8px">Success Stories</h2>
+        <p class="muted" style="margin-top:0">Data tells one side of the story. Meet the people and places where your support made a difference.</p>
+        <div class="controls">
+          <div class="control">
+            <label for="storyProgramSelect">Filter</label>
+            <select id="storyProgramSelect" class="focusable" aria-label="Filter stories by program">
+              <option value="All">All</option>
+              <option value="Education">Education</option>
+              <option value="Health">Health</option>
+              <option value="Environment">Environment</option>
+            </select>
+          </div>
+          <div class="control">
+            <label for="autoplayToggle">Autoplay</label>
+            <input id="autoplayToggle" class="focusable" type="checkbox" aria-label="Toggle autoplay" />
+          </div>
+        </div>
+        <div class="carousel" aria-roledescription="carousel" aria-label="Impact stories">
+          <div id="slides" class="slides"></div>
+          <div class="carousel-controls">
+            <div style="display:flex; gap:8px; align-items:center">
+              <button id="prevStory" class="btn" aria-label="Previous story">Prev</button>
+              <button id="nextStory" class="btn primary" aria-label="Next story">Next</button>
+            </div>
+            <div id="dots" class="dots" role="tablist" aria-label="Slide dots"></div>
+          </div>
+        </div>
+        <div class="proxies" aria-label="Carousel proxies">
+          <div class="proxy-item">Carousel active dot has aria-current: <span id="carouselActiveState">false</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="transparency" class="container" aria-labelledby="transparencyTitle">
+      <h2 id="transparencyTitle">Financial Transparency</h2>
+      <p class="muted">Explore how funds are allocated across major categories.</p>
+      <div class="row">
+        <div class="panel">
+          <h3 style="margin:0 0 6px">How funds are used</h3>
+          <div class="chartwrap" style="min-height:300px; position:relative">
+            <svg id="pieChart" viewBox="0 0 300 300" role="img" aria-label="Funds breakdown"></svg>
+            <div id="pieTooltip" class="tooltip" role="tooltip" aria-hidden="true">people</div>
+          </div>
+          <div id="pieLegend" class="small" style="margin-top:8px"></div>
+        </div>
+        <div class="panel">
+          <h3 style="margin:0 0 6px">About this chart</h3>
+          <p>The chart displays the proportion of total funds allocated to each category. Select a slice to see details.</p>
+          <ul>
+            <li>Programs: direct program costs and grants</li>
+            <li>Administration: operating costs</li>
+            <li>Fundraising: donor engagement and campaigns</li>
+            <li>Reserves: future-readiness and emergencies</li>
+          </ul>
+          <button id="openMethodology2" class="btn">Read full methodology</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="donate" class="container cta" aria-labelledby="donateTitle">
+      <article class="panel">
+        <h2 id="donateTitle" style="margin-top:0">Fuel the next chapter</h2>
+        <p class="muted">We are on track to reach more communities this year. Help us go further.</p>
+        <div style="display:grid; gap:8px; margin:8px 0">
+          <div style="display:flex; justify-content:space-between; color:#000; font-size:14px">
+            <span>Monthly goal</span>
+            <span><strong id="goalRaised">$0</strong> raised of <strong id="goalTotal">$0</strong></span>
+          </div>
+          <div class="progress" aria-label="Donation progress">
+            <span id="goalProgressBar" style="width:0%"></span>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center">
+          <a id="donateLink" class="btn primary" href="https://example.org/donate" target="_blank" rel="noopener" aria-label="Donate now in new tab">Donate Now</a>
+          <button id="shareBtn" class="btn" aria-label="Copy link to share">Share Impact</button>
+          <a id="volunteerCTA" class="btn" href="mailto:volunteer@example.org?subject=Volunteer%20Inquiry" aria-label="Volunteer via email">Volunteer</a>
+        </div>
+      </article>
+
+      <aside class="panel pledge" aria-labelledby="pledgeTitle">
+        <h3 id="pledgeTitle" style="margin:0">Pledge calculator</h3>
+        <label for="pledgeSlider">Choose an amount</label>
+        <div class="inline-steps" role="group" aria-label="Pledge stepper">
+          <button id="pledgeMinus" class="step-btn" aria-label="Decrease pledge">-</button>
+          <input id="pledgeSlider" class="focusable" type="range" min="10" max="1000" step="10" value="100" />
+          <button id="pledgePlus" class="step-btn" aria-label="Increase pledge">+</button>
+        </div>
+        <div><strong id="pledgeAmount">$100</strong></div>
+        <div class="impact-note" id="pledgeImpact" aria-live="polite">Your gift could provide 300 days of clean water.</div>
+      </aside>
+    </section>
+
+    <section id="partners" class="container" aria-labelledby="partnersTitle">
+      <h2 id="partnersTitle">Partners & Supporters</h2>
+      <p class="muted">We are grateful for the partners who make this work possible. Click a logo to visit their website.</p>
+      <div class="partners-grid">
+        <a class="partner" id="partner1" href="https://example.com/partner1" target="_blank" rel="noopener">Partner 1</a>
+        <a class="partner" id="partner2" href="https://example.com/partner2" target="_blank" rel="noopener">Partner 2</a>
+        <a class="partner" id="partner3" href="https://example.com/partner3" target="_blank" rel="noopener">Partner 3</a>
+        <a class="partner" id="partner4" href="https://example.com/partner4" target="_blank" rel="noopener">Partner 4</a>
+        <a class="partner" id="partner5" href="https://example.com/partner5" target="_blank" rel="noopener">Partner 5</a>
+        <a class="partner" id="partner6" href="https://example.com/partner6" target="_blank" rel="noopener">Partner 6</a>
+      </div>
+    </section>
+
+    <section id="contact" class="container" aria-labelledby="contactTitle">
+      <h2 id="contactTitle">Contact</h2>
+      <div class="row">
+        <div class="panel">
+          <h3>Get in touch</h3>
+          <p>Email us for general inquiries, partnerships, or press.</p>
+          <p>Email: <a id="contactEmail" href="mailto:hello@example.org">hello@example.org</a></p>
+          <p>Phone: <a href="tel:+1234567890">+1 (234) 567-890</a></p>
+          <p>Address: 123 Community Way, Hope City</p>
+        </div>
+        <div class="panel">
+          <h3>Quick Links</h3>
+          <ul>
+            <li><a id="quickImpact" href="#impact">Impact</a></li>
+            <li><a id="quickPrograms" href="#programs">Programs</a></li>
+            <li><a id="quickStories" href="#stories">Success Stories</a></li>
+            <li><a id="quickTransparency" href="#transparency">Financial Transparency</a></li>
+            <li><a id="quickDonate" href="#donate">Get Involved</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="proxies" aria-label="Link proxy">
+        <div class="proxy-item">Last link clicked: <strong id="lastLinkClicked">none</strong></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-columns">
+        <div>
+          <div>© <span id="yearNow"></span> Nonprofit Impact Report</div>
+          <p class="small muted">Advancing opportunity through education, health, and environment.</p>
+        </div>
+        <div>
+          <h3 style="margin:0 0 8px">Sitemap</h3>
+          <div class="sitemap">
+            <a id="footerImpact" href="#impact">Impact</a>
+            <a id="footerPrograms" href="#programs">Programs</a>
+            <a id="footerStories" href="#stories">Success Stories</a>
+            <a id="footerTransparency" href="#transparency">Financial Transparency</a>
+            <a id="donateFooterLink" href="https://example.org/donate" target="_blank" rel="noopener">Donate</a>
+          </div>
+        </div>
+        <div>
+          <h3 style="margin:0 0 8px">Social</h3>
+          <div class="socials" aria-label="Social links">
+            <a class="focusable" href="#" aria-label="Twitter" title="Twitter">Twitter</a>
+            <a class="focusable" href="#" aria-label="LinkedIn" title="LinkedIn">LinkedIn</a>
+            <a class="focusable" href="#" aria-label="YouTube" title="YouTube">YouTube</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <button id="backToTopBtn" class="btn to-top" aria-label="Back to top">Back to top</button>
+
+  <!-- Methodology Modal -->
+  <div id="methodologyModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="methodologyTitle">
+    <div class="modal" role="document">
+      <div class="modal-header">
+        <h2 id="methodologyTitle" style="margin:0">How we calculate impact</h2>
+        <button id="methodologyClose" class="btn modal-close" aria-label="Close methodology">✕</button>
+      </div>
+      <div class="modal-body">
+        <p>Our impact metrics are computed using program-reported outputs, independent surveys, and periodic audits. The model below summarizes how we derive the visualizations you see in this report.</p>
+        <h3>Data sources</h3>
+        <ul>
+          <li>Program reporting from partner organizations (monthly)</li>
+          <li>Randomized household surveys (semiannual)</li>
+          <li>Administrative data from schools and clinics (quarterly)</li>
+          <li>Environmental sensors and field validation (ongoing)</li>
+        </ul>
+        <h3>Attribution</h3>
+        <p>We attribute outcomes proportionally when multiple organizations collaborate. For example, if two partners contribute equally to a water system serving 10,000 people, we count 5,000 people reached.</p>
+        <h3>Quality checks</h3>
+        <ul>
+          <li>Outlier detection using rolling medians</li>
+          <li>Independent desk review for all large grants</li>
+          <li>Confidence bands on survey-based estimates</li>
+        </ul>
+        <h3>Financial transparency chart</h3>
+        <p>The funds allocation pie chart is constructed from audited financial statements. Percentages reflect the share of total functional expenses in the most recent fiscal year.</p>
+        <h3>Limitations</h3>
+        <ul>
+          <li>Some programs report with a lag; data is updated when available.</li>
+          <li>Survey confidence intervals may widen in conflict-affected areas.</li>
+          <li>Infrastructure benefits are modeled over expected lifetime.</li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button id="methodologyOk" class="btn primary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Story Modal -->
+  <div id="storyModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="storyModalTitle">
+    <div class="modal" role="document">
+      <div class="modal-header">
+        <h2 id="storyModalTitle" style="margin:0">Full Story</h2>
+        <button id="storyModalClose" class="btn modal-close" aria-label="Close story">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="storyModalContent">
+          <!-- populated dynamically -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a id="storyShareTwitter" href="#" target="_blank" rel="noopener" class="btn">Share on Twitter</a>
+        <button id="storyCopyLink" class="btn">Copy link</button>
+        <button id="storyModalOk" class="btn primary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Data and utility (preserved API)
+    const regions = ["Americas","Africa","Asia","Europe"];
+    const programs = ["Education","Health","Environment"];
+    const state = {
+      year: 2024,
+      program: "Education",
+      metric: "people", // 'people' or 'funds'
+      autoplay: false,
+      slideIndex: 0
+    };
+
+    function seededRandom(seed){
+      let x = Math.sin(seed) * 10000; return x - Math.floor(x);
+    }
+    function programSeed(program, year){return Array.from(program).reduce((a,c)=>a+c.charCodeAt(0),0) + year*7;}
+    function niceNumber(n){
+      if (n >= 1e9) return (n/1e9).toFixed(2).replace(/\.00$/,'') + "B";
+      if (n >= 1e6) return (n/1e6).toFixed(2).replace(/\.00$/,'') + "M";
+      if (n >= 1e3) return (n/1e3).toFixed(1).replace(/\.0$/,'') + "k";
+      return String(n);
+    }
+
+    function computeData(program, year){
+      const seed = programSeed(program, year);
+      const regionData = regions.map((r, i)=>{
+        const s = seededRandom(seed + i*19);
+        const base = program==="Education"? 22000 : program==="Health"? 26000 : 18000;
+        const variance = (s*0.6 + 0.7);
+        const people = Math.round(base * variance + (year-2019)*1200 + (i*900));
+        const funds = Math.round(people * (program==="Health" ? 42 : program==="Education" ? 30 : 38));
+        return {region: r, people, funds};
+      });
+      const totals = regionData.reduce((acc, d)=>({people:acc.people+d.people, funds:acc.funds+d.funds}), {people:0, funds:0});
+      const communities = Math.max(12, Math.round(totals.people / 380));
+      const volunteers = Math.round(totals.people / (program==="Health"? 18 : 22));
+      const baseGoalPeople = program==="Education"? 90000 : program==="Health"? 110000 : 80000;
+      const goalPeople = Math.round(baseGoalPeople + (year-2019)*4500);
+      const goalFunds = Math.round(goalPeople * (program==="Health" ? 40 : program==="Education" ? 28 : 34));
+      return {
+        program, year, regionData, totals, communities, volunteers, goals: {people: goalPeople, funds: goalFunds}
+      };
+    }
+
+    // DOM references (preserve ids)
+    const kpiPeople = document.getElementById('kpiPeople');
+    const kpiCommunities = document.getElementById('kpiCommunities');
+    const kpiVolunteers = document.getElementById('kpiVolunteers');
+    const programSelect = document.getElementById('programSelect');
+    const yearRange = document.getElementById('yearRange');
+    const yearLabel = document.getElementById('yearLabel');
+    const yearMinus = document.getElementById('yearMinus');
+    const yearPlus = document.getElementById('yearPlus');
+    const metricTogglePeople = document.getElementById('metricTogglePeople');
+    const metricToggleFunds = document.getElementById('metricToggleFunds');
+    const barChart = document.getElementById('barChart');
+    const barTooltip = document.getElementById('barTooltip');
+    const donutArc = document.getElementById('donutArc');
+    const donutBig = document.getElementById('donutBig');
+    const donutSmall = document.getElementById('donutSmall');
+    const exploreBtn = document.getElementById('exploreImpactBtn');
+    const donateLink = document.getElementById('donateLink');
+    const backToTopBtn = document.getElementById('backToTopBtn');
+    const shareBtn = document.getElementById('shareBtn');
+    const pledgeSlider = document.getElementById('pledgeSlider');
+    const pledgeAmount = document.getElementById('pledgeAmount');
+    const pledgeImpact = document.getElementById('pledgeImpact');
+    const goalRaisedEl = document.getElementById('goalRaised');
+    const goalTotalEl = document.getElementById('goalTotal');
+    const goalBar = document.getElementById('goalProgressBar');
+    const yearNowEl = document.getElementById('yearNow');
+    const applyBtn = document.getElementById('applyBtn');
+    const applyStatus = document.getElementById('applyStatus');
+    const previewStatus = document.getElementById('previewStatus');
+    const prepareExportBtn = document.getElementById('prepareExport');
+    const downloadData = document.getElementById('downloadData');
+    const downloadStatus = document.getElementById('downloadStatus');
+    const activeSectionProxy = document.getElementById('activeSection');
+    const lastLinkClicked = document.getElementById('lastLinkClicked');
+
+    // Additional DOM
+    const donateHeaderBtn = document.getElementById('donateHeaderBtn');
+    const learnMoreBtn = document.getElementById('learnMoreBtn');
+    const heroGetInvolved = document.getElementById('heroGetInvolved');
+    const menuToggle = document.getElementById('menuToggle');
+    const mainNav = document.getElementById('mainNav');
+    const donateHeaderLink = document.getElementById('donateHeaderLink');
+    const donateFooterLink = document.getElementById('donateFooterLink');
+
+    // Stories
+    const slidesEl = document.getElementById('slides');
+    const dotsEl = document.getElementById('dots');
+    const prevStory = document.getElementById('prevStory');
+    const nextStory = document.getElementById('nextStory');
+    const storyProgramSelect = document.getElementById('storyProgramSelect');
+    const autoplayToggle = document.getElementById('autoplayToggle');
+    let autoplayTimer = null;
+    const carouselActiveState = document.getElementById('carouselActiveState');
+
+    // Pie chart refs
+    const pieChart = document.getElementById('pieChart');
+    const pieTooltip = document.getElementById('pieTooltip');
+    const pieLegend = document.getElementById('pieLegend');
+    const openMethodology2 = document.getElementById('openMethodology2');
+
+    // Modals
+    const methodologyLink = document.getElementById('methodologyLink');
+    const methodologyModal = document.getElementById('methodologyModal');
+    const methodologyClose = document.getElementById('methodologyClose');
+    const methodologyOk = document.getElementById('methodologyOk');
+
+    const storyModal = document.getElementById('storyModal');
+    const storyModalTitle = document.getElementById('storyModalTitle');
+    const storyModalContent = document.getElementById('storyModalContent');
+    const storyModalClose = document.getElementById('storyModalClose');
+    const storyModalOk = document.getElementById('storyModalOk');
+    const storyShareTwitter = document.getElementById('storyShareTwitter');
+    const storyCopyLink = document.getElementById('storyCopyLink');
+
+    // Range helpers
+    const pledgeMinus = document.getElementById('pledgeMinus');
+    const pledgePlus = document.getElementById('pledgePlus');
+
+    // Event listeners (preserve behaviors, add explicit apply)
+    programSelect.addEventListener('change', (e)=>{ state.program = e.target.value; renderAll(); });
+    yearRange.addEventListener('input', (e)=>{ state.year = +e.target.value; yearLabel.textContent = String(state.year); renderAll(); });
+    yearMinus.addEventListener('click', ()=>{ yearRange.value = Math.max(+yearRange.min, +yearRange.value - 1); yearRange.dispatchEvent(new Event('input')); });
+    yearPlus.addEventListener('click', ()=>{ yearRange.value = Math.min(+yearRange.max, +yearRange.value + 1); yearRange.dispatchEvent(new Event('input')); });
+
+    metricTogglePeople.addEventListener('click', ()=>{
+      state.metric = 'people';
+      metricTogglePeople.classList.add('active'); metricTogglePeople.setAttribute('aria-selected','true');
+      metricToggleFunds.classList.remove('active'); metricToggleFunds.setAttribute('aria-selected','false');
+      renderCharts();
+    });
+    metricToggleFunds.addEventListener('click', ()=>{
+      state.metric = 'funds';
+      metricToggleFunds.classList.add('active'); metricToggleFunds.setAttribute('aria-selected','true');
+      metricTogglePeople.classList.remove('active'); metricTogglePeople.setAttribute('aria-selected','false');
+      renderCharts();
+    });
+
+    applyBtn.addEventListener('click', ()=>{
+      renderAll();
+      applyStatus.textContent = 'done';
+      applyBtn.setAttribute('data-applied','true');
+      // Clear after a short synchronous acknowledgement (no timers for state change)
+      // We keep "done" visible; it's acceptable per proxy requirements
+    });
+    applyBtn.addEventListener('keydown', (e)=>{
+      if (e.key === 'Enter'){ e.preventDefault(); applyBtn.click(); }
+    });
+
+    exploreBtn.addEventListener('click', ()=>{ document.getElementById('impact').scrollIntoView({behavior:'smooth'}); setActiveSectionProxy('impact'); });
+    learnMoreBtn.addEventListener('click', ()=>{ document.getElementById('stories').scrollIntoView({behavior:'smooth'}); setActiveSectionProxy('stories'); });
+    donateHeaderBtn.addEventListener('click', ()=>{ document.getElementById('donate').scrollIntoView({behavior:'smooth'}); setActiveSectionProxy('donate'); });
+    heroGetInvolved.addEventListener('click', ()=>{ setActiveSectionProxy('donate'); });
+
+    window.addEventListener('scroll', ()=>{
+      const show = window.scrollY > 600;
+      backToTopBtn.classList.toggle('show', show);
+    });
+    backToTopBtn.addEventListener('click', ()=>window.scrollTo({top:0, behavior:'smooth'}));
+
+    donateLink.addEventListener('click', ()=> {
+      lastLinkClicked.textContent = 'Donate Now (main)';
+    });
+    donateHeaderLink.addEventListener('click', ()=> {
+      lastLinkClicked.textContent = 'Donate (Header external)';
+    });
+    donateFooterLink.addEventListener('click', ()=> {
+      lastLinkClicked.textContent = 'Donate (Footer external)';
+    });
+
+    shareBtn.addEventListener('click', async ()=>{
+      const shareData = {
+        title: 'Nonprofit Impact Report',
+        text: 'See the measurable results of our programs.',
+        url: location.href
+      };
+      try{
+        if (navigator.share) {
+          await navigator.share(shareData);
+        } else {
+          await navigator.clipboard.writeText(location.href);
+        }
+        shareBtn.textContent = "Link copied!";
+      }catch(e){
+        shareBtn.textContent = "Copy failed";
+      }
+    });
+
+    pledgeSlider.addEventListener('input', ()=>{
+      const val = +pledgeSlider.value;
+      pledgeAmount.textContent = `$${val}`;
+      updatePledgeImpact(val);
+    });
+    pledgeMinus.addEventListener('click', ()=>{
+      const val = Math.max(+pledgeSlider.min, +pledgeSlider.value - +pledgeSlider.step);
+      pledgeSlider.value = String(val); pledgeSlider.dispatchEvent(new Event('input'));
+    });
+    pledgePlus.addEventListener('click', ()=>{
+      const val = Math.min(+pledgeSlider.max, +pledgeSlider.value + +pledgeSlider.step);
+      pledgeSlider.value = String(val); pledgeSlider.dispatchEvent(new Event('input'));
+    });
+
+    // KPI and Chart rendering (preserve APIs)
+    function countUp(el, to, duration=0){ // no animation per destylization; instantaneous
+      const formatCurrency = el.dataset && el.dataset.currency === "1";
+      el.textContent = formatCurrency ? "$" + niceNumber(to) : niceNumber(to);
+    }
+
+    function renderKPIs(data){
+      countUp(kpiPeople, data.totals.people);
+      countUp(kpiCommunities, data.communities);
+      countUp(kpiVolunteers, data.volunteers);
+    }
+
+    function renderBarChart(data){
+      const metric = state.metric;
+      const w = barChart.clientWidth || 560;
+      const h = 260;
+      const padding = {l:50, r:8, t:10, b:34};
+      const chartW = w - padding.l - padding.r;
+      const chartH = h - padding.t - padding.b;
+      barChart.setAttribute('viewBox', `0 0 ${w} ${h}`);
+      while (barChart.firstChild) barChart.removeChild(barChart.firstChild);
+
+      // baseline
+      const axis = document.createElementNS("http://www.w3.org/2000/svg","line");
+      axis.setAttribute("x1", padding.l); axis.setAttribute("y1", h - padding.b);
+      axis.setAttribute("x2", w - padding.r); axis.setAttribute("y2", h - padding.b);
+      axis.setAttribute("stroke", "#000"); axis.setAttribute("stroke-width", "1");
+      barChart.appendChild(axis);
+
+      const maxVal = Math.max(...data.regionData.map(d=>d[metric])) * 1.1;
+      const barW = chartW / data.regionData.length * 0.6;
+
+      data.regionData.forEach((d, i)=>{
+        const x = padding.l + (i+0.2) * (chartW / data.regionData.length);
+        const val = d[metric];
+        const barH = Math.max(2, val / maxVal * chartH);
+        const y = h - padding.b - barH;
+
+        const rect = document.createElementNS("http://www.w3.org/2000/svg","rect");
+        rect.setAttribute("x", x);
+        rect.setAttribute("y", y);
+        rect.setAttribute("width", barW);
+        rect.setAttribute("height", barH);
+        rect.setAttribute("fill", "#000");
+        rect.setAttribute("class","bar-interactive");
+        rect.setAttribute("tabindex","0");
+        rect.setAttribute("role","img");
+        rect.setAttribute("aria-label", `${d.region}: ${metric==='people'? d.people + ' people' : '$'+ niceNumber(d.funds)}`);
+        rect.addEventListener('mouseenter', (ev)=>showBarTooltip(ev, d));
+        rect.addEventListener('mousemove', (ev)=>moveTooltip(ev));
+        rect.addEventListener('mouseleave', hideTooltip);
+        rect.addEventListener('focus', (ev)=>showBarTooltip(ev, d));
+        rect.addEventListener('blur', hideTooltip);
+        rect.addEventListener('click', (ev)=>showBarTooltip(ev, d));
+        barChart.appendChild(rect);
+
+        const lbl = document.createElementNS("http://www.w3.org/2000/svg","text");
+        lbl.setAttribute("x", x + barW/2); lbl.setAttribute("y", h - padding.b + 20);
+        lbl.setAttribute("text-anchor","middle"); lbl.setAttribute("fill","#000");
+        lbl.setAttribute("font-size","12"); lbl.textContent = d.region;
+        barChart.appendChild(lbl);
+      });
+
+      // Update preview proxy
+      previewStatus.textContent = "ready";
+    }
+
+    function showBarTooltip(ev, d){
+      const metric = state.metric;
+      const valStr = metric==='people' ? `${niceNumber(d.people)} people` : `$${niceNumber(d.funds)}`;
+      barTooltip.innerHTML = `<strong>${d.region}</strong><br>${valStr}`;
+      const bounds = document.getElementById('barChartWrap').getBoundingClientRect();
+      const x = (ev.clientX || bounds.left + bounds.width/2);
+      const y = (ev.clientY || bounds.top + 10);
+      barTooltip.style.left = x + 'px';
+      barTooltip.style.top = y + 'px';
+      barTooltip.style.opacity = 1;
+      barTooltip.setAttribute('aria-hidden', 'false');
+    }
+    function moveTooltip(ev){
+      barTooltip.style.left = ev.clientX + 'px';
+      barTooltip.style.top = (ev.clientY - 10) + 'px';
+    }
+    function hideTooltip(){
+      barTooltip.style.opacity = 0;
+      barTooltip.setAttribute('aria-hidden', 'true');
+    }
+
+    function renderDonut(data){
+      const metric = state.metric;
+      const actual = metric==='people' ? data.totals.people : data.totals.funds;
+      const goal = metric==='people' ? data.goals.people : data.goals.funds;
+      const pct = Math.max(0, Math.min(1, actual / goal));
+      const r = 88;
+      const circ = 2 * Math.PI * r;
+      const dash = `${(circ * pct).toFixed(2)} ${(circ * (1-pct)).toFixed(2)}`;
+      donutArc.setAttribute('stroke-dasharray', dash);
+      donutBig.textContent = Math.round(pct*100) + "%";
+      donutSmall.textContent = metric==='people' ? "of people target" : "of funds target";
+    }
+
+    function renderCharts(){
+      const data = computeData(state.program, state.year);
+      renderBarChart(data);
+      renderDonut(data);
+      renderKPIs(data);
+    }
+
+    // Stories content (preserve story rendering API)
+    const stories = [
+      {
+        id:"books-broadband",
+        program:"Education",
+        title:"Books to Broadband",
+        excerpt:"In rural districts, we expanded a library into a digital hub.",
+        detail:"Through local partnerships, we trained student mentors and provided community Wi‑Fi access. Attendance rose 22% and graduation rates improved in two years."
+      },
+      {
+        id:"mobile-clinic",
+        program:"Health",
+        title:"Mobile Clinic, Lasting Trust",
+        excerpt:"A mobile clinic brought care to remote villages weekly.",
+        detail:"Over 18 months, nurses screened 5,000 residents and reduced treatable illnesses by 31%. Community health workers now manage follow‑ups locally."
+      },
+      {
+        id:"mangroves-protect",
+        program:"Environment",
+        title:"Mangroves that Protect",
+        excerpt:"Coastal families planted mangroves to shield their homes.",
+        detail:"With 40,000 seedlings and youth leadership, erosion slowed and fisheries rebounded. The project also created eco‑tourism jobs."
+      },
+      {
+        id:"stem-girls",
+        program:"Education",
+        title:"STEM for Girls",
+        excerpt:"A mentorship network for girls in STEM changed career paths.",
+        detail:"After 12 weekend bootcamps, participants reported greater confidence and 65% pursued advanced courses the next semester."
+      },
+      {
+        id:"clean-water",
+        program:"Health",
+        title:"Clean Water, Clear Futures",
+        excerpt:"Low‑cost filtration systems cut waterborne disease dramatically.",
+        detail:"Local technicians now maintain the filters, ensuring sustainability. School absenteeism dropped by 17% in the first term."
+      },
+      {
+        id:"waste-wages",
+        program:"Environment",
+        title:"Turning Waste into Wages",
+        excerpt:"Community composting reduced landfill waste and created income.",
+        detail:"Farmers buy nutrient‑rich compost at affordable prices while households earn credits for sorted waste."
+      }
+    ];
+
+    function getFilteredStories(){
+      const sel = storyProgramSelect.value;
+      return sel==="All" ? stories : stories.filter(s=>s.program===sel);
+    }
+    function renderStories(){
+      const list = getFilteredStories();
+      slidesEl.innerHTML = "";
+      dotsEl.innerHTML = "";
+      list.forEach((s, idx)=>{
+        const slide = document.createElement('article');
+        slide.className='slide';
+        slide.setAttribute('role','group');
+        slide.setAttribute('aria-roledescription','slide');
+        slide.setAttribute('aria-label', `${s.title} (${s.program})`);
+
+        slide.innerHTML = `
+          <div class="thumb" aria-hidden="true"></div>
+          <div>
+            <span class="tag">${s.program}</span>
+            <h3>${s.title}</h3>
+            <p>${s.excerpt}</p>
+            <p class="more">${s.detail}</p>
+            <div class="story-actions">
+              <button class="read-more-btn" aria-label="Read more about ${s.title}">
+                <span class="chev">⌄</span> Read more
+              </button>
+              <button class="btn" aria-label="Open full story modal">Read full story</button>
+              <button class="btn" aria-label="Copy story link">Copy link</button>
+            </div>
+          </div>
+        `;
+
+        const [btnToggle, btnModal, btnCopy] = slide.querySelectorAll('button');
+        btnToggle.addEventListener('click', ()=>{
+          const expanded = slide.classList.toggle('expanded');
+          btnToggle.querySelector('.chev').style.transform = expanded ? 'rotate(180deg)' : 'rotate(0deg)';
+          btnToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+          btnToggle.lastChild.nodeValue = expanded ? ' Show less' : ' Read more';
+        });
+
+        btnModal.addEventListener('click', ()=>{
+          openStoryModal(s);
+        });
+
+        btnCopy.addEventListener('click', async ()=>{
+          const url = new URL(location.href);
+          url.hash = '#story-' + s.id;
+          try {
+            await navigator.clipboard.writeText(url.toString());
+            btnCopy.textContent = 'Link copied';
+          } catch(e){
+            btnCopy.textContent = 'Copy failed';
+          }
+        });
+
+        slidesEl.appendChild(slide);
+
+        const dot = document.createElement('button');
+        dot.className = 'dotbtn';
+        dot.setAttribute('aria-label', `Go to slide ${idx+1}`);
+        dot.addEventListener('click', ()=>goToSlide(idx));
+        dotsEl.appendChild(dot);
+      });
+      state.slideIndex = 0;
+      updateCarousel();
+    }
+    function updateCarousel(){
+      const count = slidesEl.children.length;
+      if (count === 0) return;
+      const idx = ((state.slideIndex % count) + count) % count;
+      state.slideIndex = idx;
+      slidesEl.style.transform = `translateX(-${idx*100}%)`;
+      Array.from(dotsEl.children

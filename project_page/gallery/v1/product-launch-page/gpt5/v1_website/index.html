@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Product Press Release — NovaBand</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Product Press Release for NovaBand — a next‑gen smart band with 10-day battery, health sensors, and LTE." />
+  <style>
+    /* Destylized, high-contrast, operator-friendly UI */
+    :root{
+      --bg: #ffffff;
+      --panel: #f2f2f2;
+      --panel-strong: #000000;
+      --text: #000000;
+      --muted: #333333;
+      --accent: #0a84ff; /* dynamic per color selection */
+      --accent-contrast: #000000;
+      --success: #137333;
+      --warn: #b25f00;
+      --danger: #b00020;
+      --radius: 0;   /* no rounded corners */
+      --radius-sm: 0;
+      --radius-lg: 0;
+      --maxw: 1200px;
+      --gap: 16px;
+      --line: 1px solid #000;
+      --focus: 2px solid #000;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background: var(--bg);
+      color:var(--text);
+      font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      color-scheme: light;
+      scroll-behavior:smooth;
+    }
+    a{color:#0047b3; text-decoration:underline}
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {outline: var(--focus); outline-offset: 2px}
+    .container{max-width: var(--maxw); margin-inline:auto; padding: 0 16px}
+    header{position:sticky; top:0; z-index: 30; background: #fff; border-bottom: var(--line)}
+    .nav{display:flex; align-items:center; justify-content:space-between; padding: 8px 0}
+    .brand{display:inline-flex; gap:8px; align-items:center; font-weight:700; letter-spacing:.2px; color: #000; text-decoration:none}
+    .brand-dot{width:16px; height:16px; background: var(--accent)}
+    nav.links{display:flex; gap:8px}
+    .cta-small{
+      display:inline-flex; align-items:center; justify-content:center;
+      min-height:44px; padding: 0 12px; background: #fff; border: var(--line); color:#000; text-decoration:none
+    }
+    .statusbar{
+      border-bottom: var(--line); background:#fff; color:#000; font-size:14px;
+    }
+    .statusbar .container{display:flex; gap:16px; padding: 8px 16px}
+    .status-item b{margin-right:6px}
+    /* Hero */
+    #top{position: absolute; top: 0}
+    .hero{display:grid; grid-template-columns: 1.1fr 0.9fr; align-items:start; gap:24px; padding: 16px 0 16px}
+    .eyebrow{display:inline-flex; align-items:center; gap:8px; font-size: 14px; color:var(--muted); background: #fff; border: var(--line); padding:6px 8px}
+    .eyebrow b{color:var(--text)}
+    h1{font-size: clamp(28px, 4vw, 40px); line-height:1.2; margin: 8px 0}
+    .sub{color: var(--muted); font-size: 16px; max-width: 70ch}
+    .hero-ctas{display:flex; gap:12px; margin-top:12px}
+    .btn{
+      --bgc: #fff; --txt: #000;
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      min-height: 44px; padding: 0 16px; border: var(--line); cursor:pointer;
+      background: #fff; color: #000; font-weight: 700; letter-spacing: .1px; text-decoration:none
+    }
+    .btn.secondary{
+      background: #fff; color: #000
+    }
+    .btn[aria-disabled="true"]{opacity:0.5; cursor:not-allowed}
+    .hero-art{position:relative; width:100%; height: 360px; display:grid; place-items:center; border: var(--line)}
+    .art-card{display:none}
+    .product-3d{
+      width: 86%; max-width: 520px;
+      transform-style: flat;
+    }
+    .art-controls{position:absolute; right:8px; bottom:8px; display:flex; gap:8px}
+    .chip{
+      background: #fff; border: var(--line); color:var(--text);
+      padding:8px; font-size: 14px; display:inline-flex; align-items:center; gap:8px; cursor:default;
+      min-height: 44px
+    }
+    .chip .dot{width:16px; height:16px; background: var(--accent)}
+    .divider{height:1px; background: #000; margin: 12px 0}
+    .ship{font-size: 14px; color: var(--muted)}
+    .ship strong{color: var(--text)}
+    /* Sections */
+    section{padding: 16px 0}
+    .section-title{font-size: 22px; margin: 4px 0 12px}
+    /* Specs */
+    .specs-grid{
+      display:grid; gap:12px; grid-template-columns: repeat(3, 1fr);
+    }
+    .card{
+      background: #fff;
+      border: var(--line);
+      padding:12px; display:flex; gap:12px; align-items:flex-start;
+      min-height: 44px
+    }
+    .icon{
+      width:44px; height:44px;
+      display:grid; place-items:center;
+      background: #fff;
+      border: var(--line);
+      color: var(--text);
+      flex: none;
+    }
+    .card h3{margin: 2px 0 4px; font-size: 16px}
+    .muted{color: var(--muted)}
+    .learn-more{
+      display:inline-flex; align-items:center; min-height: 44px; padding: 0 12px; margin-top:8px;
+      border: var(--line); background:#fff; color:#000; cursor:pointer
+    }
+    .spec-detail{border-top: var(--line); margin-top:8px; padding-top:8px; display:none}
+    .spec-detail[data-open="true"]{display:block}
+    .spec-accordion-controls{display:flex; gap:8px; margin: 8px 0}
+    /* Config + Preorder */
+    .preorder{
+      display:grid; grid-template-columns: 1.2fr 0.8fr; gap: 16px; align-items:start;
+    }
+    .panel{
+      background: #fff; border: var(--line); padding: 12px;
+    }
+    .option-row{display:flex; flex-wrap: wrap; gap:8px; margin-top:8px}
+    .swatch{width:44px; height:44px; border: var(--line); cursor:pointer; position:relative}
+    .swatch[data-selected="true"]{outline: var(--focus)}
+    .swatch input{position:absolute; inset:0; opacity:0; cursor:pointer}
+    .sizes,.connectivity{display:flex; gap:8px}
+    .radio-btn input{display:none}
+    .radio-btn{
+      border: var(--line); background: #fff;
+      padding: 10px 12px; cursor:pointer; user-select:none; min-height:44px; display:inline-flex; align-items:center
+    }
+    .radio-btn[data-selected="true"]{background: #e6f0ff; border-color: #000}
+    .qty{display:flex; align-items:center; gap:12px; margin-top:10px}
+    .stepper{display:flex; align-items:center; border: var(--line)}
+    .stepper button{width:44px; height:44px; background:#fff; color:#000; border:0; border-right: var(--line); cursor:pointer}
+    .stepper button:last-child{border-right:0; border-left: var(--line)}
+    .stepper input{
+      width:72px; height:44px; background:#fff; color: #000; text-align:center; border:0; font-size:16px
+    }
+    .price{display:grid; grid-template-columns: 1fr auto; gap: 8px; align-items:center; margin-top: 6px}
+    .price .line{display:flex; justify-content:space-between; gap:8px; color:#000; font-size:14px}
+    .price-strong{font-size: 22px; font-weight: 800}
+    .banner{
+      background: #eef6ff; border: 1px dashed #000; padding:12px; color:#000; font-size:14px; display:flex; gap:10px; align-items:flex-start
+    }
+    .notice{color: var(--warn); font-weight:700}
+    /* Form */
+    .form-grid{display:grid; gap:8px; grid-template-columns: repeat(2, 1fr)}
+    .form-grid .full{grid-column: 1/-1}
+    label{font-size:14px; color: #000}
+    input[type="text"], input[type="email"], select, textarea{
+      width:100%; background:#fff; color: #000; border: var(--line);
+      padding: 12px; outline: none; min-height:44px; resize:vertical
+    }
+    .terms{display:flex; gap:8px; align-items:flex-start; font-size:14px; color:#000}
+    .error{color: var(--danger); font-size: 14px; margin-top:4px}
+    .help{font-size:14px; color:#000}
+    .hint{font-size: 12px; color:#000; margin-top: 6px}
+    /* Modal */
+    .modal-backdrop{position:fixed; inset:0; background: rgba(0,0,0,0.2); display:none; align-items:center; justify-content:center; z-index: 40}
+    .modal{background: #fff; border: var(--line); max-width: 640px; width: calc(100% - 28px); padding: 12px}
+    .modal h3{margin: 0 0 10px}
+    .modal .actions{display:flex; gap:8px; justify-content:flex-end; margin-top: 14px}
+    .modal .summary{font-size:14px; color:#000}
+    .toast{
+      position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: #000;
+      border: 1px solid #000; color: #fff; min-height:44px; display:flex; align-items:center; padding: 12px 16px; display:none; z-index:50
+    }
+    footer{padding: 16px 0 24px; color: #000; font-size: 14px; border-top: var(--line); background:#fff}
+    footer a{color: #0047b3; text-decoration: underline}
+    /* FAQ */
+    .faq{border-top: var(--line)}
+    .faq-item{border-bottom: var(--line); padding: 8px 0}
+    .faq-q{display:flex; justify-content:space-between; align-items:center}
+    .faq-btn{
+      display:inline-flex; align-items:center; min-height:44px; padding: 0 12px; border: var(--line); background:#fff; color:#000; cursor:pointer
+    }
+    .faq-a{display:none; padding-top:8px}
+    .faq-a[data-open="true"]{display:block}
+    /* Press */
+    .press-logos{display:flex; gap:16px; flex-wrap:wrap}
+    .press-logos a{
+      display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:0 12px; border: var(--line); background:#fff; color:#000; text-decoration:none
+    }
+    /* Responsive */
+    @media (max-width: 980px){
+      .hero{grid-template-columns: 1fr; gap: 8px}
+      .hero-art{height: 300px}
+      .preorder{grid-template-columns: 1fr}
+      .specs-grid{grid-template-columns: 1fr 1fr}
+    }
+    @media (max-width: 600px){
+      .form-grid{grid-template-columns: 1fr}
+      .specs-grid{grid-template-columns: 1fr}
+      .hero-ctas{flex-direction: column; align-items: stretch}
+    }
+    /* Visually-hidden utility */
+    .visually-hidden{position:absolute !important; top:auto !important; width:1px !important; height:1px !important; overflow:hidden !important; clip: rect(1px, 1px, 1px, 1px) !important; white-space:nowrap !important; clip-path: inset(50%) !important; border:0 !important; padding:0 !important; margin:-1px !important}
+  </style>
+</head>
+<body>
+  <div id="top" aria-hidden="true"></div>
+  <header>
+    <div class="container nav">
+      <a href="#top" id="nav-home" class="brand" aria-label="Product Press Release">
+        <span class="brand-dot" aria-hidden="true"></span>
+        <span>NovaBand</span>
+      </a>
+      <nav class="links" aria-label="Primary">
+        <a href="#specs" class="cta-small" id="specs-btn">Specs</a>
+        <a href="#preorder" class="cta-small" id="pre-order-btn">Pre-order</a>
+        <a href="#contact" class="cta-small" id="contact-btn">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="statusbar" aria-live="polite">
+    <div class="container">
+      <div class="status-item" id="activeSectionWrap"><b>Active section:</b> <span id="activeSection">Home</span></div>
+      <div class="status-item"><b>Preview:</b> <span id="previewStatus">idle</span></div>
+      <div class="status-item"><b>Review button:</b> <span id="reviewBtnState">enabled</span></div>
+      <div class="status-item"><b>Submit:</b> <span id="submitStatus">idle</span></div>
+      <div class="status-item"><b>Last external link:</b> <span id="lastLinkClicked">none</span></div>
+    </div>
+  </div>
+
+  <main id="main">
+    <section class="container hero" aria-labelledby="hero-title">
+      <div>
+        <span class="eyebrow"><b>New</b> • Product Press Release</span>
+        <h1 id="hero-title">Meet NovaBand — power at your pulse</h1>
+        <p class="sub">A featherweight smart band with 10-day battery, precision health sensors, and LTE freedom. Designed to disappear. Built to perform.</p>
+        <div class="hero-ctas">
+          <a href="#preorder" class="btn" id="cta-preorder" aria-label="Jump to pre-order form">Pre-order now</a>
+          <button class="btn secondary" id="toggle-rotate" aria-pressed="false">View 360</button>
+        </div>
+        <div class="divider" aria-hidden="true"></div>
+        <div class="ship">
+          Launch window: <strong>October 2025</strong> • Pre-order discount automatically applied at checkout.
+        </div>
+      </div>
+      <div class="hero-art" id="hero-art" role="region" aria-label="Product preview area">
+        <div class="art-card" aria-hidden="true"></div>
+        <!-- Inline SVG smartwatch visual -->
+        <svg class="product-3d" id="product-visual" viewBox="0 0 400 520" role="img" aria-label="NovaBand product rendering">
+          <defs>
+            <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="0" dy="0" stdDeviation="0" flood-color="#000" flood-opacity="0"/>
+            </filter>
+            <linearGradient id="screenGrad" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="#121826"/>
+              <stop offset="100%" stop-color="#0a0e18"/>
+            </linearGradient>
+            <linearGradient id="gloss" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="rgba(255,255,255,0)"/>
+              <stop offset="40%" stop-color="rgba(255,255,255,0)"/>
+              <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+            </linearGradient>
+          </defs>
+          <!-- Band -->
+          <g filter="url(#shadow)">
+            <rect x="150" y="30" width="100" height="460" rx="0" fill="var(--accent)" opacity="0.75"/>
+            <rect x="150" y="30" width="100" height="180" rx="0" fill="var(--accent)" />
+            <rect x="150" y="310" width="100" height="180" rx="0" fill="var(--accent)" />
+          </g>
+          <!-- Case -->
+          <g filter="url(#shadow)">
+            <rect x="80" y="120" width="240" height="280" rx="0" fill="#121826" stroke="rgba(255,255,255,0.08)" stroke-width="0"/>
+            <rect x="90" y="130" width="220" height="260" rx="0" fill="url(#screenGrad)" />
+            <!-- Screen content -->
+            <g transform="translate(120,160)">
+              <rect x="6" y="6" width="148" height="148" fill="#0c111b"></rect>
+              <circle cx="80" cy="80" r="70" fill="none" stroke="var(--accent)" stroke-width="8" stroke-dasharray="18 14" opacity=".9"/>
+              <text x="80" y="88" text-anchor="middle" fill="#e8ebf1" font-size="28" font-weight="700" font-family="system-ui">72</text>
+              <text x="80" y="112" text-anchor="middle" fill="#a6afc3" font-size="12" font-family="system-ui">BPM</text>
+            </g>
+            <!-- Button -->
+            <rect x="318" y="210" width="12" height="100" rx="0" fill="var(--accent)"/>
+          </g>
+          <!-- Bottom shadow ellipse -->
+          <ellipse cx="200" cy="500" rx="120" ry="1" fill="#000" opacity=".10"/>
+        </svg>
+        <div class="art-controls">
+          <label class="chip" title="Current color">
+            <span class="dot" aria-hidden="true"></span> Accent
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="container" id="specs" aria-labelledby="specs-title">
+      <h2 class="section-title" id="specs-title">Specs that matter</h2>
+      <div class="spec-accordion-controls">
+        <button class="btn" id="full-specs-toggle" aria-expanded="false" aria-controls="specs">Expand all</button>
+        <span class="hint" id="specsDetailStatus">details: closed</span>
+      </div>
+      <div class="specs-grid">
+        <article class="card" id="spec-battery">
+          <div class="icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 8v5l4 2" /></svg>
+          </div>
+          <div>
+            <h3>10-day Battery</h3>
+            <p class="muted">Efficient chipset and adaptive refresh for power that lasts. 60-minute fast charge to 80%.</p>
+            <button class="learn-more" id="learn-battery" aria-expanded="false" aria-controls="detail-battery">Learn more</button>
+            <div class="spec-detail" id="detail-battery" data-open="false">
+              Real-world endurance varies by usage. Continuous heart-rate monitoring and AOD will impact longevity. Our new adaptive scheduler optimizes background tasks to maximize uptime without compromising responsiveness.
+            </div>
+          </div>
+        </article>
+        <article class="card" id="spec-health">
+          <div class="icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3a9 9 0 1 0 0 18a9 9 0 0 0 0-18m0 2a7 7 0 1 1 0 14a7 7 0 0 1 0-14m0 3a4 4 0 0 0-4 4h2a2 2 0 1 1 2 2v3h2v-3a4 4 0 0 0-2-7" /></svg>
+          </div>
+          <div>
+            <h3>Health Suite</h3>
+            <p class="muted">Heart rate, SpO₂, skin temp, and sleep stages with on-device insights.</p>
+            <button class="learn-more" id="learn-health" aria-expanded="false" aria-controls="detail-health">Learn more</button>
+            <div class="spec-detail" id="detail-health" data-open="false">
+              NovaBand is not a medical device. Metrics are intended for general wellness. Sleep staging uses multi-sensor fusion to estimate REM, light, and deep sleep durations. Historical trends are viewable offline.
+            </div>
+          </div>
+        </article>
+        <article class="card" id="spec-water">
+          <div class="icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2L3 6v6c0 5 3.8 9.7 9 10c5.2-.3 9-5 9-10V6z"/></svg>
+          </div>
+          <div>
+            <h3>50m Water Resistant</h3>
+            <p class="muted">Swim-proof with auto workout detection and lap tracking.</p>
+            <button class="learn-more" id="learn-water" aria-expanded="false" aria-controls="detail-water">Learn more</button>
+            <div class="spec-detail" id="detail-water" data-open="false">
+              Rated 5 ATM under ISO 22810:2010. Suitable for swimming in pools and shallow waters. Not suitable for scuba, high-velocity water, or hot showers/saunas.
+            </div>
+          </div>
+        </article>
+        <article class="card" id="spec-display">
+          <div class="icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5h18v14H3zM5 7v10h14V7z"/></svg>
+          </div>
+          <div>
+            <h3>Always-On Display</h3>
+            <p class="muted">1.9" AMOLED, sapphire glass, 2000 nits peak brightness.</p>
+            <button class="learn-more" id="learn-display" aria-expanded="false" aria-controls="detail-display">Learn more</button>
+            <div class="spec-detail" id="detail-display" data-open="false">
+              AOD refresh intelligently scales down to conserve power while keeping time and key complications visible. Sapphire glass adds scratch resistance for daily wear.
+            </div>
+          </div>
+        </article>
+        <article class="card" id="spec-gps">
+          <div class="icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 20a8 8 0 1 1 8-8a8 8 0 0 1-8 8m1-13v5l4 2"/></svg>
+          </div>
+          <div>
+            <h3>Multi‑band GPS</h3>
+            <p class="muted">Dual-frequency GNSS for accurate routes under dense canopies.</p>
+            <button class="learn-more" id="learn-gps" aria-expanded="false" aria-controls="detail-gps">Learn more</button>
+            <div class="spec-detail" id="detail-gps" data-open="false">
+              Supports L1/L5 where available for better lock in urban and wooded environments. Offline route breadcrumbs help you find your way back without a phone.
+            </div>
+          </div>
+        </article>
+        <article class="card" id="spec-nfc">
+          <div class="icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 6h16v12H4zM8 18v2h8v-2"/></svg>
+          </div>
+          <div>
+            <h3>NFC Pay</h3>
+            <p class="muted">Leave the wallet. Tap to pay with secure on‑device tokenization.</p>
+            <button class="learn-more" id="learn-nfc" aria-expanded="false" aria-controls="detail-nfc">Learn more</button>
+            <div class="spec-detail" id="detail-nfc" data-open="false">
+              Payment provisioning is supported in select regions. A PIN can be required every time or after removal detection for added security.
+            </div>
+          </div>
+        </article>
+        <article class="card" id="spec-compat">
+          <div class="icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M2 6h20v12H2zM4 8v8h16V8z"/></svg>
+          </div>
+          <div>
+            <h3>Compatibility</h3>
+            <p class="muted">Works with iOS and Android. Bluetooth 5.3 for reliable pairing.</p>
+            <button class="learn-more" id="learn-compat" aria-expanded="false" aria-controls="detail-compat">Learn more</button>
+            <div class="spec-detail" id="detail-compat" data-open="false">
+              Requires iOS 15+ or Android 10+. Companion app enables deeper insights, firmware updates, and downloadable watch faces.
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="container" id="preorder" aria-labelledby="pre-title">
+      <h2 class="section-title" id="pre-title">Pre-order NovaBand</h2>
+      <div class="preorder">
+        <!-- Configuration Panel -->
+        <aside class="panel" aria-label="Configure your NovaBand">
+          <div class="banner" role="note">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M13 13h-2V7h2m0 10h-2v-2h2M1 21h22L12 2"/></svg>
+            Pre-order saves 10% off MSRP. Limited quantities for select colors.
+          </div>
+
+          <div class="divider"></div>
+
+          <div>
+            <h3>Choose color</h3>
+            <div class="option-row" role="radiogroup" aria-label="Band color">
+              <label class="swatch" style="background:#0f1324" title="Midnight" data-color="#0a84ff" id="color-midnight" data-selected="true">
+                <input type="radio" name="color" value="midnight" checked aria-labelledby="color-midnight-label">
+              </label>
+              <span id="color-midnight-label" class="visually-hidden">Midnight</span>
+
+              <label class="swatch" style="background:#e7e7e7" title="Stone" data-color="#4f6b88" id="color-stone">
+                <input type="radio" name="color" value="stone" aria-labelledby="color-stone-label">
+              </label>
+              <span id="color-stone-label" class="visually-hidden">Stone</span>
+
+              <label class="swatch" style="background:#ff7a59" title="Sunset" data-color="#ff7a59" id="color-sunset">
+                <input type="radio" name="color" value="sunset" aria-labelledby="color-sunset-label">
+              </label>
+              <span id="color-sunset-label" class="visually-hidden">Sunset</span>
+
+              <label class="swatch" style="background:#00c2a8" title="Lagoon" data-color="#00c2a8" id="color-lagoon">
+                <input type="radio" name="color" value="lagoon" aria-labelledby="color-lagoon-label">
+              </label>
+              <span id="color-lagoon-label" class="visually-hidden">Lagoon</span>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div>
+            <h3>Case size</h3>
+            <div class="sizes" role="radiogroup" aria-label="Case size">
+              <label class="radio-btn" id="size-40" data-selected="true">
+                <input type="radio" name="size" value="40" checked> 40 mm
+              </label>
+              <label class="radio-btn" id="size-44">
+                <input type="radio" name="size" value="44"> 44 mm (+$30)
+              </label>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div>
+            <h3>Connectivity</h3>
+            <div class="connectivity" role="radiogroup" aria-label="Connectivity">
+              <label class="radio-btn" id="conn-gps" data-selected="true">
+                <input type="radio" name="conn" value="gps" checked> GPS
+              </label>
+              <label class="radio-btn" id="conn-lte">
+                <input type="radio" name="conn" value="lte"> GPS + LTE (+$80)
+              </label>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="qty">
+            <div>
+              <h3>Quantity</h3>
+              <p class="muted" id="qty-announce" aria-live="polite"></p>
+            </div>
+            <div class="stepper" role="group" aria-label="Quantity stepper">
+              <button id="qty-minus" aria-label="Decrease quantity">−</button>
+              <input id="qty" type="number" min="1" max="10" value="1" aria-label="Quantity">
+              <button id="qty-plus" aria-label="Increase quantity">+</button>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="price" aria-live="polite">
+            <div class="line"><span>Base</span><span id="price-base">$299</span></div>
+            <div class="line"><span>Options</span><span id="price-options">$0</span></div>
+            <div class="line"><span>Pre-order discount</span><span id="price-discount" class="notice">−$0</span></div>
+            <div class="line"><span>Qty</span><span id="price-qty">×1</span></div>
+            <div class="line"><span>Subtotal</span><span id="price-sub">$299</span></div>
+            <div class="divider"></div>
+            <strong>Total</strong>
+            <div class="price-strong" id="price-total">$299</div>
+          </div>
+
+          <div class="divider"></div>
+
+          <p class="ship">Estimated ship: <strong id="ship-estimate">2–3 weeks</strong> • <span id="stock-note">In stock</span></p>
+        </aside>
+
+        <!-- Pre-order Form -->
+        <form class="panel" id="preorder-form" aria-label="Pre-order form" novalidate>
+          <h3>Secure your NovaBand</h3>
+          <div class="hint">Keyboard: Press Enter to review your order.</div>
+          <div class="form-grid">
+            <div>
+              <label for="fname">First name</label>
+              <input id="fname" type="text" placeholder="Ada" required>
+              <div class="error" id="err-fname" role="alert" aria-live="polite" hidden>First name is required.</div>
+            </div>
+            <div>
+              <label for="lname">Last name</label>
+              <input id="lname" type="text" placeholder="Lovelace" required>
+              <div class="error" id="err-lname" role="alert" aria-live="polite" hidden>Last name is required.</div>
+            </div>
+            <div class="full">
+              <label for="email">Email</label>
+              <input id="email" type="email" placeholder="you@example.com" required>
+              <div class="error" id="err-email" role="alert" aria-live="polite" hidden>Enter a valid email address.</div>
+            </div>
+            <div>
+              <label for="country">Country/Region</label>
+              <select id="country" required>
+                <option value="">Select…</option>
+                <option>United States</option>
+                <option>Canada</option>
+                <option>United Kingdom</option>
+                <option>Germany</option>
+                <option>Australia</option>
+                <option>Japan</option>
+              </select>
+              <div class="error" id="err-country" role="alert" aria-live="polite" hidden>Country/Region is required.</div>
+            </div>
+            <div>
+              <label for="postal">Postal code</label>
+              <input id="postal" type="text" placeholder="10001" required>
+              <div class="error" id="err-postal" role="alert" aria-live="polite" hidden>Postal code is required.</div>
+            </div>
+            <div class="full">
+              <label for="notes">Order notes (optional)</label>
+              <textarea id="notes" rows="3" placeholder="Delivery instructions or gift note (will be included in confirmation)"></textarea>
+              <div class="hint">HTML is sanitized and displayed as plain text.</div>
+            </div>
+            <div class="full terms">
+              <input id="agree" type="checkbox" aria-describedby="agree-help">
+              <label for="agree">I agree to the pre-order terms and acknowledge that estimated ship dates may change.</label>
+            </div>
+            <div class="full">
+              <div class="error" id="err-agree" role="alert" aria-live="polite" hidden>You must agree to the pre-order terms to continue.</div>
+              <div class="help" id="agree-help">We’ll send a confirmation to your email. You can cancel anytime before shipment.</div>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="hint">Status: <span id="formStatus" aria-live="polite">idle</span></div>
+          <button type="submit" class="btn" id="preorder-btn" aria-disabled="false">Review and place order</button>
+          <div class="divider"></div>
+          <div class="help" id="confirmationMessage" aria-live="polite"></div>
+        </form>
+      </div>
+    </section>
+
+    <section class="container" id="press" aria-labelledby="press-title">
+      <h2 class="section-title" id="press-title">As seen in</h2>
+      <div class="press-logos">
+        <a href="https://example.com/techradar" target="_blank" rel="noopener noreferrer" id="press-link-1">TechRadar review</a>
+        <a href="https://example.com/theverge" target="_blank" rel="noopener noreferrer" id="press-link-2">The Verge coverage</a>
+        <a href="https://example.com/wired" target="_blank" rel="noopener noreferrer" id="press-link-3">WIRED first look</a>
+      </div>
+    </section>
+
+    <section class="container faq" id="faq" aria-labelledby="faq-title">
+      <h2 class="section-title" id="faq-title">FAQ</h2>
+      <article class="faq-item">
+        <div class="faq-q">
+          <h3>Is NovaBand truly water resistant to 50m?</h3>
+          <button class="faq-btn" id="faq-btn-water" aria-expanded="false" aria-controls="faq-a-water">Toggle</button>
+        </div>
+        <div class="faq-a" id="faq-a-water" data-open="false">
+          Yes, it is rated 5 ATM. It’s suitable for pool swimming and shallow water activities. Avoid scuba diving, hot showers, or saunas.
+        </div>
+      </article>
+      <article class="faq-item">
+        <div class="faq-q">
+          <h3>Does NovaBand work with my phone?</h3>
+          <button class="faq-btn" id="faq-btn-compat" aria-expanded="false" aria-controls="faq-a-compat">Toggle</button>
+        </div>
+        <div class="faq-a" id="faq-a-compat" data-open="false">
+          NovaBand supports iOS 15+ and Android 10+. Install the companion app for setup, insights, and updates.
+        </div>
+      </article>
+      <article class="faq-item">
+        <div class="faq-q">
+          <h3>What’s included in the box?</h3>
+          <button class="faq-btn" id="faq-btn-box" aria-expanded="false" aria-controls="faq-a-box">Toggle</button>
+        </div>
+        <div class="faq-a" id="faq-a-box" data-open="false">
+          NovaBand, charging cable, quick start guide, and two strap sizes for the perfect fit.
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="modal-backdrop" aria-hidden="true" aria-labelledby="modal-title" role="dialog">
+    <div class="modal" role="document">
+      <h3 id="modal-title">Review your order</h3>
+      <div class="summary" id="order-summary"></div>
+      <div class="actions">
+        <button class="btn secondary" id="modal-cancel">Cancel</button>
+        <button class="btn" id="modal-confirm">Place order</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">Order placed. Check your email for confirmation.</div>
+
+  <footer class="container" id="contact">
+    <div class="divider" aria-hidden="true"></div>
+    <p>Press contact: <a id="pressEmail" href="mailto:press@novaband.example">press@novaband.example</a> • Product images and media kit available on request.</p>
+    <p>
+      © 2025 NovaBand. All rights reserved.
+      <a href="https://example.com/privacy" target="_blank" id="privacyLink" rel="noopener noreferrer">Privacy</a> •
+      <a href="https://example.com/terms" target="_blank" id="termsLink" rel="noopener noreferrer">Terms</a>
+    </p>
+    <p><a href="#top" id="backToTop">Back to top</a></p>
+  </footer>
+
+  <script>
+    // State and Config
+    const state = {
+      color: 'midnight',
+      colorMap: {
+        midnight: {accent:'#0a84ff', ship:'2–3 weeks', stock:'In stock'},
+        stone: {accent:'#4f6b88', ship:'3–4 weeks', stock:'Limited'},
+        sunset: {accent:'#ff7a59', ship:'4–5 weeks', stock:'Backorder'},
+        lagoon: {accent:'#00c2a8', ship:'2 weeks', stock:'In stock'}
+      },
+      size: 40,
+      conn: 'gps',
+      qty: 1,
+      pricing: {
+        base: 299,
+        size44: 30,
+        lte: 80,
+        preorderDiscount: 0.10
+      }
+    };
+
+    // Utilities
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+    function formatUSD(n){ return '$' + n.toFixed(2).replace(/\.00$/,''); }
+    function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+    function persist(){
+      localStorage.setItem('novaband-config', JSON.stringify({
+        color: state.color, size: state.size, conn: state.conn, qty: state.qty
+      }));
+    }
+    function restore(){
+      try{
+        const saved = JSON.parse(localStorage.getItem('novaband-config') || '{}');
+        if(saved.color && state.colorMap[saved.color]) state.color = saved.color;
+        if(saved.size) state.size = Number(saved.size);
+        if(saved.conn) state.conn = saved.conn;
+        if(saved.qty) state.qty = clamp(Number(saved.qty), 1, 10);
+      }catch(e){}
+    }
+    function sanitize(str){
+      return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+    }
+    function setActiveSection(label){
+      const el = $('#activeSection');
+      if(el) el.textContent = label;
+    }
+
+    // Initialization
+    document.addEventListener('DOMContentLoaded', () => {
+      restore();
+      bindNav();
+      bindColorControls();
+      bindSizeConnectivity();
+      bindQty();
+      bindRotateToggle();
+      bindForm();
+      bindSpecDetails();
+      bindFAQ();
+      bindExternalLinks();
+      applyStateToUI();
+      announceQty();
+      setupHashFocusOnLoad();
+      updatePreviewStatus('ready');
+      updateReviewBtnProxy();
+    });
+
+    // Navigation and section tracking
+    function bindNav(){
+      const navMap = new Map([
+        ['#nav-home', 'Home'],
+        ['#specs-btn', 'Specs'],
+        ['#pre-order-btn', 'Pre-order'],
+        ['#contact-btn', 'Contact'],
+        ['#backToTop', 'Home'],
+        ['#cta-preorder', 'Pre-order']
+      ]);
+      navMap.forEach((label, id) => {
+        const el = $(id);
+        if(el){
+          el.addEventListener('click', () => {
+            setActiveSection(label);
+            // If navigating to preorder, also focus first field after scroll
+            if(el.getAttribute('href') === '#preorder' || id === '#cta-preorder' || id === '#pre-order-btn'){
+              requestAnimationFrame(() => {
+                setTimeout(() => { const f = $('#fname'); if(f){ f.focus(); } }, 50);
+              });
+            }
+          });
+        }
+      });
+    }
+
+    // Color selection
+    function bindColorControls(){
+      const swatches = $$('.swatch');
+      swatches.forEach(s => {
+        const input = s.querySelector('input');
+        if(input){
+          input.addEventListener('change', () => {
+            swatches.forEach(x => x.dataset.selected='false');
+            s.dataset.selected = 'true';
+            const value = input.value;
+            state.color = value;
+            updateAccent(state.colorMap[value].accent);
+            updateShipping();
+            persist();
+          });
+        }
+        s.addEventListener('click', () => {
+          const i = s.querySelector('input');
+          i.checked = true;
+          i.dispatchEvent(new Event('change'));
+        });
+      });
+      const sel = $('#color-' + state.color);
+      if(sel){ sel.dataset.selected = 'true'; sel.querySelector('input').checked = true; }
+      updateAccent(state.colorMap[state.color].accent);
+      updateShipping();
+    }
+
+    function updateAccent(color){
+      document.documentElement.style.setProperty('--accent', color);
+      const dot = document.querySelector('.art-controls .dot');
+      if(dot) dot.style.backgroundColor = color;
+    }
+
+    // Size & connectivity
+    function bindSizeConnectivity(){
+      // Size
+      const sizeLabels = [$('#size-40'), $('#size-44')];
+      sizeLabels.forEach(lbl => {
+        lbl.addEventListener('click', () => {
+          sizeLabels.forEach(x => x.dataset.selected='false');
+          lbl.dataset.selected = 'true';
+          const val = Number(lbl.querySelector('input').value);
+          state.size = val;
+          updatePrice();
+          persist();
+        });
+      });
+      // Connectivity
+      const connLabels = [$('#conn-gps'), $('#conn-lte')];
+      connLabels.forEach(lbl => {
+        lbl.addEventListener('click', () => {
+          connLabels.forEach(x => x.dataset.selected='false');
+          lbl.dataset.selected = 'true';
+          const val = lbl.querySelector('input').value;
+          state.conn = val;
+          updatePrice();
+          persist();
+        });
+      });
+      // Restore selected states
+      $('#size-40').dataset.selected = String(state.size === 40);
+      $('#size-44').dataset.selected = String(state.size === 44);
+      const sizeSel = $('#size-' + state.size + ' input');
+      if(sizeSel) sizeSel.checked = true;
+      $('#conn-gps').dataset.selected = String(state.conn === 'gps');
+      $('#conn-lte').dataset.selected = String(state.conn === 'lte');
+      const connSel = $('#conn-' + state.conn + ' input');
+      if(connSel) connSel.checked = true;
+      updatePrice();
+    }
+
+    // Quantity
+    function bindQty(){
+      const input = $('#qty');
+      const minus = $('#qty-minus');
+      const plus = $('#qty-plus');
+      input.value = state.qty;
+      input.addEventListener('input', () => {
+        const v = clamp(Number(input.value || 1), 1, 10);
+        input.value = v;
+        state.qty = v;
+        announceQty();
+        updatePrice();
+        persist();
+      });
+      input.addEventListener('keydown', (e) => {
+        if(e.key === 'ArrowUp' || e.key === '+'){ e.preventDefault(); plus.click(); }
+        if(e.key === 'ArrowDown' || e.key === '-'){ e.preventDefault(); minus.click(); }
+      });
+      minus.addEventListener('click', () => {
+        state.qty = clamp(state.qty - 1, 1, 10);
+        input.value = state.qty;
+        announceQty();
+        updatePrice();
+        persist();
+      });
+      plus.addEventListener('click', () => {
+        state.qty = clamp(state.qty + 1, 1, 10);
+        input.value = state.qty;
+        announceQty();
+        updatePrice();
+        persist();
+      });
+    }
+    function announceQty(){
+      $('#qty-announce').textContent = 'Quantity: ' + state.qty;
+      $('#price-qty').textContent = '×' + state.qty;
+    }
+
+    // Price calculation
+    function calcPrice(){
+      const {base, size44, lte, preorderDiscount} = state.pricing;
+      let options = 0;
+      if(state.size === 44) options += size44;
+      if(state.conn === 'lte') options += lte;
+      const unit = base + options;
+      const discount = unit * preorderDiscount;
+      const unitAfter = unit - discount;
+      const subtotal = unitAfter * state.qty;
+      return { base, options, discount, unit, unitAfter, subtotal };
+    }
+
+    function updatePrice(){
+      const p = calcPrice();
+      $('#price-base').textContent = formatUSD(state.pricing.base);
+      $('#price-options').textContent = formatUSD(p.options);
+      $('#price-discount').textContent = '−' + formatUSD(p.discount);
+      $('#price-sub').textContent = formatUSD(p.unitAfter);
+      $('#price-total').textContent = formatUSD(p.subtotal);
+    }
+
+    // Shipping estimate
+    function updateShipping(){
+      const info = state.colorMap[state.color];
+      $('#ship-estimate').textContent = info.ship;
+      const note = $('#stock-note');
+      note.textContent = info.stock;
+      note.style.color = info.stock === 'Backorder' ? 'var(--danger)' : (info.stock === 'Limited' ? 'var(--warn)' : 'var(--success)');
+    }
+
+    // Apply restored state to UI
+    function applyStateToUI(){
+      updatePrice();
+      updateShipping();
+    }
+
+    // Rotate toggle / preview status
+    function bindRotateToggle(){
+      const btn = $('#toggle-rotate');
+      const art = $('#hero-art');
+      btn.addEventListener('click', () => {
+        const active = art.classList.toggle('rotating');
+        btn.setAttribute('aria-pressed', String(active));
+        btn.textContent = active ? 'Pause 360' : 'View 360';
+        updatePreviewStatus(active ? '360-on' : 'ready');
+      });
+    }
+    function updatePreviewStatus(s){
+      const st = $('#previewStatus');
+      if(st) st.textContent = s;
+    }
+
+    // Spec details toggles
+    function bindSpecDetails(){
+      const pairs = [
+        ['#learn-battery', '#detail-battery'],
+        ['#learn-health', '#detail-health'],
+        ['#learn-water', '#detail-water'],
+        ['#learn-display', '#detail-display'],
+        ['#learn-gps', '#detail-gps'],
+        ['#learn-nfc', '#detail-nfc'],
+        ['#learn-compat', '#detail-compat']
+      ];
+      pairs.forEach(([btnSel, panelSel]) => {
+        const btn = $(btnSel);
+        const panel = $(panelSel);
+        if(btn && panel){
+          btn.addEventListener('click', () => {
+            const isOpen = panel.getAttribute('data-open') === 'true';
+            panel.setAttribute('data-open', String(!isOpen));
+            btn.setAttribute('aria-expanded', String(!isOpen));
+            updateSpecsDetailStatus();
+          });
+        }
+      });
+      const allToggle = $('#full-specs-toggle');
+      if(allToggle){
+        allToggle.addEventListener('click', () => {
+          const allPanels = $$('.spec-detail');
+          const anyClosed = allPanels.some(p => p.getAttribute('data-open') !== 'true');
+          allPanels.forEach(p => p.setAttribute('data-open', String(anyClosed)));
+          pairs.forEach(([btnSel]) => {
+            const b = $(btnSel);
+            if(b) b.setAttribute('aria-expanded', String(anyClosed));
+          });
+          allToggle.textContent = anyClosed ? 'Collapse all' : 'Expand all';
+          allToggle.setAttribute('aria-expanded', String(anyClosed));
+          updateSpecsDetailStatus();
+        });
+      }
+      updateSpecsDetailStatus();
+    }
+    function updateSpecsDetailStatus(){
+      const panels = $$('.spec-detail');
+      const openCount = panels.filter(p => p.getAttribute('data-open') === 'true').length;
+      const st = $('#specsDetailStatus');
+      if(st) st.textContent = openCount > 0 ? 'details: open' : 'details: closed';
+    }
+
+    // Form handling
+    function bindForm(){
+      const form = $('#preorder-form');
+      const modal = $('#modal-backdrop');
+      const summary = $('#order-summary');
+      const cancel = $('#modal-cancel');
+      const confirm = $('#modal-confirm');
+      const preorderBtn = $('#preorder-btn');
+
+      function openModal(){
+        // Build summary
+        const p = calcPrice();
+        const notes = sanitize(($('#notes')?.value || '').trim());
+        const name = sanitize(($('#fname')?.value || '').trim() + ' ' + ($('#lname')?.value || '').trim());
+        summary.innerHTML = `
+          <div style="display:grid; gap:8px">
+            <div><strong>Customer</strong>: ${name.trim() ||

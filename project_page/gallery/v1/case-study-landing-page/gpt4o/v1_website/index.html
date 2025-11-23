@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Case Study - XYZ Corp</title>
+  <style>
+    /* General Reset */
+    body, h1, h2, p, button, a {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      background-color: #ffffff;
+      color: #000000;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #cccccc;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      color: #0073e6;
+    }
+
+    header p {
+      font-size: 1rem;
+      color: #555555;
+      margin-top: 10px;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+      background: #f5f5f5;
+      padding: 10px;
+      border: 1px solid #cccccc;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: #0073e6;
+      margin: 0 10px;
+      font-weight: bold;
+    }
+
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    .section {
+      margin-bottom: 20px;
+    }
+
+    .section h2 {
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+      color: #444;
+    }
+
+    .section p {
+      margin-bottom: 10px;
+    }
+
+    .metrics {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+
+    .metric {
+      background: #0073e6;
+      color: #ffffff;
+      border-radius: 5px;
+      padding: 10px;
+      text-align: center;
+      flex: 1;
+      margin: 0 5px;
+    }
+
+    .metric h3 {
+      font-size: 1.2rem;
+    }
+
+    .testimonial {
+      font-style: italic;
+      background: #f1f1f1;
+      padding: 15px;
+      border-left: 4px solid #0073e6;
+      border-radius: 5px;
+    }
+
+    .testimonial span {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+      color: #0073e6;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    footer button {
+      background: #0073e6;
+      color: #ffffff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    footer button:hover {
+      background: #005bb5;
+    }
+
+    @media (max-width: 768px) {
+      .metrics {
+        flex-direction: column;
+      }
+
+      .metric {
+        margin: 5px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Customer Case Study - XYZ Corp</h1>
+      <p>Your trusted partner in efficiency and growth</p>
+    </header>
+
+    <nav>
+      <a href="#problem-solution">Problem</a>
+      <a href="#solution">Solution</a>
+      <a href="#metrics">Metrics</a>
+      <a href="#testimonial">Testimonial</a>
+    </nav>
+
+    <div class="section" id="problem-solution">
+      <h2>Problem & Solution</h2>
+      <p><strong>Problem:</strong> XYZ Corp struggled with inefficient workflows and high operational costs due to outdated software.</p>
+      <p><strong>Solution:</strong> Our SaaS platform streamlined their processes, reduced costs, and improved team collaboration.</p>
+    </div>
+
+    <div class="section" id="metrics">
+      <h2>Key Metrics</h2>
+      <div class="metrics">
+        <div class="metric" id="metric-time-saved">
+          <h3>30%</h3>
+          <p>Time Saved</p>
+        </div>
+        <div class="metric" id="metric-cost-reduction">
+          <h3>40%</h3>
+          <p>Cost Reduction</p>
+        </div>
+        <div class="metric" id="metric-productivity">
+          <h3>50%</h3>
+          <p>Productivity Boost</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="testimonial">
+      <h2>Testimonial</h2>
+      <blockquote class="testimonial">
+        "Thanks to this SaaS platform, our team is more efficient than ever. We've saved time, reduced costs, and achieved unprecedented productivity."
+        <span>- Jane Doe, CEO of XYZ Corp</span>
+      </blockquote>
+      <button id="read-more-testimonial">Read Full Testimonial</button>
+    </div>
+
+    <footer>
+      <button id="learn-more-btn">Learn More</button>
+    </footer>
+  </div>
+
+  <script>
+    // JavaScript for interactivity
+    document.getElementById('learn-more-btn').addEventListener('click', function() {
+      alert('Thank you for your interest! Visit our website for more details.');
+    });
+
+    document.getElementById('read-more-testimonial').addEventListener('click', function() {
+      alert('Full testimonial: "Thanks to this SaaS platform, our team is more efficient than ever. We\'ve saved time, reduced costs, and achieved unprecedented productivity. This was a game-changer for our company!"');
+    });
+
+    // Smooth scroll for navigation
+    document.querySelectorAll('nav a').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        target.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+  </script>
+</body>
+</html>

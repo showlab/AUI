@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asteroid Game</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #000;
+      color: #fff;
+      text-align: center;
+    }
+
+    canvas {
+      display: block;
+      margin: 20px auto;
+      border: 2px solid #fff;
+    }
+
+    #menu, #game-over, #header {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: none;
+    }
+
+    #menu.active, #game-over.active {
+      display: block;
+    }
+
+    #menu button, #game-over button {
+      display: block;
+      margin: 10px auto;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #fff;
+      color: #000;
+      border: none;
+    }
+
+    #menu button:hover, #game-over button:hover {
+      background-color: #ccc;
+    }
+
+    #header {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      padding: 10px 20px;
+      box-sizing: border-box;
+    }
+
+    #header span {
+      font-size: 20px;
+    }
+
+    #pause-overlay {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      font-size: 32px;
+      text-align: center;
+      line-height: 100vh;
+    }
+
+    #pause-overlay.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div id="menu" class="active">
+    <h1>2D Space Game</h1>
+    <p>Choose Difficulty:</p>
+    <button id="easy">Easy</button>
+    <button id="normal">Normal</button>
+    <button id="hard">Hard</button>
+  </div>
+
+  <div id="header">
+    <span id="score">Score: 0</span>
+    <span id="timer">Time: 0s</span>
+  </div>
+
+  <canvas id="gameCanvas" width="1280" height="720"></canvas>
+
+  <div id="game-over">
+    <h2>Game Over!</h2>
+    <p>Your Score: <span id="final-score">0</span></p>
+    <button id="restart">Play Again</button>
+  </div>
+
+  <div id="pause-overlay">
+    <p>Game Paused</p>
+    <p>Press P to Resume</p>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const menu = document.getElementById('menu');
+    const gameOverScreen = document.getElementById('game-over');
+    const header = document.getElementById('header');
+    const pauseOverlay = document.getElementById('pause-overlay');
+    const scoreDisplay = document.getElementById('score');
+    const timerDisplay = document.getElementById('timer');
+    const finalScoreDisplay = document.getElementById('final-score');
+    const restartButton = document.getElementById('restart');
+
+    let gameInterval;
+    let paused = false;
+    let gameOver = false;
+    let score = 0;
+    let time = 0;
+    let difficulty = 'normal';
+    let asteroids = [];
+    let bullets = [];
+    let aiShips = [];
+    let ship = { x: canvas.width / 2, y: canvas.height / 2, angle: 0, speed: 0 };
+
+    const DIFFICULTY_SETTINGS = {
+      easy: { asteroidCount: 3, aiShipCount: 1 },
+      normal: { asteroidCount: 5, aiShipCount: 2 },
+      hard: { asteroidCount: 7, aiShipCount: 3 },
+    };
+
+    function initGame() {
+      asteroids = [];
+      bullets = [];
+      aiShips = [];
+      ship = { x: canvas.width / 2, y: canvas.height / 2, angle: 0, speed: 0 };
+      score = 0;
+      time = 0;
+      gameOver = false;
+
+      // Create asteroids and AI ships based on difficulty
+      const settings = DIFFICULTY_SETTINGS[difficulty];
+      for (let i = 0; i < settings.asteroidCount; i++) {
+        asteroids.push(createAsteroid());
+      }
+      for (let i = 0; i < settings.aiShipCount; i++) {
+        aiShips.push(createAIShip());
+      }
+
+      header.style.display = 'flex';
+      menu.classList.remove('active');
+      gameOverScreen.classList.remove('active');
+      pauseOverlay.classList.remove('active');
+      updateScore();
+      updateTimer();
+      startGameLoop();
+    }
+
+    function createAsteroid() {
+      return {
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * 30 + 20,
+        dx: Math.random() * 2 - 1,
+        dy: Math.random() * 2 - 1,
+      };
+    }
+
+    function createAIShip() {
+      return {
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        angle: Math.random() * 360,
+        speed: 2,
+      };
+    }
+
+    function startGameLoop() {
+      gameInterval = setInterval(() => {
+        if (!paused) {
+          updateGame();
+          drawGame();
+          time += 1;
+          updateTimer();
+        }
+      }, 1000 / 60); // 60 FPS
+    }
+
+    function stopGameLoop() {
+      clearInterval(gameInterval);
+    }
+
+    function updateGame() {
+      // Update ship position
+      ship.x += Math.cos(toRadians(ship.angle)) * ship.speed;
+      ship.y += Math.sin(toRadians(ship.angle)) * ship.speed;
+
+      // Wrap ship around screen edges
+      wrapAround(ship);
+
+      // Update bullets, asteroids, and AI ships
+      updateBullets();
+      updateAsteroids();
+      updateAIShips();
+
+      // Check for collisions
+      checkCollisions();
+    }
+
+    function drawGame() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw ship
+      drawShip();
+
+      // Draw bullets
+      bullets.forEach(drawBullet);
+
+      // Draw asteroids
+      asteroids.forEach(drawAsteroid);
+
+      // Draw AI ships
+      aiShips.forEach(drawAIShip);
+    }
+
+    function wrapAround(entity) {
+      if (entity.x > canvas.width) entity.x = 0;
+      if (entity.x < 0) entity.x = canvas.width;
+      if (entity.y > canvas.height) entity.y = 0;
+      if (entity.y < 0) entity.y = canvas.height;
+    }
+
+    function toRadians(degrees) {
+      return (degrees * Math.PI) / 180;
+    }
+
+    function drawShip() {
+      ctx.save();
+      ctx.translate(ship.x, ship.y);
+      ctx.rotate(toRadians(ship.angle));
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.moveTo(15, 0);
+      ctx.lineTo(-10, -10);
+      ctx.lineTo(-10, 10);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawBullet(bullet) {
+      ctx.fillStyle = '#ff0';
+      ctx.beginPath();
+      ctx.arc(bullet.x, bullet.y, 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawAsteroid(asteroid) {
+      ctx.fillStyle = '#888';
+      ctx.beginPath();
+      ctx.arc(asteroid.x, asteroid.y, asteroid.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawAIShip(aiShip) {
+      ctx.save();
+      ctx.translate(aiShip.x, aiShip.y);
+      ctx.rotate(toRadians(aiShip.angle));
+      ctx.fillStyle = '#f00';
+      ctx.beginPath();
+      ctx.moveTo(15, 0);
+      ctx.lineTo(-10, -10);
+      ctx.lineTo(-10, 10);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function updateBullets() {
+      bullets.forEach((bullet, index) => {
+        bullet.x += Math.cos(toRadians(bullet.angle)) * 5;
+        bullet.y += Math.sin(toRadians(bullet.angle)) * 5;
+
+        // Remove bullets that go off-screen
+        if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height) {
+          bullets.splice(index, 1);
+        }
+      });
+    }
+
+    function updateAsteroids() {
+      asteroids.forEach((asteroid) => {
+        asteroid.x += asteroid.dx;
+        asteroid.y += asteroid.dy;
+        wrapAround(asteroid);
+      });
+    }
+
+    function updateAIShips() {
+      aiShips.forEach((aiShip) => {
+        aiShip.x += Math.cos(toRadians(aiShip.angle)) * aiShip.speed;
+        aiShip.y += Math.sin(toRadians(aiShip.angle)) * aiShip.speed;
+        wrapAround(aiShip);
+      });
+    }
+
+    function checkCollisions() {
+      // Check collisions between bullets and asteroids
+      bullets.forEach((bullet, bulletIndex) => {
+        asteroids.forEach((asteroid, asteroidIndex) => {
+          const dist = Math.hypot(bullet.x - asteroid.x, bullet.y - asteroid.y);
+          if (dist < asteroid.size) {
+            bullets.splice(bulletIndex, 1);
+            asteroids.splice(asteroidIndex, 1);
+            score += 10;
+            updateScore();
+          }
+        });
+      });
+
+      // Check collisions between bullets and AI ships
+      bullets.forEach((bullet, bulletIndex) => {
+        aiShips.forEach((aiShip, aiShipIndex) => {
+          const dist = Math.hypot(bullet.x - aiShip.x, bullet.y - aiShip.y);
+          if (dist < 15) {
+            bullets.splice(bulletIndex, 1);
+            aiShips.splice(aiShipIndex, 1);
+            score += 50;
+            updateScore();
+          }
+        });
+      });
+
+      // Check collisions between ship and asteroids
+      asteroids.forEach((asteroid) => {
+        const dist = Math.hypot(ship.x - asteroid.x, ship.y - asteroid.y);
+        if (dist < asteroid.size) {
+          endGame();
+        }
+      });
+
+      // Check collisions between ship and AI ships
+      aiShips.forEach((aiShip) => {
+        const dist = Math.hypot(ship.x - aiShip.x, ship.y - aiShip.y);
+        if (dist < 15) {
+          endGame();
+        }
+      });
+
+      // Spawn new wave if no asteroids or AI ships remain
+      if (asteroids.length === 0 && aiShips.length === 0) {
+        spawnNewWave();
+      }
+    }
+
+    function spawnNewWave() {
+      const settings = DIFFICULTY_SETTINGS[difficulty];
+      for (let i = 0; i < settings.asteroidCount; i++) {
+        asteroids.push(createAsteroid());
+      }
+      for (let i = 0; i < settings.aiShipCount; i++) {
+        aiShips.push(createAIShip());
+      }
+    }
+
+    function updateScore() {
+      scoreDisplay.textContent = `Score: ${score}`;
+    }
+
+    function updateTimer() {
+      timerDisplay.textContent = `Time: ${time}s`;
+    }
+
+    function endGame() {
+      gameOver = true;
+      stopGameLoop();
+      header.style.display = 'none';
+      gameOverScreen.classList.add('active');
+      finalScoreDisplay.textContent = score;
+    }
+
+    function togglePause() {
+      paused = !paused;
+      pauseOverlay.classList.toggle('active', paused);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') ship.angle -= 5;
+      if (e.key === 'ArrowRight') ship.angle += 5;
+      if (e.key === 'ArrowUp') ship.speed = 3;
+      if (e.key === ' ') {
+        bullets.push({ x: ship.x, y: ship.y, angle: ship.angle });
+      }
+      if (e.key === 'p' || e.key === 'P') {
+        togglePause();
+      }
+    });
+
+    document.addEventListener('keyup', (e) => {
+      if (e.key === 'ArrowUp') ship.speed = 0;
+    });
+
+    document.getElementById('easy').addEventListener('click', () => {
+      difficulty = 'easy';
+      initGame();
+    });
+
+    document.getElementById('normal').addEventListener('click', () => {
+      difficulty = 'normal';
+      initGame();
+    });
+
+    document.getElementById('hard').addEventListener('click', () => {
+      difficulty = 'hard';
+      initGame();
+    });
+
+    restartButton.addEventListener('click', () => {
+      initGame();
+    });
+  </script>
+</body>
+</html>

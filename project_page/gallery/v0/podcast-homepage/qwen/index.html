@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Podcast Home Page</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #6b8cbc;
+            --accent-color: #ff6b6b;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --text-color: #212529;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            color: white;
+            animation: fadeIn 1s ease;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin: 30px 0;
+            box-shadow: var(--box-shadow);
+            animation: slideUp 0.8s ease;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            outline: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-button {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 0 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: var(--transition);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .search-button:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+        }
+
+        .episodes-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .episode-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .episode-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .episode-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid #eee;
+        }
+
+        .episode-content {
+            padding: 20px;
+        }
+
+        .episode-title {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: var(--dark-color);
+        }
+
+        .episode-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+        }
+
+        .episode-description {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .episode-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .subscribe-btn {
+            flex: 1;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .subscribe-btn:hover {
+            background: var(--secondary-color);
+            transform: scale(1.02);
+        }
+
+        .play-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .play-btn:hover {
+            background: #ff5252;
+            transform: scale(1.02);
+        }
+
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 50px;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 40px;
+            font-size: 0.9rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .episodes-container {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .search-button {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            header {
+                padding: 20px 0;
+            }
+            
+            header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .episode-content {
+                padding: 15px;
+            }
+            
+            .episode-title {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Podcast Home Page</h1>
+            <p>Your favorite episodes, all in one place</p>
+        </header>
+
+        <section class="search-container">
+            <div class="search-box">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search episodes..." aria-label="Search episodes">
+                <button id="searchButton" class="search-button">Search</button>
+            </div>
+        </section>
+
+        <main id="episodesContainer" class="episodes-container">
+            <!-- Episodes will be dynamically inserted here -->
+        </main>
+
+        <footer>
+            <p>© 2023 Podcast Home Page | All rights reserved</p>
+        </footer>
+    </div>
+
+    <script>
+        // Sample podcast data
+        const podcastEpisodes = [
+            {
+                id: 1,
+                title: "The Future of AI in Everyday Life",
+                description: "Exploring how artificial intelligence is transforming our daily routines and what to expect in the coming years.",
+                date: "2023-06-15",
+                duration: "45:22",
+                image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80"
+            },
+            {
+                id: 2,
+                title: "Building Sustainable Habits",
+                description: "Practical strategies for creating lasting positive changes in your lifestyle and environment.",
+                date: "2023-06-08",
+                duration: "38:45",
+                image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80"
+            },
+            {
+                id: 3,
+                title: "Remote Work Revolution",
+                description: "How remote work has changed the landscape of business and what it means for the future of employment.",
+                date: "2023-06-01",
+                duration: "52:18",
+                image: "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80"
+            },
+            {
+                id: 4,
+                title: "Mindfulness in the Digital Age",
+                description: "Finding balance between technology and mental well-being in our hyperconnected world.",
+                date: "2023-05-25",
+                duration: "41:33",
+                image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80"
+            },
+            {
+                id: 5,
+                title: "The Art of Storytelling",
+                description: "How narrative techniques shape our understanding of the world and influence human behavior.",
+                date: "2023-05-18",
+                duration: "36:57",
+                image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80"
+            },
+            {
+                id: 6,
+                title: "Climate Change Solutions",
+                description: "Innovative approaches to addressing environmental challenges and building sustainable communities.",
+                date: "2023-05-11",
+                duration: "48:12",
+                image: "https://images.unsplash.com/photo-1501854140801-50d01698950b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80"
+            }
+        ];
+
+        // DOM Elements
+        const episodesContainer = document.getElementById('episodesContainer');
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+
+        // Function to render episodes
+        function renderEpisodes(episodes) {
+            episodesContainer.innerHTML = '';
+            
+            if (episodes.length === 0) {
+                episodesContainer.innerHTML = `
+                    <div class="no-results">
+                        <p>No episodes found matching your search.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            episodes.forEach(episode => {
+                const episodeCard = document.createElement('article');
+                episodeCard.className = 'episode-card';
+                episodeCard.setAttribute('data-id', episode.id);
+                
+                episodeCard.innerHTML = `
+                    <img src="${episode.image}" alt="${episode.title}" class="episode-image">
+                    <div class="episode-content">
+                        <h2 class="episode-title">${episode.title}</h2>
+                        <div class="episode-meta">
+                            <span>${new Date(episode.date).toLocaleDateString()}</span>
+                            <span>${episode.duration}</span>
+                        </div>
+                        <p class="episode-description">${episode.description}</p>
+                        <div class="episode-actions">
+                            <button class="subscribe-btn" id="subscribe-${episode.id}">
+                                <span>Subscribe</span>
+                            </button>
+                            <button class="play-btn" id="play-${episode.id}">
+                                <span>Play</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                episodesContainer.appendChild(episodeCard);
+                
+                // Add event listeners to buttons
+                const subscribeBtn = document.getElementById(`subscribe-${episode.id}`);
+                const playBtn = document.getElementById(`play-${episode.id}`);
+                
+                subscribeBtn.addEventListener('click', () => {
+                    alert(`Subscribed to "${episode.title}"!`);
+                });
+                
+                playBtn.addEventListener('click', () => {
+                    alert(`Playing "${episode.title}"...`);
+                });
+            });
+        }
+
+        // Function to filter episodes based on search term
+        function filterEpisodes(searchTerm) {
+            if (!searchTerm.trim()) {
+                return podcastEpisodes;
+            }
+            
+            return podcastEpisodes.filter(episode => 
+                episode.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                episode.description.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+
+        // Event Listeners
+        searchButton.addEventListener('click', () => {
+            const searchTerm = searchInput.value;
+            const filteredEpisodes = filterEpisodes(searchTerm);
+            renderEpisodes(filteredEpisodes);
+        });
+
+        searchInput.addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') {
+                searchButton.click();
+            }
+        });
+
+        // Initial render
+        renderEpisodes(podcastEpisodes);
+
+        // Add some interactivity to the search input
+        searchInput.addEventListener('focus', () => {
+            searchInput.style.boxShadow = '0 0 0 3px rgba(74, 111, 165, 0.3)';
+        });
+
+        searchInput.addEventListener('blur', () => {
+            searchInput.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+        });
+    </script>
+</body>
+</html>

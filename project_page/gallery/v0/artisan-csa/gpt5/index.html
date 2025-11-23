@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8" />
+  <title>Artisan CSA — Hand-Drawn Farm Landing</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Artisan CSA — seasonal, hand-harvested produce with a watercolor, hand-drawn feel. Check your ZIP, choose a plan, and join the harvest." />
+  <style>
+    :root{
+      --paper:#f6f1e7;
+      --ink:#2f2a28;
+      --sage:#a3b18a;
+      --sky:#ccd5ae;
+      --mustard:#d4a373;
+      --clay:#cb997e;
+      --berry:#9c6644;
+      --cream:#fffaf2;
+      --shadow: 0 1px 0 rgba(0,0,0,.06), 0 8px 18px rgba(0,0,0,.08);
+      --radius:14px;
+    }
+    /* Paper texture background using layered gradients and a subtle grain mask */
+    html, body {
+      height: 100%;
+      background:
+        radial-gradient(2400px 1200px at 30% -10%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 45%),
+        radial-gradient(1600px 800px at 120% 10%, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 50%),
+        linear-gradient(180deg, #faf7f1 0%, #f3efe7 100%);
+      background-color: var(--paper);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    body {
+      margin: 0;
+      font-family: Georgia, 'Times New Roman', Times, serif;
+      line-height: 1.5;
+    }
+    /* Subtle grain overlay */
+    body::before{
+      content:"";
+      position: fixed;
+      inset:0;
+      pointer-events:none;
+      opacity: .25;
+      background-image: url('data:image/svg+xml;utf8,\
+      <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120">\
+        <filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/></filter>\
+        <rect width="100%" height="100%" filter="url(%23n)" opacity="0.04"/>\
+      </svg>');
+      background-size: 240px 240px;
+      mix-blend-mode: multiply;
+    }
+
+    a{ color: inherit; }
+    .wrap{
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(246,241,231,0.7);
+      backdrop-filter: blur(4px);
+      border-bottom: 1px dashed rgba(0,0,0,0.08);
+    }
+    .brand {
+      display:flex; align-items:center; gap:12px;
+    }
+    .brand h1{
+      font-size: 28px; margin:0; letter-spacing: .5px; color: var(--berry);
+    }
+    .brand small{ color: #6b5f5a; }
+    .nav{
+      display:flex; gap:18px; align-items:center;
+      font-size: 15px;
+    }
+    .nav a { text-decoration: none; padding: 6px 8px; border-radius: 8px; }
+    .nav a:focus { outline: 2px dashed var(--clay); outline-offset: 2px; }
+
+    .header-row{ display:flex; align-items:center; justify-content:space-between; }
+
+    /* Hero */
+    .hero{
+      display:grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 32px;
+      align-items:center;
+      padding: 32px 0 8px;
+      position: relative;
+    }
+    .hero h2{
+      font-size: 40px; margin: 0 0 8px; color: var(--berry); line-height:1.15;
+    }
+    .hero p.lead{
+      margin: 0 0 16px; font-size: 18px; color: #534a46;
+    }
+    .panel{
+      background: var(--cream);
+      border: 1px solid rgba(47,42,40,0.12);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .hero .panel{
+      padding: 16px;
+    }
+    .field{
+      display:flex; gap:8px; align-items: center; margin: 10px 0;
+    }
+    label{ font-weight: 600; }
+    input[type="text"], input[type="email"], textarea{
+      font: inherit; color: var(--ink);
+      border: 1px solid rgba(47,42,40,0.22);
+      border-radius: 10px; padding: 10px 12px; background: #fffdf9;
+    }
+    input[type="range"]{ width: 100%; }
+    button, .btn{
+      font: inherit; color: var(--ink);
+      border: 2px solid var(--ink);
+      background: linear-gradient(180deg, #fffaf2 0%, #fff4e6 100%);
+      padding: 10px 14px; border-radius: 999px; cursor: pointer;
+      box-shadow: 1px 1px 0 0 var(--ink), 0 10px 16px rgba(0,0,0,.08);
+      transition: transform .06s ease, box-shadow .2s ease;
+    }
+    button:hover, .btn:hover{ transform: translateY(-1px); }
+    button:active, .btn:active{ transform: translateY(1px); }
+    button:focus-visible, .btn:focus-visible{ outline: 2px dashed var(--clay); outline-offset: 2px; }
+    .btn-primary{
+      background: linear-gradient(180deg, #ffe8c7 0%, #ffd7a4 100%);
+      border-color: #5d4530; color: #3f2b1a;
+    }
+    .subtle{ color:#6b5f5a; font-size: 14px; }
+    .status{
+      margin-top: 8px; min-height: 22px; font-weight:600;
+    }
+    .status.ok{ color: #2e6b3d; }
+    .status.no{ color: #8a2f2f; }
+
+    .hero-art{
+      position: relative; height: 380px;
+    }
+    .parallax{
+      will-change: transform;
+      transition: transform .2s ease-out;
+    }
+
+    /* Seasons grid */
+    .section{
+      padding: 28px 0;
+    }
+    .section h3{
+      font-size: 28px; margin: 0 0 8px; color: var(--berry);
+    }
+    .muted{ color: #6b5f5a; margin-top: 0; }
+    .grid{
+      display:grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    }
+    .season-card{
+      position: relative; overflow: hidden; cursor: default;
+      padding: 12px; border-radius: var(--radius);
+      border: 1px solid rgba(47,42,40,0.12);
+      background: #fffaf3;
+      box-shadow: var(--shadow);
+    }
+    .season-card h4{ margin: 8px 0 4px; }
+    .season-ink{
+      height: 120px; display: block; width: 100%;
+    }
+    .tooltip{
+      position: absolute; left: 10px; right: 10px; bottom: 10px;
+      background: rgba(255,255,255,0.94); border: 1px dashed rgba(47,42,40,0.35);
+      border-radius: 10px; padding: 8px 10px; opacity: 0; transform: translateY(8px);
+      transition: opacity .2s ease, transform .2s ease;
+      pointer-events: none;
+      box-shadow: 0 8px 14px rgba(0,0,0,.08);
+    }
+    .season-card:focus-within .tooltip,
+    .season-card:hover .tooltip{ opacity: 1; transform: translateY(0); }
+    .season-card button{
+      position:absolute; inset:0; opacity:0; border:0; background: transparent;
+    }
+    .icons{ display:flex; gap:8px; margin-top:6px; }
+    .badge{
+      display:inline-flex; align-items:center; gap:6px;
+      background: #fff; border:1px dashed rgba(47,42,40,0.25);
+      border-radius: 999px; padding: 4px 8px; font-size: 12px;
+    }
+
+    /* Plans */
+    .plans{
+      display:grid; grid-template-columns: 1.05fr 1fr; gap: 20px; align-items: stretch;
+    }
+    .plan-panel{ padding: 16px; }
+    .flex{ display:flex; align-items:center; justify-content:space-between; gap: 12px; }
+    .toggles{ display:flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+    .toggle{
+      display:flex; align-items:center; gap:8px; padding: 8px 12px; border-radius: 999px;
+      background: #fff8ee; border: 1px solid rgba(47,42,40,0.18);
+    }
+    .price{
+      font-size: 30px; font-weight: 700; color: #294b2f;
+    }
+    .breakdown{ font-size: 14px; color: #574d47; }
+
+    /* Map */
+    .map-wrap{
+      display:grid; grid-template-columns: 1.2fr .8fr; gap: 16px;
+    }
+    .pickup-list{
+      display:flex; flex-direction:column; gap: 8px;
+    }
+    .pickup{
+      display:flex; align-items:center; justify-content:space-between; gap: 10px;
+      padding: 10px 12px; background: #fffaf3; border: 1px solid rgba(47,42,40,0.12);
+      border-radius: 12px;
+    }
+
+    /* Testimonials */
+    .carousel{
+      position: relative; overflow: hidden;
+      border-radius: var(--radius); border: 1px solid rgba(47,42,40,0.12);
+      background:#fffaf3; box-shadow: var(--shadow);
+    }
+    .track{
+      display:flex; transition: transform .4s cubic-bezier(.22,.61,.36,1);
+      will-change: transform;
+    }
+    .card{
+      min-width: 100%;
+      padding: 16px;
+      box-sizing: border-box;
+      display:grid; grid-template-columns: 140px 1fr; gap: 16px; align-items:center;
+    }
+    .portrait{
+      width: 140px; height: 140px; border-radius: 50%; overflow:hidden; background: #fff;
+      border: 2px solid var(--ink);
+      box-shadow: inset 0 0 0 6px #fff, 0 6px 14px rgba(0,0,0,.08);
+    }
+    .carousel-controls{
+      position:absolute; inset: auto 8px 8px 8px; display:flex; align-items:center; justify-content: space-between;
+    }
+    .dotbar{ display:flex; gap: 6px; justify-content:center; padding: 8px; }
+    .dot{
+      width: 10px; height:10px; border-radius:50%;
+      border:1px solid var(--ink); background: #fff; opacity:.5;
+    }
+    .dot.active{ opacity:1; background: var(--mustard); }
+
+    /* FAQ + Contact */
+    .accordion{ display:grid; gap: 8px; }
+    .accordion-item{
+      border-radius: 12px; overflow:hidden; background: #fffaf3;
+      border: 1px solid rgba(47,42,40,0.12);
+    }
+    .accordion button{
+      width:100%; text-align:left; padding: 12px 14px; background: #fffaf3; border:0; border-bottom:1px dashed rgba(47,42,40,0.15);
+      display:flex; align-items:center; justify-content:space-between; gap: 8px;
+    }
+    .accordion .content{
+      max-height: 0; overflow:hidden; transition: max-height .3s ease;
+      padding: 0 14px;
+    }
+    .accordion .content.open{
+      padding: 12px 14px;
+    }
+    .contact{
+      display:grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items:start;
+    }
+    .form{
+      padding: 16px;
+    }
+    .notice{
+      font-size: 13px; color: #5a524e;
+    }
+
+    /* Helpers */
+    .sr-only{
+      position:absolute!important; width:1px!important; height:1px!important; padding:0!important; margin:-1px!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; border:0!important;
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 1024px){
+      .hero{ grid-template-columns: 1fr; }
+      .plans{ grid-template-columns: 1fr; }
+      .map-wrap{ grid-template-columns: 1fr; }
+      .grid{ grid-template-columns: repeat(2, 1fr); }
+      .card{ grid-template-columns: 1fr; text-align:center; }
+      .portrait{ justify-self:center; }
+      header .nav{ display: none; }
+    }
+    @media (max-width: 600px){
+      .grid{ grid-template-columns: 1fr; }
+      .hero-art{ height: 300px; }
+    }
+  </style>
+</head>
+<body>
+  <a class="sr-only" href="#main">Skip to content</a>
+  <header>
+    <div class="wrap header-row">
+      <div class="brand" aria-label="Artisan CSA brand">
+        <svg aria-hidden="true" width="36" height="36" viewBox="0 0 64 64">
+          <defs>
+            <filter id="ink-blur" x="-20%" y="-20%" width="140%" height="140%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" result="n"/>
+              <feColorMatrix in="n" type="saturate" values="0"/>
+              <feBlend in="SourceGraphic" in2="n" mode="multiply" />
+            </filter>
+          </defs>
+          <g fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="url(#ink-blur)">
+            <path d="M8 40c6-2 12-2 18 0s12 2 18 0 12-2 12-2" />
+            <path d="M16 36s6-18 16-18 16 18 16 18" />
+            <path d="M20 40v8m24-8v8" />
+          </g>
+        </svg>
+        <div>
+          <h1>Artisan CSA</h1>
+          <small>Hand-harvested. Neighbor-grown.</small>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Primary">
+        <a href="#seasons">Seasons</a>
+        <a href="#plans">Plans</a>
+        <a href="#map">Delivery</a>
+        <a href="#testimonials">Voices</a>
+        <a href="#faq">FAQ</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap" role="main">
+    <!-- Hero -->
+    <section class="hero" aria-labelledby="heroTitle">
+      <div class="hero-copy">
+        <h2 id="heroTitle">Join the harvest, season by season</h2>
+        <p class="lead">A community-supported agriculture share with small-batch, hand-picked produce and add-ons from nearby makers. Watercolor-washed, soil-kissed.</p>
+
+        <div class="panel" aria-labelledby="zipLabel">
+          <div class="field">
+            <label id="zipLabel" for="zipInput">Enter your ZIP to check delivery</label>
+          </div>
+          <div class="field">
+            <input id="zipInput" type="text" inputmode="numeric" pattern="[0-9]*" aria-describedby="zipHelp" placeholder="e.g., 94607" maxlength="5" />
+            <button id="zipCheckBtn" class="btn" aria-controls="zipResult">Check ZIP</button>
+          </div>
+          <div id="zipHelp" class="subtle">We currently deliver to much of the Bay Area (ZIPs starting with 94 and 95).</div>
+          <div id="zipResult" class="status" aria-live="polite"></div>
+          <div class="field" style="margin-top:12px">
+            <button id="joinCtaBtn" class="btn btn-primary" aria-label="Join the harvest sign-up">Join the harvest</button>
+          </div>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <!-- Leafy doodles for parallax -->
+        <svg class="parallax" id="leafDoodle1" viewBox="0 0 200 200" width="180" height="180" style="position:absolute; right: -10px; top: -20px; opacity:.5">
+          <g fill="none" stroke="var(--sage)" stroke-width="1.8">
+            <path d="M20 150c30-40 80-70 120-90M40 140c20-30 60-50 90-65M60 130c16-22 44-38 68-48" />
+            <circle cx="158" cy="58" r="18" fill="rgba(204,213,174,.35)" stroke="var(--sky)"/>
+          </g>
+        </svg>
+
+        <!-- Seasonal basket ink-style SVG -->
+        <svg id="heroIllustration" class="parallax" viewBox="0 0 520 340" width="100%" height="100%" role="img" aria-label="Hand-drawn basket of seasonal produce with watercolor wash">
+          <defs>
+            <linearGradient id="wash1" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ffe8c7" stop-opacity=".9"/>
+              <stop offset="100%" stop-color="#ffd7a4" stop-opacity=".6"/>
+            </linearGradient>
+            <linearGradient id="wash2" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#ccd5ae" stop-opacity=".9"/>
+              <stop offset="100%" stop-color="#a3b18a" stop-opacity=".6"/>
+            </linearGradient>
+            <filter id="ink-feather">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="0.4" />
+            </filter>
+          </defs>
+          <rect x="0" y="0" width="520" height="340" fill="none"/>
+          <!-- Watercolor splash -->
+          <ellipse cx="260" cy="220" rx="220" ry="110" fill="url(#wash1)" opacity=".55"></ellipse>
+          <ellipse cx="220" cy="130" rx="120" ry="70" fill="url(#wash2)" opacity=".45"></ellipse>
+          <!-- Basket -->
+          <g fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" filter="url(#ink-feather)">
+            <path d="M90 220h340c0 60-60 80-170 80S90 280 90 220z" fill="none"/>
+            <path d="M120 230h280M110 250h300M120 270h280" />
+            <path d="M170 220c0-60 40-100 90-100s90 40 90 100" />
+            <!-- produce -->
+            <path d="M200 190c-10-20 20-50 40-30 10 10 6 30-8 34-12 4-20 2-32-4z" fill="none"/>
+            <path d="M300 170c10-16 40-8 40 10s-20 24-34 16-18-16-6-26z" fill="none"/>
+            <path d="M250 150c0-18 28-26 40-8 8 12-2 28-16 26-12-2-16-6-24-18z" fill="none"/>
+          </g>
+        </svg>
+
+        <svg class="parallax" id="leafDoodle2" viewBox="0 0 200 200" width="160" height="160" style="position:absolute; left: -14px; bottom: -20px; opacity:.55">
+          <g fill="none" stroke="var(--clay)" stroke-width="1.6">
+            <path d="M150 30c-16 40-50 90-110 130"/>
+            <path d="M120 40c-12 30-38 64-82 100"/>
+            <circle cx="40" cy="150" r="16" fill="rgba(203,153,126,.28)" stroke="var(--clay)"/>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <!-- Seasons -->
+    <section id="seasons" class="section" aria-labelledby="seasonsTitle">
+      <h3 id="seasonsTitle">What’s in season</h3>
+      <p class="muted">Hover or focus a season to preview typical produce. Icons note potential allergens in add-ons.</p>
+      <div class="grid">
+        <article id="seasonSpring" class="season-card panel">
+          <h4>Spring</h4>
+          <svg class="season-ink" viewBox="0 0 220 120" aria-hidden="true">
+            <g fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 80c20-30 40-40 60-40s40 10 60 40" />
+              <path d="M40 84c4-10 14-18 24-24M80 84c4-10 14-18 24-24" />
+              <circle cx="120" cy="50" r="10" fill="rgba(163,177,138,.35)" stroke="var(--sage)"/>
+            </g>
+          </svg>
+          <button aria-describedby="tooltipSpring">Spring details</button>
+          <div id="tooltipSpring" class="tooltip" role="tooltip">
+            - Asparagus, sugar snap peas, radishes, baby lettuces, strawberries
+            <div class="icons">
+              <span class="badge" aria-label="Dairy in some add-ons">
+                <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="var(--ink)" d="M7 5h10M9 5c0 3-2 3-2 6v6a4 4 0 0 0 4 4h2a4 4 0 0 0 4-4v-6c0-3-2-3-2-6"/></svg>
+                dairy
+              </span>
+            </div>
+          </div>
+        </article>
+
+        <article id="seasonSummer" class="season-card panel">
+          <h4>Summer</h4>
+          <svg class="season-ink" viewBox="0 0 220 120" aria-hidden="true">
+            <g fill="none" stroke="var(--ink)" stroke-width="2">
+              <path d="M20 90c30 0 30-30 60-30s30 30 60 30" />
+              <circle cx="60" cy="60" r="14" />
+              <path d="M60 46v-8M46 60h-8M60 74v8M74 60h8" />
+              <circle cx="140" cy="70" r="12" fill="rgba(212,163,115,.35)" stroke="var(--mustard)"/>
+            </g>
+          </svg>
+          <button aria-describedby="tooltipSummer">Summer details</button>
+          <div id="tooltipSummer" class="tooltip" role="tooltip">
+            - Tomatoes, cucumbers, basil, peaches, sweet corn
+            <div class="icons">
+              <span class="badge" aria-label="Gluten in some breads">
+                <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="var(--ink)" d="M4 16c0-6 4-10 8-10s8 4 8 10H4z"/></svg>
+                gluten
+              </span>
+            </div>
+          </div>
+        </article>
+
+        <article id="seasonFall" class="season-card panel">
+          <h4>Fall</h4>
+          <svg class="season-ink" viewBox="0 0 220 120" aria-hidden="true">
+            <g fill="none" stroke="var(--ink)" stroke-width="2">
+              <path d="M30 80c20-20 50-30 80-20 30 10 50 10 70 0" />
+              <path d="M80 80c-6-10-6-20 0-30M120 84c6-10 6-20 0-30" />
+              <path d="M54 86c8-8 16-8 24 0M146 86c8-8 16-8 24 0" />
+            </g>
+          </svg>
+          <button aria-describedby="tooltipFall">Fall details</button>
+          <div id="tooltipFall" class="tooltip" role="tooltip">
+            - Delicata squash, apples, kale, purple carrots, mushrooms
+            <div class="icons">
+              <span class="badge" aria-label="Nuts in some granola">
+                <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="var(--ink)" d="M6 14c0-4 2-6 6-6s6 2 6 6-2 6-6 6-6-2-6-6zM12 8V4"/></svg>
+                nuts
+              </span>
+            </div>
+          </div>
+        </article>
+
+        <article id="seasonWinter" class="season-card panel">
+          <h4>Winter</h4>
+          <svg class="season-ink" viewBox="0 0 220 120" aria-hidden="true">
+            <g fill="none" stroke="var(--ink)" stroke-width="2">
+              <path d="M20 88h180M50 88c10-20 30-32 60-32s50 12 60 32" />
+              <path d="M110 50l-8 12h16l-8-12z" />
+              <circle cx="150" cy="60" r="10" fill="rgba(156,102,68,.3)" stroke="var(--berry)"/>
+            </g>
+          </svg>
+          <button aria-describedby="tooltipWinter">Winter details</button>
+          <div id="tooltipWinter" class="tooltip" role="tooltip">
+            - Citrus, hardy greens, potatoes, winter herbs, beets
+            <div class="icons">
+              <span class="badge" aria-label="Gluten & dairy possible in pastries">
+                <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="var(--ink)" d="M7 5h10M9 5c0 3-2 3-2 6v6a4 4 0 0 0 4 4h2a4 4 0 0 0 4-4v-6c0-3-2-3-2-6"/></svg> dairy
+              </span>
+              <span class="badge" aria-label="Gluten in breads">
+                <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="var(--ink)" d="M4 16c0-6 4-10 8-10s8 4 8 10H4z"/></svg> gluten
+              </span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Plans -->
+    <section id="plans" class="section" aria-labelledby="plansTitle">
+      <h3 id="plansTitle">Plans & add-ons</h3>
+      <p class="muted">Choose your cadence and optional add-ons. Prices update in real time.</p>
+      <div class="plans">
+        <div class="plan-panel panel">
+          <div class="flex">
+            <strong>Delivery frequency</strong>
+            <div aria-live="polite" id="freqLabel" class="badge">Weekly</div>
+          </div>
+          <div class="field" style="align-items:center">
+            <span class="subtle">Bi-weekly</span>
+            <input id="planFrequency" type="range" min="0" max="1" step="1" value="0" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0" aria-label="Delivery frequency slider: 0 weekly, 1 bi-weekly" />
+            <span class="subtle">Weekly</span>
+          </div>
+
+          <div class="toggles" aria-label="Add-ons">
+            <label class="toggle"><input id="addonEggs" type="checkbox" /> Eggs (+$6)</label>
+            <label class="toggle"><input id="addonFlowers" type="checkbox" /> Flowers (+$8)</label>
+            <label class="toggle"><input id="addonBread" type="checkbox" /> Bread (+$5)</label>
+          </div>
+        </div>
+
+        <div class="plan-panel panel">
+          <div class="flex">
+            <div>
+              <div class="subtle">Your price per delivery</div>
+              <div id="priceDisplay" class="price" aria-live="polite" aria-atomic="true">$38.00</div>
+            </div>
+            <button id="planJoinBtn" class="btn btn-primary">Reserve my share</button>
+          </div>
+          <div id="priceBreakdown" class="breakdown" style="margin-top:10px">
+            Base $38.00 • Add-ons $0.00 • Est. monthly (4 weeks) $152.00
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Map -->
+    <section id="map" class="section" aria-labelledby="mapTitle">
+      <h3 id="mapTitle">Delivery map & pickups</h3>
+      <p class="muted">We deliver within our radius; pickup spots for those beyond. The map is a static sketch with our current zone.</p>
+      <div class="map-wrap">
+        <figure class="panel" style="padding:0" role="img" aria-label="Static map with delivery radius">
+          <svg id="mapSvg" viewBox="0 0 640 420" width="100%" height="100%">
+            <defs>
+              <pattern id="paperGrid" width="16" height="16" patternUnits="userSpaceOnUse">
+                <path d="M0 16h16M16 0v16" stroke="rgba(0,0,0,.035)" />
+              </pattern>
+              <filter id="soften">
+                <feGaussianBlur stdDeviation="0.8" />
+              </filter>
+            </defs>
+            <rect x="0" y="0" width="640" height="420" fill="url(#paperGrid)" />
+            <!-- Sketchy roads -->
+            <g fill="none" stroke="#816a5c" stroke-width="1.4" opacity=".7">
+              <path d="M20 360C160 320 180 260 280 220s160-40 240-120" />
+              <path d="M40 80c120 40 200 60 300 60s160-20 240-40" />
+              <path d="M100 380c80-80 180-140 320-140 60 0 120 20 200 40" />
+            </g>
+            <!-- Town centers -->
+            <g fill="#fff" stroke="#3e332e" stroke-width="2">
+              <circle cx="320" cy="210" r="6"/>
+              <circle cx="420" cy="160" r="5"/>
+              <circle cx="260" cy="260" r="5"/>
+            </g>
+            <!-- Radius overlay -->
+            <g opacity=".35">
+              <circle id="deliveryCircle" cx="320" cy="210" r="150" fill="#a3b18a" filter="url(#soften)"/>
+            </g>
+            <text x="16" y="24" font-size="18" fill="#3e332e">Delivery radius ~15mi</text>
+          </svg>
+        </figure>
+        <div class="pickup-list">
+          <div class="pickup">
+            <div>
+              <strong>Downtown Co-op</strong><br/>
+              <span class="subtle">M-F 10–6</span>
+            </div>
+            <span class="badge"><span aria-hidden="true">📍</span> <span aria-label="Distance">1.2 mi</span></span>
+          </div>
+          <div class="pickup">
+            <div>
+              <strong>Riverside Park Pavilion</strong><br/>
+              <span class="subtle">Sat 9–1</span>
+            </div>
+            <span class="badge"><span aria-hidden="true">📍</span> 4.8 mi</span>
+          </div>
+          <div class="pickup">
+            <div>
+              <strong>West End Library</strong><br/>
+              <span class="subtle">Thu 4–7</span>
+            </div>
+            <span class="badge"><span aria-hidden="true">📍</span> 9.3 mi</span>
+          </div>
+          <div class="pickup">
+            <div>
+              <strong>Harbor Market</strong><br/>
+              <span class="subtle">Sun 10–2</span>
+            </div>
+            <span class="badge"><span aria-hidden="true">📍</span> 14.7 mi</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section id="testimonials" class="section" aria-labelledby="voicesTitle">
+      <h3 id="voicesTitle">From our farmers & neighbors</h3>
+      <div id="testimonialsCarousel" class="carousel" role="region" aria-roledescription="carousel" aria-label="Testimonials" aria-live="polite">
+        <div id="carouselTrack" class="track">
+          <article class="card" aria-label="Testimonial 1 of 3">
+            <div class="portrait" aria-hidden="true">
+              <svg viewBox="0 0 160 160" width="160" height="160">
+                <circle cx="80" cy="80" r="78" fill="#fffdf8"/>
+                <g fill="none" stroke="var(--ink)" stroke-width="2">
+                  <circle cx="80" cy="70" r="28"/>
+                  <path d="M40 130c18-22 40-24 40-24s22 2 40 24" />
+                  <circle cx="68" cy="64" r="4"/>
+                  <circle cx="92" cy="64" r="4"/>
+                  <path d="M70 82c6 6 14 6 20 0" />
+                </g>
+              </svg>
+            </div>
+            <div>
+              <p>We pick before sunrise so your greens arrive dewy and crisp. Sharing the harvest feels like sharing a poem of the season.</p>
+              <strong>Mae, field lead</strong>
+            </div>
+          </article>
+
+          <article class="card" aria-label="Testimonial 2 of 3">
+            <div class="portrait" aria-hidden="true">
+              <svg viewBox="0 0 160 160" width="160" height="160">
+                <circle cx="80" cy="80" r="78" fill="#fffdf8"/>
+                <g fill="none" stroke="var(--ink)" stroke-width="2">
+                  <circle cx="80" cy="68" r="26"/>
+                  <path d="M40 130c16-18 40-20 40-20s24 2 40 20" />
+                  <path d="M60 60c4-10 16-16 20-8" />
+                  <path d="M64 78c6 4 16 4 22 0" />
+                </g>
+              </svg>
+            </div>
+            <div>
+              <p>My kids now know the names of herbs by scent. The CSA box made our kitchen a little classroom every week.</p>
+              <strong>Aisha, member</strong>
+            </div>
+          </article>
+
+          <article class="card" aria-label="Testimonial 3 of 3">
+            <div class="portrait" aria-hidden="true">
+              <svg viewBox="0 0 160 160" width="160" height="160">
+                <circle cx="80" cy="80" r="78" fill="#fffdf8"/>
+                <g fill="none" stroke="var(--ink)" stroke-width="2">
+                  <circle cx="80" cy="68" r="26"/>
+                  <path d="M40 130c22-14 44-16 44-16s22 2 36 16" />
+                  <path d="M68 78c6 6 18 6 24 0" />
+                  <path d="M56 56c12-10 28-10 48 6" />
+                </g>
+              </svg>
+            </div>
+            <div>
+              <p>The add-on sourdough and eggs round out meals. It’s like the farmers’ market arrives at our stoop.</p>
+              <strong>Rene, neighbor</strong>
+            </div>
+          </article>
+        </div>
+        <div class="carousel-controls" aria-hidden="false">
+          <button id="carouselPrev" class="btn" aria-label="Previous testimonial">◀</button>
+          <div id="carouselDots" class="dotbar" role="tablist" aria-label="Carousel pagination">
+            <button class="dot" role="tab" aria-selected="true" aria-controls="t1" tabindex="0"></button>
+            <button class="dot" role="tab" aria-selected="false" aria-controls="t2" tabindex="-1"></button>
+            <button class="dot" role="tab" aria-selected="false" aria-controls="t3" tabindex="-1"></button>
+          </div>
+          <button id="carouselNext" class="btn" aria-label="Next testimonial">▶</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ + Contact -->
+    <section id="faq" class="section" aria-labelledby="faqTitle">
+      <h3 id="faqTitle">Frequently asked</h3>
+      <div class="accordion" role="region" aria-label="FAQ accordion">
+        <div class="accordion-item">
+          <button id="faqBtn1" aria-expanded="false" aria-controls="faqPanel1">
+            How big is a share?
+            <span aria-hidden="true">+</span>
+          </button>
+          <div id="faqPanel1" class="content" role="region" aria-labelledby="faqBtn1">
+            A weekly share typically feeds 2–4 people who cook 3–4 nights a week, or 1–2 veggie-forward eaters. Bi-weekly shares are the same size, delivered every other week.
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button id="faqBtn2" aria-expanded="false" aria-controls="faqPanel2">
+            Can I pause or skip a week?
+            <span aria-hidden="true">+</span>
+          </button>
+          <div id="faqPanel2" class="content" role="region" aria-labelledby="faqBtn2">
+            Yes. Use your confirmation email to manage skips, or email us 48 hours ahead. Unused deliveries can be donated to our food bank partner.
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button id="faqBtn3" aria-expanded="false" aria-controls="faqPanel3">
+            What about allergies?
+            <span aria-hidden="true">+</span>
+          </button>
+          <div id="faqPanel3" class="content" role="region" aria-labelledby="faqBtn3">
+            Core produce is nut-, gluten-, and dairy-free. Some add-ons (breads, pastries, cheeses, granola) may contain allergens—see icons and labels each week.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="section" aria-labelledby="contactTitle">
+      <h3 id="contactTitle">Say hello</h3>
+      <div class="contact">
+        <div class="panel form">
+          <form id="contactForm" novalidate>
+            <div class="field">
+              <label for="contactEmail">Email</label>
+            </div>
+            <div class="field">
+              <input id="contactEmail" name="email" type="email" placeholder="you@example.com" required aria-required="true"/>
+            </div>
+            <div class="field">
+              <label for="contactMsg">Message</label>
+            </div>
+            <div class="field">
+              <textarea id="contactMsg" name="message" rows="4" placeholder="Ask us anything about the CSA…"></textarea>
+            </div>
+            <div class="field">
+              <button id="contactSubmit" class="btn btn-primary" type="submit">Send</button>
+            </div>
+            <div id="contactResult" class="status" aria-live="polite"></div>
+          </form>
+        </div>
+        <div class="panel form">
+          <strong>Access & support</strong>
+          <p class="notice">We’re committed to accessibility. This page supports keyboard navigation, ARIA roles, and high-contrast ink lines. Need assistance? Email hello@artisancsa.local.</p>
+          <p class="notice">CSA pick-ups are in accessible locations. Sliding-scale pricing is available—mention it in your message.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap" style="padding-bottom: 48px">
+    <small class="subtle">© <span id="yearNow"></span> Artisan CSA. Grown with care.</small>
+  </footer>
+
+  <script>
+    (function(){
+      // Utilities
+      const $ = sel => document.querySelector(sel);
+      const $$ = sel => Array.from(document.querySelectorAll(sel));
+      const currency = n => '$' + n.toFixed(2);
+
+      // Year
+      $('#yearNow').textContent = new Date().getFullYear();
+
+      // Parallax gently moves ink illustrations
+      const parallaxEls = [
+        {el: $('#heroIllustration'), factor: 0.15},
+        {el: $('#leafDoodle1'), factor: -0.08},
+        {el: $('#leafDoodle2'), factor: 0.10},
+      ];
+      const onScroll = () => {
+        const y = window.scrollY || window.pageYOffset;
+        parallaxEls.forEach(p => {
+          if (p.el) p.el.style.transform = 'translateY(' + (y * p.factor) + 'px)';
+        });
+      };
+      document.addEventListener('scroll', onScroll, {passive: true});
+      onScroll();
+
+      // ZIP checker
+      const zipInput = $('#zipInput');
+      const zipBtn = $('#zipCheckBtn');
+      const zipResult = $('#zipResult');
+
+      const servicePrefixes = ['94','95']; // Bay Area simulation
+      function checkZip(zip){
+        const cleaned = (zip || '').trim();
+        if(!/^\d{5}$/.test(cleaned)) return {ok:false, msg:'Please enter a 5-digit ZIP.'};
+        const ok = servicePrefixes.includes(cleaned.slice(0,2));
+        const msg = ok
+          ? 'Great news! We deliver to ' + cleaned + '.'
+          : 'Sorry — ' + cleaned + ' is outside our current delivery area. Consider a pickup location.';
+        return {ok, msg};
+      }
+      function performZipCheck(){
+        const result = checkZip(zipInput.value);
+        zipResult.textContent = result.msg;
+        zipResult.classList.toggle('ok', result.ok);
+        zipResult.classList.toggle('no', !result.ok);
+        // Subtle highlight of delivery circle to reinforce feedback
+        const circle = $('#deliveryCircle');
+        if(circle){
+          circle.setAttribute('fill', result.ok ? '#a3b18a' : '#cb997e');
+          circle.setAttribute('opacity', result.ok ? '0.35' : '0.25');
+        }
+      }
+      zipBtn.addEventListener('click', performZipCheck);
+      zipInput.addEventListener('keypress', e => { if(e.key==='Enter'){ e.preventDefault(); performZipCheck(); } });
+
+      // CTA buttons
+      $('#joinCtaBtn').addEventListener('click', () => {
+        document.getElementById('plans').scrollIntoView({behavior:'smooth', block:'start'});
+        const btn = $('#planJoinBtn');
+        btn.focus({preventScroll:true});
+      });
+      $('#planJoinBtn').addEventListener('click', () => {
+        alert('Thanks! Choose your frequency and add-ons, then we\'ll email you next steps.');
+        document.getElementById('contact').scrollIntoView({behavior:'smooth', block:'start'});
+        $('#contactEmail').focus({preventScroll:true});
+      });
+
+      // Plans price calculator
+      const frequency = $('#planFrequency');
+      const freqLabel = $('#freqLabel');
+      const priceDisplay = $('#priceDisplay');
+      const priceBreakdown = $('#priceBreakdown');
+
+      const addons = [
+        {id:'addonEggs', price:6},
+        {id:'addonFlowers', price:8},
+        {id:'addonBread', price:5},
+      ];
+      addons.forEach(a => {
+        const el = document.getElementById(a.id);
+        el.addEventListener('change', updatePrice);
+      });
+
+      function updatePrice(){
+        // Frequency 0=weekly, 1=bi-weekly
+        const biweekly = frequency.value === '1';
+        const basePerDelivery = biweekly ? 28 : 38; // slightly cheaper per delivery for bi-weekly
+        let addonsTotal = addons.reduce((sum,a) => sum + (document.getElementById(a.id).checked ? a.price : 0), 0);
+        const perDelivery = basePerDelivery + addonsTotal;
+
+        // Estimated monthly: weekly=4 deliveries, bi-weekly=2 deliveries
+        const deliveriesPerMonth = biweekly ? 2 : 4;
+        const estMonthly = perDelivery * deliveriesPerMonth;
+
+        priceDisplay.textContent = currency(perDelivery);
+        priceBreakdown.textContent = 'Base ' + currency(basePerDelivery) + ' • Add-ons ' + currency(addonsTotal) + ' • Est. monthly (' + deliveriesPerMonth + (deliveriesPerMonth===1?' delivery':' deliveries') + ') ' + currency(estMonthly);
+
+        freqLabel.textContent = biweekly ? 'Bi-weekly' : 'Weekly';
+        frequency.setAttribute('aria-valuenow', biweekly ? '1' : '0');
+      }
+      frequency.addEventListener('input', updatePrice);
+      updatePrice();
+
+      // Tooltips are shown by CSS on focus/hover. Ensure keyboard accessibility:
+      $$('.season-card button').forEach(btn => {
+        btn.addEventListener('focus', e => {
+          // nothing needed; CSS handles
+        });
+        btn.addEventListener('keydown', e => {
+          if(e.key === 'Escape'){ e.currentTarget.blur(); }
+        });
+      });
+
+      // Carousel
+      const track = $('#carouselTrack');
+      const prevBtn = $('#carouselPrev');
+      const nextBtn = $('#carouselNext');
+      const dots = $$('#carouselDots .dot');
+      let index = 0;
+      function go(i){
+        const total = dots.length;
+        index = (i + total) % total;
+        track.style.transform = 'translateX(' + (-index * 100) + '%)';
+        dots.forEach((d,idx)=>{
+          d.classList.toggle('active', idx===index);
+          d.setAttribute('aria-selected', idx===index ? 'true' : 'false');
+          d.tabIndex = idx===index ? 0 : -1;
+        });
+        // Update aria-labels
+        $$('#carouselTrack .card').forEach((card, idx)=>{
+          card.setAttribute('aria-label', 'Testimonial ' + (idx+1) + ' of ' + total);
+        });
+      }
+      prevBtn.addEventListener('click', ()=> go(index-1));
+      nextBtn.addEventListener('click', ()=> go(index+1));
+      dots.forEach((d,idx)=> d.addEventListener('click', ()=> go(idx)));
+      // Keyboard support
+      $('#testimonialsCarousel').addEventListener('keydown', e => {
+        if(e.key === 'ArrowRight'){ e.preventDefault(); go(index+1); }
+        if(e.key === 'ArrowLeft'){ e.preventDefault(); go(index-1); }
+      });
+      go(0);
+
+      // Accordion
+      $$('.accordion-item').forEach(item=>{
+        const btn = item.querySelector('button');
+        const panel = item.querySelector('.content');
+        function toggle(open){
+          const willOpen = typeof open === 'boolean' ? open : btn.getAttribute('aria-expanded') !== 'true';
+          btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+          if(willOpen){
+            panel.classList.add('open');
+            panel.style.maxHeight = panel.scrollHeight + 'px';
+          } else {
+            panel.style.maxHeight = '0px';
+            // delay removing padding for smoother transition
+            panel.addEventListener('transitionend', function onEnd(){
+              panel.classList.remove('open');
+              panel.removeEventListener('transitionend', onEnd);
+            });
+          }
+        }
+        btn.addEventListener('click', ()=> toggle());
+        btn.addEventListener('keydown', e=>{
+          if(e.key==='Enter' || e.key===' '){ e.preventDefault(); toggle(); }
+          if(e.key==='Escape'){ e.preventDefault(); toggle(false); btn.blur(); }
+        });
+      });
+
+      // Contact form
+      const contactForm = $('#contactForm');
+      const contactEmail = $('#contactEmail');
+      const contactMsg = $('#contactMsg');
+      const contactResult = $('#contactResult');
+      contactForm.addEventListener('submit', e=>{
+        e.preventDefault();
+        // Simple validation
+        const emailVal = contactEmail.value.trim();
+        if(!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)){
+          contactResult.textContent = 'Please provide a valid email so we can reply.';
+          contactResult.classList.remove('ok');
+          contactResult.classList.add('no');
+          contactEmail.focus();
+          return;
+        }
+        contactResult.textContent = 'Thanks! We\'ll get back to you at ' + emailVal + ' soon.';
+        contactResult.classList.remove('no');
+        contactResult.classList.add('ok');
+        // Reset fields softly
+        contactMsg.value = '';
+      });
+
+      // Improve focus visibility on mouse users who press Tab
+      function handleFirstTab(e){
+        if(e.key === 'Tab'){
+          document.body.classList.add('user-tabbing');
+          window.removeEventListener('keydown', handleFirstTab);
+        }
+      }
+      window.addEventListener('keydown', handleFirstTab);
+
+      // Ensure 1280x720 viewport looks good: scroll to top on load
+      window.scrollTo(0,0);
+    })();
+  </script>
+</body>
+</html>

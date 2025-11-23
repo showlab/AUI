@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bay Roast Lab — Master Espresso in 6 Months</title>
+  <meta name="description" content="Bay Roast Lab: $200/month equipment rental and 1:1 coaching to master roasting and espresso in 6 months. Built for Bay Area coffee enthusiasts in tech." />
+  <style>
+    :root{
+      --bg:#0f0e0d;
+      --surface:#171513;
+      --surface-2:#1b1917;
+      --text:#f4f1ed;
+      --muted:#b8b4af;
+      --primary:#c58b5a;
+      --primary-contrast:#0d0b09;
+      --accent:#43bfb0;
+      --success:#3ecf8e;
+      --danger:#ff675c;
+      --shadow: 0 10px 30px rgba(0,0,0,.4);
+      --radius:14px;
+      --radius-sm:10px;
+      --radius-lg:22px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;line-height:1.5}
+    img,svg{max-width:100%;height:auto}
+    a{color:inherit;text-decoration:none}
+    button{cursor:pointer}
+    .container{width:100%;max-width:1140px;margin:0 auto;padding:0 24px}
+    header{
+      position:sticky;top:0;z-index:1000;background:rgba(15,14,13,.7);backdrop-filter:saturate(1.2) blur(8px);
+      border-bottom:1px solid rgba(255,255,255,.06)
+    }
+    .nav{
+      display:flex;align-items:center;justify-content:space-between;height:68px
+    }
+    .brand{
+      display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.2px
+    }
+    .brand svg{filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))}
+    .nav-links{display:flex;gap:22px;align-items:center}
+    .nav-links a{color:var(--muted);font-weight:600;font-size:.95rem;opacity:.9}
+    .nav-links a:hover{color:var(--text)}
+    .spots-pill{
+      display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#2b2825,#1b1917);
+      padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.08);color:#e7d8c7;font-size:.85rem
+    }
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:10px;border:none;border-radius:999px;padding:12px 18px;font-weight:700;
+      transition:transform .08s ease,box-shadow .2s ease,background .2s ease;will-change:transform;
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn-primary{background:linear-gradient(180deg,#d39a6c,#b77946);color:var(--primary-contrast);box-shadow:0 10px 20px rgba(197,139,90,.25)}
+    .btn-primary:hover{box-shadow:0 16px 28px rgba(197,139,90,.35)}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,.14);color:var(--text)}
+    .btn-ghost:hover{border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.04)}
+    .btn-accent{background:linear-gradient(180deg,#55d2c2,#3fb9ab);color:#06201c}
+    /* Hero */
+    .hero{
+      position:relative;overflow:hidden
+    }
+    .hero::before{
+      content:"";position:absolute;inset:-20% -10% -10% -10%;
+      background:
+        radial-gradient(1200px 600px at 80% -10%,rgba(197,139,90,.28),transparent 60%),
+        radial-gradient(1400px 700px at -10% 30%,rgba(67,191,176,.18),transparent 60%),
+        radial-gradient(800px 600px at 50% 110%,rgba(255,255,255,.06),transparent 60%);
+      pointer-events:none
+    }
+    .hero-inner{display:grid;grid-template-columns:1.15fr .85fr;gap:32px;align-items:center;padding:48px 0 28px}
+    .eyebrow{display:inline-flex;align-items:center;gap:10px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:#f1e7db;font-weight:600}
+    .eyebrow svg{opacity:.8}
+    .hero h1{font-size:3rem;line-height:1.1;margin:18px 0 12px;letter-spacing:.2px}
+    .hero p.sub{color:#e5ded6;font-size:1.15rem;opacity:.92;margin-bottom:22px}
+    .hero-ctas{display:flex;gap:12px;flex-wrap:wrap}
+    .hero-meta{
+      display:flex;gap:18px;align-items:center;margin-top:16px;color:#d9d3cd;font-size:.95rem
+    }
+    .meta-item{display:flex;align-items:center;gap:8px;opacity:.9}
+    .lock{width:18px;height:18px}
+    .hero-art{
+      position:relative;background:linear-gradient(180deg,#1b1917,#141311);
+      border:1px solid rgba(255,255,255,.08);border-radius:var(--radius-lg);min-height:360px;box-shadow:var(--shadow);overflow:hidden
+    }
+    .hero-art::after{
+      content:"";position:absolute;inset:0;background:
+        radial-gradient(500px 240px at 70% 10%,rgba(197,139,90,.25),transparent 60%),
+        radial-gradient(420px 240px at 20% 70%,rgba(67,191,176,.2),transparent 60%);
+      mix-blend:screen;pointer-events:none
+    }
+    .espresso-svg{position:absolute;inset:10% 10%;filter:drop-shadow(0 20px 30px rgba(0,0,0,.6))}
+    /* Credibility strip */
+    .cred{margin:8px 0 24px}
+    .cred-inner{display:flex;gap:24px;align-items:center;justify-content:space-between;background:linear-gradient(180deg,#151311,#12100f);
+      border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:14px 18px}
+    .cred-logos{display:flex;gap:22px;align-items:center;opacity:.9}
+    .bridge{width:26px;height:26px}
+    /* Sections */
+    section{padding:52px 0}
+    .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+    .card{
+      background:linear-gradient(180deg,#1b1917,#141311);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);
+      padding:18px;box-shadow:0 6px 16px rgba(0,0,0,.35)
+    }
+    .card h3{margin:8px 0 6px}
+    .muted{color:var(--muted)}
+    .more-link{display:inline-flex;align-items:center;gap:8px;color:#e7d8c7;font-weight:700}
+    .more{display:none;margin-top:8px;color:#d9d3cd}
+    .card .icon{width:26px;height:26px}
+    /* How it works */
+    .how{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .step{position:relative;padding:18px;border-radius:var(--radius);background:linear-gradient(180deg,#191715,#12100f);border:1px solid rgba(255,255,255,.08)}
+    .step-num{
+      position:absolute;top:-10px;left:-10px;background:var(--primary);color:var(--primary-contrast);width:36px;height:36px;border-radius:50%;display:grid;place-items:center;
+      font-weight:900;box-shadow:0 8px 16px rgba(197,139,90,.3)
+    }
+    .micro-video{
+      height:140px;border-radius:12px;background:
+        radial-gradient(300px 120px at 20% 50%,rgba(197,139,90,.25),transparent 60%),
+        radial-gradient(300px 140px at 80% 50%,rgba(67,191,176,.22),transparent 60%),
+        linear-gradient(90deg,#100f0e,#141311 60%,#100f0e);
+      border:1px solid rgba(255,255,255,.08);animation:scan 6s linear infinite;background-size:200% 100%;
+    }
+    @keyframes scan{0%{background-position:0 0}100%{background-position:200% 0}}
+    /* Zip checker */
+    .zip{
+      display:flex;gap:10px;margin-top:12px
+    }
+    input,select{
+      background:#13110f;border:1px solid rgba(255,255,255,.14);color:var(--text);padding:12px 14px;border-radius:10px;outline:none;font:inherit
+    }
+    input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(67,191,176,.15)}
+    .note{font-size:.9rem;color:#d7d0c8}
+    /* Calculator */
+    .calc{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch}
+    .calc .result{
+      background:linear-gradient(180deg,#161412,#12100f);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);padding:18px;display:flex;flex-direction:column;justify-content:space-between
+    }
+    .kpi{display:flex;gap:12px;align-items:center}
+    .kpi .num{font-size:2rem;font-weight:900}
+    .pill{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:6px 10px;font-weight:700}
+    .pill.good{border-color:rgba(62,207,142,.35);color:var(--success)}
+    .pill.bad{border-color:rgba(255,103,92,.35);color:var(--danger)}
+    .disclaimer{color:#cfc8bf;font-size:.85rem;margin-top:8px;opacity:.82}
+    /* Quiz */
+    .quiz{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .range{width:100%}
+    .recommend{background:linear-gradient(180deg,#191715,#12100f);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);padding:18px}
+    .rec-title{font-weight:900}
+    /* Pricing */
+    .pricing{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .plan{position:relative}
+    .plan .best{position:absolute;top:-10px;right:-10px;background:linear-gradient(180deg,#55d2c2,#3fb9ab);color:#09302b;padding:6px 10px;border-radius:999px;font-weight:900;border:1px solid rgba(0,0,0,.08)}
+    .price{font-size:2.4rem;font-weight:900}
+    .toggle{display:inline-flex;background:#12100f;border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:4px}
+    .toggle button{background:transparent;border:none;color:#d9d3cd;padding:8px 12px;border-radius:999px;font-weight:800}
+    .toggle button.active{background:var(--primary);color:var(--primary-contrast)}
+    /* Testimonials */
+    .slider{position:relative;overflow:hidden;border-radius:var(--radius);border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#1a1816,#12100f)}
+    .slides{display:flex;transition:transform .5s ease}
+    .testimonial{flex:0 0 100%;padding:24px}
+    .stars{color:#f6d266}
+    .slider-controls{position:absolute;top:50%;left:0;right:0;display:flex;justify-content:space-between;transform:translateY(-50%);pointer-events:none}
+    .slider-controls button{pointer-events:auto;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.12);color:#fff;border-radius:999px;padding:8px 10px}
+    /* FAQ */
+    .faq .q{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:14px;border-bottom:1px solid rgba(255,255,255,.08);cursor:pointer}
+    .faq .a{display:none;padding:0 14px 14px;color:#dcd4cc}
+    /* Footer */
+    footer{border-top:1px solid rgba(255,255,255,.08);padding:28px 0 48px;color:#d1c9c0}
+    .foot{display:grid;grid-template-columns:2fr 1fr 1fr;gap:18px}
+    .fine{font-size:.85rem;opacity:.85}
+    /* Modal */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:24px;z-index:2000}
+    .modal.show{display:flex}
+    .modal-card{width:100%;max-width:760px;background:linear-gradient(180deg,#1b1917,#12100f);border:1px solid rgba(255,255,255,.12);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+    .modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.08)}
+    .close{background:transparent;border:1px solid rgba(255,255,255,.18);border-radius:10px;color:#fff;padding:6px 8px}
+    .modal-body{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;padding:18px}
+    .lead-bullets{display:flex;flex-direction:column;gap:10px;font-size:.95rem}
+    .schedule{display:flex;flex-direction:column;gap:10px}
+    .success-box{display:none;background:rgba(62,207,142,.1);border:1px solid rgba(62,207,142,.3);color:#c0f2da;border-radius:12px;padding:12px;font-weight:700}
+    /* Responsive */
+    @media (max-width: 980px){
+      .nav-links{display:none}
+      .hero-inner{grid-template-columns:1fr}
+      .calc,.quiz,.pricing,.how{grid-template-columns:1fr}
+      .grid-4{grid-template-columns:1fr 1fr}
+      .modal-body{grid-template-columns:1fr}
+      .foot{grid-template-columns:1fr 1fr}
+    }
+    @media (max-width: 640px){
+      .grid-4{grid-template-columns:1fr}
+      .foot{grid-template-columns:1fr}
+      .hero h1{font-size:2.2rem}
+    }
+    /* Focus visibility */
+    :focus-visible{outline:3px solid rgba(67,191,176,.6);outline-offset:2px;border-radius:8px}
+  </style>
+</head>
+<body>
+  <header role="banner" id="siteHeader">
+    <div class="container nav">
+      <div class="brand" aria-label="Bay Roast Lab">
+        <svg width="28" height="28" viewBox="0 0 64 64" aria-hidden="true">
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#d39a6c"/>
+              <stop offset="1" stop-color="#9c6641"/>
+            </linearGradient>
+          </defs>
+          <path d="M18 10c12-6 28 4 28 18s-10 26-22 26S6 42 6 28c0-8 4-14 12-18z" fill="url(#g1)"/>
+          <path d="M28 8c2 10-2 22-14 28" stroke="#3c2415" stroke-width="4" fill="none" stroke-linecap="round"/>
+        </svg>
+        <span>Bay Roast Lab</span>
+        <span class="spots-pill" id="spotsLeftPill" aria-live="polite">
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="#e7d8c7" d="M12 1a3 3 0 0 1 3 3v1h2a2 2 0 0 1 2 2v12a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V7a2 2 0 0 1 2-2h2V4a3 3 0 0 1 3-3Zm1 4V4a1 1 0 1 0-2 0v1h2Z"/></svg>
+          <span id="spotsLeftText">September cohort: 9 spots left</span>
+        </span>
+      </div>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#features" id="navFeatures">Features</a>
+        <a href="#how" id="navHow">How it works</a>
+        <a href="#quiz" id="navQuiz">Kit quiz</a>
+        <a href="#pricing" id="navPricing">Pricing</a>
+        <a href="#testimonials" id="navTestimonials">Reviews</a>
+        <a href="#faq" id="navFAQ">FAQ</a>
+      </nav>
+      <div>
+        <button class="btn btn-primary" id="navCtaButton" aria-label="Start 6-month journey">Start 6‑Month Journey</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="container hero-inner">
+        <div>
+          <span class="eyebrow">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#e7d8c7" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            Master espresso in 6 months — without buying the gear
+          </span>
+          <h1>Pro machines. Pro coaching. Your kitchen.</h1>
+          <p class="sub">$200/month equipment rental and 1:1 coaching to dial in roasting and pull café-level shots. Designed for the Bay Area coffee geek who loves the art and the data.</p>
+          <div class="hero-ctas">
+            <button class="btn btn-primary" id="ctaPrimaryHeroButton">Start 6‑Month Journey</button>
+            <button class="btn btn-ghost" id="ctaBookCallButton">Book 10‑min Intro Call</button>
+          </div>
+          <div class="hero-meta">
+            <div class="meta-item">
+              <svg class="lock" viewBox="0 0 24 24" aria-hidden="true"><path fill="#bfb9b2" d="M12 2a5 5 0 0 1 5 5v3h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h1V7a5 5 0 0 1 5-5Zm3 8V7a3 3 0 1 0-6 0v3h6Z"/></svg>
+              Secure checkout • 14‑day equipment swap guarantee
+            </div>
+            <div class="meta-item">
+              <svg class="lock" viewBox="0 0 24 24" aria-hidden="true"><path fill="#bfb9b2" d="M12 22s8-4.5 8-12a8 8 0 1 0-16 0c0 7.5 8 12 8 12Z"/></svg>
+              Serving the Bay Area
+            </div>
+          </div>
+          <form class="zip" id="zipForm" aria-label="Service area checker">
+            <label class="visually-hidden" for="zipInput">ZIP code</label>
+            <input id="zipInput" name="zip" inputmode="numeric" minlength="5" maxlength="5" placeholder="Check your ZIP (e.g., 94107)" aria-describedby="zipHelp" />
+            <button class="btn btn-ghost" id="zipCheckButton" type="submit">Check availability</button>
+          </form>
+          <div class="note" id="zipHelp" aria-live="polite">We deliver, install, and calibrate in SF, Peninsula, South Bay, and East Bay.</div>
+          <div class="note" id="zipResult" style="margin-top:6px;"></div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <svg class="espresso-svg" viewBox="0 0 600 420">
+            <defs>
+              <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#c9c4bf"/>
+                <stop offset="1" stop-color="#8b857f"/>
+              </linearGradient>
+              <linearGradient id="steam" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#ffffff" stop-opacity=".6"/>
+                <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="copper" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#d39a6c"/>
+                <stop offset="1" stop-color="#9c6641"/>
+              </linearGradient>
+            </defs>
+            <rect x="50" y="100" width="500" height="220" rx="18" fill="url(#metal)" opacity=".85"/>
+            <rect x="70" y="120" width="460" height="30" rx="8" fill="#2a2725" opacity=".8"/>
+            <circle cx="120" cy="135" r="8" fill="#43bfb0"/>
+            <circle cx="160" cy="135" r="8" fill="#e7d8c7"/>
+            <circle cx="200" cy="135" r="8" fill="#e7d8c7"/>
+            <rect x="190" y="180" width="220" height="18" rx="4" fill="#141311"/>
+            <rect x="210" y="198" width="180" height="6" rx="3" fill="#55514c"/>
+            <rect x="230" y="210" width="140" height="20" rx="6" fill="url(#copper)"/>
+            <rect x="260" y="230" width="80" height="6" rx="3" fill="#6e6760"/>
+            <rect x="265" y="250" width="70" height="40" rx="8" fill="#23201e"/>
+            <rect x="140" y="320" width="100" height="18" rx="9" fill="#3d3a37"/>
+            <rect x="360" y="320" width="100" height="18" rx="9" fill="#3d3a37"/>
+            <rect x="285" y="270" width="30" height="50" rx="6" fill="#0f0e0d"/>
+            <rect x="278" y="320" width="44" height="12" rx="6" fill="#a78a6a"/>
+            <rect x="120" y="335" width="360" height="12" rx="6" fill="#2a2725"/>
+            <path d="M298 310 C 290 290, 310 280, 298 260" stroke="url(#steam)" stroke-width="3" fill="none" />
+            <path d="M302 308 C 310 288, 295 278, 310 260" stroke="url(#steam)" stroke-width="2.5" fill="none" opacity=".8"/>
+            <rect x="360" y="245" width="50" height="50" rx="8" fill="#201d1b"/>
+            <rect x="365" y="250" width="40" height="12" rx="6" fill="#a78a6a"/>
+          </svg>
+        </div>
+      </div>
+      <div class="container cred">
+        <div class="cred-inner">
+          <div class="cred-logos">
+            <svg class="bridge" viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M4 48h56v4H4z" fill="#6a655f"/>
+              <path d="M10 48V26h4v22h-4zm40 0V26h4v22h-4z" fill="#8b857f"/>
+              <path d="M12 26c8-10 32-10 40 0" stroke="#bcb6af" stroke-width="2" fill="none"/>
+            </svg>
+            <span class="muted">Proudly serving SF, Peninsula, East Bay, South Bay</span>
+          </div>
+          <div class="muted">Trusted by engineers and designers from Mountain View to Oakland</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" aria-labelledby="features-title">
+      <div class="container">
+        <h2 id="features-title">Everything you need to go from curious to calibrated</h2>
+        <div class="grid-4" style="margin-top:14px">
+          <article class="card">
+            <div class="icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#c58b5a" d="M3 7h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7zm4-4h10l2 4H5l2-4z"/></svg>
+            </div>
+            <h3>Pro Equipment Rental</h3>
+            <p class="muted">Commercial-grade espresso machine and burr grinder installed and maintained in your home.</p>
+            <button class="more-link" id="feature1More">Learn more</button>
+            <div class="more" id="feature1MoreText">We fit you with machines like Linea Mini, Profitec, or Decent-based setups depending on your space, noise tolerance, and taste goals. We handle water, maintenance, and insurance.</div>
+          </article>
+          <article class="card">
+            <div class="icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#43bfb0" d="M4 12h16v2H4zm8-9 4 5H8l4-5zM8 21l4-5 4 5H8z"/></svg>
+            </div>
+            <h3>Calibration & Water</h3>
+            <p class="muted">We dial in pressure, flow, and temperature curves. We also install a water kit tailored to Bay Area profiles.</p>
+            <button class="more-link" id="feature2More">Learn more</button>
+            <div class="more" id="feature2MoreText">We map your tap, remineralize if needed, and set preinfusion and pressure profiles. You’ll taste the difference and see it in your data.</div>
+          </article>
+          <article class="card">
+            <div class="icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#e7d8c7" d="M3 4h18v4H3zM3 10h10v4H3zM3 16h14v4H3z"/></svg>
+            </div>
+            <h3>1:1 Coaching</h3>
+            <p class="muted">Weekly sessions with a pro coach to troubleshoot channeling, puck prep, and roast interpretation.</p>
+            <button class="more-link" id="feature3More">Learn more</button>
+            <div class="more" id="feature3MoreText">We combine palate training with data (refractometer readings, flow curves) to build intuition and repeatability.</div>
+          </article>
+          <article class="card">
+            <div class="icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#c58b5a" d="M12 2 2 7l10 5 10-5-10-5zm-7 9v6l7 4 7-4v-6l-7 4-7-4z"/></svg>
+            </div>
+            <h3>Roast Labs</h3>
+            <p class="muted">Hands-on roast sessions (optional) help you understand development, Maillard, and post-roast rest.</p>
+            <button class="more-link" id="feature4More">Learn more</button>
+            <div class="more" id="feature4MoreText">Small-group labs across SF and the Peninsula. Bring your beans or explore our curated single origins.</div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="how" aria-labelledby="how-title">
+      <div class="container">
+        <h2 id="how-title">How it works</h2>
+        <div class="how" style="margin-top:14px">
+          <div class="step">
+            <div class="step-num">1</div>
+            <h3>We fit your setup</h3>
+            <p class="muted">Tell us about your space, routine, and flavor goals. We recommend a quiet, compact, or data-forward machine.</p>
+            <div class="micro-video" aria-hidden="true"></div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <h3>White‑glove install</h3>
+            <p class="muted">We deliver, install, and calibrate your gear. We set water hardness and dial-in to your beans.</p>
+            <div class="micro-video" aria-hidden="true"></div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <h3>Weekly coaching</h3>
+            <p class="muted">60‑minute calendar slots. We iterate extraction variables and tasting to level you up fast.</p>
+            <div class="micro-video" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="calculator" aria-labelledby="calculator-title">
+      <div class="container">
+        <h2 id="calculator-title">Is the lab better than buying?</h2>
+        <div class="calc" style="margin-top:14px">
+          <form class="card" id="calcForm" aria-describedby="calcDisc">
+            <div style="display:grid;gap:12px">
+              <label for="calcShotsPerDay">Shots per day</label>
+              <input type="range" id="calcShotsPerDay" min="1" max="6" value="2" class="range" />
+              <div class="muted"><span id="calcShotsLabel">2</span> shots/day</div>
+
+              <label for="calcOwnsGear">Do you already own an espresso machine?</label>
+              <select id="calcOwnsGear">
+                <option value="no" selected>No</option>
+                <option value="yes">Yes</option>
+              </select>
+
+              <label for="calcClasses">Do you plan to take classes if you buy gear?</label>
+              <select id="calcClasses">
+                <option value="yes" selected>Yes</option>
+                <option value="no">No</option>
+              </select>
+
+              <div class="disclaimer" id="calcDisc">Assumptions: quality machine $1800 + grinder $600 amortized over 36 months; classes $150/mo; beans $16/lb, 0.25 lb per 10 doubles; maintenance $8/mo. Bay Roast Lab includes install, maintenance, and coaching.</div>
+            </div>
+          </form>
+          <div class="result" id="calcResult">
+            <div>
+              <div class="kpi">
+                <div>
+                  <div class="muted">Your est. monthly cost buying gear</div>
+                  <div class="num" id="calcBuyMonthly">$0</div>
+                </div>
+              </div>
+              <div style="margin:10px 0">
+                <span class="pill">Bay Roast Lab: $200/mo</span>
+              </div>
+              <div class="kpi" style="margin-top:10px">
+                <div>
+                  <div class="muted">Estimated 6‑month difference</div>
+                  <div class="num" id="calcSixMonthDiff">–</div>
+                </div>
+                <span class="pill good" id="calcDiffBadge">You save</span>
+              </div>
+            </div>
+            <div>
+              <button class="btn btn-primary" id="calcCtaButton">Start 6‑Month Journey</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="quiz" aria-labelledby="quiz-title">
+      <div class="container">
+        <h2 id="quiz-title">Find your perfect kit</h2>
+        <div class="quiz" style="margin-top:14px">
+          <form class="card" id="quizForm">
+            <div style="display:grid;gap:14px">
+              <label for="tasteSlider">Taste preference: Bright & fruity to chocolate & syrupy</label>
+              <input id="tasteSlider" type="range" min="0" max="100" value="50" class="range"/>
+              <label for="timeSlider">Time for prep each morning</label>
+              <input id="timeSlider" type="range" min="1" max="10" value="5" class="range"/>
+              <fieldset style="border:none;padding:0">
+                <legend>Noise tolerance</legend>
+                <label><input type="radio" name="noise" value="low" checked/> Low</label>
+                <label style="margin-left:10px"><input type="radio" name="noise" value="medium"/> Medium</label>
+                <label style="margin-left:10px"><input type="radio" name="noise" value="high"/> High</label>
+              </fieldset>
+              <button type="button" class="btn btn-ghost" id="quizRecommendButton">Recommend my kit</button>
+            </div>
+          </form>
+          <div class="recommend">
+            <div class="rec-title" id="recTitle">Your kit will appear here</div>
+            <p class="muted" id="recCopy">Tune the sliders and click “Recommend my kit”.</p>
+            <div style="margin-top:10px">
+              <button class="btn btn-primary" id="quizCtaButton" disabled>Add to my 6‑month plan</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="pricing" aria-labelledby="pricing-title">
+      <div class="container">
+        <h2 id="pricing-title">Pricing</h2>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;gap:12px;flex-wrap:wrap">
+          <div class="toggle" role="tablist" aria-label="Plan selector">
+            <button id="planToggle6" class="active" role="tab" aria-selected="true">6‑Month Mastery</button>
+            <button id="planToggleFlex" role="tab" aria-selected="false">Flex</button>
+          </div>
+          <div class="muted">No deposit. Free install. 14‑day equipment swap.</div>
+        </div>
+        <div class="pricing" style="margin-top:14px">
+          <article class="card plan" id="planSix">
+            <span class="best">Recommended</span>
+            <h3>6‑Month Mastery Track</h3>
+            <div class="price">$200<span class="muted" style="font-size:1rem;font-weight:600">/mo</span></div>
+            <ul class="muted">
+              <li>Pro machine + grinder rental</li>
+              <li>Weekly 1:1 coaching sessions</li>
+              <li>Priority calibration tweaks</li>
+              <li>Bonus: 2 roast lab passes</li>
+            </ul>
+            <button class="btn btn-primary" id="planSixButton">Start 6‑Month Journey</button>
+          </article>
+          <article class="card plan" id="planFlex">
+            <h3>Flex (Month‑to‑Month)</h3>
+            <div class="price">$200<span class="muted" style="font-size:1rem;font-weight:600">/mo</span></div>
+            <ul class="muted">
+              <li>Pro machine + grinder rental</li>
+              <li>Bi‑weekly coaching</li>
+              <li>Standard support</li>
+              <li>Roast labs sold separately</li>
+            </ul>
+            <button class="btn btn-ghost" id="planFlexButton">Try Flex First</button>
+          </article>
+        </div>
+        <div class="note" style="margin-top:10px">We cap enrollment monthly to preserve 1:1 attention. Switching plans is easy later—most members commit to the 6‑month track to build durable skill.</div>
+      </div>
+    </section>
+
+    <section id="testimonials" aria-labelledby="testimonials-title">
+      <div class="container">
+        <h2 id="testimonials-title">What Bay Area members say</h2>
+        <div class="slider" style="margin-top:14px">
+          <div class="slides" id="testimonialSlides" style="width:300%">
+            <figure class="testimonial">
+              <div class="stars">★★★★★</div>
+              <blockquote>As a staff engineer I love systems — this brought system thinking to espresso. In 8 weeks I went from good to “how did you do that?” shots. The data + palate training combo is unmatched.</blockquote>
+              <figcaption class="muted">— Priya K., Staff Engineer, Mountain View</figcaption>
+            </figure>
+            <figure class="testimonial">
+              <div class="stars">★★★★★</div>
+              <blockquote>The white‑glove install solved my water and channeling drama. Coaching was practical and kind. I would’ve spent $3k+ on gear; this was smarter.</blockquote>
+              <figcaption class="muted">— Jason L., Product Designer, San Francisco</figcaption>
+            </figure>
+            <figure class="testimonial">
+              <div class="stars">★★★★★</div>
+              <blockquote>My partner thought the machine would be loud — the team spec’d a quiet setup. Now our morning routine is a joy and the shots… balanced and sweet.</blockquote>
+              <figcaption class="muted">— Mei W., Data Scientist, Oakland</figcaption>
+            </figure>
+          </div>
+          <div class="slider-controls">
+            <button id="testimonialPrev" aria-label="Previous testimonial">‹</button>
+            <button id="testimonialNext" aria-label="Next testimonial">›</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq" aria-labelledby="faq-title">
+      <div class="container">
+        <h2 id="faq-title">FAQ</h2>
+        <div class="card faq" style="margin-top:14px" id="faqList">
+          <div class="q" data-faq="1" id="faqQ1">
+            <span>What’s included for $200/month?</span>
+            <span>+</span>
+          </div>
+          <div class="a" id="faqA1">Pro espresso machine + grinder rental, install and calibration, weekly coaching (6‑month track), maintenance, and support. No deposit.</div>
+
+          <div class="q" data-faq="2" id="faqQ2">
+            <span>Do I need to buy beans?</span>
+            <span>+</span>
+          </div>
+          <div class="a" id="faqA2">Yes, beans are separate so you can explore. We recommend 2–3 roasters and provide dial‑in guidance for each roast.</div>
+
+          <div class="q" data-faq="3" id="faqQ3">
+            <span>Can I pause or travel?</span>
+            <span>+</span>
+          </div>
+          <div class="a" id="faqA3">We offer a one‑time pause up to 3 weeks with 7‑day notice. Coaching sessions can be stacked before/after travel.</div>
+
+          <div class="q" data-faq="4" id="faqQ4">
+            <span>What happens after 6 months?</span>
+            <span>+</span>
+          </div>
+          <div class="a" id="faqA4">Most members either extend month‑to‑month or buy their own setup with our help. We’ll share a personalized gear recommendation based on your preferences.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer role="contentinfo">
+    <div class="container foot">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;font-weight:700">
+          <svg width="22" height="22" viewBox="0 0 64 64" aria-hidden="true">
+            <path d="M18 10c12-6 28 4 28 18s-10 26-22 26S6 42 6 28c0-8 4-14 12-18z" fill="#c58b5a"/>
+            <path d="M28 8c2 10-2 22-14 28" stroke="#3c2415" stroke-width="4" fill="none" stroke-linecap="round"/>
+          </svg>
+          Bay Roast Lab
+        </div>
+        <div class="fine" style="margin-top:8px">Hands-on espresso mastery for the Bay Area. White‑glove install, data‑driven coaching, and pro gear — $200/month.</div>
+        <div class="fine" style="margin-top:8px">© <span id="yearNow"></span> Bay Roast Lab • San Francisco, CA</div>
+      </div>
+      <div>
+        <div class="muted" style="font-weight:700;margin-bottom:6px">Contact</div>
+        <div class="fine">hello@bayroastlab.com</div>
+        <div class="fine">Mon–Sat 9am–6pm PT</div>
+      </div>
+      <div>
+        <div class="muted" style="font-weight:700;margin-bottom:6px">Trust</div>
+        <div class="fine">Secure checkout • 14‑day equipment swap</div>
+        <div class="fine">Limited monthly cohort for quality</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Signup Modal -->
+  <div class="modal" id="signupModal" role="dialog" aria-modal="true" aria-labelledby="signupTitle" aria-describedby="signupDesc">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <div id="signupTitle" style="font-weight:900">Reserve your spot</div>
+          <div id="signupDesc" class="muted">Join the 6‑month mastery track. No charge today — we’ll follow up to confirm delivery and install details.</div>
+        </div>
+        <button class="close" id="modalCloseButton" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="leadForm" novalidate>
+          <div class="success-box" id="leadSuccess">Thanks! We’ve reserved your spot and sent a confirmation email.</div>
+          <div style="display:grid;gap:10px">
+            <label for="leadFirstName">First name</label>
+            <input id="leadFirstName" name="firstName" placeholder="Your first name" required />
+
+            <label for="leadEmail">Email</label>
+            <input id="leadEmail" name="email" type="email" placeholder="name@company.com" required />
+
+            <label for="leadZip">ZIP code</label>
+            <input id="leadZip" name="zip" inputmode="numeric" minlength="5" maxlength="5" placeholder="94107" required />
+
+            <label for="leadPlanSelect">Plan</label>
+            <select id="leadPlanSelect" name="plan">
+              <option value="six" selected>6‑Month Mastery — $200/mo</option>
+              <option value="flex">Flex — $200/mo</option>
+            </select>
+
+            <label for="scheduleDateSelect">Preferred install date</label>
+            <select id="scheduleDateSelect"></select>
+
+            <label for="scheduleTimeSelect">Time</label>
+            <select id="scheduleTimeSelect">
+              <option>9:00 AM</option>
+              <option>12:30 PM</option>
+              <option>4:30 PM</option>
+            </select>
+
+            <label><input type="checkbox" id="leadAgree" checked/> I’m interested in the 6‑month mastery track to build durable skill.</label>
+            <button type="submit" class="btn btn-primary" id="leadSubmitButton">Reserve my spot</button>
+            <div class="fine">By submitting, you consent to be contacted about your setup. We never share your data.</div>
+          </div>
+        </form>
+        <div>
+          <div class="card" style="margin-bottom:10px">
+            <h3>What happens next</h3>
+            <div class="lead-bullets">
+              <div>• We confirm your address and water profile</div>
+              <div>• Schedule install and first coaching session</div>
+              <div>• Bring beans you love — we’ll dial them in together</div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Founders’ perk</h3>
+            <div class="muted">Commit to the 6‑month track today and get 2 bonus roast lab passes.</div>
+            <div style="margin-top:10px">
+              <button class="btn btn-accent" id="acceptPerkButton">Apply perk</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Utility: smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click', e=>{
+        const id = a.getAttribute('href').slice(1);
+        const el = document.getElementById(id);
+        if(el){
+          e.preventDefault();
+          el.scrollIntoView({behavior:'smooth', block:'start'});
+        }
+      });
+    });
+
+    // Year in footer
+    document.getElementById('yearNow').textContent = new Date().getFullYear();
+
+    // Sticky header shadow
+    const header = document.getElementById('siteHeader');
+    const setHeaderShadow = () => {
+      header.style.boxShadow = window.scrollY > 6 ? '0 8px 18px rgba(0,0,0,.35)' : 'none';
+    };
+    window.addEventListener('scroll', setHeaderShadow);
+    setHeaderShadow();
+
+    // Spots left (ethical, informational)
+    const spotsEl = document.getElementById('spotsLeftText');
+    let baseSpots = 9 + Math.floor((new Date().getDate() % 4)); // 9..12
+    const setSpots = () => {
+      spotsEl.textContent = `Current cohort: ${baseSpots} spots left`;
+    };
+    setSpots();
+    // Reduce by 1 after user interacts with CTA and time
+    let spotsReduced = false;
+
+    // ZIP checker (rough Bay Area ZIPs)
+    const zipForm = document.getElementById('zipForm');
+    const zipInput = document.getElementById('zipInput');
+    const zipResult = document.getElementById('zipResult');
+    zipForm.addEventListener('submit', e=>{
+      e.preventDefault();
+      const v = (zipInput.value||'').trim();
+      const ok = /^(94[0-9]{3}|95[0-1][0-9]{2})$/.test(v); // 94000-95199 approx
+      if(!v || v.length<5){
+        zipResult.textContent = 'Please enter a 5-digit ZIP.';
+        zipResult.style.color = '#ffb3ab';
+        return;
+      }
+      if(ok){
+        zipResult.textContent = 'Great news — you’re in our delivery radius. We handle install and calibration.';
+        zipResult.style.color = '#c0f2da';
+      } else {
+        zipResult.textContent = 'You might be just outside our current radius. Tell us your ZIP in the form — we often make exceptions.';
+        zipResult.style.color = '#f5d4d0';
+      }
+    });
+
+    // Features "Learn more"
+    const featureToggles = [
+      ['feature1More','feature1MoreText'],
+      ['feature2More','feature2MoreText'],
+      ['feature3More','feature3MoreText'],
+      ['feature4More','feature4MoreText'],
+    ];
+    featureToggles.forEach(([btnId, textId])=>{
+      const b = document.getElementById(btnId), t = document.getElementById(textId);
+      b.addEventListener('click', ()=>{
+        const open = t.style.display==='block';
+        t.style.display = open ? 'none' : 'block';
+        b.textContent = open ? 'Learn more' : 'Show less';
+      });
+    });
+
+    // Calculator
+    const shots = document.getElementById('calcShotsPerDay');
+    const shotsLabel = document.getElementById('calcShotsLabel');
+    const owns = document.getElementById('calcOwnsGear');
+    const classes = document.getElementById('calcClasses');
+    const buyMonthly = document.getElementById('calcBuyMonthly');
+    const sixDiff = document.getElementById('calcSixMonthDiff');
+    const diffBadge = document.getElementById('calcDiffBadge');
+    function calc(){
+      const s = parseInt(shots.value,10);
+      shotsLabel.textContent = s;
+      // Costs
+      const gearMonthly = owns.value==='yes' ? 0 : (1800/36 + 600/36); // $66.67
+      const classesMonthly = classes.value==='yes' ? 150 : 0;
+      // Beans: rough estimate, 0.25 lb per 10 doubles @ $16/lb
+      const doublesPerMonth = s*30;
+      const lbs = (doublesPerMonth/10)*0.25;
+      const beansMonthly = lbs*16;
+      const maintenance = 8;
+      const totalBuy = Math.round((gearMonthly + classesMonthly + beansMonthly + maintenance)*100)/100;
+      buyMonthly.textContent = `$${totalBuy.toFixed(2)}`;
+      const labMonthly = 200 + beansMonthly; // beans still separate for both
+      const monthlyDiff = totalBuy - (200 + beansMonthly); // positive means buying more expensive
+      const sixMonth = Math.round(monthlyDiff*6);
+      const sign = sixMonth>0? 'You save' : (sixMonth<0 ? 'Lab costs more' : 'Cost neutral');
+      diffBadge.textContent = sign;
+      diffBadge.className = 'pill ' + (sixMonth>=0 ? 'good' : 'bad');
+      sixDiff.textContent = (sixMonth>=0? 'Save ' : 'Pay +') + '$' + Math.abs(sixMonth).toFixed(0) + ' over 6 months';
+    }
+    [shots, owns, classes].forEach(el=>el.addEventListener('input', calc));
+    calc();
+
+    // Testimonials slider
+    const slides = document.getElementById('testimonialSlides');
+    const prev = document.getElementById('testimonialPrev');
+    const next = document.getElementById('testimonialNext');
+    let idx = 0;
+    function renderSlide(){ slides.style.transform = `translateX(-${idx*100}%)`; }
+    prev.addEventListener('click', ()=>{ idx = (idx+2)%3; renderSlide(); resetSliderTimer(); });
+    next.addEventListener('click', ()=>{ idx = (idx+1)%3; renderSlide(); resetSliderTimer(); });
+    let sliderTimer = setInterval(()=>{ idx=(idx+1)%3; renderSlide(); }, 6000);
+    function resetSliderTimer(){ clearInterval(sliderTimer); sliderTimer=setInterval(()=>{ idx=(idx+1)%3; renderSlide(); }, 6000); }
+
+    // Quiz recommendation
+    const taste = document.getElementById('tasteSlider');
+    const time = document.getElementById('timeSlider');
+    const quizRecommendButton = document.getElementById('quizRecommendButton');
+    const recTitle = document.getElementById('recTitle');
+    const recCopy = document.getElementById('recCopy');
+    const quizCtaButton = document.getElementById('quizCtaButton');
+    function recommend(){
+      const t = parseInt(taste.value,10);
+      const tm = parseInt(time.value,10);
+      const noise = (document.querySelector('input[name="noise"]:checked')||{}).value || 'low';
+      let kit = {name:'Balanced prosumer setup', copy:'A forgiving, data-friendly setup that makes both bright and chocolatey profiles sing.', notes:[]};
+      if(t>70 && noise!=='low'){ kit = {name:'Decent-style profile machine + flat burrs', copy:'Lean into fruit and clarity. Pressure/flow profiling unlocks modern light roasts.', notes:['Includes refractometer support','Advanced flow curves']} }
+      else if(t<30 && tm<=5){ kit = {name:'Heat‑exchanger + conical burrs', copy:'Syrupy chocolate in a compact, quiet footprint. Fast warm‑up for busy mornings.', notes:['Quiet pump spec','Easy maintenance']} }
+      else if(noise==='low'){ kit = {name:'Dual‑boiler + damped pump + 64mm burrs', copy:'Low‑noise refinement with rock‑solid temperature stability for consistent sweetness.', notes:['Acoustic damping','Barista lights']} }
+      recTitle.textContent = kit.name;
+      recCopy.textContent = kit.copy + (kit.notes?.length? (' • ' + kit.notes.join(' • ')) : '');
+      quizCtaButton.disabled = false;
+    }
+    quizRecommendButton.addEventListener('click', recommend);
+
+    // Pricing toggle
+    const planToggle6 = document.getElementById('planToggle6');
+    const planToggleFlex = document.getElementById('planToggleFlex');
+    const planSix = document.getElementById('planSix');
+    const planFlex = document.getElementById('planFlex');
+    function setPlanToggle(which){
+      if(which==='six'){
+        planToggle6.classList.add('active'); planToggle6.setAttribute('aria-selected','true');
+        planToggleFlex.classList.remove('active'); planToggleFlex.setAttribute('aria-selected','false');
+        planSix.style.order = '0'; planFlex.style.order='1';
+        planSix.scrollIntoView({behavior:'smooth', block:'nearest'});
+      } else {
+        planToggleFlex.classList.add('active'); planToggleFlex.setAttribute('aria-selected','true');
+        planToggle6.classList.remove('active'); planToggle6.setAttribute('aria-selected','false');
+        planFlex.style.order = '0'; planSix.style.order='1';
+        planFlex.scrollIntoView({behavior:'smooth', block:'nearest'});
+      }
+    }
+    planToggle6.addEventListener('click', ()=>setPlanToggle('six'));
+    planToggleFlex.addEventListener('click', ()=>setPlanToggle('flex'));
+
+    // Modal
+    const modal = document.getElementById('signupModal');
+    const leadForm = document.getElementById('leadForm');
+    const leadFirst = document.getElementById('leadFirstName');
+    const leadEmail = document.getElementById('leadEmail');
+    const leadZip = document.getElementById('leadZip');
+    const leadPlanSelect = document.getElementById('leadPlanSelect');
+    const scheduleDateSelect = document.getElementById('scheduleDateSelect');
+    const scheduleTimeSelect = document.getElementById('scheduleTimeSelect');
+    const leadSuccess = document.getElementById('leadSuccess');
+    const modalCloseButton = document.getElementById('modalCloseButton');
+    const acceptPerkButton = document.getElementById('acceptPerkButton');
+
+    function openModal(plan='six'){
+      modal.classList.add('show');
+      document.body.style.overflow='hidden';
+      if(plan==='six') leadPlanSelect.value='six'; else leadPlanSelect.value='flex';
+      // prefill ZIP if checked earlier
+      if(zipInput.value) leadZip.value = zipInput.value;
+      // Decrease spots once on first open to reflect active interest
+      if(!spotsReduced && baseSpots>1){ baseSpots--; setSpots(); spotsReduced = true; }
+    }
+    function closeModal(){
+      modal.classList.remove('show');
+      document.body.style.overflow='';
+    }
+    document.getElementById('ctaPrimaryHeroButton').addEventListener('click', ()=>openModal('six'));
+    document.getElementById('navCtaButton').addEventListener('click', ()=>openModal('six'));
+    document.getElementById('calcCtaButton').addEventListener('click', ()=>openModal('six'));
+    document.getElementById('planSixButton').addEventListener('click', ()=>openModal('six'));
+    document.getElementById('planFlexButton').addEventListener('click', ()=>openModal('flex'));
+    document.getElementById('ctaBookCallButton').addEventListener('click', ()=>{
+      openModal('six');
+      scheduleTimeSelect.value='12:30 PM';
+    });
+    document.getElementById('quizCtaButton').addEventListener('click', ()=>openModal('six'));
+    modalCloseButton.addEventListener('click', closeModal);
+    modal.addEventListener('click', e=>{ if(e.target===modal) closeModal(); });
+
+    // Exit-intent modal (once)
+    let exitShown = false;
+    document.addEventListener('mouseout', e=>{
+      if(exitShown || localStorage.getItem('leadSubmitted')==='1') return;
+      if(e.clientY<=0){ exitShown = true; openModal('six'); }
+    });
+    // Time-delayed modal if very engaged (30s)
+    setTimeout(()=>{
+      if(!exitShown && localStorage.getItem('leadSubmitted')!=='1'){
+        openModal('six');
+      }
+    }, 30000);
+
+    // Populate install dates (next 7 business days)
+    function populateDates(){
+      scheduleDateSelect.innerHTML = '';
+      const today = new Date();
+      let added = 0, i=0;
+      while(added<7 && i<14){
+        const d = new Date(today.getFullYear(), today.getMonth(), today.getDate()+i+2);
+        const day = d.getDay();
+        if(day!==0){ // skip Sundays
+          const opt = document.createElement('option');
+          opt.textContent = d.toLocaleDateString(undefined,{weekday:'short', month:'short', day:'numeric'});
+          opt.value = d.toISOString().split('T')[0];
+          scheduleDateSelect.appendChild(opt);
+          added++;
+        }
+        i++;
+      }
+    }
+    populateDates();
+
+    // Lead form validate
+    function validEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+    leadForm.addEventListener('submit', e=>{
+      e.preventDefault();
+      const first = leadFirst.value.trim();
+      const email = leadEmail.value.trim();
+      const zip = leadZip.value.trim();
+      if(!first || !validEmail(email) || zip.length<5){
+        leadSuccess.style.display = 'none';
+        alert('Please complete your name, a valid email, and 5‑digit ZIP.');
+        return;
+      }
+      // Simulate submit
+      const payload = {
+        first, email, zip,
+        plan: leadPlanSelect.value,
+        date: scheduleDateSelect.value,
+        time: scheduleTimeSelect.value,
+        ts: Date.now()
+      };
+      try { localStorage.setItem('lead', JSON.stringify(payload)); localStorage.setItem('leadSubmitted','1'); } catch(e){}
+      leadSuccess.style.display = 'block';
+      // Close after short delay
+      setTimeout(closeModal, 1800);
+    });
+
+    // Perk button
+    acceptPerkButton.addEventListener('click', ()=>{
+      leadPlanSelect.value='six';
+      alert('Perk applied: 2 bonus roast lab passes with your 6‑month track.');
+    });
+
+    // Plan toggle buttons also open modal on Enter key
+    [planToggle6, planToggleFlex].forEach(btn=>{
+      btn.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); btn.click(); } });
+    });
+
+    // FAQ accordion
+    const faqList = document.getElementById('faqList');
+    faqList.querySelectorAll('.q').forEach(q=>{
+      q.addEventListener('click', ()=>{
+        const id = q.getAttribute('data-faq');
+        const a = document.getElementById('faqA'+id);
+        const open = a.style.display==='block';
+        a.style.display = open ? 'none' : 'block';
+        q.lastElementChild.textContent = open ? '+' : '–';
+      });
+    });
+
+    // Keyboard ESC closes modal
+    document.addEventListener('keydown', e=>{
+      if(e.key==='Escape' && modal.classList.contains('show')) closeModal();
+    });
+
+    // Ensure 1280x720 friendly: scroll to top on load, set initial focus for accessibility
+    window.addEventListener('load', ()=>{
+      window.scrollTo(0,0);
+      document.getElementById('ctaPrimaryHeroButton').focus({preventScroll:true});
+    });
+  </script>
+</body>
+</html>

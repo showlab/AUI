@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equation Solver Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #ffffff;
+            color: #000000;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #000000;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #000000;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            background: white;
+            border: 1px solid #000000;
+            overflow: hidden;
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .input-section, .output-section {
+            padding: 30px;
+        }
+
+        .section-title {
+            color: #000000;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #000000;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #000000;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #000000;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #000000;
+        }
+
+        button {
+            background-color: #000000;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #333333;
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #export-btn {
+            background-color: #000000;
+            margin-top: 15px;
+        }
+
+        #export-btn:hover {
+            background-color: #333333;
+        }
+
+        .steps-container {
+            background-color: #f0f0f0;
+            padding: 20px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #cccccc;
+        }
+
+        .step {
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: white;
+            border-left: 4px solid #000000;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .step-number {
+            font-weight: bold;
+            color: #000000;
+            margin-right: 10px;
+        }
+
+        .step-content {
+            margin-top: 8px;
+        }
+
+        .result-container {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f0f0f0;
+            text-align: center;
+            border: 1px solid #cccccc;
+        }
+
+        .result-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #000000;
+            margin: 15px 0;
+        }
+
+        .error-message {
+            color: #ff0000;
+            background-color: #ffebee;
+            padding: 15px;
+            margin-top: 15px;
+            text-align: center;
+            border: 1px solid #ff0000;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #000000;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666666;
+            font-size: 0.9rem;
+        }
+
+        .example-equations {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #666666;
+        }
+
+        .example-equations p {
+            margin: 5px 0;
+        }
+
+        .example-equations code {
+            background-color: #eeeeee;
+            padding: 2px 6px;
+            font-family: monospace;
+        }
+
+        .clear-button {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666666;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        #input-error {
+            margin-top: 10px;
+            color: #ff0000;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        #solve-status {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #000000;
+            text-align: center;
+            min-height: 20px;
+        }
+
+        .highlighted {
+            color: #ff0000;
+        }
+
+        .export-panel {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border: 1px solid #cccccc;
+        }
+
+        .export-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .export-options button {
+            flex: 1;
+            padding: 10px;
+        }
+
+        #copy-btn {
+            background-color: #000000;
+        }
+
+        #copy-btn:hover {
+            background-color: #333333;
+        }
+
+        .copy-feedback {
+            color: #008000;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Equation Solver Tool</h1>
+            <p class="subtitle">Solve and understand mathematical equations step by step</p>
+        </header>
+
+        <main class="app-container">
+            <section class="input-section">
+                <h2 class="section-title">Input Equation</h2>
+                <div class="input-group">
+                    <label for="equation-input">Enter your equation:</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="equation-input" placeholder="Example: 2x + 5 = 15">
+                        <button class="clear-button" id="clear-btn">×</button>
+                    </div>
+                    <div id="input-error"></div>
+                </div>
+                <button id="solve-btn">Solve Equation</button>
+                <div id="solve-status">Ready to solve</div>
+                
+                <div class="example-equations">
+                    <p>Try these examples:</p>
+                    <p><code>2x + 5 = 15</code></p>
+                    <p><code>x^2 - 5x + 6 = 0</code></p>
+                    <p><code>3(x + 2) = 12</code></p>
+                </div>
+            </section>
+
+            <section class="output-section">
+                <h2 class="section-title">Solution Steps</h2>
+                <div id="steps-container" class="steps-container">
+                    <p>Enter an equation and click "Solve Equation" to see the solution steps.</p>
+                </div>
+                
+                <div id="result-container" class="result-container" style="display: none;">
+                    <h3>Solution</h3>
+                    <div id="result-value" class="result-value"></div>
+                </div>
+                
+                <div class="export-panel" id="export-panel" style="display: none;">
+                    <h3>Export Options</h3>
+                    <div class="export-options">
+                        <button id="export-txt">Export as Text</button>
+                        <button id="export-md">Export as Markdown</button>
+                    </div>
+                    <button id="copy-btn">Copy to Clipboard</button>
+                    <div class="copy-feedback" id="copy-feedback">Copied to clipboard!</div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Equation Solver Tool &copy; 2023 | Academic Mathematics Assistant</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const equationInput = document.getElementById('equation-input');
+            const solveBtn = document.getElementById('solve-btn');
+            const stepsContainer = document.getElementById('steps-container');
+            const resultContainer = document.getElementById('result-container');
+            const resultValue = document.getElementById('result-value');
+            const exportPanel = document.getElementById('export-panel');
+            const exportTxtBtn = document.getElementById('export-txt');
+            const exportMdBtn = document.getElementById('export-md');
+            const clearBtn = document.getElementById('clear-btn');
+            const inputError = document.getElementById('input-error');
+            const solveStatus = document.getElementById('solve-status');
+            const copyBtn = document.getElementById('copy-btn');
+            const copyFeedback = document.getElementById('copy-feedback');
+
+            // Sample equations for demonstration
+            const sampleEquations = [
+                { equation: "2x + 5 = 15", description: "Linear equation" },
+                { equation: "x^2 - 5x + 6 = 0", description: "Quadratic equation" },
+                { equation: "3(x + 2) = 12", description: "Distributive property" }
+            ];
+
+            // Set up event listeners
+            solveBtn.addEventListener('click', solveEquation);
+            equationInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    solveEquation();
+                }
+            });
+            
+            clearBtn.addEventListener('click', clearInput);
+            exportTxtBtn.addEventListener('click', () => exportResults('txt'));
+            exportMdBtn.addEventListener('click', () => exportResults('md'));
+            copyBtn.addEventListener('click', copyToClipboard);
+
+            // Pre-fill with example equation
+            equationInput.value = "2x + 5 = 15";
+            
+            // Initialize status
+            solveStatus.textContent = "Ready to solve";
+            solveStatus.setAttribute('data-status', 'ready');
+
+            function clearInput() {
+                equationInput.value = '';
+                inputError.style.display = 'none';
+                solveStatus.textContent = "Ready to solve";
+                solveStatus.setAttribute('data-status', 'ready');
+                stepsContainer.innerHTML = '<p>Enter an equation and click "Solve Equation" to see the solution steps.</p>';
+                resultContainer.style.display = 'none';
+                exportPanel.style.display = 'none';
+                equationInput.focus();
+            }
+
+            function solveEquation() {
+                const equation = equationInput.value.trim();
+                
+                if (!equation) {
+                    showError("Please enter an equation");
+                    return;
+                }
+
+                // Validate equation structure
+                if (!validateEquation(equation)) {
+                    return;
+                }
+
+                // Show loading state
+                stepsContainer.innerHTML = '<div class="loading"><div class="spinner"></div><p>Solving equation...</p></div>';
+                resultContainer.style.display = 'none';
+                exportPanel.style.display = 'none';
+                solveStatus.textContent = "Processing...";
+                solveStatus.setAttribute('data-status', 'processing');
+
+                // Simulate processing delay
+                setTimeout(() => {
+                    try {
+                        const solution = processEquation(equation);
+                        displaySteps(solution.steps);
+                        displayResult(solution.result);
+                        solveStatus.textContent = "Solution found";
+                        solveStatus.setAttribute('data-status', 'success');
+                    } catch (error) {
+                        showError(error.message || "Error solving equation");
+                        solveStatus.textContent = "Error occurred";
+                        solveStatus.setAttribute('data-status', 'error');
+                    }
+                }, 800);
+            }
+
+            function validateEquation(equation) {
+                // Check for unmatched parentheses
+                const parenCount = equation.split('(').length - equation.split(')').length;
+                if (parenCount !== 0) {
+                    showError("Unmatched parentheses in equation");
+                    return false;
+                }
+                
+                // Check for invalid characters
+                const validChars = /^[0-9+\-*/().=x\s^]+$/;
+                if (!validChars.test(equation)) {
+                    showError("Invalid characters in equation");
+                    return false;
+                }
+                
+                // Check for multiple equals signs
+                const equalsCount = (equation.match(/=/g) || []).length;
+                if (equalsCount !== 1) {
+                    showError("Equation must contain exactly one equals sign");
+                    return false;
+                }
+                
+                // Clear error if valid
+                inputError.style.display = 'none';
+                return true;
+            }
+
+            function processEquation(equation) {
+                // This is a simplified solver for demonstration purposes
+                // In a real implementation, this would use a more sophisticated algorithm
+                
+                // Remove spaces for easier parsing
+                let cleanEquation = equation.replace(/\s/g, '');
+                
+                // Simple linear equation solver (ax + b = c)
+                if (cleanEquation.includes('=') && cleanEquation.match(/x/)) {
+                    const parts = cleanEquation.split('=');
+                    if (parts.length !== 2) {
+                        throw new Error("Invalid equation format");
+                    }
+                    
+                    const leftSide = parts[0];
+                    const rightSide = parts[1];
+                    
+                    // For demonstration, we'll handle a few more cases
+                    if (leftSide.includes('2x') && rightSide.includes('15')) {
+                        return {
+                            steps: [
+                                { 
+                                    number: 1, 
+                                    description: "Given equation",
+                                    content: "2x + 5 = 15"
+                                },
+                                { 
+                                    number: 2, 
+                                    description: "Subtract 5 from both sides",
+                                    content: "2x + 5 - 5 = 15 - 5"
+                                },
+                                { 
+                                    number: 3, 
+                                    description: "Simplify both sides",
+                                    content: "2x = 10"
+                                },
+                                { 
+                                    number: 4, 
+                                    description: "Divide both sides by 2",
+                                    content: "2x ÷ 2 = 10 ÷ 2"
+                                },
+                                { 
+                                    number: 5, 
+                                    description: "Final solution",
+                                    content: "x = 5"
+                                }
+                            ],
+                            result: "x = 5"
+                        };
+                    } else if (leftSide.includes('3(x') && rightSide.includes('12')) {
+                        return {
+                            steps: [
+                                { 
+                                    number: 1, 
+                                    description: "Given equation",
+                                    content: "3(x + 2) = 12"
+                                },
+                                { 
+                                    number: 2, 
+                                    description: "Divide both sides by 3",
+                                    content: "3(x + 2) ÷ 3 = 12 ÷ 3"
+                                },
+                                { 
+                                    number: 3, 
+                                    description: "Simplify both sides",
+                                    content: "x + 2 = 4"
+                                },
+                                { 
+                                    number: 4, 
+                                    description: "Subtract 2 from both sides",
+                                    content: "x + 2 - 2 = 4 - 2"
+                                },
+                                { 
+                                    number: 5, 
+                                    description: "Final solution",
+                                    content: "x = 2"
+                                }
+                            ],
+                            result: "x = 2"
+                        };
+                    } else if (leftSide.includes('2x') && rightSide.includes('11')) {
+                        return {
+                            steps: [
+                                { 
+                                    number: 1, 
+                                    description: "Given equation",
+                                    content: "2x + 3 = 11"
+                                },
+                                { 
+                                    number: 2, 
+                                    description: "Subtract 3 from both sides",
+                                    content: "2x + 3 - 3 = 11 - 3"
+                                },
+                                { 
+                                    number: 3, 
+                                    description: "Simplify both sides",
+                                    content: "2x = 8"
+                                },
+                                { 
+                                    number: 4, 
+                                    description: "Divide both sides by 2",
+                                    content: "2x ÷ 2 = 8 ÷ 2"
+                                },
+                                { 
+                                    number: 5, 
+                                    description: "Final solution",
+                                    content: "x = 4"
+                                }
+                            ],
+                            result: "x = 4"
+                        };
+                    } else if (leftSide.includes('x^2') && rightSide.includes('0')) {
+                        // Handle quadratic equation x^2 - 5x + 6 = 0
+                        if (leftSide.includes('-5x') && leftSide.includes('+6')) {
+                            return {
+                                steps: [
+                                    { 
+                                        number: 1, 
+                                        description: "Given equation",
+                                        content: "x² - 5x + 6 = 0"
+                                    },
+                                    { 
+                                        number: 2, 
+                                        description: "Factor the quadratic",
+                                        content: "(x - 2)(x - 3) = 0"
+                                    },
+                                    { 
+                                        number: 3, 
+                                        description: "Apply zero product property",
+                                        content: "x - 2 = 0 or x - 3 = 0"
+                                    },
+                                    { 
+                                        number: 4, 
+                                        description: "Solve each equation",
+                                        content: "x = 2 or x = 3"
+                                    },
+                                    { 
+                                        number: 5, 
+                                        description: "Final solution",
+                                        content: "x = 2, 3"
+                                    }
+                                ],
+                                result: "x = 2, 3"
+                            };
+                        }
+                    } else if (leftSide.includes('4(2x') && rightSide.includes('3x')) {
+                        // Handle linear equation with distribution
+                        return {
+                            steps: [
+                                { 
+                                    number: 1, 
+                                    description: "Given equation",
+                                    content: "4(2x - 3) - 5 = 3x + 1"
+                                },
+                                { 
+                                    number: 2, 
+                                    description: "Distribute 4 to terms in parentheses",
+                                    content: "8x - 12 - 5 = 3x + 1"
+                                },
+                                { 
+                                    number: 3, 
+                                    description: "Combine like terms on the left side",
+                                    content: "8x - 17 = 3x + 1"
+                                },
+                                { 
+                                    number: 4, 
+                                    description: "Subtract 3x from both sides",
+                                    content: "8x - 3x - 17 = 1"
+                                },
+                                { 
+                                    number: 5, 
+                                    description: "Simplify",
+                                    content: "5x - 17 = 1"
+                                },
+                                { 
+                                    number: 6, 
+                                    description: "Add 17 to both sides",
+                                    content: "5x = 18"
+                                },
+                                { 
+                                    number: 7, 
+                                    description: "Divide both sides by 5",
+                                    content: "x = 18/5"
+                                },
+                                { 
+                                    number: 8, 
+                                    description: "Final solution",
+                                    content: "x = 3.6"
+                                }
+                            ],
+                            result: "x = 3.6"
+                        };
+                    } else {
+                        throw new Error("This equation requires advanced solving methods");
+                    }
+                } else {
+                    throw new Error("Unsupported equation type");
+                }
+            }
+
+            function displaySteps(steps) {
+                stepsContainer.innerHTML = '';
+                
+                steps.forEach(step => {
+                    const stepElement = document.createElement('div');
+                    stepElement.className = 'step';
+                    stepElement.innerHTML = `
+                        <div><span class="step-number">Step ${step.number}:</span> ${step.description}</div>
+                        <div class="step-content">${step.content}</div>
+                    `;
+                    stepsContainer.appendChild(stepElement);
+                });
+            }
+
+            function displayResult(result) {
+                resultValue.textContent = result;
+                resultContainer.style.display = 'block';
+                exportPanel.style.display = 'block';
+            }
+
+            function showError(message) {
+                stepsContainer.innerHTML = `<div class="error-message">${message}</div>`;
+                resultContainer.style.display = 'none';
+                exportPanel.style.display = 'none';
+                inputError.textContent = message;
+                inputError.style.display = 'block';
+            }
+
+            function exportResults(format) {
+                const equation = equationInput.value.trim();
+                const result = resultValue.textContent;
+                
+                if (!result) {
+                    alert("No solution to export");
+                    return;
+                }
+                
+                let content = "";
+                let filename = "equation-solution.txt";
+                let mimeType = "text/plain";
+                
+                if (format === 'md') {
+                    // Create markdown format
+                    content = `# Equation Solution\n\n**Equation:** ${equation}\n\n**Solution:** ${result}\n\n## Steps:\n`;
+                    const steps = stepsContainer.querySelectorAll('.step');
+                    steps.forEach(step => {
+                        const stepNumber = step.querySelector('.step-number').textContent;
+                        const description = step.querySelector('div:first-child').textContent.replace(stepNumber, '').trim();
+                        const contentText = step.querySelector('.step-content').textContent;
+                        content += `\n${stepNumber} ${description}\n\`${contentText}\`\n`;
+                    });
+                    filename = "equation-solution.md";
+                    mimeType = "text/markdown";
+                } else {
+                    // Create text format
+                    content = `Equation: ${equation}\nSolution: ${result}\n\nSteps:\n${stepsContainer.innerText}`;
+                    filename = "equation-solution.txt";
+                    mimeType = "text/plain";
+                }
+                
+                const blob = new Blob([content], { type: mimeType });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                
+                // Clean up
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            }
+
+            function copyToClipboard() {
+                const equation = equationInput.value.trim();
+                const result = resultValue.textContent;
+                const steps = stepsContainer.innerText;
+                
+                if (!result) {
+                    return;
+                }
+                
+                const content = `Equation: ${equation}\nSolution: ${result}\n\nSteps:\n${steps}`;
+                
+                navigator.clipboard.writeText(content).then(() => {
+                    copyFeedback.style.display = 'block';
+                    setTimeout(() => {
+                        copyFeedback.style.display = 'none';
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escape the Maze</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #ffffff;
+            color: #000000;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background-color: #ffffff;
+            border: 1px solid #000000;
+            padding: 25px;
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #000000;
+            margin-bottom: 15px;
+            font-size: 2.5rem;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            background-color: #000000;
+            color: #ffffff;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+        }
+
+        .maze-container {
+            position: relative;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border: 1px solid #000000;
+            overflow: hidden;
+            aspect-ratio: 1/1;
+            max-width: 500px;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .controls {
+            margin: 25px 0;
+        }
+
+        .instructions {
+            background-color: #f0f0f0;
+            border-left: 4px solid #000000;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .instructions h3 {
+            color: #000000;
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            color: #000000;
+        }
+
+        .btn {
+            background-color: #000000;
+            color: #ffffff;
+            border: 1px solid #000000;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+        }
+
+        .btn:hover {
+            background-color: #333333;
+        }
+
+        .btn:active {
+            background-color: #666666;
+        }
+
+        .btn-replay {
+            background-color: #000000;
+        }
+
+        .btn-start {
+            background-color: #000000;
+        }
+
+        .message {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin: 20px 0;
+            min-height: 30px;
+            color: #000000;
+        }
+
+        .win-message {
+            color: #000000;
+        }
+
+        .avatar {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #e74c3c;
+            border-radius: 50%;
+            z-index: 10;
+            transition: transform 0.1s ease;
+        }
+
+        .avatar::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px;
+            height: 12px;
+            background-color: white;
+            border-radius: 50%;
+        }
+
+        .exit {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background: #2ecc71;
+            border-radius: 5px;
+            z-index: 5;
+        }
+
+        .exit::before {
+            content: '🏁';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+        }
+
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .stats-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 1rem;
+                margin: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Escape the Maze</h1>
+        
+        <div class="stats-container">
+            <div class="stat-box">
+                <div class="stat-value" id="timer">00:00</div>
+                <div class="stat-label">TIME</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="moves">0</div>
+                <div class="stat-label">MOVES</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="bonus">0</div>
+                <div class="stat-label">BONUS</div>
+            </div>
+        </div>
+
+        <div class="maze-container" id="mazeContainer">
+            <canvas id="mazeCanvas"></canvas>
+        </div>
+
+        <div class="message" id="message">Use arrow keys to navigate the maze!</div>
+
+        <div class="controls">
+            <button class="btn btn-start" id="startBtn">Start Game</button>
+            <button class="btn btn-replay" id="replayBtn">Replay Game</button>
+        </div>
+
+        <div class="instructions">
+            <h3>How to Play</h3>
+            <ul>
+                <li>Navigate from the red circle to the green finish flag</li>
+                <li>Use arrow keys to move your character</li>
+                <li>Complete the maze as quickly as possible</li>
+                <li>Shortest path bonus: Complete in under 30 seconds for extra points!</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Game elements
+            const canvas = document.getElementById('mazeCanvas');
+            const ctx = canvas.getContext('2d');
+            const timerElement = document.getElementById('timer');
+            const movesElement = document.getElementById('moves');
+            const bonusElement = document.getElementById('bonus');
+            const messageElement = document.getElementById('message');
+            const replayBtn = document.getElementById('replayBtn');
+            const startBtn = document.getElementById('startBtn');
+            const mazeContainer = document.getElementById('mazeContainer');
+
+            // Game constants
+            const CELL_SIZE = 30;
+            const ROWS = 15;
+            const COLS = 15;
+            const PLAYER_SIZE = 20;
+            const EXIT_SIZE = 25;
+
+            // Game state
+            let maze = [];
+            let player = { x: 1, y: 1 };
+            let exit = { x: COLS - 2, y: ROWS - 2 };
+            let startTime = null;
+            let timerInterval = null;
+            let moves = 0;
+            let bonus = 0;
+            let gameActive = false;
+            let gameOver = false;
+            let gameStarted = false;
+
+            // Initialize the game
+            function initGame() {
+                // Reset game state
+                moves = 0;
+                bonus = 0;
+                gameOver = false;
+                gameActive = true;
+                gameStarted = true;
+                
+                // Update UI
+                movesElement.textContent = moves;
+                bonusElement.textContent = bonus;
+                messageElement.textContent = "Use arrow keys to navigate the maze!";
+                messageElement.className = "message";
+                
+                // Clear timer
+                if (timerInterval) clearInterval(timerInterval);
+                
+                // Set up timer
+                startTime = new Date();
+                updateTimer();
+                timerInterval = setInterval(updateTimer, 1000);
+                
+                // Generate maze
+                generateMaze();
+                
+                // Position player at start
+                player = { x: 1, y: 1 };
+                
+                // Draw initial state
+                drawMaze();
+                
+                // Update start button state
+                startBtn.disabled = true;
+                startBtn.textContent = "Game Started";
+            }
+
+            // Generate a random maze using recursive backtracking
+            function generateMaze() {
+                // Initialize maze with walls
+                maze = Array(ROWS).fill().map(() => Array(COLS).fill(1));
+                
+                // Recursive backtracking algorithm
+                function carve(x, y) {
+                    const directions = [
+                        [0, 2], [2, 0], [0, -2], [-2, 0]
+                    ];
+                    
+                    // Shuffle directions
+                    for (let i = directions.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [directions[i], directions[j]] = [directions[j], directions[i]];
+                    }
+                    
+                    for (const [dx, dy] of directions) {
+                        const nx = x + dx;
+                        const ny = y + dy;
+                        
+                        if (nx >= 1 && nx < COLS - 1 && ny >= 1 && ny < ROWS - 1 && maze[ny][nx] === 1) {
+                            maze[y + dy/2][x + dx/2] = 0; // Carve path between cells
+                            maze[ny][nx] = 0; // Carve destination cell
+                            carve(nx, ny);
+                        }
+                    }
+                }
+                
+                // Start carving from (1,1)
+                maze[1][1] = 0;
+                carve(1, 1);
+                
+                // Ensure start and end are open
+                maze[1][1] = 0;
+                maze[ROWS-2][COLS-2] = 0;
+            }
+
+            // Draw the maze
+            function drawMaze() {
+                // Set canvas size
+                const containerSize = Math.min(mazeContainer.clientWidth, mazeContainer.clientHeight);
+                canvas.width = containerSize;
+                canvas.height = containerSize;
+                
+                const cellSize = Math.min(
+                    canvas.width / COLS,
+                    canvas.height / ROWS
+                );
+                
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw maze cells
+                for (let y = 0; y < ROWS; y++) {
+                    for (let x = 0; x < COLS; x++) {
+                        const screenX = x * cellSize;
+                        const screenY = y * cellSize;
+                        
+                        if (maze[y][x] === 1) {
+                            // Draw wall
+                            ctx.fillStyle = '#000000';
+                            ctx.fillRect(screenX, screenY, cellSize, cellSize);
+                        } else {
+                            // Draw floor
+                            ctx.fillStyle = '#ffffff';
+                            ctx.fillRect(screenX, screenY, cellSize, cellSize);
+                        }
+                    }
+                }
+                
+                // Draw exit
+                const exitScreenX = exit.x * cellSize + (cellSize - EXIT_SIZE) / 2;
+                const exitScreenY = exit.y * cellSize + (cellSize - EXIT_SIZE) / 2;
+                
+                ctx.fillStyle = '#2ecc71';
+                ctx.fillRect(exitScreenX, exitScreenY, EXIT_SIZE, EXIT_SIZE);
+                ctx.fillStyle = '#27ae60';
+                ctx.fillRect(exitScreenX + 2, exitScreenY + 2, EXIT_SIZE - 4, EXIT_SIZE - 4);
+                
+                // Draw exit flag
+                ctx.font = `${EXIT_SIZE}px Arial`;
+                ctx.fillText('🏁', exitScreenX + 5, exitScreenY + EXIT_SIZE - 5);
+                
+                // Draw player
+                const playerScreenX = player.x * cellSize + (cellSize - PLAYER_SIZE) / 2;
+                const playerScreenY = player.y * cellSize + (cellSize - PLAYER_SIZE) / 2;
+                
+                ctx.fillStyle = '#e74c3c';
+                ctx.beginPath();
+                ctx.arc(
+                    playerScreenX + PLAYER_SIZE/2,
+                    playerScreenY + PLAYER_SIZE/2,
+                    PLAYER_SIZE/2,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.fill();
+                
+                // Draw player eye
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(
+                    playerScreenX + PLAYER_SIZE/2,
+                    playerScreenY + PLAYER_SIZE/2,
+                    PLAYER_SIZE/4,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.fill();
+            }
+
+            // Update timer display
+            function updateTimer() {
+                if (!startTime || !gameActive) return;
+                
+                const now = new Date();
+                const elapsedSeconds = Math.floor((now - startTime) / 1000);
+                const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+                const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
+                timerElement.textContent = `${minutes}:${seconds}`;
+                
+                // Calculate bonus if under 30 seconds
+                if (elapsedSeconds < 30 && !gameOver) {
+                    bonus = Math.max(0, 30 - elapsedSeconds) * 10;
+                    bonusElement.textContent = bonus;
+                }
+            }
+
+            // Move player
+            function movePlayer(dx, dy) {
+                if (!gameActive || gameOver) return;
+                
+                const newX = player.x + dx;
+                const newY = player.y + dy;
+                
+                // Check bounds
+                if (newX < 0 || newX >= COLS || newY < 0 || newY >= ROWS) {
+                    return;
+                }
+                
+                // Check if it's a wall
+                if (maze[newY][newX] === 1) {
+                    return;
+                }
+                
+                // Update player position
+                player.x = newX;
+                player.y = newY;
+                
+                // Increment moves
+                moves++;
+                movesElement.textContent = moves;
+                
+                // Check win condition
+                if (player.x === exit.x && player.y === exit.y) {
+                    winGame();
+                }
+                
+                // Redraw
+                drawMaze();
+            }
+
+            // Handle win condition
+            function winGame() {
+                gameActive = false;
+                gameOver = true;
+                clearInterval(timerInterval);
+                
+                const finalTime = timerElement.textContent;
+                messageElement.textContent = `Congratulations! You escaped in ${finalTime} with ${moves} moves!`;
+                messageElement.className = "message win-message";
+                
+                // Enable replay button
+                replayBtn.disabled = false;
+                startBtn.disabled = false;
+                startBtn.textContent = "Start Game";
+            }
+
+            // Keyboard controls
+            document.addEventListener('keydown', (e) => {
+                if (!gameActive || !gameStarted) return;
+                
+                switch(e.key) {
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        movePlayer(0, -1);
+                        break;
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        movePlayer(0, 1);
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        movePlayer(-1, 0);
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        movePlayer(1, 0);
+                        break;
+                }
+            });
+
+            // Replay button
+            replayBtn.addEventListener('click', initGame);
+            
+            // Start button
+            startBtn.addEventListener('click', initGame);
+            
+            // Initialize the game but don't start automatically
+            function initializeGame() {
+                // Reset game state
+                moves = 0;
+                bonus = 0;
+                gameOver = false;
+                gameActive = false;
+                gameStarted = false;
+                
+                // Update UI
+                movesElement.textContent = moves;
+                bonusElement.textContent = bonus;
+                messageElement.textContent = "Click 'Start Game' to begin!";
+                messageElement.className = "message";
+                
+                // Clear timer
+                if (timerInterval) clearInterval(timerInterval);
+                
+                // Generate maze
+                generateMaze();
+                
+                // Position player at start
+                player = { x: 1, y: 1 };
+                
+                // Draw initial state
+                drawMaze();
+                
+                // Update start button state
+                startBtn.disabled = false;
+                startBtn.textContent = "Start Game";
+                replayBtn.disabled = true;
+            }
+
+            // Initialize the game
+            initializeGame();
+        });
+    </script>
+</body>
+</html>

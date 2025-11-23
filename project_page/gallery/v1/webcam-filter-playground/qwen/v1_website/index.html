@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webcam Filter Playground</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #000;
+            color: #fff;
+            min-height: 100vh;
+            padding: 10px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        header {
+            text-align: center;
+            padding: 15px 0;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        @media (min-width: 768px) {
+            .app-container {
+                flex-direction: row;
+            }
+        }
+
+        .preview-section {
+            flex: 1;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .controls-section {
+            width: 100%;
+            max-width: 350px;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            border-radius: 0;
+            overflow: hidden;
+            background: #000;
+            margin-bottom: 15px;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #videoPreview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .camera-error-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        .camera-error-overlay p {
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .grant-camera-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+
+        .grant-camera-btn:hover {
+            background: #0056b3;
+        }
+
+        .filter-controls {
+            margin-bottom: 15px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+            color: #ffcc00;
+        }
+
+        .filter-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .filter-btn {
+            background: #333;
+            border: 1px solid #555;
+            color: #fff;
+            padding: 10px 5px;
+            border-radius: 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            text-align: center;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .filter-btn:hover {
+            background: #444;
+        }
+
+        .filter-btn.active {
+            background: #ffcc00;
+            color: #000;
+            border-color: #ffcc00;
+            font-weight: bold;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .action-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 0;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 44px;
+        }
+
+        #captureBtn {
+            background: #dc3545;
+            color: white;
+        }
+
+        #saveBtn {
+            background: #28a745;
+            color: white;
+        }
+
+        #resetBtn {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .snapshot-section {
+            margin-top: 10px;
+        }
+
+        .snapshot-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .snapshot-item {
+            width: 80px;
+            height: 80px;
+            border-radius: 0;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: 1px solid #444;
+        }
+
+        .snapshot-item:hover {
+            transform: scale(1.05);
+        }
+
+        .snapshot-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .status {
+            text-align: center;
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 0;
+            background: #222;
+            border: 1px solid #444;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px 0 10px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            opacity: 0.7;
+            border-top: 1px solid #333;
+        }
+
+        @media (max-width: 767px) {
+            .filter-buttons {
+                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            }
+            
+            h1 {
+                font-size: 1.7rem;
+            }
+            
+            .container {
+                padding: 5px;
+            }
+            
+            .preview-section, .controls-section {
+                padding: 10px;
+            }
+        }
+
+        /* Loading spinner */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #ffcc00;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Error message styling */
+        .error-message {
+            color: #ff6b6b;
+            font-weight: bold;
+            padding: 10px;
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff6b6b;
+            border-radius: 0;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        /* Success message styling */
+        .success-message {
+            color: #4caf50;
+            font-weight: bold;
+            padding: 10px;
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid #4caf50;
+            border-radius: 0;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        /* Filter intensity controls */
+        .intensity-controls {
+            margin-top: 15px;
+        }
+
+        .intensity-slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .intensity-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .intensity-value {
+            font-weight: bold;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            .controls-section {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 id="appTitle">Webcam Filter Playground</h1>
+            <p class="subtitle">Apply fun filters to your live webcam feed. Capture moments and save your creations!</p>
+        </header>
+
+        <main class="app-container">
+            <section class="preview-section">
+                <div class="video-container" id="videoContainer">
+                    <video id="videoPreview" autoplay playsinline></video>
+                    <div class="camera-error-overlay hidden" id="cameraErrorOverlay">
+                        <p id="errorMessage">Camera access denied. Please grant permission to use your webcam.</p>
+                        <button class="grant-camera-btn" id="grantCameraBtn">Grant Camera Access</button>
+                    </div>
+                </div>
+                
+                <div class="status" id="statusMessage">
+                    Initializing camera...
+                </div>
+            </section>
+
+            <section class="controls-section">
+                <div class="filter-controls">
+                    <h2>Filters</h2>
+                    <div class="filter-buttons" id="filterButtons">
+                        <button class="filter-btn active" data-filter="none">None</button>
+                        <button class="filter-btn" data-filter="grayscale">Grayscale</button>
+                        <button class="filter-btn" data-filter="sepia">Sepia</button>
+                        <button class="filter-btn" data-filter="invert">Invert</button>
+                        <button class="filter-btn" data-filter="blur">Blur</button>
+                        <button class="filter-btn" data-filter="hue">Hue Shift</button>
+                        <button class="filter-btn" data-filter="brightness">Bright</button>
+                        <button class="filter-btn" data-filter="contrast">Contrast</button>
+                    </div>
+                    
+                    <div class="intensity-controls" id="intensityControls" style="display: none;">
+                        <div class="intensity-label">
+                            <span>Intensity:</span>
+                            <span class="intensity-value" id="intensityValue">100%</span>
+                        </div>
+                        <input type="range" min="0" max="200" value="100" class="intensity-slider" id="intensitySlider">
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="captureBtn" class="action-btn" disabled>
+                        <span>📸</span> Capture Snapshot
+                    </button>
+                    <button id="saveBtn" class="action-btn hidden">
+                        <span>💾</span> Save Image
+                    </button>
+                    <button id="resetBtn" class="action-btn">
+                        <span>🔄</span> Reset Filters
+                    </button>
+                </div>
+
+                <div class="snapshot-section">
+                    <h2>Snapshots</h2>
+                    <div class="snapshot-container" id="snapshotContainer">
+                        <!-- Snapshots will be added here dynamically -->
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Webcam Filter Playground &copy; 2023 | All filters applied in real-time</p>
+        </footer>
+    </div>
+
+    <script>
+        // DOM Elements
+        const video = document.getElementById('videoPreview');
+        const statusMessage = document.getElementById('statusMessage');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const captureBtn = document.getElementById('captureBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const snapshotContainer = document.getElementById('snapshotContainer');
+        const cameraErrorOverlay = document.getElementById('cameraErrorOverlay');
+        const errorMessage = document.getElementById('errorMessage');
+        const grantCameraBtn = document.getElementById('grantCameraBtn');
+        const intensityControls = document.getElementById('intensityControls');
+        const intensitySlider = document.getElementById('intensitySlider');
+        const intensityValue = document.getElementById('intensityValue');
+        const videoContainer = document.getElementById('videoContainer');
+
+        // State variables
+        let currentFilter = 'none';
+        let capturedImage = null;
+        let cameraActive = false;
+        let currentIntensity = 100;
+
+        // Initialize the webcam
+        async function initCamera() {
+            try {
+                statusMessage.textContent = 'Requesting camera access...';
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    } 
+                });
+                
+                video.srcObject = stream;
+                cameraActive = true;
+                statusMessage.textContent = 'Camera ready! Select a filter.';
+                captureBtn.disabled = false;
+                cameraErrorOverlay.classList.add('hidden');
+                videoContainer.classList.remove('camera-error-overlay');
+            } catch (err) {
+                console.error('Error accessing webcam:', err);
+                statusMessage.textContent = 'Error: Could not access camera. Please check permissions.';
+                cameraErrorOverlay.classList.remove('hidden');
+                captureBtn.disabled = true;
+                cameraActive = false;
+            }
+        }
+
+        // Apply filter to video
+        function applyFilter(filterName) {
+            let filterValue = '';
+            
+            switch(filterName) {
+                case 'grayscale':
+                    filterValue = `grayscale(${currentIntensity}%)`;
+                    break;
+                case 'sepia':
+                    filterValue = `sepia(${currentIntensity}%)`;
+                    break;
+                case 'invert':
+                    filterValue = `invert(${currentIntensity}%)`;
+                    break;
+                case 'blur':
+                    filterValue = `blur(${currentIntensity / 10}px)`;
+                    break;
+                case 'hue':
+                    filterValue = `hue-rotate(${currentIntensity / 2}deg)`;
+                    break;
+                case 'brightness':
+                    filterValue = `brightness(${currentIntensity}%)`;
+                    break;
+                case 'contrast':
+                    filterValue = `contrast(${currentIntensity}%)`;
+                    break;
+                default:
+                    filterValue = 'none';
+            }
+            
+            video.style.filter = filterValue;
+            currentFilter = filterName;
+            
+            // Show/hide intensity controls based on filter
+            if (['grayscale', 'sepia', 'invert', 'blur', 'hue', 'brightness', 'contrast'].includes(filterName)) {
+                intensityControls.style.display = 'block';
+                updateIntensityDisplay();
+            } else {
+                intensityControls.style.display = 'none';
+            }
+        }
+
+        // Update intensity display
+        function updateIntensityDisplay() {
+            intensityValue.textContent = `${currentIntensity}%`;
+            intensitySlider.value = currentIntensity;
+        }
+
+        // Capture snapshot
+        function captureSnapshot() {
+            if (!cameraActive) return;
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            
+            // Draw current video frame
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Convert to data URL
+            const imageData = canvas.toDataURL('image/png');
+            
+            // Store captured image
+            capturedImage = imageData;
+            
+            // Update UI
+            saveBtn.classList.remove('hidden');
+            statusMessage.textContent = 'Snapshot captured! Click "Save Image" to download.';
+            
+            // Add to snapshots gallery
+            addSnapshotToGallery(imageData);
+        }
+
+        // Add snapshot to gallery
+        function addSnapshotToGallery(imageData) {
+            const snapshotItem = document.createElement('div');
+            snapshotItem.className = 'snapshot-item';
+            
+            const img = document.createElement('img');
+            img.src = imageData;
+            img.alt = 'Captured snapshot';
+            
+            snapshotItem.appendChild(img);
+            snapshotContainer.prepend(snapshotItem);
+            
+            // Add click event to restore snapshot
+            snapshotItem.addEventListener('click', () => {
+                statusMessage.textContent = 'Snapshot restored from gallery!';
+            });
+        }
+
+        // Save image
+        function saveImage() {
+            if (!capturedImage) return;
+            
+            const link = document.createElement('a');
+            link.download = `webcam-filter-${Date.now()}.png`;
+            link.href = capturedImage;
+            link.click();
+            
+            statusMessage.textContent = 'Image saved successfully!';
+        }
+
+        // Reset filters
+        function resetFilters() {
+            applyFilter('none');
+            saveBtn.classList.add('hidden');
+            capturedImage = null;
+            statusMessage.textContent = 'Filters reset. Select a new filter.';
+            currentIntensity = 100;
+            updateIntensityDisplay();
+            
+            // Remove active class from all buttons except "None"
+            filterButtons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.filter === 'none') {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        // Handle intensity slider change
+        function handleIntensityChange() {
+            currentIntensity = parseInt(intensitySlider.value);
+            updateIntensityDisplay();
+            applyFilter(currentFilter);
+        }
+
+        // Event Listeners
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                
+                // Add active class to clicked button
+                button.classList.add('active');
+                
+                // Apply selected filter
+                applyFilter(button.dataset.filter);
+                statusMessage.textContent = `Applied ${button.dataset.filter} filter`;
+            });
+        });
+
+        captureBtn.addEventListener('click', captureSnapshot);
+        saveBtn.addEventListener('click', saveImage);
+        resetBtn.addEventListener('click', resetFilters);
+        
+        // Intensity slider event
+        intensitySlider.addEventListener('input', handleIntensityChange);
+        
+        // Grant camera access button
+        grantCameraBtn.addEventListener('click', () => {
+            initCamera();
+        });
+
+        // Initialize the app
+        window.addEventListener('load', () => {
+            initCamera();
+        });
+    </script>
+</body>
+</html>

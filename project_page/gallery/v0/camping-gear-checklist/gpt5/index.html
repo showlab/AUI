@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8" />
+  <title>Camping Gear Checklist</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg-sky:#cbe6ff;
+      --bg-forest:#0f3d2e;
+      --bg-earth:#2a4236;
+      --accent:#56b37f;
+      --accent-dark:#3d8f64;
+      --accent-2:#f8b400;
+      --text:#0d1b16;
+      --muted:#6a7d72;
+      --card:#ffffffee;
+      --chip:#e8f4ee;
+      --danger:#b94d4d;
+      --warning:#d99d2b;
+      --ok:#2f9e44;
+      --shadow: 0 8px 24px rgba(0,0,0,.15);
+      --radius: 14px;
+    }
+    *{ box-sizing:border-box; }
+    html, body { height:100%; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      color:var(--text);
+      background:
+        linear-gradient(180deg, var(--bg-sky) 0%, #a8d7ff 35%, #83c1ed 50%, #65b1de 60%, #3c8cba 70%, #275d75 78%, var(--bg-forest) 100%);
+      min-height:100vh;
+      overflow-y:auto;
+    }
+    /* Decorative mountains/trees */
+    header::before, header::after{
+      content:"";
+      position:absolute; left:0; right:0; bottom:-1px; height:140px; pointer-events:none;
+      background:
+        radial-gradient(120px 120px at 10% 100%, #3f6f56 60%, transparent 61%),
+        radial-gradient(100px 100px at 28% 100%, #2f5a44 60%, transparent 61%),
+        radial-gradient(150px 150px at 47% 100%, #355f49 60%, transparent 61%),
+        radial-gradient(120px 120px at 66% 100%, #2f5a44 60%, transparent 61%),
+        radial-gradient(160px 160px at 86% 100%, #3f6f56 60%, transparent 61%);
+      opacity:.9;
+    }
+    header{
+      position:relative;
+      padding:28px 24px 120px 24px;
+      color:#083023;
+      text-shadow: 0 1px 0 rgba(255,255,255,.4);
+    }
+    #appTitle{
+      margin:0;
+      font-size: clamp(24px, 3.2vw, 40px);
+      letter-spacing:.5px;
+      display:flex; align-items:center; gap:12px;
+    }
+    #appTitle .emoji{
+      font-size:1.1em;
+      filter: drop-shadow(0 2px 0 rgba(255,255,255,.5));
+    }
+    .header-toolbar{
+      margin-top:12px;
+      display:flex; gap:12px; flex-wrap:wrap; align-items:center;
+    }
+    .unit-select, .search, .category-filter {
+      background:var(--card);
+      border-radius:999px;
+      padding:8px 12px;
+      box-shadow: var(--shadow);
+      display:flex; align-items:center; gap:8px;
+    }
+    .unit-select select, .search input, .category-filter select{
+      border:none; background:transparent; outline:none; font-size:14px; color:var(--text);
+      min-width: 140px;
+    }
+    main{
+      width: min(1200px, 96vw);
+      margin:-70px auto 24px;
+      display:grid; grid-template-columns: 360px 1fr; gap:18px;
+      align-items:flex-start;
+    }
+    @media (max-width: 980px){
+      main{ grid-template-columns: 1fr; margin-top:-70px; }
+    }
+    .card{
+      background:var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:16px;
+    }
+    .card h2, .card h3 {
+      margin:0 0 10px 0; font-size:18px;
+    }
+    /* Controls column */
+    .form-row{
+      display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;
+    }
+    .form-row.full{ grid-template-columns: 1fr; }
+    label{ font-size:12px; color:var(--muted); display:block; margin-bottom:4px; }
+    input[type=text], input[type=number], select, textarea{
+      width:100%;
+      padding:10px 12px;
+      border:1px solid #d8e2dc;
+      border-radius:10px;
+      background:#fff;
+      font-size:14px;
+      outline:none;
+    }
+    textarea{ resize:vertical; min-height:58px; }
+    .btn{
+      appearance:none; border:none; outline:none;
+      background:var(--accent);
+      color:white; padding:10px 14px;
+      border-radius:10px; font-weight:600;
+      cursor:pointer; transition:.15s ease;
+      display:inline-flex; align-items:center; gap:8px;
+    }
+    .btn:hover{ background:var(--accent-dark); transform: translateY(-1px); }
+    .btn.secondary{ background:#e5efe9; color:#0f3829; }
+    .btn.warn{ background:var(--warning); color:#241602; }
+    .btn.danger{ background:var(--danger); }
+    .btn.ghost{
+      background:transparent; color:#0f3829; border:1px solid #cfe3d9;
+    }
+    .btn.small{ padding:8px 10px; font-size:13px; border-radius:9px; }
+    .btn-group{ display:flex; flex-wrap:wrap; gap:8px; }
+    .chip{
+      display:inline-flex; align-items:center; gap:6px;
+      background:var(--chip); color:#20533f;
+      padding:6px 10px; border-radius:999px; font-size:12px; font-weight:600;
+    }
+    .summary{
+      display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;
+    }
+    .summary .stat{
+      background:#f5fbf8; border:1px dashed #cfe3d9; border-radius:12px; padding:10px;
+      text-align:center;
+    }
+    .stat .label{ color:var(--muted); font-size:12px; }
+    .stat .value{ font-size:16px; font-weight:700; margin-top:4px; }
+    .progress{
+      margin-top:10px; background:#e7f2ed; border-radius:999px; overflow:hidden;
+      height:10px;
+    }
+    .progress .bar{
+      height:100%; width:0%; background:linear-gradient(90deg, var(--accent), #7dd3a6);
+      transition: width .25s ease;
+    }
+    /* List toolbar */
+    .list-toolbar{
+      display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:8px;
+    }
+    /* Gear list */
+    #gearList{
+      list-style:none; padding:0; margin:0;
+      display:grid; gap:10px;
+    }
+    .gear-item{
+      display:grid;
+      grid-template-columns: 30px 1fr auto auto auto;
+      gap:12px; align-items:center;
+      background:#ffffff; border:1px solid #e8efe9; border-radius:12px; padding:10px;
+    }
+    @media (max-width: 720px){
+      .gear-item{ grid-template-columns: 30px 1fr; grid-auto-rows:auto; }
+      .gear-item .qty, .gear-item .weight, .gear-item .actions{ grid-column: 2 / span 1; }
+    }
+    .checkbox{
+      position:relative; width:20px; height:20px; display:inline-block;
+    }
+    .checkbox input{
+      appearance:none; width:20px; height:20px; margin:0; border-radius:6px;
+      border:2px solid #96cdb3; background:#fff; cursor:pointer;
+      display:inline-block; position:relative; transition:.15s;
+    }
+    .checkbox input:checked{
+      background: var(--ok);
+      border-color: var(--ok);
+    }
+    .checkbox input:checked::after{
+      content:""; position:absolute; left:5px; top:1px; width:6px; height:12px;
+      border-right:2px solid #fff; border-bottom:2px solid #fff; transform:rotate(45deg);
+    }
+    .item-main .name{
+      font-weight:700; font-size:15px;
+    }
+    .item-main .meta{
+      display:flex; gap:8px; flex-wrap:wrap; margin-top:4px;
+    }
+    .badge{
+      background:#ecf7f1; color:#2b6b51; padding:4px 8px; border-radius:999px; font-size:12px; font-weight:600;
+      border:1px solid #d4ece1;
+    }
+    .note{
+      color:#406b59; font-size:12px; margin-top:4px;
+    }
+    .packed .name{ text-decoration: line-through; color:#6c8b7d; }
+    .qty{
+      display:flex; align-items:center; gap:6px;
+      background:#f6fbf8; padding:6px; border-radius:10px; border:1px solid #e1efe9;
+    }
+    .qty input{
+      width:60px; text-align:center;
+    }
+    .qty .btn{ padding:6px 10px; }
+    .weight{
+      color:#20533f; font-weight:600; text-align:right; min-width:140px;
+    }
+    .weight small{ display:block; font-weight:400; color:#4f6e61; }
+    .actions{ display:flex; gap:6px; }
+    .gear-item.editing{
+      border-color:#b4e0cc; background:#f2fbf7;
+    }
+    .edit-fields{
+      display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:8px; grid-column: 2 / -1;
+      padding-top:6px;
+    }
+    .edit-fields .row-2{ grid-column:1 / -1; }
+    .footer{
+      text-align:center; color:#e1efe9; font-size:12px; padding:16px 0 32px;
+    }
+    .tip{ font-size:12px; color:#527a69; }
+    /* small helper classes */
+    .space{ height:10px; }
+    .hidden{ display:none !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 id="appTitle"><span class="emoji">🏕️</span> Camping Gear Checklist</h1>
+    <div class="header-toolbar">
+      <div class="unit-select" title="Choose display unit">
+        <span>Display unit</span>
+        <select id="displayUnit" aria-label="Display unit">
+          <option value="g">grams (g)</option>
+          <option value="kg">kilograms (kg)</option>
+          <option value="oz">ounces (oz)</option>
+          <option value="lb">pounds (lb)</option>
+        </select>
+      </div>
+      <div class="search">
+        <span>Search</span>
+        <input id="searchInput" type="text" placeholder="Find gear..." aria-label="Search gear" />
+      </div>
+      <div class="category-filter">
+        <span>Category</span>
+        <select id="filterCategory" aria-label="Filter by category">
+          <option value="">All</option>
+        </select>
+      </div>
+      <span class="chip" id="packedCountDisplay">Packed 0/0 items</span>
+    </div>
+  </header>
+
+  <main id="appRoot">
+    <aside>
+      <section class="card" aria-labelledby="addItemHeading">
+        <h2 id="addItemHeading">Add Gear</h2>
+        <form id="addItemForm">
+          <div class="form-row full">
+            <div>
+              <label for="inputName">Item name</label>
+              <input id="inputName" type="text" placeholder="e.g., Tent, Headlamp" required />
+            </div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label for="inputCategory">Category</label>
+              <input id="inputCategory" list="categoryDatalist" type="text" placeholder="e.g., Shelter" />
+              <datalist id="categoryDatalist"></datalist>
+            </div>
+            <div>
+              <label for="inputQuantity">Quantity</label>
+              <input id="inputQuantity" type="number" min="1" step="1" value="1" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label for="inputWeight">Weight per item</label>
+              <input id="inputWeight" type="number" min="0" step="0.01" placeholder="e.g., 250" />
+            </div>
+            <div>
+              <label for="selectUnit">Unit</label>
+              <select id="selectUnit">
+                <option value="g">g</option>
+                <option value="kg">kg</option>
+                <option value="oz">oz</option>
+                <option value="lb">lb</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row full">
+            <div>
+              <label for="inputNote">Note (optional)</label>
+              <textarea id="inputNote" placeholder="e.g., stakes included, spare batteries"></textarea>
+            </div>
+          </div>
+          <div class="btn-group">
+            <button id="btnAddItem" type="submit" class="btn">Add Item</button>
+            <button id="btnAddSampleData" type="button" class="btn secondary">Add Sample Items</button>
+          </div>
+          <div class="space"></div>
+          <div class="btn-group">
+            <button id="btnCheckAll" type="button" class="btn ghost small">Check All</button>
+            <button id="btnUncheckAll" type="button" class="btn ghost small">Uncheck All</button>
+            <button id="btnClearPacked" type="button" class="btn warn small">Remove Packed</button>
+            <button id="btnClearAll" type="button" class="btn danger small">Clear All</button>
+          </div>
+          <div class="space"></div>
+          <div class="tip">Tip: Weight calculator updates as you add, edit, and check items.</div>
+        </form>
+      </section>
+
+      <section class="card" aria-labelledby="saveLoadHeading">
+        <h2 id="saveLoadHeading">Save / Load Lists</h2>
+        <div class="form-row full">
+          <div>
+            <label for="listNameInput">List name</label>
+            <input id="listNameInput" type="text" placeholder="e.g., Yosemite Weekend" />
+          </div>
+        </div>
+        <div class="btn-group">
+          <button id="btnNewList" type="button" class="btn ghost">New List</button>
+          <button id="btnSaveList" type="button" class="btn">Save as New</button>
+          <button id="btnUpdateList" type="button" class="btn secondary">Update Current</button>
+        </div>
+        <div class="space"></div>
+        <div class="form-row full">
+          <div>
+            <label for="savedListsSelect">Saved lists</label>
+            <select id="savedListsSelect"></select>
+          </div>
+        </div>
+        <div class="btn-group">
+          <button id="btnLoadList" type="button" class="btn">Load</button>
+          <button id="btnDeleteList" type="button" class="btn danger">Delete</button>
+          <button id="btnExportList" type="button" class="btn ghost">Export</button>
+          <button id="btnImportList" type="button" class="btn ghost">Import</button>
+          <input id="fileImport" type="file" accept="application/json" class="hidden" />
+        </div>
+        <div id="currentListStatus" class="tip" aria-live="polite"></div>
+      </section>
+
+      <section class="card" aria-labelledby="totalsHeading">
+        <h2 id="totalsHeading">Weight Summary</h2>
+        <div class="summary">
+          <div class="stat">
+            <div class="label">Packed</div>
+            <div class="value" id="totalPacked">0 g</div>
+          </div>
+          <div class="stat">
+            <div class="label">Unpacked</div>
+            <div class="value" id="totalUnpacked">0 g</div>
+          </div>
+          <div class="stat">
+            <div class="label">All Items</div>
+            <div class="value" id="totalAll">0 g</div>
+          </div>
+        </div>
+        <div class="space"></div>
+        <div class="label">Packed progress</div>
+        <div class="progress" aria-label="Packed progress">
+          <div id="progressPackedBar" class="bar"></div>
+        </div>
+      </section>
+    </aside>
+
+    <section class="card" aria-labelledby="gearListHeading">
+      <div class="list-toolbar">
+        <h2 id="gearListHeading">Gear List</h2>
+        <div class="btn-group">
+          <button id="btnCollapseNotes" type="button" class="btn ghost small">Toggle Notes</button>
+        </div>
+      </div>
+      <ul id="gearList" aria-live="polite"></ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Made for the outdoors. Your lists are saved locally in your browser.
+  </footer>
+
+  <script>
+    // State and constants
+    const SAVED_LISTS_KEY = 'campingGear_savedLists_v1';
+    const LAST_SESSION_KEY = 'campingGear_lastSession_v1';
+
+    const DEFAULT_CATEGORIES = [
+      'Shelter','Sleep','Kitchen','Clothing','Health','Tools','Electronics','Food','Water','Navigation','Misc'
+    ];
+
+    const unitToGrams = {
+      g: 1,
+      kg: 1000,
+      oz: 28.349523125,
+      lb: 453.59237,
+    };
+
+    const state = {
+      items: [],
+      currentListName: null,
+      dirty: false,
+      showNotes: true,
+      savedLists: {},
+    };
+
+    // Helpers
+    const $ = (sel, scope=document)=>scope.querySelector(sel);
+    const $$ = (sel, scope=document)=>Array.from(scope.querySelectorAll(sel));
+
+    function generateId(){
+      return 'itm-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,7);
+    }
+
+    function gramsFrom(value, unit){
+      const v = Number(value || 0);
+      const factor = unitToGrams[unit] || 1;
+      return v * factor;
+    }
+
+    function convertFromGrams(grams, unit){
+      const factor = unitToGrams[unit] || 1;
+      return grams / factor;
+    }
+
+    function formatWeight(grams, unit){
+      const val = convertFromGrams(grams, unit);
+      let decimals = unit === 'g' ? 0 : 2;
+      const s = val.toFixed(decimals);
+      return `${trimZeros(s)} ${unit}`;
+    }
+
+    function trimZeros(str){
+      if (str.indexOf('.') >= 0){
+        str = str.replace(/\.?0+$/,'');
+      }
+      return str;
+    }
+
+    function pluralize(word, n){
+      return n === 1 ? word : word + 's';
+    }
+
+    function setDirty(flag=true){
+      state.dirty = flag;
+      updateCurrentStatus();
+      saveLastSession();
+    }
+
+    function updateCurrentStatus(){
+      const statusEl = $('#currentListStatus');
+      const name = state.currentListName ? `“${state.currentListName}”` : 'Unsaved list';
+      const modified = state.dirty ? '• Unsaved changes' : '';
+      statusEl.textContent = `${name} ${modified}`.trim();
+    }
+
+    // Storage
+    function loadSavedLists(){
+      try{
+        const raw = localStorage.getItem(SAVED_LISTS_KEY);
+        state.savedLists = raw ? JSON.parse(raw) : {};
+      }catch(e){
+        state.savedLists = {};
+      }
+      populateSavedListsSelect();
+    }
+
+    function saveSavedLists(){
+      localStorage.setItem(SAVED_LISTS_KEY, JSON.stringify(state.savedLists));
+    }
+
+    function saveLastSession(){
+      const session = {
+        items: state.items,
+        currentListName: state.currentListName,
+        displayUnit: $('#displayUnit').value,
+        showNotes: state.showNotes
+      };
+      localStorage.setItem(LAST_SESSION_KEY, JSON.stringify(session));
+    }
+
+    function restoreLastSession(){
+      try{
+        const raw = localStorage.getItem(LAST_SESSION_KEY);
+        if (!raw) return false;
+        const session = JSON.parse(raw);
+        if (Array.isArray(session.items)){
+          state.items = session.items;
+        }
+        if (session.currentListName){
+          state.currentListName = session.currentListName;
+        }
+        if (session.displayUnit && unitToGrams[session.displayUnit]){
+          $('#displayUnit').value = session.displayUnit;
+        }
+        state.showNotes = session.showNotes !== false;
+        setDirty(false);
+        return true;
+      }catch(e){
+        return false;
+      }
+    }
+
+    // Rendering
+    function renderCategoriesDatalist(){
+      const dl = $('#categoryDatalist');
+      const cats = new Set([...DEFAULT_CATEGORIES, ...state.items.map(i=>i.category || '').filter(Boolean)]);
+      dl.innerHTML = [...cats].map(c => `<option value="${escapeHtml(c)}">`).join('');
+      // Filter dropdown
+      const filterSel = $('#filterCategory');
+      const prev = filterSel.value;
+      const options = ['','Shelter','Sleep','Kitchen','Clothing','Health','Tools','Electronics','Food','Water','Navigation','Misc', ...state.items.map(i=>i.category).filter(Boolean)];
+      const uniq = [...new Set(options)];
+      filterSel.innerHTML = uniq.map(c => {
+        if (c==='') return `<option value="">All</option>`;
+        return `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`;
+      }).join('');
+      filterSel.value = prev || '';
+    }
+
+    function render(){
+      renderCategoriesDatalist();
+      renderList();
+      renderTotals();
+      updateCurrentStatus();
+    }
+
+    function getFilters(){
+      const q = $('#searchInput').value.trim().toLowerCase();
+      const cat = $('#filterCategory').value;
+      return { q, cat };
+    }
+
+    function filteredItems(){
+      const { q, cat } = getFilters();
+      return state.items.filter(item=>{
+        const matchesQ = !q || [item.name, item.category, item.note].filter(Boolean).some(t => t.toLowerCase().includes(q));
+        const matchesC = !cat || (item.category || '') === cat;
+        return matchesQ && matchesC;
+      });
+    }
+
+    function renderList(){
+      const list = $('#gearList');
+      const items = filteredItems();
+      if (!items.length){
+        list.innerHTML = `<li class="gear-item" aria-live="polite" style="grid-template-columns: 1fr; text-align:center; color:#567a6b;">
+          Your list is empty. Add items to get started!
+        </li>`;
+        $('#packedCountDisplay').textContent = `Packed 0/0 items`;
+        return;
+      }
+      const displayUnit = $('#displayUnit').value;
+      const html = items.map(item=>{
+        const totalGrams = item.weightGrams * item.quantity;
+        const packedCls = item.packed ? ' packed' : '';
+        const notes = item.note && state.showNotes ? `<div class="note">📝 ${escapeHtml(item.note)}</div>` : '';
+        return `
+          <li class="gear-item${packedCls}" data-id="${item.id}">
+            <label class="checkbox" title="Mark as packed">
+              <input type="checkbox" id="chk-${item.id}" ${item.packed?'checked':''} />
+            </label>
+            <div class="item-main">
+              <div class="name">${escapeHtml(item.name)}</div>
+              <div class="meta">
+                ${item.category ? `<span class="badge">${escapeHtml(item.category)}</span>` : ''}
+                <span class="badge" title="Per-item weight">${formatWeight(item.weightGrams, displayUnit)} ea</span>
+                <span class="badge" title="Quantity">${item.quantity} ${pluralize('pc', item.quantity)}</span>
+              </div>
+              ${notes}
+            </div>
+            <div class="qty" aria-label="Quantity controls">
+              <button class="btn ghost small qty-dec" title="Decrease">−</button>
+              <input class="qty-input" type="number" min="1" step="1" value="${item.quantity}" aria-label="Quantity input"/>
+              <button class="btn ghost small qty-inc" title="Increase">+</button>
+            </div>
+            <div class="weight">
+              <div>${formatWeight(totalGrams, displayUnit)}</div>
+              <small>${formatWeight(item.weightGrams, displayUnit)} × ${item.quantity}</small>
+            </div>
+            <div class="actions">
+              <button class="btn ghost small btn-edit" title="Edit">Edit</button>
+              <button class="btn ghost small btn-dup" title="Duplicate">Copy</button>
+              <button class="btn danger small btn-del" title="Delete">Delete</button>
+            </div>
+          </li>
+        `;
+      }).join('');
+      list.innerHTML = html;
+
+      // Update packed count display (all items, not just filtered)
+      const packedCount = state.items.filter(i=>i.packed).length;
+      $('#packedCountDisplay').textContent = `Packed ${packedCount}/${state.items.length} items`;
+    }
+
+    function computeTotals(){
+      let all=0, packed=0, unpacked=0;
+      for (const item of state.items){
+        const weight = item.weightGrams * item.quantity;
+        all += weight;
+        if (item.packed) packed += weight; else unpacked += weight;
+      }
+      return { all, packed, unpacked };
+    }
+
+    function renderTotals(){
+      const displayUnit = $('#displayUnit').value;
+      const { all, packed, unpacked } = computeTotals();
+      $('#totalAll').textContent = formatWeight(all, displayUnit);
+      $('#totalPacked').textContent = formatWeight(packed, displayUnit);
+      $('#totalUnpacked').textContent = formatWeight(unpacked, displayUnit);
+      const count = state.items.length || 1;
+      const packedCount = state.items.filter(i=>i.packed).length;
+      const percent = Math.round((packedCount / count) * 100);
+      $('#progressPackedBar').style.width = percent + '%';
+    }
+
+    // Item operations
+    function addItemFromForm(e){
+      if (e) e.preventDefault();
+      const name = $('#inputName').value.trim();
+      let category = $('#inputCategory').value.trim();
+      const qty = Math.max(1, parseInt($('#inputQuantity').value || '1', 10));
+      const weightVal = parseFloat($('#inputWeight').value || '0');
+      const unit = $('#selectUnit').value;
+      const note = $('#inputNote').value.trim();
+
+      if (!name){
+        alert('Please enter an item name.');
+        return;
+      }
+      if (isNaN(weightVal) || weightVal < 0){
+        alert('Please enter a valid weight (0 or more).');
+        return;
+      }
+      if (!category) category = 'Misc';
+
+      const item = {
+        id: generateId(),
+        name,
+        category,
+        quantity: qty,
+        weightGrams: gramsFrom(weightVal, unit),
+        note,
+        packed: false
+      };
+      state.items.push(item);
+      clearAddForm();
+      setDirty(true);
+      render();
+    }
+
+    function clearAddForm(){
+      $('#inputName').value = '';
+      $('#inputCategory').value = '';
+      $('#inputQuantity').value = 1;
+      $('#inputWeight').value = '';
+      $('#inputNote').value = '';
+      $('#inputName').focus();
+    }
+
+    function updateItemQuantity(id, newQty){
+      const item = state.items.find(i=>i.id===id);
+      if (!item) return;
+      const qty = Math.max(1, parseInt(newQty || '1', 10));
+      item.quantity = qty;
+      setDirty(true);
+      renderTotals();
+      // Update only the row qty/weight for performance
+      renderList(); // ensure consistent display
+    }
+
+    function togglePacked(id, packed){
+      const item = state.items.find(i=>i.id===id);
+      if (!item) return;
+      item.packed = packed;
+      setDirty(true);
+      renderList();
+      renderTotals();
+    }
+
+    function deleteItem(id){
+      const idx = state.items.findIndex(i=>i.id===id);
+      if (idx >= 0){
+        state.items.splice(idx,1);
+        setDirty(true);
+        render();
+      }
+    }
+
+    function duplicateItem(id){
+      const item = state.items.find(i=>i.id===id);
+      if (!item) return;
+      const copy = JSON.parse(JSON.stringify(item));
+      copy.id = generateId();
+      copy.packed = false;
+      copy.name = item.name + ' (copy)';
+      state.items.push(copy);
+      setDirty(true);
+      render();
+    }
+
+    function openEditRow(li, item){
+      li.classList.add('editing');
+      const displayUnit = $('#displayUnit').value;
+      const editor = document.createElement('div');
+      editor.className = 'edit-fields';
+      editor.innerHTML = `
+        <div>
+          <label class="label">Name</label>
+          <input type="text" class="edit-name" value="${escapeHtmlAttr(item.name)}"/>
+        </div>
+        <div>
+          <label class="label">Category</label>
+          <input type="text" class="edit-category" list="categoryDatalist" value="${escapeHtmlAttr(item.category || '')}"/>
+        </div>
+        <div>
+          <label class="label">Quantity</label>
+          <input type="number" class="edit-qty" min="1" step="1" value="${item.quantity}"/>
+        </div>
+        <div>
+          <label class="label">Weight</label>
+          <div style="display:flex; gap:6px;">
+            <input type="number" class="edit-weight" min="0" step="0.01" value="${convertFromGrams(item.weightGrams, displayUnit).toFixed(displayUnit==='g'?0:2)}" style="flex:1;"/>
+            <select class="edit-unit">
+              ${Object.keys(unitToGrams).map(u => `<option value="${u}" ${u===displayUnit?'selected':''}>${u}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="row-2">
+          <label class="label">Note</label>
+          <input type="text" class="edit-note" value="${escapeHtmlAttr(item.note || '')}"/>
+        </div>
+        <div class="row-2" style="display:flex; gap:8px; justify-content:flex-end;">
+          <button class="btn secondary small btn-cancel-edit">Cancel</button>
+          <button class="btn small btn-save-edit">Save</button>
+        </div>
+      `;
+      li.appendChild(editor);
+    }
+
+    function saveEdit(li, id){
+      const item = state.items.find(i=>i.id===id);
+      if (!item) return;
+      const name = $('.edit-name', li).value.trim();
+      const category = $('.edit-category', li).value.trim() || 'Misc';
+      const qty = Math.max(1, parseInt($('.edit-qty', li).value || '1', 10));
+      const wVal = parseFloat($('.edit-weight', li).value || '0');
+      const wUnit = $('.edit-unit', li).value;
+      const note = $('.edit-note', li).value.trim();
+      if (!name){
+        alert('Please enter an item name.');
+        return;
+      }
+      if (isNaN(wVal) || wVal < 0){
+        alert('Please enter a valid weight (0 or more).');
+        return;
+      }
+      item.name = name;
+      item.category = category;
+      item.quantity = qty;
+      item.weightGrams = gramsFrom(wVal, wUnit);
+      item.note = note;
+      setDirty(true);
+      render();
+    }
+
+    function cancelEdit(li){
+      li.classList.remove('editing');
+      const edit = $('.edit-fields', li);
+      if (edit) edit.remove();
+    }
+
+    // Save/Load
+    function populateSavedListsSelect(){
+      const sel = $('#savedListsSelect');
+      const names = Object.keys(state.savedLists).sort((a,b)=> a.localeCompare(b));
+      sel.innerHTML = names.length ? names.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('') : `<option value="">No saved lists</option>`;
+    }
+
+    function newList(){
+      if (state.items.length && state.dirty){
+        const ok = confirm('Discard current changes and start a new list?');
+        if (!ok) return;
+      }
+      state.items = [];
+      state.currentListName = null;
+      $('#listNameInput').value = '';
+      setDirty(false);
+      render();
+    }
+
+    function saveAsNew(){
+      const name = $('#listNameInput').value.trim();
+      if (!name){
+        alert('Enter a list name to save.');
+        return;
+      }
+      if (state.savedLists[name]){
+        const overwrite = confirm('A list with this name exists. Overwrite?');
+        if (!overwrite) return;
+      }
+      const now = new Date().toISOString();
+      state.savedLists[name] = {
+        name,
+        items: state.items,
+        createdAt: state.savedLists[name]?.createdAt || now,
+        updatedAt: now
+      };
+      state.currentListName = name;
+      setDirty(false);
+      saveSavedLists();
+      populateSavedListsSelect();
+      alert('List saved.');
+    }
+
+    function updateCurrent(){
+      if (!state.currentListName){
+        alert('No current list. Use "Save as New" first.');
+        return;
+      }
+      const name = state.currentListName;
+      const now = new Date().toISOString();
+      state.savedLists[name] = {
+        name,
+        items: state.items,
+        createdAt: state.savedLists[name]?.createdAt || now,
+        updatedAt: now
+      };
+      setDirty(false);
+      saveSavedLists();
+      alert('List updated.');
+    }
+
+    function loadSelected(){
+      const sel = $('#savedListsSelect');
+      const name = sel.value;
+      if (!name){
+        alert('No saved list selected.');
+        return;
+      }
+      const list = state.savedLists[name];
+      if (!list){
+        alert('List not found.');
+        return;
+      }
+      if (state.dirty){
+        const ok = confirm('Discard current unsaved changes and load the selected list?');
+        if (!ok) return;
+      }
+      state.items = JSON.parse(JSON.stringify(list.items || []));
+      state.currentListName = name;
+      $('#listNameInput').value = name;
+      setDirty(false);
+      render();
+    }
+
+    function deleteSelected(){
+      const sel = $('#savedListsSelect');
+      const name = sel.value;
+      if (!name || !state.savedLists[name]){
+        alert('No saved list selected.');
+        return;
+      }
+      const ok = confirm(`Delete the saved list “${name}”? This cannot be undone.`);
+      if (!ok) return;
+      delete state.savedLists[name];
+      saveSavedLists();
+      populateSavedListsSelect();
+      if (state.currentListName === name){
+        state.currentListName = null;
+        $('#listNameInput').value = '';
+        setDirty(true); // current items remain in view
+      }
+      alert('List deleted.');
+    }
+
+    function exportCurrent(){
+      const data = {
+        name: state.currentListName || $('#listNameInput').value.trim() || 'Unnamed List',
+        items: state.items
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `camping-gear-${sanitizeFilename(data.name)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+    }
+
+    function importFromFile(){
+      $('#fileImport').click();
+    }
+
+    function handleFileImport(e){
+      const file = e.target.files[0];
+      e.target.value = '';
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try{
+          const obj = JSON.parse(reader.result);
+          if (!obj || !Array.isArray(obj.items)){
+            alert('Invalid file format.');
+            return;
+          }
+          const ok = confirm('Importing will replace the current items. Continue?');
+          if (!ok) return;
+          state.items = obj.items.map(normalizeItem);
+          state.currentListName = obj.name || null;
+          $('#listNameInput').value = obj.name || '';
+          setDirty(true);
+          render();
+        }catch(err){
+          alert('Failed to read the file.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function normalizeItem(i){
+      return {
+        id: i.id || generateId(),
+        name: i.name || 'Item',
+        category: i.category || 'Misc',
+        quantity: Math.max(1, parseInt(i.quantity || 1, 10)),
+        weightGrams: typeof i.weightGrams === 'number' ? i.weightGrams : gramsFrom(parseFloat(i.weight || 0), 'g'),
+        note: i.note || '',
+        packed: !!i.packed
+      };
+    }
+
+    // Bulk actions
+    function checkAll(){
+      state.items.forEach(i => i.packed = true);
+      setDirty(true);
+      render();
+    }
+    function uncheckAll(){
+      state.items.forEach(i => i.packed = false);
+      setDirty(true);
+      render();
+    }
+    function clearPacked(){
+      const before = state.items.length;
+      state.items = state.items.filter(i => !i.packed);
+      setDirty(true);
+      render();
+      const removed = before - state.items.length;
+      if (removed) alert(`Removed ${removed} packed ${pluralize('item', removed)}.`);
+    }
+    function clearAll(){
+      if (!state.items.length) return;
+      const ok = confirm('Clear all items?');
+      if (!ok) return;
+      state.items = [];
+      setDirty(true);
+      render();
+    }
+
+    function addSampleData(){
+      const sample = [
+        { name:'Tent (2P)', category:'Shelter', qty:1, w: 2100, u:'g', note:'stakes & fly included' },
+        { name:'Sleeping Bag', category:'Sleep', qty:1, w: 900, u:'g', note:'20°F down' },
+        { name:'Sleeping Pad', category:'Sleep', qty:1, w: 450, u:'g', note:'' },
+        { name:'Stove', category:'Kitchen', qty:1, w: 85, u:'g', note:'fuel can separate' },
+        { name:'Fuel Canister', category:'Kitchen', qty:1, w: 230, u:'g', note:'partial' },
+        { name:'Lighter', category:'Kitchen', qty:1, w: 20, u:'g', note:'' },
+        { name:'Cook Pot 750ml', category:'Kitchen', qty:1, w: 120, u:'g', note:'titanium' },
+        { name:'Spoon', category:'Kitchen', qty:1, w: 12, u:'g', note:'' },
+        { name:'Water Filter', category:'Water', qty:1, w: 57, u:'g', note:'' },
+        { name:'Water Bottle 1L', category:'Water', qty:2, w: 180, u:'g', note:'' },
+        { name:'Headlamp', category:'Electronics', qty:1, w: 90, u:'g', note:'with batteries' },
+        { name:'First Aid Kit', category:'Health', qty:1, w: 180, u:'g', note:'' },
+        { name:'Rain Jacket', category:'Clothing', qty:1, w: 300, u:'g', note:'' },
+        { name:'Knife', category:'Tools', qty:1, w: 120, u:'g', note:'' },
+        { name:'Snacks', category:'Food', qty:5, w: 45, u:'g', note:'bars' }
+      ];
+      for (const s of sample){
+        state.items.push({
+          id: generateId(),
+          name: s.name,
+          category: s.category,
+          quantity: s.qty,
+          weightGrams: gramsFrom(s.w, s.u),
+          note: s.note,
+          packed: false
+        });
+      }
+      setDirty(true);
+      render();
+    }
+
+    // UI events
+    function bindEvents(){
+      $('#addItemForm').addEventListener('submit', addItemFromForm);
+      $('#btnAddItem').addEventListener('click', addItemFromForm);
+      $('#btnAddSampleData').addEventListener('click', addSampleData);
+
+      $('#displayUnit').addEventListener('change', ()=>{
+        renderList(); renderTotals(); saveLastSession();
+      });
+      $('#searchInput').addEventListener('input', ()=> renderList());
+      $('#filterCategory').addEventListener('change', ()=> renderList());
+      $('#btnCollapseNotes').addEventListener('click', ()=>{
+        state.showNotes = !state.showNotes; renderList(); saveLastSession();
+      });
+
+      $('#btnCheckAll').addEventListener('click', checkAll);
+      $('#btnUncheckAll').addEventListener('click', uncheckAll);
+      $('#btnClearPacked').addEventListener('click', clearPacked);
+      $('#btnClearAll').addEventListener('click', clearAll);
+
+      $('#btnNewList').addEventListener('click', newList);
+      $('#btnSaveList').addEventListener('click', saveAsNew);
+      $('#btnUpdateList').addEventListener('click', updateCurrent);
+      $('#btnLoadList').addEventListener('click', loadSelected);
+      $('#btnDeleteList').addEventListener('click', deleteSelected);
+      $('#btnExportList').addEventListener('click', exportCurrent);
+      $('#btnImportList').addEventListener('click', importFromFile);
+      $('#fileImport').addEventListener('change', handleFileImport);
+
+      // List interactions (event delegation)
+      $('#gearList').addEventListener('click', (e)=>{
+        const li = e.target.closest('.gear-item');
+        if (!li) return;
+        const id = li.getAttribute('data-id');
+        if (!id) return;
+
+        if (e.target.matches('.qty-dec')){
+          const input = $('.qty-input', li);
+          input.value = Math.max(1, parseInt(input.value,10)-1);
+          updateItemQuantity(id, input.value);
+        } else if (e.target.matches('.qty-inc')){
+          const input = $('.qty-input', li);
+          input.value = Math.max(1, parseInt(input.value,10)+1);
+          updateItemQuantity(id, input.value);
+        } else if (e.target.matches('.btn-del')){
+          deleteItem(id);
+        } else if (e.target.matches('.btn-dup')){
+          duplicateItem(id);
+        } else if (e.target.matches('.btn-edit')){
+          if (li.classList.contains('editing')){
+            // ignore if already editing
+            return;
+          }
+          const item = state.items.find(i=>i.id===id);
+          openEditRow(li, item);
+        } else if (e.target.matches('.btn-save-edit')){
+          saveEdit(li, id);
+        } else if (e.target.matches('.btn-cancel-edit')){
+          cancelEdit(li);
+        }
+      });
+
+      $('#gearList').addEventListener('change', (e)=>{
+        const li = e.target.closest('.gear-item');
+        if (!li) return;
+        const id = li.getAttribute('data-id');
+        if (!id) return;
+
+        if (e.target.matches('.qty-input')){
+          updateItemQuantity(id, e.target.value);
+        } else if (e.target.matches('input[type="checkbox"]')){
+          togglePacked(id, e.target.checked);
+        }
+      });
+    }
+
+    function escapeHtml(str){
+      return (str||'').replace(/[&<>"']/g, s=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;', "'":'&#39;' }[s]));
+    }
+    function escapeHtmlAttr(str){
+      return escapeHtml(str).replace(/"/g, '&quot;');
+    }
+    function sanitizeFilename(name){
+      return name.replace(/[^\w\-]+/g,'_').slice(0,60);
+    }
+
+    function initFilterCategory(){
+      const filterSel = $('#filterCategory');
+      filterSel.innerHTML = `<option value="">All</option>` + DEFAULT_CATEGORIES.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+
+    function init(){
+      bindEvents();
+      initFilterCategory();
+      loadSavedLists();
+      const restored = restoreLastSession();
+      if (!restored && state.items.length === 0){
+        // Start empty; user can add sample items if desired
+      }
+      render();
+      // Accessibility: focus on name input for rapid entry
+      $('#inputName').focus();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

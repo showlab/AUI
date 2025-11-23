@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cloud Painter</title>
+<style>
+/* 
+Cloud Painter — Destylized, Operator-Friendly UI
+This stylesheet follows the "Destylization And Viewport Optimization" rules:
+- White background, black text.
+- No decorative gradients, shadows, or rounded corners in CSS.
+- Clear readable layout with ≥44×44 px controls.
+- Strong focus outline and keyboard navigability.
+- Compact two-column layout to fit 1280×720.
+
+Note: The canvas artwork may still render gradients or visuals as part of the app's core function. 
+The rules apply primarily to the UI styling.
+*/
+
+/* Color and spacing tokens for clarity (not decorative) */
+:root{
+  --bg: #ffffff;
+  --ink: #000000;
+  --ink-muted:#333333;
+  --accent: #005fcc;
+  --accent-muted:#267dff;
+  --danger: #b00020;
+  --ok: #1b5e20;
+  --warn: #7a6000;
+  --panel: #f2f2f2;
+  --panel2: #e9e9e9;
+  --focus: #ff9500;
+  --border: #cccccc;
+  --thumb: #444444;
+  --space-1: 6px;
+  --space-2: 12px;
+  --space-3: 16px;
+  --space-4: 20px;
+  --space-5: 24px;
+  --hit: 44px;
+  --font: system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  line-height: 1.35;
+}
+
+* { box-sizing: border-box; }
+
+#app{
+  height:100%;
+  display:grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: 1fr;
+}
+
+/* Header */
+header#topBar{
+  padding: var(--space-2);
+  display:flex; align-items:center; justify-content:space-between; gap:var(--space-2);
+  border-bottom: 1px solid var(--border);
+}
+#brand{ display:flex; align-items:center; gap:var(--space-2); min-height: var(--hit); }
+#brand .logo{
+  width:44px; height:44px; background:#ddd; /* simple neutral block */
+}
+#appTitle{
+  margin:0;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+#topActions{ display:flex; align-items:center; gap:var(--space-2); flex-wrap:wrap; }
+
+/* Buttons */
+.btn{
+  min-height: var(--hit);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--ink);
+  background: #fff;
+  color: var(--ink);
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn[aria-disabled="true"], .btn:disabled{
+  opacity:0.6; cursor:not-allowed;
+}
+.btn.primary{ border-color: var(--accent); color: var(--accent); }
+.btn.danger{ border-color: var(--danger); color: var(--danger); }
+.btn.small{
+  min-height: var(--hit);
+  font-size: 0.95rem;
+  padding: 0 var(--space-2);
+}
+.btn:focus{ outline: 3px solid var(--focus); outline-offset: 2px; }
+.btn:hover{ background:#fafafa; }
+
+/* Main layout */
+#main{
+  display:grid;
+  grid-template-columns: 360px 1fr;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  min-height:0;
+}
+@media (max-width: 1000px){
+  #main{ grid-template-columns: 1fr; }
+  #controlsPanel{ order:2; }
+  #stage{ order:1; }
+}
+
+/* Control panel */
+#controlsPanel{
+  border: 1px solid var(--border);
+  background: var(--panel);
+  padding: var(--space-2);
+  min-height:0;
+  overflow:auto;
+}
+fieldset{
+  margin: 0 0 var(--space-3) 0;
+  border: 1px solid var(--border);
+  padding: var(--space-2);
+}
+legend{
+  padding: 0 var(--space-1);
+  font-weight: 800;
+}
+.control{
+  display:flex; align-items:center; gap: var(--space-2); margin: var(--space-2) 0;
+  flex-wrap: wrap;
+}
+label{ min-width: 140px; font-weight:600; }
+
+.row{ display:flex; align-items:center; gap: var(--space-2); flex-wrap: wrap; }
+.hint{ color: var(--ink-muted); font-size: 0.9rem; }
+.tag{ padding: 4px 6px; border:1px solid var(--border); background:#fff; }
+
+/* Inputs */
+input[type="range"]{
+  width: 220px; height: var(--hit);
+  background: transparent;
+}
+input[type="checkbox"], select, input[type="number"]{
+  min-height: var(--hit);
+}
+input[type="number"]{ width: 80px; }
+
+.sliderWrap{
+  display:flex; align-items:center; gap: var(--space-2); flex-wrap: wrap;
+  border: 1px solid var(--border); padding: 6px;
+}
+.sliderWrap[data-active="true"]{
+  border-color: var(--accent);
+}
+.stepBtn{
+  width: var(--hit); height: var(--hit);
+  border: 1px solid var(--ink); background:#fff; cursor:pointer; font-weight:800;
+}
+.stepBtn:focus{ outline:3px solid var(--focus); outline-offset:2px; }
+
+/* Color swatches */
+.swatch{
+  width:44px; height:44px; border: 1px solid var(--ink); background:#fff; cursor:pointer;
+}
+.swatch.active{ outline: 3px solid var(--accent); outline-offset:2px; }
+
+/* Brush preview */
+#brushPreview{
+  width: 88px; height: 88px; border: 1px solid var(--ink); background:#fff;
+  display:flex; align-items:center; justify-content:center;
+}
+#brushPreview canvas{ width: 80px; height: 80px; }
+
+/* Stage (canvas area) */
+#stage{
+  position:relative;
+  border: 1px solid var(--ink); background: #fff;
+  min-height: 200px;
+  display:flex; align-items:stretch; justify-content:stretch;
+}
+#skyCanvas{
+  width:100%; height:100%; display:block; cursor: crosshair; touch-action:none;
+}
+#stageToolbar{
+  position:absolute; left:0; right:0; top:0;
+  background: rgba(255,255,255,0.9);
+  border-bottom: 1px solid var(--border);
+  display:flex; align-items:center; gap: var(--space-2);
+  padding: var(--space-2);
+}
+.toolbarGroup{ display:flex; align-items:center; gap: var(--space-2); flex-wrap:wrap; }
+
+#windIndicator{
+  position:absolute; right: 8px; bottom: 8px;
+  background: rgba(255,255,255,0.9);
+  border: 1px solid var(--border);
+  padding: 6px 8px; font-size: 0.9rem;
+}
+#statusBar{
+  margin-top: var(--space-2);
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap;
+  gap: var(--space-2);
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-2);
+}
+.statusGroup{ display:flex; align-items:center; gap: var(--space-2); flex-wrap:wrap; }
+
+/* Modal preview */
+#previewModal{
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+  display:none; align-items:center; justify-content:center; padding: var(--space-3);
+}
+#previewDialog{
+  background: #fff; color:#000; border: 1px solid var(--ink);
+  max-width: 90vw; max-height: 90vh; width: 900px; padding: var(--space-2);
+  display:flex; flex-direction:column; gap: var(--space-2);
+}
+#previewHeader{ display:flex; align-items:center; justify-content:space-between; gap:var(--space-2); }
+#previewBody{ overflow:auto; border: 1px solid var(--border); padding: var(--space-2); background:#fff; }
+#previewImage{ max-width:100%; height:auto; display:block; }
+#previewFooter{ display:flex; gap: var(--space-2); justify-content:flex-end; align-items:center; }
+
+/* Footer */
+#footer{
+  padding: var(--space-2); border-top: 1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between; gap: var(--space-2);
+  font-size: 0.95rem;
+}
+
+/* Focus visibility */
+:focus-visible{
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Links */
+a{ color: var(--accent); }
+a:focus{ outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* Badges and small labels */
+.badge{
+  display:inline-block;
+  min-width: 24px; text-align:center;
+  padding: 2px 6px; border: 1px solid var(--ink);
+}
+
+/* Accessibility helpers */
+.visuallyHidden{
+  position:absolute !important; clip: rect(1px, 1px, 1px, 1px); padding:0 !important; border:0 !important;
+  height:1px !important; width:1px !important; overflow:hidden;
+}
+
+/* Keyboard hints small */
+.kbd{ border:1px solid #000; padding: 2px 4px; font-family: monospace; }
+
+/* Divider to visually separate sections if needed */
+.divider{ height:1px; background: var(--border); margin: var(--space-3) 0; }
+
+/* Active section proxy line (display-only) */
+#activeSection{
+  border:1px solid var(--border);
+  padding: 3px 6px; background:#fff;
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="topBar">
+    <div id="brand" aria-label="Cloud Painter brand">
+      <div class="logo" aria-hidden="true"></div>
+      <h1 id="appTitle">Cloud Painter</h1>
+    </div>
+    <div id="topActions">
+      <button id="previewBtn" class="btn" aria-label="Preview your sky as an image (no download)">Preview</button>
+      <button id="saveBtn" class="btn primary" aria-label="Download your sky as a PNG image">Save Image</button>
+      <button id="clearBtn" class="btn danger" aria-label="Clear the sky">Clear Sky</button>
+      <div class="hint">Keyboard: <span class="kbd">B</span> Brush, <span class="kbd">E</span> Eraser, <span class="kbd">S</span> Save, <span class="kbd">C</span> Clear</div>
+    </div>
+  </header>
+
+  <div id="main">
+    <aside id="controlsPanel" aria-label="Painting controls">
+      <fieldset id="sectionBrush">
+        <legend>Brush</legend>
+        <div class="control">
+          <label for="brushShape">Shape</label>
+          <select id="brushShape" aria-label="Brush shape">
+            <option value="puff">Puff</option>
+            <option value="fluffy">Fluffy Cloud</option>
+            <option value="star">Star</option>
+            <option value="heart">Heart</option>
+          </select>
+          <div id="brushPreview" aria-label="Brush preview"><canvas width="80" height="80"></canvas></div>
+        </div>
+        <div class="control">
+          <label>Active Shape</label>
+          <span id="activeShapeLabel" class="tag">puff</span>
+        </div>
+
+        <div class="control">
+          <label for="brushSize">Size</label>
+          <div class="sliderWrap" id="brushSizeWrap">
+            <button id="brushSizeMinus" class="stepBtn" title="Decrease size">-</button>
+            <input id="brushSize" type="range" min="10" max="160" value="80" />
+            <button id="brushSizePlus" class="stepBtn" title="Increase size">+</button>
+            <span id="brushSizeVal" class="tag">80</span>
+          </div>
+        </div>
+
+        <div class="control">
+          <label for="brushSoftness">Softness</label>
+          <div class="sliderWrap" id="brushSoftnessWrap">
+            <button id="brushSoftnessMinus" class="stepBtn" title="Decrease softness">-</button>
+            <input id="brushSoftness" type="range" min="0" max="100" value="60" />
+            <button id="brushSoftnessPlus" class="stepBtn" title="Increase softness">+</button>
+            <span id="brushSoftnessVal" class="tag">60%</span>
+          </div>
+        </div>
+
+        <div class="control">
+          <label for="brushOpacity">Opacity</label>
+          <div class="sliderWrap" id="brushOpacityWrap">
+            <button id="brushOpacityMinus" class="stepBtn" title="Decrease opacity">-</button>
+            <input id="brushOpacity" type="range" min="10" max="100" value="85" />
+            <button id="brushOpacityPlus" class="stepBtn" title="Increase opacity">+</button>
+            <span id="brushOpacityVal" class="tag">0.85</span>
+          </div>
+        </div>
+
+        <div class="control">
+          <label>Colors</label>
+          <div class="row" id="colorRow" role="radiogroup" aria-label="Cloud color">
+            <button class="swatch active" id="colorWhite" role="radio" aria-checked="true" title="Pure white" style="background:#ffffff"></button>
+            <button class="swatch" id="colorBlue" role="radio" aria-checked="false" title="Baby blue" style="background:#f2f8ff"></button>
+            <button class="swatch" id="colorLavender" role="radio" aria-checked="false" title="Lavender" style="background:#f7f3ff"></button>
+            <button class="swatch" id="colorPeach" role="radio" aria-checked="false" title="Peach" style="background:#fff2e6"></button>
+            <button class="swatch" id="colorPink" role="radio" aria-checked="false" title="Blush pink" style="background:#fff0f6"></button>
+          </div>
+        </div>
+
+        <div class="control">
+          <label for="jitterToggle">Whimsy</label>
+          <div class="row">
+            <input id="jitterToggle" type="checkbox" checked />
+            <span class="hint">Adds playful variation</span>
+            <span id="jitterStatus" class="tag">on</span>
+          </div>
+        </div>
+
+        <div class="control">
+          <label for="eraserToggle">Eraser</label>
+          <div class="row">
+            <input id="eraserToggle" type="checkbox" />
+            <span class="hint">Erase clouds (E)</span>
+            <span id="currentModeLabel" class="tag">Brush</span>
+          </div>
+        </div>
+
+        <div class="control">
+          <label for="applyBrushSettings">Apply</label>
+          <div class="row">
+            <button id="applyBrushSettings" class="btn small">Apply Brush Settings</button>
+            <span id="applyStatus" class="tag">idle</span>
+          </div>
+        </div>
+
+        <div class="control">
+          <label>Last Stroke</label>
+          <span id="lastStrokeInfo" class="tag">none</span>
+        </div>
+      </fieldset>
+
+      <div class="divider" role="separator" aria-label="Divider"></div>
+
+      <fieldset id="sectionSky">
+        <legend>Sky</legend>
+
+        <div class="control">
+          <label for="driftToggle">Cloud Drift</label>
+          <div class="row">
+            <input id="driftToggle" type="checkbox" checked />
+            <span class="hint">Enable clouds movement</span>
+            <span id="cloudDriftStatus" class="tag">on</span>
+          </div>
+        </div>
+
+        <div class="control" title="Controls clouds speed only">
+          <label for="cloudDriftSpeed">Cloud Drift Speed</label>
+          <div class="sliderWrap" id="cloudDriftSpeedWrap">
+            <button id="cloudDriftSpeedMinus" class="stepBtn" title="Decrease drift speed">-</button>
+            <input id="cloudDriftSpeed" type="range" min="0" max="100" value="60" />
+            <button id="cloudDriftSpeedPlus" class="stepBtn" title="Increase drift speed">+</button>
+            <span id="cloudDriftSpeedVal" class="tag">0.60</span>
+          </div>
+        </div>
+
+        <div class="control" title="Affects airplanes only">
+          <label for="windSpeed">Wind (airplanes)</label>
+          <div class="sliderWrap" id="windSpeedWrap">
+            <button id="windSpeedMinus" class="stepBtn" title="Decrease wind">-</button>
+            <input id="windSpeed" type="range" min="0" max="100" value="25" />
+            <button id="windSpeedPlus" class="stepBtn" title="Increase wind">+</button>
+            <span id="windSpeedVal" class="tag">0.25</span>
+            <button id="gustBtn" class="btn small" title="Give a temporary gust (clouds only)">Gust</button>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="divider" role="separator" aria-label="Divider"></div>
+
+      <fieldset id="sectionPlanes">
+        <legend>Airplanes</legend>
+
+        <div class="control" title="Controls spawning of new airplanes only">
+          <label for="planesToggle">Air Traffic</label>
+          <div class="row">
+            <input id="planesToggle" type="checkbox" checked />
+            <span class="hint">New planes will spawn</span>
+            <span id="airTrafficStatus" class="tag">spawning-on</span>
+            <span class="badge" id="airTrafficBadge">0</span>
+          </div>
+        </div>
+
+        <div class="control" title="Show/hide airplanes without removing them">
+          <label for="planeVisibilityToggle">Show Planes</label>
+          <div class="row">
+            <input id="planeVisibilityToggle" type="checkbox" checked />
+            <span class="hint">Toggle visibility only</span>
+            <span id="planeVisibilityStatus" class="tag">visible</span>
+          </div>
+        </div>
+
+        <div class="control">
+          <label>Spawn</label>
+          <div class="row">
+            <button id="spawnPlaneBtn" class="btn small" title="Add a plane">Add Plane</button>
+            <span class="hint">They draw soft contrails</span>
+            <span id="planeCountLabel" class="tag">0 planes</span>
+          </div>
+        </div>
+
+        <div class="control" title="Adjust speed of all airplanes (in flight too)">
+          <label for="planeSpeed">Airplane Speed</label>
+          <div class="sliderWrap" id="planeSpeedWrap">
+            <button id="planeSpeedMinus" class="stepBtn" title="Slower">-</button>
+            <input id="planeSpeed" type="range" min="25" max="200" value="100" />
+            <button id="planeSpeedPlus" class="stepBtn" title="Faster">+</button>
+            <span id="planeSpeedVal" class="tag">1.00x</span>
+          </div>
+        </div>
+
+        <div class="control" title="Control whether planes are drawn above or below clouds">
+          <label for="planeLayerToggle">Plane Layer</label>
+          <div class="row">
+            <input id="planeLayerToggle" type="checkbox" />
+            <span class="hint">On = above clouds</span>
+            <span id="planeLayerLabel" class="tag">below clouds</span>
+          </div>
+        </div>
+
+        <div class="control">
+          <label for="includePlanesInSave">Save Planes</label>
+          <div class="row">
+            <input id="includePlanesInSave" type="checkbox" checked />
+            <span class="hint">Include planes in image</span>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="divider" role="separator" aria-label="Divider"></div>
+
+      <fieldset id="sectionExport">
+        <legend>Export</legend>
+        <div class="control">
+          <label>Preview</label>
+          <div class="row">
+            <span id="previewStatus" class="tag">idle</span>
+          </div>
+        </div>
+        <div class="control">
+          <label>Download</label>
+          <div class="row">
+            <a id="downloadLink" href="#" download="cloud-painter.png" aria-disabled="true">Download PNG Link</a>
+            <span id="downloadStatus" class="tag">idle</span>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="divider" role="separator" aria-label="Divider"></div>
+
+      <fieldset id="sectionTips">
+        <legend>Tips</legend>
+        <div class="hint">
+          - Click or tap and drag to paint fluffy clouds.<br>
+          - Toggle Eraser (E) to remove clouds, Brush (B) to paint.<br>
+          - Use +/- buttons next to sliders for precise steps.<br>
+          - Press S to save, C to clear. Preview before downloading.<br>
+          - Cloud Drift Speed affects cloud motion only. Wind affects airplanes only.<br>
+          - Gust briefly boosts cloud drift (direction does not change).<br>
+          - Air Traffic toggles spawning new planes; Show Planes toggles visibility.<br>
+          - Plane Layer controls whether planes appear above or below clouds.
+        </div>
+      </fieldset>
+
+      <details>
+        <summary>Help & Keyboard Shortcuts</summary>
+        <div class="hint">
+          Painting<br>
+          - Brush Shape: Select from Puff, Fluffy Cloud, Star, Heart.<br>
+          - Brush Size: Adjust with slider or +/- buttons. Live preview updates instantly.<br>
+          - Softness & Opacity: Affect blending; preview reflects current settings.<br>
+          - Colors: Choose a cloud tint. Currently affects new strokes only.<br>
+          - Whimsy: Adds natural variation to strokes.<br><br>
+          Sky & Motion<br>
+          - Cloud Drift: Enable/disable cloud movement.<br>
+          - Cloud Drift Speed: Controls cloud speed; smoothed transitions on change.<br>
+          - Wind (airplanes): Affects airplanes and their contrails only; visible indicator shows changes.<br><br>
+          Airplanes<br>
+          - Air Traffic: When on, planes may spawn periodically. When off, no new planes spawn (existing remain).<br>
+          - Show Planes: Toggle visibility without removing planes.<br>
+          - Airplane Speed: Adjusts speed of planes already in flight and new ones.<br>
+          - Plane Layer: Toggle to draw planes above or below clouds.<br><br>
+          Export<br>
+          - Preview: Opens a modal with the current composition. Close to continue painting.<br>
+          - Save Image: Generates a downloadable PNG. The link below updates. The file downloads immediately and the link is enabled for reuse.<br><br>
+          Keyboard<br>
+          - B: Brush mode<br>
+          - E: Eraser mode<br>
+          - S: Save image<br>
+          - C: Clear sky<br>
+          - Arrow keys or Tab + Enter can control sliders and buttons.<br><br>
+          Navigation Proxy<br>
+          - Active Section tag displays the last interacted section: Brush, Sky, Airplanes, Export, Tips.<br>
+        </div>
+      </details>
+    </aside>
+
+    <section id="stage" aria-label="Sky canvas">
+      <div id="stageToolbar" role="region" aria-label="Canvas toolbar">
+        <div class="toolbarGroup">
+          <strong>Cloud Drift Speed</strong>
+          <div class="sliderWrap" id="cloudDriftSpeedWrap2">
+            <button id="cloudDriftSpeedMinus2" class="stepBtn" title="Decrease cloud drift speed">-</button>
+            <input id="cloudDriftSpeed2" type="range" min="0" max="100" value="60" />
+            <button id="cloudDriftSpeedPlus2" class="stepBtn" title="Increase cloud drift speed">+</button>
+          </div>
+          <span class="hint" title="This slider mirrors the one in the left panel">Mirror</span>
+        </div>
+        <div class="toolbarGroup">
+          <label for="driftToggle" class="hint">Drift</label>
+          <input id="driftToggleMirror" type="checkbox" checked />
+        </div>
+      </div>
+      <canvas id="skyCanvas" width="1280" height="720" aria-label="Painting area"></canvas>
+      <div id="windIndicator" role="status" aria-live="polite">WIND: 0.25 • Clouds: on</div>
+      <div id="statusBar">
+        <div class="statusGroup">
+          <span>Animation</span>
+          <span id="animationStatus" class="tag">running</span>
+        </div>
+        <div class="statusGroup">
+          <span>Active Section</span>
+          <span id="activeSection" class="tag">Brush</span>
+        </div>
+        <div class="statusGroup">
+          <span>Mode</span>
+          <span id="modeStatus" class="tag">Brush</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer id="footer">
+    <div>Made with care – minimal UI for maximum creativity</div>
+    <div>Viewport target: 1280×720 • Responsive</div>
+  </footer>
+</div>
+
+<!-- Preview Modal -->
+<div id="previewModal" role="dialog" aria-modal="true" aria-labelledby="previewTitle" aria-describedby="previewDesc">
+  <div id="previewDialog">
+    <div id="previewHeader">
+      <h2 id="previewTitle">Image Preview</h2>
+      <button id="closePreviewBtn" class="btn" aria-label="Close preview">Close</button>
+    </div>
+    <div id="previewBody">
+      <p id="previewDesc" class="hint">Static snapshot of your current sky. Close to continue painting.</p>
+      <img id="previewImage" alt="Snapshot preview of current sky composition" />
+    </div>
+    <div id="previewFooter">
+      <a id="previewDownload" class="btn primary" href="#" download="cloud-painter.png" aria-disabled="true">Download This Preview</a>
+      <span class="hint">Status: <span id="previewStatusModal" class="tag">idle</span></span>
+    </div>
+  </div>
+</div>
+
+<script>
+/* 
+Cloud Painter — Functional JavaScript
+- Preserves original core functions and ids required by automated tests.
+- Adds requested features: preview modal, airplane visibility toggle, plane speed, plane layer order, cloud drift speed separation, statuses, proxies, step buttons, and more.
+- Ensures immediate and synchronous DOM updates and proxy signals for state changes.
+
+Mandatory API preservation list is respected. New additions use new IDs and are wired without renaming or removing existing ones.
+*/
+(function(){
+  // Utilities
+  const clamp=(v,min,max)=>Math.min(max,Math.max(min,v));
+  const rand=(a,b)=>a + Math.random()*(b-a);
+  const lerp=(a,b,t)=>a+(b-a)*t;
+  const TAU = Math.PI*2;
+
+  // Elements
+  const canvas = document.getElementById('skyCanvas');
+  const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
+
+  const brushShapeEl = document.getElementById('brushShape');
+  const brushSizeEl = document.getElementById('brushSize');
+  const brushSoftnessEl = document.getElementById('brushSoftness');
+  const brushOpacityEl = document.getElementById('brushOpacity');
+  const brushSizeVal = document.getElementById('brushSizeVal');
+  const brushSoftnessVal = document.getElementById('brushSoftnessVal');
+  const brushOpacityVal = document.getElementById('brushOpacityVal');
+  const brushPreviewEl = document.getElementById('brushPreview');
+  const activeShapeLabel = document.getElementById('activeShapeLabel');
+
+  const colorButtons = [
+    {el:document.getElementById('colorWhite'), color:'#ffffff'},
+    {el:document.getElementById('colorBlue'), color:'#f2f8ff'},
+    {el:document.getElementById('colorLavender'), color:'#f7f3ff'},
+    {el:document.getElementById('colorPeach'), color:'#fff2e6'},
+    {el:document.getElementById('colorPink'), color:'#fff0f6'},
+  ];
+
+  const jitterToggle = document.getElementById('jitterToggle');
+  const jitterStatus = document.getElementById('jitterStatus');
+  const eraserToggle = document.getElementById('eraserToggle');
+  const currentModeLabel = document.getElementById('currentModeLabel');
+
+  const driftToggle = document.getElementById('driftToggle');
+  const driftToggleMirror = document.getElementById('driftToggleMirror');
+  const cloudDriftStatus = document.getElementById('cloudDriftStatus');
+
+  const cloudDriftSpeed = document.getElementById('cloudDriftSpeed');
+  const cloudDriftSpeedVal = document.getElementById('cloudDriftSpeedVal');
+  const cloudDriftSpeed2 = document.getElementById('cloudDriftSpeed2'); // toolbar mirror
+  const windSpeedEl = document.getElementById('windSpeed');
+  const windSpeedVal = document.getElementById('windSpeedVal');
+  const gustBtn = document.getElementById('gustBtn');
+
+  const planesToggle = document.getElementById('planesToggle');
+  const airTrafficStatus = document.getElementById('airTrafficStatus');
+  const airTrafficBadge = document.getElementById('airTrafficBadge');
+  const planeVisibilityToggle = document.getElementById('planeVisibilityToggle');
+  const planeVisibilityStatus = document.getElementById('planeVisibilityStatus');
+  const spawnPlaneBtn = document.getElementById('spawnPlaneBtn');
+  const planeCountLabel = document.getElementById('planeCountLabel');
+  const includePlanesInSave = document.getElementById('includePlanesInSave');
+  const planeSpeed = document.getElementById('planeSpeed');
+  const planeSpeedVal = document.getElementById('planeSpeedVal');
+  const planeLayerToggle = document.getElementById('planeLayerToggle');
+  const planeLayerLabel = document.getElementById('planeLayerLabel');
+
+  const previewBtn = document.getElementById('previewBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  const clearBtn = document.getElementById('clearBtn');
+
+  const downloadLink = document.getElementById('downloadLink');
+  const downloadStatus = document.getElementById('downloadStatus');
+
+  const previewModal = document.getElementById('previewModal');
+  const previewImage = document.getElementById('previewImage');
+  const previewStatus = document.getElementById('previewStatus');
+  const previewStatusModal = document.getElementById('previewStatusModal');
+  const previewDownload = document.getElementById('previewDownload');
+  const closePreviewBtn = document.getElementById('closePreviewBtn');
+
+  const windIndicator = document.getElementById('windIndicator');
+  const animationStatus = document.getElementById('animationStatus');
+  const lastStrokeInfo = document.getElementById('lastStrokeInfo');
+
+  const activeSection = document.getElementById('activeSection');
+  const modeStatus = document.getElementById('modeStatus');
+
+  // Step controls wrappers for highlight
+  const brushSizeWrap = document.getElementById('brushSizeWrap');
+  const brushSoftnessWrap = document.getElementById('brushSoftnessWrap');
+  const brushOpacityWrap = document.getElementById('brushOpacityWrap');
+  const windSpeedWrap = document.getElementById('windSpeedWrap');
+  const planeSpeedWrap = document.getElementById('planeSpeedWrap');
+  const cloudDriftSpeedWrap = document.getElementById('cloudDriftSpeedWrap');
+  const cloudDriftSpeedWrap2 = document.getElementById('cloudDriftSpeedWrap2');
+
+  // Step buttons
+  const brushSizeMinus = document.getElementById('brushSizeMinus');
+  const brushSizePlus = document.getElementById('brushSizePlus');
+  const brushSoftnessMinus = document.getElementById('brushSoftnessMinus');
+  const brushSoftnessPlus = document.getElementById('brushSoftnessPlus');
+  const brushOpacityMinus = document.getElementById('brushOpacityMinus');
+  const brushOpacityPlus = document.getElementById('brushOpacityPlus');
+
+  const windSpeedMinus = document.getElementById('windSpeedMinus');
+  const windSpeedPlus = document.getElementById('windSpeedPlus');
+
+  const planeSpeedMinus = document.getElementById('planeSpeedMinus');
+  const planeSpeedPlus = document.getElementById('planeSpeedPlus');
+
+  const cloudDriftSpeedMinus = document.getElementById('cloudDriftSpeedMinus');
+  const cloudDriftSpeedPlus = document.getElementById('cloudDriftSpeedPlus');
+  const cloudDriftSpeedMinus2 = document.getElementById('cloudDriftSpeedMinus2');
+  const cloudDriftSpeedPlus2 = document.getElementById('cloudDriftSpeedPlus2');
+
+  // DPR and sizing
+  let DPR = Math.max(1, (window.devicePixelRatio||1));
+  function resizeCanvas(){
+    const rect = document.getElementById('stage').getBoundingClientRect();
+    const w = Math.max(600, rect.width);
+    const h = Math.max(360, rect.height);
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    if (canvas.width !== Math.floor(w*dpr) || canvas.height !== Math.floor(h*dpr)){
+      DPR = dpr;
+      canvas.width = Math.floor(w * DPR);
+      canvas.height = Math.floor(h * DPR);
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+    }
+  }
+  window.addEventListener('resize', () => { resizeCanvas(); updateBrushStamp(); });
+
+  // Painting state
+  const state = {
+    brushShape: 'puff',
+    brushSize: 80,
+    softness: 0.6, // 0..1
+    opacity: 0.85,
+    color: '#ffffff',
+    jitter: true,
+    erasing: false,
+
+    drift: true,
+    cloudDriftTarget: 0.60, // new control
+    cloudDriftCurrent: 0.60, // smoothly lerp towards target
+    wind: 0.25, // affects airplanes (and indicator)
+    gust: 0, // temporary boost for clouds only
+
+    spawnPlanes: true, // Air Traffic toggle (spawning)
+    showPlanes: true,  // separate visibility toggle
+    planeSpeedFactor: 1.0,
+    planesOnTop: false, // drawing order
+  };
+
+  // Data
+  const puffs = []; // {x,y,scale,rot,opacity,vx,vy,bob,shapeKey,removed:false}
+  const planes = []; // {x,y,baseVx,vx,scale,color,history:[],alive:true}
+  const MAX_PUFFS = 6000;
+
+  // Brush stamp
+  let stampCanvas = null; // base stamp at size = state.brushSize
+  let stampKey = '';
+  function colorToRGBA(c, a){
+    const ctx2 = document.createElement('canvas').getContext('2d');
+    ctx2.fillStyle = c;
+    const s = ctx2.fillStyle; // computed rgb(...)
+    const nums = s.replace(/[^\d,]/g,'').split(',').map(n=>parseInt(n.trim(),10));
+    return `rgba(${nums[0]},${nums[1]},${nums[2]},${a})`;
+  }
+  function makeCanvas(w,h){
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.floor(w));
+    c.height = Math.max(1, Math.floor(h));
+    return c;
+  }
+  function drawStar(ctx, cx, cy, spikes, outerR, innerR){
+    let rot = Math.PI / 2 * 3;
+    let x = cx, y = cy;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - outerR);
+    for (let i = 0; i < spikes; i++){
+      x = cx + Math.cos(rot) * outerR;
+      y = cy + Math.sin(rot) * outerR;
+      ctx.lineTo(x,y);
+      rot += Math.PI / spikes;
+
+      x = cx + Math.cos(rot) * innerR;
+      y = cy + Math.sin(rot) * innerR;
+      ctx.lineTo(x,y);
+      rot += Math.PI / spikes;
+    }
+    ctx.lineTo(cx, cy - outerR);
+    ctx.closePath();
+  }
+  function drawHeart(ctx, cx, cy, size){
+    const s = size;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + s*0.25);
+    ctx.bezierCurveTo(cx - s, cy - s*0.5, cx - s*0.1, cy - s*1.1, cx, cy - s*0.4);
+    ctx.bezierCurveTo(cx + s*0.1, cy - s*1.1, cx + s, cy - s*0.5, cx, cy + s*0.25);
+    ctx.closePath();
+  }
+
+  function buildStamp(shape, baseSize, softness, color){
+    // No CSS gradients; this is canvas drawing which is allowed for the painting effect
+    const pad = baseSize * 0.6;
+    const w = baseSize + pad*2;
+    const h = baseSize + pad*2;
+    const cnv = makeCanvas(w, h);
+    const c = cnv.getContext('2d');
+    const cx = w/2, cy = h/2;
+    const radius = baseSize * 0.5;
+    const mainColor = colorToRGBA(color, 1);
+
+    if (shape === 'puff'){
+      const grad = c.createRadialGradient(cx, cy, 0, cx, cy, radius);
+      const sStop = clamp(softness, 0, 0.98);
+      grad.addColorStop(0, colorToRGBA(color, 1));
+      grad.addColorStop(clamp(sStop*0.7,0,1), colorToRGBA(color, 0.65));
+      grad.addColorStop(1, colorToRGBA(color, 0));
+      c.fillStyle = grad;
+      c.beginPath();
+      c.arc(cx, cy, radius, 0, TAU);
+      c.fill();
+    } else if (shape === 'fluffy'){
+      const lobes = 6;
+      const r = radius * 0.65;
+      for (let i=0;i<lobes;i++){
+        const ang = (i / lobes) * TAU + (i%2?0.2:-0.1);
+        const dist = radius * 0.25 + (i%2?radius*0.05:0);
+        const lx = cx + Math.cos(ang) * dist;
+        const ly = cy + Math.sin(ang) * dist * 0.6;
+        const grad = c.createRadialGradient(lx, ly, 0, lx, ly, r);
+        grad.addColorStop(0, colorToRGBA(color, 0.95));
+        grad.addColorStop(clamp(softness,0,1), colorToRGBA(color, 0.5));
+        grad.addColorStop(1, colorToRGBA(color, 0));
+        c.fillStyle = grad;
+        c.beginPath();
+        c.arc(lx, ly, r, 0, TAU);
+        c.fill();
+      }
+      const grad = c.createRadialGradient(cx, cy, 0, cx, cy, radius*0.8);
+      grad.addColorStop(0, colorToRGBA(color, 0.9));
+      grad.addColorStop(clamp(softness,0,1), colorToRGBA(color, 0.5));
+      grad.addColorStop(1, colorToRGBA(color, 0));
+      c.fillStyle = grad;
+      c.beginPath(); c.arc(cx, cy, radius*0.85, 0, TAU); c.fill();
+    } else if (shape === 'star'){
+      c.fillStyle = mainColor;
+      drawStar(c, cx, cy, 5, radius*0.95, radius*0.46);
+      c.fill();
+      const g = makeCanvas(w,h);
+      const gctx = g.getContext('2d');
+      const grad = gctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+      grad.addColorStop(0, 'rgba(255,255,255,1)');
+      grad.addColorStop(clamp(softness,0,1), 'rgba(255,255,255,0.6)');
+      grad.addColorStop(1, 'rgba(255,255,255,0)');
+      gctx.fillStyle = grad;
+      gctx.fillRect(0,0,w,h);
+      c.globalCompositeOperation = 'destination-in';
+      c.drawImage(g,0,0);
+      c.globalCompositeOperation = 'source-over';
+    } else if (shape === 'heart'){
+      c.fillStyle = mainColor;
+      drawHeart(c, cx, cy, radius*0.95);
+      c.fill();
+      const g = makeCanvas(w,h);
+      const gctx = g.getContext('2d');
+      const grad = gctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+      grad.addColorStop(0, 'rgba(255,255,255,1)');
+      grad.addColorStop(clamp(softness,0,1), 'rgba(255,255,255,0.6)');
+      grad.addColorStop(1, 'rgba(255,255,255,0)');
+      gctx.fillStyle = grad;
+      gctx.fillRect(0,0,w,h);
+      c.globalCompositeOperation = 'destination-in';
+      c.drawImage(g,0,0);
+      c.globalCompositeOperation = 'source-over';
+    }
+    return cnv;
+  }
+
+  function updateBrushStamp(){
+    const key = [state.brushShape, Math.round(state.brushSize), Math.round(state.softness*100), state.color].join('|');
+    if (stampKey !== key){
+      stampKey = key;
+      stampCanvas = buildStamp(state.brushShape, state.brushSize * DPR, state.softness, state.color);
+      // preview
+      let pv = brushPreviewEl.querySelector('canvas');
+      if (!pv){
+        pv = document.createElement('canvas');
+        pv.width = pv.height = 80;
+        brushPreviewEl.appendChild(pv);
+      }
+      const pvctx = pv.getContext('2d');
+      pv.width = pv.height = 80;
+      pvctx.clearRect(0,0,80,80);
+      const scale = Math.min(1, 70 / (stampCanvas.width / DPR));
+      const drawW = stampCanvas.width / DPR * scale;
+      const drawH = stampCanvas.height / DPR * scale;
+      pvctx.drawImage(stampCanvas, (80 - drawW)/2, (80 - drawH)/2, drawW, drawH);
+    }
+    activeShapeLabel.textContent = state.brushShape;
+  }
+
+  // Painting interaction
+  let isPointerDown = false;
+  let lastPt = null;
+  let pointerId = null;
+  function getCanvasPoint(evt){
+    const rect = canvas.getBoundingClientRect();
+    const x = (evt.clientX - rect.left) * DPR;
+    const y = (evt.clientY - rect.top) * DPR;
+    return {x,y};
+  }
+  function addPuffAt(x, y, baseSpacingBoost=1){
+    if (!stampCanvas) updateBrushStamp();
+    let scale = 1;
+    let rot = 0;
+    let opacity = state.opacity;
+    if (state.jitter){
+      scale *= rand(0.9, 1.15);
+      rot = rand(-0.35, 0.35);
+      opacity *= rand(0.9, 1.0);
+    }
+    const bob = Math.random()*TAU;
+    const puff = {x, y, scale, rot, opacity, vx:0, vy:0, bob, shapeKey:stampKey, removed:false};
+    puffs.push(puff);
+    if (puffs.length > MAX_PUFFS){
+      let idx = puffs.findIndex(p => p.removed);
+      if (idx === -1) idx = 0;
+      puffs.splice(idx,1);
+    }
+  }
+  function eraseAt(x, y){
+    const radius = (state.brushSize * DPR) * 0.6;
+    for (let i = 0; i < puffs.length; i++){
+      const p = puffs[i];
+      if (p.removed) continue;
+      const dx = p.x - x;
+      const dy = p.y - y;
+      const r = radius * p.scale;
+      if (dx*dx + dy*dy <= r*r){
+        p.removed = true;
+      }
+    }
+    if (Math.random() < 0.1){
+      for (let i=puffs.length-1;i>=0;i--){
+        if (puffs[i].removed) puffs.splice(i,1);
+      }
+    }
+  }
+  function handlePointerDown(evt){
+    if (isPointerDown) return;
+    isPointerDown = true;
+    pointerId = evt.pointerId || 'mouse';
+    canvas.setPointerCapture && canvas.setPointerCapture(pointerId);
+    const pt = getCanvasPoint(evt);
+    lastPt = pt;
+    if (state.erasing){
+      eraseAt(pt.x, pt.y);
+    } else {
+      addPuffAt(pt.x, pt.y);
+    }
+    evt.preventDefault();
+  }
+  function handlePointerMove(evt){
+    if (!isPointerDown) return;
+    if ((evt.pointerId || 'mouse') !== pointerId) return;
+    const pt = getCanvasPoint(evt);
+    const distX = pt.x - lastPt.x;
+    const distY = pt.y - lastPt.y;
+    const dist = Math.hypot(distX, distY);
+    const spacing = state.brushSize * DPR * 0.35;
+    if (dist >= spacing){
+      const steps = Math.floor(dist / spacing);
+      for (let i=1;i<=steps;i++){
+        const t = i/steps;
+        const x = lastPt.x + distX * t;
+        const y = lastPt.y + distY * t;
+        if (state.erasing){
+          eraseAt(x,y);
+        } else {
+          addPuffAt(x,y);
+        }
+      }
+      lastPt = pt;
+    }
+    evt.preventDefault();
+  }
+  function handlePointerUp(evt){
+    if (!isPointerDown) return;
+    if ((evt.pointerId || 'mouse') !== pointerId) return;
+    isPointerDown = false;
+    pointerId = null;
+    canvas.releasePointerCapture && canvas.releasePointerCapture(evt.pointerId);
+    lastPt = null;
+    // Update last stroke info
+    lastStrokeInfo.textContent = `size ${state.brushSize}, soft ${(state.softness*100)|0}%, op ${state.opacity.toFixed(2)}, shape ${state.brushShape}`;
+    evt.preventDefault();
+  }
+  canvas.addEventListener('pointerdown', handlePointerDown, {passive:false});
+  window.addEventListener('pointermove', handlePointerMove, {passive:false});
+  window.addEventListener('pointerup', handlePointerUp, {passive:false});
+  window.addEventListener('pointercancel', handlePointerUp, {passive:false});
+
+  // Controls hooks
+  function setActiveColorButton(btn){
+    colorButtons.forEach(o=>{
+      const active = o.el === btn;
+      o.el.classList.toggle('active', active);
+      o.el.setAttribute('aria-checked', active ? 'true' : 'false');
+    });
+  }
+  colorButtons.forEach(o=>{
+    o.el.addEventListener('click', ()=>{
+      state.color = o.color;
+      setActiveColorButton(o.el);
+      updateBrushStamp();
+    })
+  });
+
+  brushShapeEl.addEventListener('change', ()=>{
+    state.brushShape = brushShapeEl.value;
+    activeShapeLabel.textContent = state.brushShape;
+    updateBrushStamp();
+  });
+
+  function highlightWrap(el){
+    if (!el) return;
+    el.setAttribute('data-active','true');
+    // remove on next frame tick to avoid race with tests; keep for a short while but not necessary for proxies
+    setTimeout(()=>{ el.removeAttribute('data-active'); }, 600);
+  }
+
+  function updateSize(){
+    state.brushSize = parseInt(brushSizeEl.value, 10);
+    brushSizeVal.textContent = state.brushSize;
+    updateBrushStamp();
+    highlightWrap(brushSizeWrap);
+  }
+  brushSizeEl.addEventListener('input', updateSize);
+  function updateSoftness(){
+    state.softness = parseInt(brushSoftnessEl.value, 10) / 100;
+    brushSoftnessVal.textContent = Math.round(state.softness*100) + '%';
+    updateBrushStamp();
+    highlightWrap(brushSoftnessWrap);
+  }
+  brushSoftnessEl.addEventListener('input', updateSoftness);
+  function updateOpacity(){
+    state.opacity = parseInt(brushOpacityEl.value, 10) / 100;
+    brushOpacityVal.textContent = state.opacity.toFixed(2);
+    updateBrushStamp();
+    highlightWrap(brushOpacityWrap);
+  }
+  brushOpacityEl.addEventListener('input', updateOpacity);
+
+  // Step buttons for sliders
+  function stepRange(input, delta, wrap){
+    const min = parseFloat(input.min||0);
+    const max = parseFloat(input.max||100);
+    const step = 1;
+    let v = parseFloat(input.value||0) + delta*step;
+    v = clamp(v, min, max);
+    input.value = v;
+    input.dispatchEvent(new Event('input', {bubbles:true}));
+  }
+  brushSizeMinus.addEventListener('click', ()=> stepRange(brushSizeEl, -1));
+  brushSizePlus.addEventListener('click', ()=> stepRange(brushSizeEl, +1));
+  brushSoftnessMinus.addEventListener('click', ()=> stepRange(brushSoftnessEl, -1));
+  brushSoftnessPlus.addEventListener('click', ()=> stepRange(brushSoftnessEl, +1));
+  brushOpacityMinus.addEventListener('click', ()=> stepRange(brushOpacityEl, -1));
+  brushOpacityPlus.addEventListener('click', ()=> stepRange(brushOpacityEl, +1));
+
+  jitterToggle.addEventListener('change', ()=>{ 
+    state.jitter = jitterToggle.checked; 
+    jitterStatus.textContent = state.jitter ? 'on' : 'off';
+  });
+
+  function setModeLabels(){
+    if (state.erasing){
+      canvas.style.cursor = 'not-allowed';
+      currentModeLabel.textContent = 'Eraser';
+      modeStatus.textContent = 'Eraser';
+    } else {
+      canvas.style.cursor = 'crosshair';
+      currentModeLabel.textContent = 'Brush';
+      modeStatus.textContent = 'Brush';
+    }
+  }
+  eraserToggle.addEventListener('change', ()=>{ state.erasing = eraserToggle.checked; setModeLabels(); });
+
+  // Sky / Motion
+  driftToggle.addEventListener('change', ()=>{
+    state.drift = driftToggle.checked;
+    cloudDriftStatus.textContent = state.drift ? 'on' : 'off';
+    driftToggleMirror.checked = state.drift;
+  });
+  driftToggleMirror.addEventListener('change', ()=>{
+    state.drift = driftToggleMirror.checked;
+    driftToggle.checked = state.drift;
+    cloudDriftStatus.textContent = state.drift ? 'on' : 'off';
+  });
+
+  function syncCloudDrift(val){
+    const v = clamp(parseInt(val,10)/100, 0, 1);
+    state.cloudDriftTarget = v;
+    cloudDriftSpeed.value = Math.round(v*100);
+    cloudDriftSpeed2.value = Math.round(v*100);
+    cloudDriftSpeedVal.textContent = v.toFixed(2);
+    highlightWrap(cloudDriftSpeedWrap);
+    highlightWrap(cloudDriftSpeedWrap2);
+  }
+  cloudDriftSpeed.addEventListener('input', e=> syncCloudDrift(e.target.value));
+  cloudDriftSpeed2.addEventListener('input', e=> syncCloudDrift(e.target.value));
+  cloudDriftSpeedMinus.addEventListener('click', ()=> stepRange(cloudDriftSpeed, -1));
+  cloudDriftSpeedPlus.addEventListener('click', ()=> stepRange(cloudDriftSpeed, +1));
+  cloudDriftSpeedMinus2.addEventListener('click', ()=> stepRange(cloudDriftSpeed2, -1));
+  cloudDriftSpeedPlus2.addEventListener('click', ()=> stepRange(cloudDriftSpeed2, +1));
+
+  function updateWind(){
+    state.wind = parseInt(windSpeedEl.value, 10) / 100;
+    windSpeedVal.textContent = state.wind.toFixed(2);
+    highlightWrap(windSpeedWrap);
+    updateWindIndicator();
+  }
+  windSpeedEl.addEventListener('input', updateWind);
+  windSpeedMinus.addEventListener('click', ()=> stepRange(windSpeedEl, -1));
+  windSpeedPlus.addEventListener('click', ()=> stepRange(windSpeedEl, +1));
+
+  gustBtn.addEventListener('click', ()=>{
+    // Gust affects clouds only; direction unchanged
+    state.gust += 0.30;
+    if (state.gust > 1.0) state.gust = 1.0;
+    updateWindIndicator();
+  });
+
+  // Airplanes
+  planesToggle.addEventListener('change', ()=>{
+    state.spawnPlanes = planesToggle.checked;
+    airTrafficStatus.textContent = state.spawnPlanes ? 'spawning-on' : 'spawning-off';
+  });
+  planeVisibilityToggle.addEventListener('change', ()=>{
+    state.showPlanes = planeVisibilityToggle.checked;
+    planeVisibilityStatus.textContent = state.showPlanes ? 'visible' : 'hidden';
+  });
+  spawnPlaneBtn.addEventListener('click', ()=>{
+    spawnPlane();
+    pulseBadge();
+  });
+  includePlanesInSave.addEventListener('change', ()=>{ /* nothing; read on save */ });
+
+  planeSpeed.addEventListener('input', ()=>{
+    const factor = parseInt(planeSpeed.value,10) / 100;
+    state.planeSpeedFactor = factor;
+    planeSpeedVal.textContent = factor.toFixed(2)+'x';
+    highlightWrap(planeSpeedWrap);
+    // Update existing planes vx to follow new factor and wind
+    for (let i=0;i<planes.length;i++){
+      const pl = planes[i];
+      const dir = Math.sign(pl.baseVx) || 1;
+      // wind affects airplanes multiplicatively for visibility
+      const windFactor = 1

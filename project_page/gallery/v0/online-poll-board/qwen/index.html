@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Poll Board</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .polls-container {
+            padding: 30px;
+        }
+
+        .poll-card {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-left: 5px solid #6a11cb;
+        }
+
+        .poll-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .poll-question {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .options-container {
+            margin-bottom: 25px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid #e2e8f0;
+        }
+
+        .option:hover {
+            background: #f0f8ff;
+            border-color: #a3d5ff;
+        }
+
+        .option input {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .option label {
+            flex-grow: 1;
+            font-size: 1.1rem;
+            color: #4a5568;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .option:hover label {
+            color: #2b6cb0;
+        }
+
+        .vote-btn {
+            background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(37, 117, 252, 0.3);
+        }
+
+        .vote-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(37, 117, 252, 0.4);
+        }
+
+        .vote-btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .results-container {
+            margin-top: 20px;
+        }
+
+        .result-bar {
+            height: 30px;
+            background: #e2e8f0;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+            border-radius: 15px;
+            transition: width 1s ease-in-out;
+            position: relative;
+        }
+
+        .result-text {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .result-percentage {
+            font-weight: 700;
+            color: #2b6cb0;
+        }
+
+        .total-votes {
+            text-align: center;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f0f8ff;
+            border-radius: 10px;
+            font-weight: 500;
+            color: #2b6cb0;
+        }
+
+        .vote-animation {
+            animation: pulse 0.5s ease;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #718096;
+            font-size: 0.9rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 15px;
+            }
+            
+            header {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .polls-container {
+                padding: 20px;
+            }
+            
+            .poll-question {
+                font-size: 1.2rem;
+            }
+            
+            .option {
+                padding: 12px;
+            }
+            
+            .option label {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Online Poll Board</h1>
+            <p class="subtitle">Share your opinion and see what others think</p>
+        </header>
+        
+        <main class="polls-container" id="pollsContainer">
+            <!-- Polls will be dynamically inserted here -->
+        </main>
+        
+        <footer>
+            <p>© 2023 Online Poll Board | Vote responsibly</p>
+        </footer>
+    </div>
+
+    <script>
+        // Sample poll data
+        const polls = [
+            {
+                id: "poll1",
+                question: "What is your favorite programming language?",
+                options: [
+                    { id: "opt1", text: "JavaScript", votes: 45 },
+                    { id: "opt2", text: "Python", votes: 38 },
+                    { id: "opt3", text: "Java", votes: 22 },
+                    { id: "opt4", text: "C++", votes: 15 }
+                ]
+            },
+            {
+                id: "poll2",
+                question: "Which technology do you want to learn next?",
+                options: [
+                    { id: "opt5", text: "React", votes: 52 },
+                    { id: "opt6", text: "Vue.js", votes: 28 },
+                    { id: "opt7", text: "Angular", votes: 18 },
+                    { id: "opt8", text: "Node.js", votes: 35 }
+                ]
+            },
+            {
+                id: "poll3",
+                question: "What's your preferred development environment?",
+                options: [
+                    { id: "opt9", text: "Visual Studio Code", votes: 68 },
+                    { id: "opt10", text: "IntelliJ IDEA", votes: 25 },
+                    { id: "opt11", text: "Sublime Text", votes: 12 },
+                    { id: "opt12", text: "Vim", votes: 10 }
+                ]
+            }
+        ];
+
+        // DOM elements
+        const pollsContainer = document.getElementById('pollsContainer');
+
+        // Function to render polls
+        function renderPolls() {
+            pollsContainer.innerHTML = '';
+            
+            polls.forEach(poll => {
+                const pollElement = document.createElement('div');
+                pollElement.className = 'poll-card';
+                pollElement.id = `poll-${poll.id}`;
+                
+                let optionsHTML = '';
+                let totalVotes = poll.options.reduce((sum, option) => sum + option.votes, 0);
+                
+                poll.options.forEach(option => {
+                    optionsHTML += `
+                        <div class="option">
+                            <input type="radio" name="poll-${poll.id}" id="${option.id}" value="${option.id}">
+                            <label for="${option.id}">${option.text}</label>
+                        </div>
+                    `;
+                });
+                
+                pollElement.innerHTML = `
+                    <h2 class="poll-question">${poll.question}</h2>
+                    <div class="options-container">
+                        ${optionsHTML}
+                    </div>
+                    <button class="vote-btn" id="vote-${poll.id}">Vote Now</button>
+                    <div class="results-container" id="results-${poll.id}" style="display: none;">
+                        <div class="total-votes">Total Votes: ${totalVotes}</div>
+                        ${poll.options.map(option => `
+                            <div class="result-text">
+                                <span>${option.text}</span>
+                                <span class="result-percentage">${Math.round((option.votes / totalVotes) * 100)}%</span>
+                            </div>
+                            <div class="result-bar">
+                                <div class="result-fill" id="fill-${option.id}" style="width: 0;"></div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                pollsContainer.appendChild(pollElement);
+                
+                // Add event listener for vote button
+                const voteButton = document.getElementById(`vote-${poll.id}`);
+                voteButton.addEventListener('click', () => handleVote(poll));
+            });
+        }
+
+        // Function to handle voting
+        function handleVote(poll) {
+            const selectedOption = document.querySelector(`input[name="poll-${poll.id}"]:checked`);
+            
+            if (!selectedOption) {
+                alert('Please select an option before voting!');
+                return;
+            }
+            
+            // Get the selected option ID
+            const selectedOptionId = selectedOption.value;
+            
+            // Find the selected option in our data
+            const option = poll.options.find(opt => opt.id === selectedOptionId);
+            
+            // Update vote count (simulating server update)
+            option.votes++;
+            
+            // Show results
+            const resultsContainer = document.getElementById(`results-${poll.id}`);
+            resultsContainer.style.display = 'block';
+            
+            // Animate the vote
+            const voteButton = document.getElementById(`vote-${poll.id}`);
+            voteButton.disabled = true;
+            voteButton.textContent = 'Voted!';
+            voteButton.classList.add('vote-animation');
+            
+            // Animate result bars
+            animateResultBars(poll);
+            
+            // Reset after delay
+            setTimeout(() => {
+                voteButton.disabled = false;
+                voteButton.textContent = 'Vote Now';
+                voteButton.classList.remove('vote-animation');
+            }, 2000);
+        }
+
+        // Function to animate result bars
+        function animateResultBars(poll) {
+            const totalVotes = poll.options.reduce((sum, option) => sum + option.votes, 0);
+            
+            poll.options.forEach(option => {
+                const percentage = Math.round((option.votes / totalVotes) * 100);
+                const fillElement = document.getElementById(`fill-${option.id}`);
+                
+                // Animate the bar
+                fillElement.style.width = '0';
+                setTimeout(() => {
+                    fillElement.style.width = `${percentage}%`;
+                }, 100);
+            });
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPolls();
+        });
+    </script>
+</body>
+</html>

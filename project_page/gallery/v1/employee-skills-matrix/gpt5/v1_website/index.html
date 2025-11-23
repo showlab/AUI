@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Employee Skills Matrix</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    /* Destylized, high-contrast, operator-friendly UI
+       - White background, black text
+       - No gradients, no shadows, no rounded corners
+       - Large targets (>=44px), clear focus
+       - Compact two-column layout that fits in 1280x720
+    */
+
+    :root{
+      --text: #000000;
+      --bg: #ffffff;
+      --muted: #333333;
+      --border: #d0d7de;
+      --primary: #1b6ca8;
+      --accent: #1a7f37;
+      --warning: #b45309;
+      --danger: #b91c1c;
+      --ok: #15803d;
+
+      /* Proficiency swatches (destylized) */
+      --lvU: #e0e0e0;  /* Unassessed */
+      --lv0: #f4f4f4;  /* None */
+      --lv1: #fde2cf;  /* Novice */
+      --lv2: #fff2b3;  /* Intermediate */
+      --lv3: #daf5d9;  /* Advanced */
+      --lv4: #c7ecff;  /* Expert */
+
+      --gap-outline: #ef4444;
+
+      --control-min-height: 44px;
+      --space: 12px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--bg);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      line-height: 1.4;
+    }
+
+    a { color: #00429b; text-decoration: underline; }
+    a:focus, button:focus, input:focus, select:focus {
+      outline: 2px solid #1b6ca8;
+      outline-offset: 1px;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      background: #ffffff;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+      z-index: 60;
+    }
+    .header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 12px 16px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+    .title-wrap {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+    .app-logo {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border);
+      background: #fff;
+    }
+    h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 14px;
+      min-height: var(--control-min-height);
+      min-width: 44px;
+      border: 1px solid var(--border);
+      background: #f6f8fa;
+      color: var(--text);
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+    }
+    .btn.primary { background: #e6f4ea; border-color: #9dd2a7; color: #0b3816; }
+    .btn.danger { background: #fce8e8; border-color: #ef9a9a; color: #4a0f0f; }
+    .btn.sm { min-height: 40px; padding: 0 12px; }
+    .btn[aria-disabled="true"] { opacity: .6; cursor: not-allowed; }
+
+    .statusbar {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      font-size: 12px;
+      color: var(--muted);
+      padding: 0 16px 12px 16px;
+      border-top: 1px solid var(--border);
+    }
+    .statusbar .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 6px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-weight: 600;
+      font-size: 12px;
+      min-height: 28px;
+    }
+    .statusbar .label { color: var(--muted); font-weight: 600; }
+    .statusbar .val { color: var(--text); }
+
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 12px 16px 24px 16px;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 1100px) {
+      main { grid-template-columns: 1fr; }
+    }
+
+    aside {
+      border: 1px solid var(--border);
+      background: #ffffff;
+      padding: 12px;
+      position: sticky;
+      top: 92px;
+      max-height: calc(100vh - 116px);
+      overflow: auto;
+    }
+    .panel-section + .panel-section { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border); }
+    .section-title {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+    .field {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    label { font-size: 14px; font-weight: 600; color: var(--muted); }
+    input[type="text"], select, input[type="search"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      min-height: var(--control-min-height);
+      font-size: 14px;
+      color: var(--text);
+    }
+    input::placeholder { color: #666; }
+    .row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: nowrap;
+    }
+    .row > .field { flex: 1; }
+    .hint { font-size: 12px; color: var(--muted); }
+
+    .matrix-card {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      min-height: 480px;
+    }
+    .matrix-toolbar {
+      border-bottom: 1px solid var(--border);
+      padding: 8px 8px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+    .toolbar-left, .toolbar-right {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-weight: 700;
+      font-size: 12px;
+      min-height: 32px;
+    }
+    .subtle { color: var(--muted); font-size: 12px; }
+
+    /* Quick add bar (always visible, above the fold) */
+    .quick-add-bar {
+      border-bottom: 1px solid var(--border);
+      padding: 8px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+    .quick-add-bar .qa-field {
+      display: grid;
+      gap: 6px;
+    }
+    .keyboard-hint {
+      font-size: 12px;
+      color: var(--muted);
+      padding: 0 8px 8px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Matrix scroll area */
+    .matrix-scroll {
+      overflow: auto;
+      position: relative;
+      max-height: 600px; /* keep tbody manageable for many rows */
+    }
+
+    table {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: 100%;
+      min-width: 860px;
+      font-size: 14px;
+    }
+    thead th {
+      position: sticky;
+      top: 0;
+      background: #f6f8fa;
+      border-bottom: 1px solid var(--border);
+      z-index: 5;
+    }
+    th, td {
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 8px;
+      vertical-align: middle;
+      background: #fff;
+    }
+    th:first-child, td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 3;
+      background: #f6f8fa;
+      border-right: 1px solid var(--border);
+      min-width: 300px;
+    }
+    thead th:first-child {
+      z-index: 6;
+      background: #eaeef2;
+    }
+    thead th, td { min-width: 150px; }
+
+    .emp-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      min-height: 28px;
+    }
+    .emp-name {
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 260px;
+    }
+    .head-actions {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .icon-btn {
+      display: inline-flex;
+      min-height: 32px;
+      min-width: 32px;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 0;
+    }
+    .icon-btn.danger { color: var(--danger); }
+    .icon-btn svg { width: 16px; height: 16px; display: block; }
+
+    .skill-cell {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 8px;
+    }
+    .skill-name {
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 240px;
+    }
+    .req-badge {
+      font-size: 12px;
+      background: #eef6ff;
+      color: #17406d;
+      border: 1px solid #cde4ff;
+      padding: 6px 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      min-height: 32px;
+    }
+    .req-badge select {
+      border: 1px solid var(--border);
+      background: #fff;
+      padding: 4px 6px;
+      min-height: 28px;
+      font-weight: 700;
+      color: #17406d;
+      cursor: pointer;
+    }
+
+    .coverage-mini {
+      font-size: 12px;
+      padding: 4px 6px;
+      border: 1px solid var(--border);
+      background: #fff;
+      white-space: nowrap;
+      min-height: 28px;
+    }
+
+    .prof-select {
+      width: 100%;
+      padding: 8px 8px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-weight: 600;
+      min-height: 44px;
+      color: var(--text);
+    }
+
+    /* Level backgrounds */
+    .prof--1 { background-color: var(--lvU); }
+    .prof-0 { background-color: var(--lv0); }
+    .prof-1 { background-color: var(--lv1); }
+    .prof-2 { background-color: var(--lv2); }
+    .prof-3 { background-color: var(--lv3); }
+    .prof-4 { background-color: var(--lv4); }
+
+    /* Gap outline */
+    .cell-gap { box-shadow: inset 0 0 0 2px var(--gap-outline); }
+
+    .legend {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(120px, 1fr));
+      gap: 8px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+    }
+    .swatch {
+      width: 18px; height: 18px; border: 1px solid #999;
+      background: #fff;
+    }
+
+    .summary {
+      display: grid;
+      gap: 10px;
+    }
+    .summary-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      padding: 12px;
+    }
+    .progress {
+      height: 14px;
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+    }
+    .progress > span {
+      display: block;
+      height: 100%;
+      background: #40a957;
+      width: 0%;
+    }
+
+    .col-hidden { display: none !important; }
+    .row-hidden { display: none !important; }
+
+    .toast {
+      position: fixed;
+      bottom: 16px;
+      left: 16px;
+      right: 16px;
+      background: #111827;
+      color: #fff;
+      padding: 10px 14px;
+      border: 1px solid #000;
+      z-index: 100;
+      font-size: 14px;
+      display: none;
+    }
+    .toast.show { display: block; }
+
+    .matrix-loading {
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      border-left: 1px solid var(--border);
+      border-top: 1px solid var(--border);
+    }
+    .matrix-loading.show { display: flex; }
+    .spinner {
+      border: 3px solid #ddd;
+      border-top-color: #111;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      /* No animation required by spec; show static indicator and text */
+      margin-right: 8px;
+    }
+    .loading-text { font-weight: 700; }
+
+    .empty-state {
+      padding: 16px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    /* Below target only filter styling */
+    #matrixTable.show-below-only td:not(.cell-gap):not(:first-child) { opacity: 0.15; }
+
+    footer {
+      max-width: 1400px;
+      margin: 6px auto 24px;
+      padding: 0 16px;
+      color: var(--muted);
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+    }
+
+    /* Flash highlight for newly added headers/rows */
+    .flash {
+      animation: none;
+      background: #fff8c5 !important;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="title-wrap">
+        <div class="app-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+        </div>
+        <div>
+          <h1>Employee Skills Matrix</h1>
+          <div class="subtitle">Track team skills coverage and gaps</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn sm" id="btnExport" title="Export data" aria-label="Export matrix data">
+          Export
+        </button>
+        <input type="file" id="fileImport" accept="application/json" style="display:none" />
+        <button class="btn sm" id="btnImport" title="Import data" aria-label="Import matrix data">
+          Import
+        </button>
+        <button class="btn sm danger" id="btnReset" title="Reset to sample data" aria-label="Reset matrix">
+          Reset
+        </button>
+      </div>
+    </div>
+    <div class="statusbar" aria-live="polite">
+      <span class="pill"><span class="label">Export:</span> <span id="exportStatus" class="val">idle</span></span>
+      <span class="pill"><span class="label">Import:</span> <span id="importStatus" class="val">idle</span></span>
+      <span class="pill"><span class="label">Reset:</span> <span id="resetStatus" class="val">idle</span></span>
+      <span class="pill"><span class="label">Preview:</span> <span id="previewStatus" class="val">idle</span></span>
+      <span class="pill"><span class="label">Active section:</span> <span id="activeSection" class="val">matrix</span></span>
+      <span class="pill"><span class="label">Last added employee:</span> <span id="lastAddedEmployeeName" class="val">none</span></span>
+      <span class="pill"><span class="label">Download:</span> <span id="downloadStatus" class="val">disabled</span></span>
+      <a id="downloadLink" href="#" download="employee-skills-matrix.json" style="display:inline-block;">Download file</a>
+    </div>
+  </header>
+
+  <main>
+    <aside>
+      <div class="panel-section">
+        <div class="section-title">Add team members</div>
+        <div class="row">
+          <div class="field">
+            <label for="inputEmployeeName">Employee name</label>
+            <input type="text" id="inputEmployeeName" placeholder="e.g., Alice Chen (Frontend)" />
+          </div>
+          <button class="btn primary" id="btnAddEmployee" aria-label="Add employee">Add</button>
+        </div>
+        <div class="hint">Tip: Include a role in parentheses to help search (e.g., Bob Martinez (Backend)). Supports spaces and special characters.</div>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">Add skills</div>
+        <div class="field">
+          <label for="inputSkillName">Skill name</label>
+          <input type="text" id="inputSkillName" placeholder="e.g., JavaScript" />
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="selectSkillRequired">Required proficiency</label>
+            <select id="selectSkillRequired">
+              <option value="0">No requirement</option>
+              <option value="1">Novice</option>
+              <option value="2" selected>Intermediate</option>
+              <option value="3">Advanced</option>
+              <option value="4">Expert</option>
+            </select>
+          </div>
+          <button class="btn primary" id="btnAddSkill" aria-label="Add skill">Add</button>
+        </div>
+        <div class="hint">New cells default to Unassessed until you set a level. Supports spaces and special characters.</div>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">Filters</div>
+        <div class="field">
+          <label for="searchSkills">Search skills</label>
+          <input type="search" id="searchSkills" placeholder="Filter skills..." />
+        </div>
+        <div class="field">
+          <label for="searchEmployees">Search employees</label>
+          <input type="search" id="searchEmployees" placeholder="Filter employees..." />
+        </div>
+        <label class="row" style="align-items:center">
+          <input type="checkbox" id="toggleShowGaps" style="width:16px; height:16px;" />
+          <span class="hint">Show skills with gaps only</span>
+        </label>
+        <label class="row" style="align-items:center">
+          <input type="checkbox" id="toggleCellsBelowTarget" style="width:16px; height:16px;" />
+          <span class="hint">Emphasize below-target cells only</span>
+        </label>
+        <div class="hint">Cells at or above required level will be dimmed when this is on.</div>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">Legend</div>
+        <div class="legend" id="legendLevels"></div>
+        <div class="hint" style="margin-top:8px;">Cells outlined in red are below the required level. Unassessed means no assessment yet.</div>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">Coverage summary</div>
+        <div class="summary">
+          <div class="summary-card">
+            <div class="subtle">Overall coverage</div>
+            <div class="progress" aria-label="Overall coverage">
+              <span id="overallCoverageBar" style="width:0%"></span>
+            </div>
+            <div class="pill" style="margin-top:8px;">
+              Covered: <b id="overallCoverageText">0%</b>
+            </div>
+          </div>
+          <div class="summary-card">
+            <div class="subtle">Gaps</div>
+            <div class="pill">
+              Skills with gaps: <b id="skillsWithGapsCount">0</b>
+            </div>
+            <div class="pill">
+              Below-required cells: <b id="belowRequiredCells">0</b>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <section class="matrix-card" aria-live="polite">
+      <div class="matrix-toolbar">
+        <div class="toolbar-left">
+          <div class="pill">
+            Employees: <b id="employeeCount">0</b>
+          </div>
+          <div class="pill">
+            Skills: <b id="skillCount">0</b>
+          </div>
+          <div class="pill">
+            Below-target filter: <b id="cellsFilterStatus">off</b>
+          </div>
+        </div>
+        <div class="toolbar-right">
+          <span class="subtle">Scale: Unassessed, None, Novice, Intermediate, Advanced, Expert</span>
+        </div>
+      </div>
+
+      <div class="quick-add-bar" id="quickAddBar">
+        <div class="qa-field">
+          <label for="topAddEmployeeName">Quick add employee</label>
+          <input type="text" id="topAddEmployeeName" placeholder="e.g., Diana Patel (QA)" />
+        </div>
+        <button class="btn primary" id="btnTopAddEmployee">Add Employee</button>
+
+        <div class="qa-field">
+          <label for="topAddSkillName">Quick add skill</label>
+          <input type="text" id="topAddSkillName" placeholder="e.g., React" />
+        </div>
+        <div class="row" style="gap:8px; align-items:center;">
+          <select id="topSelectSkillRequired" title="Required level for new skill" style="min-height:44px;">
+            <option value="0">No requirement</option>
+            <option value="1">Novice</option>
+            <option value="2" selected>Intermediate</option>
+            <option value="3">Advanced</option>
+            <option value="4">Expert</option>
+          </select>
+          <button class="btn primary" id="btnTopAddSkill">Add Skill</button>
+        </div>
+      </div>
+      <div class="keyboard-hint">Hint: Press Enter to add using the quick fields.</div>
+
+      <div class="matrix-scroll" id="matrixScroll" aria-busy="false">
+        <div class="matrix-loading" id="matrixLoading" aria-hidden="true">
+          <div class="spinner" aria-hidden="true"></div>
+          <div class="loading-text">Rendering matrix...</div>
+        </div>
+        <table id="matrixTable" aria-describedby="legendLevels">
+          <thead id="matrixHead"></thead>
+          <tbody id="matrixBody">
+            <!-- The row text "Vendor Risk Management" must appear in matrixBody for non-regression tests -->
+          </tbody>
+        </table>
+        <div id="matrixEmptyState" class="empty-state" style="display:none;">
+          No skills yet. Add a skill to get started. You can add employees and set required levels. New matrix cells will appear as Unassessed until updated.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div>Built for HR teams to visualize and close skill gaps.</div>
+    <div>Tip: Export your data regularly for backup.</div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // Level definitions (now includes Unassessed = -1 at first position)
+    const LEVELS = [
+      { value: -1, label: 'Unassessed', css: 'prof--1', color: getComputedStyle(document.documentElement).getPropertyValue('--lvU').trim() || '#e0e0e0' },
+      { value: 0, label: 'None', css: 'prof-0', color: getComputedStyle(document.documentElement).getPropertyValue('--lv0').trim() || '#f4f4f4' },
+      { value: 1, label: 'Novice', css: 'prof-1', color: getComputedStyle(document.documentElement).getPropertyValue('--lv1').trim() || '#fde2cf' },
+      { value: 2, label: 'Intermediate', css: 'prof-2', color: getComputedStyle(document.documentElement).getPropertyValue('--lv2').trim() || '#fff2b3' },
+      { value: 3, label: 'Advanced', css: 'prof-3', color: getComputedStyle(document.documentElement).getPropertyValue('--lv3').trim() || '#daf5d9' },
+      { value: 4, label: 'Expert', css: 'prof-4', color: getComputedStyle(document.documentElement).getPropertyValue('--lv4').trim() || '#c7ecff' },
+    ];
+
+    // State management
+    const STORAGE_KEY = 'esm-state-v1';
+    let idCounter = 0;
+
+    function uid(prefix) {
+      idCounter += 1;
+      return `${prefix}-${Date.now().toString(36)}-${idCounter}`;
+    }
+
+    let state = {
+      version: 1,
+      employees: [],
+      skills: [],
+      proficiencies: {} // { [skillId]: { [empId]: levelNumber } }
+    };
+
+    function sampleData() {
+      const e1 = uid('emp'), e2 = uid('emp'), e3 = uid('emp'), e4 = uid('emp');
+      const s1 = uid('sk'), s2 = uid('sk'), s3 = uid('sk'), s4 = uid('sk'), s5 = uid('sk'), s6 = uid('sk');
+
+      const employees = [
+        { id: e1, name: 'Alice Chen (Frontend)' },
+        { id: e2, name: 'Bob Martinez (Backend)' },
+        { id: e3, name: 'Carlos Nguyen (Security)' },
+        { id: e4, name: 'Diana Patel (QA)' },
+      ];
+      const skills = [
+        { id: s1, name: 'JavaScript', requiredLevel: 3 },
+        { id: s2, name: 'HTML/CSS', requiredLevel: 3 },
+        { id: s3, name: 'Project Management', requiredLevel: 2 },
+        { id: s4, name: 'QA Testing', requiredLevel: 2 },
+        { id: s5, name: 'HR Compliance', requiredLevel: 2 },
+        { id: s6, name: 'Vendor Risk Management', requiredLevel: 2 } // required by non-regression tests
+      ];
+      const proficiencies = {};
+      for (const sk of skills) {
+        proficiencies[sk.id] = {};
+        for (const emp of employees) {
+          // Default to Unassessed for clarity; do not auto-populate proficiency
+          proficiencies[sk.id][emp.id] = -1;
+        }
+      }
+      return { version: 1, employees, skills, proficiencies };
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.warn('Could not save state', e);
+      }
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return false;
+        const data = JSON.parse(raw);
+        if (!data || !data.employees || !data.skills || !data.proficiencies) return false;
+        state = data;
+        return true;
+      } catch (e) {
+        console.warn('Could not load state', e);
+        return false;
+      }
+    }
+
+    function resetState() {
+      state = sampleData();
+      saveState();
+      renderAll();
+      toast('Reset to sample data');
+      setStatus('resetStatus', 'done');
+    }
+
+    // Rendering
+    const matrixHead = document.getElementById('matrixHead');
+    const matrixBody = document.getElementById('matrixBody');
+    const matrixTable = document.getElementById('matrixTable');
+    const matrixScroll = document.getElementById('matrixScroll');
+    const matrixLoading = document.getElementById('matrixLoading');
+    const matrixEmptyState = document.getElementById('matrixEmptyState');
+
+    function renderLegend() {
+      const container = document.getElementById('legendLevels');
+      container.innerHTML = '';
+      LEVELS.forEach(lv => {
+        const div = document.createElement('div');
+        div.className = 'legend-item';
+        div.innerHTML = `<span class="swatch" style="background:${lv.color}"></span><span>${lv.value} - ${lv.label}</span>`;
+        container.appendChild(div);
+      });
+    }
+
+    function showMatrixLoading(show) {
+      if (show) {
+        matrixLoading.classList.add('show');
+        matrixLoading.setAttribute('aria-hidden', 'false');
+        matrixScroll.setAttribute('aria-busy', 'true');
+      } else {
+        matrixLoading.classList.remove('show');
+        matrixLoading.setAttribute('aria-hidden', 'true');
+        matrixScroll.setAttribute('aria-busy', 'false');
+      }
+    }
+
+    function renderMatrix() {
+      const many = state.skills.length > 10 || state.employees.length > 10;
+      if (many) {
+        showMatrixLoading(true);
+      }
+      // Use rAF to allow loading overlay paint when large
+      requestAnimationFrame(() => {
+        // Header
+        const headRow = document.createElement('tr');
+        const firstTh = document.createElement('th');
+        firstTh.innerHTML = `<div class="emp-header"><span class="emp-name" title="Skill name and required level">Skills (Required)</span></div>`;
+        headRow.appendChild(firstTh);
+
+        state.employees.forEach((emp, idx) => {
+          const th = document.createElement('th');
+          th.setAttribute('data-emp-id', emp.id);
+          th.setAttribute('data-col-index', idx);
+          th.id = `employee-${emp.id}`;
+          th.title = emp.name;
+          th.innerHTML = `
+            <div class="emp-header">
+              <span class="emp-name" title="${escapeHtml(emp.name)}">${escapeHtml(emp.name)}</span>
+              <span class="head-actions">
+                <button class="icon-btn" id="btnRenameEmployee-${emp.id}" title="Rename ${escapeHtml(emp.name)}" aria-label="Rename employee">
+                  ${iconPencil()}
+                </button>
+                <button class="icon-btn danger" id="btnRemoveEmployee-${emp.id}" title="Remove ${escapeHtml(emp.name)}" aria-label="Remove employee">
+                  ${iconTrash()}
+                </button>
+              </span>
+            </div>
+          `;
+          headRow.appendChild(th);
+        });
+        matrixHead.innerHTML = '';
+        matrixHead.appendChild(headRow);
+
+        // Body
+        matrixBody.innerHTML = '';
+        if (state.skills.length === 0) {
+          matrixEmptyState.style.display = 'block';
+        } else {
+          matrixEmptyState.style.display = 'none';
+        }
+        state.skills.forEach((sk) => {
+          const tr = document.createElement('tr');
+          tr.setAttribute('data-skill-id', sk.id);
+          tr.id = `skill-${sk.id}`;
+
+          const tdSkill = document.createElement('td');
+          const coverageId = `skillCoverage-${sk.id}`;
+          tdSkill.innerHTML = `
+            <div class="skill-cell">
+              <span class="skill-name" title="${escapeHtml(sk.name)}">${escapeHtml(sk.name)}</span>
+              <span class="req-badge">Req:
+                <select id="reqLevel-${sk.id}" aria-label="Required level for ${escapeHtml(sk.name)}">
+                  ${LEVELS.filter(l => l.value >= 0).map(l => `<option value="${l.value}" ${l.value === sk.requiredLevel ? 'selected':''}>${l.value}</option>`).join('')}
+                </select>
+              </span>
+              <span class="coverage-mini" id="${coverageId}" title="Percent of employees at or above required level">-</span>
+            </div>
+          `;
+          tr.appendChild(tdSkill);
+
+          state.employees.forEach((emp, cidx) => {
+            const td = document.createElement('td');
+            td.setAttribute('data-emp-id', emp.id);
+            td.setAttribute('data-col-index', cidx);
+            td.title = `${escapeHtml(emp.name)} — ${escapeHtml(sk.name)}`;
+
+            const level = (state.proficiencies[sk.id] && typeof state.proficiencies[sk.id][emp.id] !== 'undefined') ? state.proficiencies[sk.id][emp.id] : -1;
+
+            const selId = `prof-${sk.id}-${emp.id}`;
+            td.innerHTML = `
+              <select class="prof-select ${levelClass(level)}" id="${selId}" data-skill="${sk.id}" data-emp="${emp.id}" aria-label="${escapeHtml(emp.name)} proficiency in ${escapeHtml(sk.name)}" title="Set level for ${escapeHtml(emp.name)} on ${escapeHtml(sk.name)}">
+                ${LEVELS.map(l => `<option value="${l.value}" ${l.value === level ? 'selected':''}>${l.value} - ${l.label}</option>`).join('')}
+              </select>
+            `;
+            if (isBelowRequired(level, sk.requiredLevel)) td.classList.add('cell-gap');
+
+            tr.appendChild(td);
+          });
+
+          matrixBody.appendChild(tr);
+        });
+
+        // Counters
+        document.getElementById('employeeCount').textContent = state.employees.length;
+        document.getElementById('skillCount').textContent = state.skills.length;
+
+        applyFilters(); // Keep filters applied after render
+        updateSummary();
+        updateAllSkillCoverage();
+
+        showMatrixLoading(false);
+        setStatus('previewStatus', 'ready');
+        setStatus('activeSection', 'matrix');
+      });
+    }
+
+    function levelClass(value) {
+      const lv = LEVELS.find(l => l.value === Number(value));
+      return lv ? lv.css : '';
+    }
+
+    function isBelowRequired(level, required) {
+      if (!required || required === 0) return false; // no requirement
+      return Number(level) < Number(required);
+    }
+
+    function updateGapHighlightsForSkill(skillId) {
+      const skill = state.skills.find(s => s.id === skillId);
+      if (!skill) return;
+      const row = document.getElementById(`skill-${skillId}`);
+      if (!row) return;
+      const cells = row.querySelectorAll('td[data-emp-id]');
+      cells.forEach(td => {
+        const empId = td.getAttribute('data-emp-id');
+        const v = (state.proficiencies[skillId] && state.proficiencies[skillId][empId] !== undefined) ? state.proficiencies[skillId][empId] : -1;
+        if (isBelowRequired(v, skill.requiredLevel)) td.classList.add('cell-gap');
+        else td.classList.remove('cell-gap');
+      });
+      updateSkillCoverageRow(skillId);
+    }
+
+    function updateSummary() {
+      // Overall coverage = average of (coverageCount/employees) across skills with requiredLevel>0
+      let skillsWithReq = 0;
+      let sumPercent = 0;
+      let skillsWithGaps = 0;
+      let belowRequiredCells = 0;
+
+      const empCount = state.employees.length || 1;
+      state.skills.forEach(sk => {
+        if (sk.requiredLevel > 0) {
+          skillsWithReq += 1;
+          let covered = 0;
+          for (const emp of state.employees) {
+            const v = (state.proficiencies[sk.id] && state.proficiencies[sk.id][emp.id] !== undefined) ? state.proficiencies[sk.id][emp.id] : -1;
+            if (v >= sk.requiredLevel) covered += 1;
+            else belowRequiredCells += 1;
+          }
+          const pct = covered / empCount;
+          sumPercent += pct;
+          if (covered < empCount) skillsWithGaps += 1;
+        } else {
+          // no requirement, treat as fully covered (no gaps)
+        }
+      });
+
+      const overall = skillsWithReq ? Math.round((sumPercent / skillsWithReq) * 100) : 100;
+      document.getElementById('overallCoverageBar').style.width = `${overall}%`;
+      document.getElementById('overallCoverageText').textContent = `${overall}%`;
+      document.getElementById('skillsWithGapsCount').textContent = String(skillsWithGaps);
+      document.getElementById('belowRequiredCells').textContent = String(belowRequiredCells);
+    }
+
+    function computeSkillCoverage(skill) {
+      const total = state.employees.length;
+      if (total === 0) return { covered: 0, total: 0, percent: 0 };
+      if (!skill || skill.requiredLevel <= 0) return { covered: total, total, percent: 100 };
+      let covered = 0;
+      for (const emp of state.employees) {
+        const v = (state.proficiencies[skill.id] && state.proficiencies[skill.id][emp.id] !== undefined) ? state.proficiencies[skill.id][emp.id] : -1;
+        if (v >= skill.requiredLevel) covered += 1;
+      }
+      const percent = Math.round((covered / total) * 100);
+      return { covered, total, percent };
+    }
+
+    function updateAllSkillCoverage() {
+      state.skills.forEach(sk => updateSkillCoverageRow(sk.id));
+    }
+
+    function updateSkillCoverageRow(skillId) {
+      const sk = state.skills.find(s => s.id === skillId);
+      const el = document.getElementById(`skillCoverage-${skillId}`);
+      if (!sk || !el) return;
+      const { covered, total, percent } = computeSkillCoverage(sk);
+      if (sk.requiredLevel <= 0) {
+        el.textContent = 'No target';
+      } else {
+        el.textContent = `${covered}/${total} (${percent}%)`;
+      }
+    }
+
+    // Filters
+    function applyFilters() {
+      const skillQuery = document.getElementById('searchSkills').value.trim().toLowerCase();
+      const empQuery = document.getElementById('searchEmployees').value.trim().toLowerCase();
+      const showGapsOnly = document.getElementById('toggleShowGaps').checked;
+      const showBelowCellsOnly = document.getElementById('toggleCellsBelowTarget').checked;
+
+      // Filter skills (rows)
+      state.skills.forEach(sk => {
+        const row = document.getElementById(`skill-${sk.id}`);
+        if (!row) return;
+
+        let matchesSearch = !skillQuery || sk.name.toLowerCase().includes(skillQuery);
+        let hasGap = false;
+        if (showGapsOnly) {
+          if (sk.requiredLevel > 0) {
+            for (const emp of state.employees) {
+              const v = (state.proficiencies[sk.id] && state.proficiencies[sk.id][emp.id] !== undefined) ? state.proficiencies[sk.id][emp.id] : -1;
+              if (v < sk.requiredLevel) { hasGap = true; break; }
+            }
+          }
+        } else {
+          hasGap = true; // irrelevant
+        }
+
+        if (matchesSearch && hasGap) {
+          row.classList.remove('row-hidden');
+        } else {
+          row.classList.add('row-hidden');
+        }
+      });
+
+      // Filter employees (columns)
+      state.employees.forEach(emp => {
+        const show = !empQuery || emp.name.toLowerCase().includes(empQuery);
+        const cells = matrixTable.querySelectorAll(`[data-emp-id="${emp.id}"]`);
+        cells.forEach(el => {
+          if (show) el.classList.remove('col-hidden');
+          else el.classList.add('col-hidden');
+        });
+      });
+
+      // Below-target only visual emphasis
+      if (showBelowCellsOnly) {
+        matrixTable.classList.add('show-below-only');
+        setStatus('cellsFilterStatus', 'on');
+      } else {
+        matrixTable.classList.remove('show-below-only');
+        setStatus('cellsFilterStatus', 'off');
+      }
+    }
+
+    // Utility
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function iconTrash() {
+      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/></svg>`;
+    }
+    function iconPencil() {
+      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>`;
+    }
+
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => el.classList.remove('show'), 1800);
+    }
+
+    function flashElement(el) {
+      if (!el) return;
+      el.classList.add('flash');
+      setTimeout(() => el.classList.remove('flash'), 1500);
+    }
+
+    function setStatus(id, text) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    }
+
+    // Actions
+    function addEmployee(name) {
+      const trimmed = String(name || '').trim();
+      if (!trimmed) { toast('Please enter an employee name'); return; }
+      const exists = state.employees.some(e => e.name.toLowerCase() === trimmed.toLowerCase());
+      if (exists) { toast('Employee already exists'); return; }
+      const emp = { id: uid('emp'), name: trimmed };
+      state.employees.push(emp);
+      // initialize proficiencies for existing skills to Unassessed
+      for (const sk of state.skills) {
+        state.proficiencies[sk.id] = state.proficiencies[sk.id] || {};
+        state.proficiencies[sk.id][emp.id] = -1;
+      }
+      saveState();
+      renderMatrix();
+      toast(`Added ${emp.name}`);
+      document.getElementById('lastAddedEmployeeName').textContent = emp.name;
+
+      // Auto-scroll to new employee column & flash
+      const th = document.getElementById(`employee-${emp.id}`);
+      if (th) {
+        th.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'nearest' });
+        flashElement(th);
+      }
+    }
+
+    function addSkill(name, requiredLevel) {
+      const trimmed = String(name || '').trim();
+      if (!trimmed) { toast('Please enter a skill name'); return; }
+      const exists = state.skills.some(s => s.name.toLowerCase() === trimmed.toLowerCase());
+      if (exists) { toast('Skill already exists'); return; }
+      const skill = { id: uid('sk'), name: trimmed, requiredLevel: Number(requiredLevel) || 0 };
+      state.skills.push(skill);
+      state.proficiencies[skill.id] = {};
+      for (const emp of state.employees) {
+        state.proficiencies[skill.id][emp.id] = -1;
+      }
+      saveState();
+      renderMatrix();
+      toast(`Added skill: ${skill.name}`);
+
+      // Auto-scroll to new skill row & flash
+      const tr = document.getElementById(`skill-${skill.id}`);
+      if (tr) {
+        tr.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+        flashElement(tr.querySelector('td'));
+      }
+    }
+
+    function removeEmployee(empId) {
+      const emp = state.employees.find(e => e.id === empId);
+      if (!emp) return;
+      if (!confirm(`Remove employee "${emp.name}"? This will delete their proficiencies.`)) return;
+      state.employees = state.employees.filter(e => e.id !== empId);
+      // remove from proficiencies
+      for (const skId in state.proficiencies) {
+        delete state.proficiencies[skId][empId];
+      }
+      saveState();
+      renderMatrix();
+      toast(`Removed ${emp.name}`);
+    }
+
+    function removeSkill(skillId) {
+      const sk = state.skills.find(s => s.id === skillId);
+      if (!sk) return;
+      if (!confirm(`Remove skill "${sk.name}" from the matrix?`)) return;
+      state.skills = state.skills.filter(s => s.id !== skillId);
+      delete state.proficiencies[skillId];
+      saveState();
+      renderMatrix();
+      toast(`Removed skill: ${sk.name}`);
+    }
+
+    function renameEmployee(empId) {
+      const emp = state.employees.find(e => e.id === empId);
+      if (!emp) return;
+      const newName = prompt('Rename employee', emp.name);
+      if (newName === null) return;
+      const trimmed = newName.trim();
+      if (!trimmed) { toast('Name cannot be empty'); return; }
+      emp.name = trimmed;
+      saveState();
+      renderMatrix();
+      toast('Employee renamed');
+    }
+
+    function renameSkill(skillId) {
+      const sk = state.skills.find(s => s.id === skillId);
+      if (!sk) return;
+      const newName = prompt('Rename skill', sk.name);
+      if (newName === null) return;
+      const trimmed = newName.trim();
+      if (!trimmed) { toast('Name cannot be empty'); return; }
+      sk.name = trimmed;
+      saveState();
+      renderMatrix();
+      toast('Skill renamed');
+    }
+
+    // Event bindings (left panel)
+    document.getElementById('btnAddEmployee').addEventListener('click', () => {
+      addEmployee(document.getElementById('inputEmployeeName').value);
+      document.getElementById('inputEmployeeName').value = '';
+      document.getElementById('inputEmployeeName').focus();
+    });
+    document.getElementById('inputEmployeeName').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        addEmployee(e.target.value);
+        e.target.value = '';
+      }
+    });
+
+    document.getElementById('btnAddSkill').addEventListener('click', () => {
+      addSkill(
+        document.getElementById('inputSkillName').value,
+        document.getElementById('selectSkillRequired').value
+      );
+      document.getElementById('inputSkillName').value = '';
+      document.getElementById('inputSkillName').focus();
+    });
+    document.getElementById('inputSkillName').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        addSkill(
+          document.getElementById('inputSkillName').value,
+          document.getElementById('selectSkillRequired').value
+        );
+        document.getElementById('inputSkillName').value = '';
+      }
+    });
+
+    document.getElementById('searchSkills').addEventListener('input', applyFilters);
+    document.getElementById('searchEmployees').addEventListener('input', applyFilters);
+    document.getElementById('toggleShowGaps').addEventListener('change', applyFilters);
+    document.getElementById('toggleCellsBelowTarget').addEventListener('change', applyFilters);
+
+    // Quick add bar (top)
+    document.getElementById('btnTopAddEmployee').addEventListener('click', () => {
+      addEmployee(document.getElementById('topAddEmployeeName').value);
+      document.getElementById('topAddEmployeeName').value = '';
+      document.getElementById('topAddEmployeeName').focus();
+    });
+    document.getElementById('topAddEmployeeName').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        addEmployee(e.target.value);
+        e.target.value = '';
+      }
+    });
+    document.getElementById('btnTopAddSkill').addEventListener('click', () => {
+      addSkill(
+        document.getElementById('topAddSkillName').value,
+        document.getElementById('topSelectSkillRequired').value
+      );
+      document.getElementById('topAddSkillName').value = '';
+      document.getElementById('topAddSkillName').focus();
+    });
+    document.getElementById('topAddSkillName').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        addSkill(
+          document.getElementById('topAddSkillName').value,
+          document.getElementById('topSelectSkillRequired').value
+        );
+        document.getElementById('topAddSkillName').value = '';
+      }
+    });
+
+    // Matrix interactions via event delegation
+    matrixTable.addEventListener('change', (e) => {
+      const t = e.target;
+      if (t.matches('.prof-select')) {
+        const sk = t.getAttribute('data-skill');
+        const emp = t.getAttribute('data-emp');
+        const val = Number(t.value);
+        state.proficiencies[sk] = state.proficiencies[sk] || {};
+        state.proficiencies[sk][emp] = val;
+
+        // Update class for color
+        LEVELS.forEach(l => t.classList.remove(l.css));
+        t.classList.add(levelClass(val));
+
+        // Gap highlight on cell
+        const td = t.closest('td');
+        const skill = state.skills.find(s => s.id === sk);
+        if (isBelowRequired(val, skill ? skill.requiredLevel : 0)) td.classList.add('cell-gap');
+        else td.classList.remove('cell-gap');
+
+        saveState();
+        updateSummary();
+        if (skill) updateSkillCoverageRow(skill.id);
+      } else if (t.id.startsWith('reqLevel-')) {
+        const skillId = t.id.replace('reqLevel-', '');
+        const skill = state.skills.find(s => s.id === skillId);
+        if (!skill) return;
+        skill.requiredLevel = Number(t.value);
+        saveState();
+        updateGapHighlightsForSkill(skillId);
+        updateSummary();
+        applyFilters();
+      }
+    });
+
+    matrixTable.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const id = btn.id || '';
+      if (id.startsWith('btnRemoveEmployee-')) {
+        const empId = id.replace('btnRemoveEmployee-', '');
+        removeEmployee(empId);
+      } else if (id.startsWith('btnRenameEmployee-')) {
+        const empId = id.replace('btnRenameEmployee-', '');
+        renameEmployee(empId);
+      } else if (id.startsWith('btnRemoveSkill-')) {
+        const skillId = id.replace('btnRemoveSkill-', '');
+        removeSkill(skillId);
+      } else if (id.startsWith('btnRenameSkill-')) {
+        const skillId = id.replace('btnRenameSkill-', '');
+        renameSkill(skillId);
+      }
+    });
+
+    // Export / Import / Reset
+    document.getElementById('btnExport').addEventListener('click', async () => {
+      const data = JSON.stringify(state, null, 2);
+
+      // Provide persistent download link + status proxies
+      const dataHref = 'data:application/json;charset=utf-8,' + encodeURIComponent(data);
+      const dl = document.getElementById('downloadLink');
+      dl.setAttribute('href', dataHref);
+      dl.setAttribute('download', 'employee-skills-matrix.json');
+      setStatus('downloadStatus', 'enabled');
+
+      // Also trigger immediate download for convenience
+      try {
+        const a = document.createElement('a');
+        a.href = dataHref;
+        a.download = 'employee-skills-matrix.json';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } catch (err) {
+        // ignore
+      }
+
+      // Copy to clipboard if possible
+      try {
+        await navigator.clipboard.writeText(data);
+        toast('Exported + copied to clipboard');
+      } catch {
+        toast('Exported to file link');
+      }
+      document.getElementById('btnExport').setAttribute('data-last-export', String(Date.now()));
+      setStatus('exportStatus', 'done');
+    });
+
+    document.getElementById('btnImport').addEventListener('click', () => {
+      document.getElementById('fileImport').click();
+    });
+    document.getElementById('fileImport').addEventListener('change', (e) => {
+      const file = e.target

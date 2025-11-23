@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kinetic Typography Studio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4cc9f0;
+            --warning: #f7b731;
+            --danger: #e63946;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #121212;
+            color: var(--light);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Styles */
+        header {
+            background: rgba(20, 20, 20, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background: #3a56e4;
+        }
+
+        .btn-accent {
+            background: var(--accent);
+        }
+
+        .btn-accent:hover {
+            background: #e01a75;
+        }
+
+        /* Main Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: rgba(25, 25, 25, 0.8);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .panel {
+            background: rgba(30, 30, 30, 0.6);
+            border-radius: var(--border-radius);
+            padding: 1.25rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .panel-title i {
+            color: var(--primary);
+        }
+
+        .control-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .control-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .input-group input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            padding: 0.5rem;
+            color: white;
+        }
+
+        select, button {
+            width: 100%;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            color: white;
+            font-family: inherit;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .color-preview {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        .preset-btn {
+            padding: 0.5rem;
+            font-size: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .preset-btn.active {
+            background: var(--primary);
+        }
+
+        /* Canvas Area */
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .canvas-header {
+            padding: 1rem 1.5rem;
+            background: rgba(20, 20, 20, 0.9);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .canvas-controls {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .canvas {
+            flex: 1;
+            background: #0a0a0a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-area {
+            position: relative;
+            width: 100%;
+            max-width: 1280px;
+            height: 720px;
+            background: #000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .safe-area {
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            right: 10%;
+            bottom: 10%;
+            border: 1px dashed rgba(255, 255, 255, 0.3);
+            pointer-events: none;
+        }
+
+        .text-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+            font-weight: 700;
+            text-align: center;
+            color: white;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        /* Timeline */
+        .timeline-container {
+            background: rgba(20, 20, 20, 0.9);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .timeline-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .timeline {
+            height: 100px;
+            background: rgba(30, 30, 30, 0.6);
+            border-radius: var(--border-radius);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .time-marker {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .keyframe {
+            position: absolute;
+            top: 20px;
+            width: 12px;
+            height: 60px;
+            background: var(--primary);
+            border-radius: 3px;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .keyframe::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .playhead {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--accent);
+            z-index: 3;
+        }
+
+        /* Footer */
+        footer {
+            padding: 0.75rem 1.5rem;
+            background: rgba(20, 20, 20, 0.9);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .export-options {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .export-btn {
+            padding: 0.3rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 900px) {
+            .sidebar {
+                width: 220px;
+            }
+            
+            .text-display {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: 300px;
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .canvas-header {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: flex-start;
+            }
+            
+            .timeline-container {
+                padding: 0.75rem 1rem;
+            }
+        }
+
+        /* Animation classes */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide-up {
+            animation: slideUp 0.3s ease forwards;
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Focus styles */
+        :focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <div class="logo-icon">K</div>
+            <h1>Kinetic Typography Studio</h1>
+        </div>
+        <div class="toolbar">
+            <button id="new-btn" class="btn" aria-label="New project">
+                <i>+</i> New
+            </button>
+            <button id="save-btn" class="btn" aria-label="Save project">
+                <i>💾</i> Save
+            </button>
+            <button id="export-btn" class="btn btn-primary" aria-label="Export animation">
+                <i>📤</i> Export
+            </button>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="panel">
+                <h2 class="panel-title">Text Content</h2>
+                <div class="control-group">
+                    <label class="control-label" for="text-input">Text</label>
+                    <textarea id="text-input" rows="3" placeholder="Enter your text here...">Kinetic Typography Studio</textarea>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="font-select">Font</label>
+                    <select id="font-select">
+                        <option value="Inter">Inter</option>
+                        <option value="Roboto Mono">Roboto Mono</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Helvetica">Helvetica</option>
+                        <option value="Georgia">Georgia</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="weight-select">Weight</label>
+                    <select id="weight-select">
+                        <option value="300">Light</option>
+                        <option value="400" selected>Regular</option>
+                        <option value="500">Medium</option>
+                        <option value="600">SemiBold</option>
+                        <option value="700">Bold</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Style</label>
+                    <div class="input-group">
+                        <button id="italic-btn" class="btn" aria-label="Italic">I</button>
+                        <button id="underline-btn" class="btn" aria-label="Underline">U</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2 class="panel-title">Style</h2>
+                <div class="control-group">
+                    <label class="control-label" for="fill-color">Fill Color</label>
+                    <div class="color-picker">
+                        <input type="color" id="fill-color" value="#ffffff">
+                        <div class="color-preview" style="background: #ffffff;"></div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="stroke-color">Stroke Color</label>
+                    <div class="color-picker">
+                        <input type="color" id="stroke-color" value="#4361ee">
+                        <div class="color-preview" style="background: #4361ee;"></div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="shadow-color">Shadow Color</label>
+                    <div class="color-picker">
+                        <input type="color" id="shadow-color" value="#000000">
+                        <div class="color-preview" style="background: #000000;"></div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Effects</label>
+                    <div class="input-group">
+                        <button id="motion-blur-btn" class="btn" aria-label="Motion Blur">Blur</button>
+                        <button id="gradient-btn" class="btn" aria-label="Gradient">Gradient</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2 class="panel-title">Animation Presets</h2>
+                <div class="preset-buttons">
+                    <button class="preset-btn active" data-preset="typewriter">Typewriter</button>
+                    <button class="preset-btn" data-preset="bounce">Bounce</button>
+                    <button class="preset-btn" data-preset="liquid">Liquid</button>
+                    <button class="preset-btn" data-preset="glitch">Glitch</button>
+                    <button class="preset-btn" data-preset="fadeup">Fade Up</button>
+                    <button class="preset-btn" data-preset="cascade">Cascade</button>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Stagger</label>
+                    <input type="range" id="stagger-range" min="0" max="1000" value="100">
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2 class="panel-title">Layout</h2>
+                <div class="control-group">
+                    <label class="control-label">Aspect Ratio</label>
+                    <div class="input-group">
+                        <button class="btn" data-aspect="1:1">1:1</button>
+                        <button class="btn" data-aspect="9:16">9:16</button>
+                        <button class="btn" data-aspect="16:9">16:9</button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="margin-input">Margins</label>
+                    <input type="range" id="margin-input" min="0" max="50" value="10">
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Grid</label>
+                    <div class="input-group">
+                        <button id="grid-btn" class="btn" aria-label="Toggle Grid">Grid</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="canvas-container">
+            <div class="canvas-header">
+                <h2>Preview</h2>
+                <div class="canvas-controls">
+                    <button id="play-btn" class="btn" aria-label="Play animation">
+                        <i>▶</i> Play
+                    </button>
+                    <button id="pause-btn" class="btn" aria-label="Pause animation">
+                        <i>⏸</i> Pause
+                    </button>
+                    <button id="stop-btn" class="btn" aria-label="Stop animation">
+                        <i>⏹</i> Stop
+                    </button>
+                </div>
+            </div>
+            
+            <div class="canvas">
+                <div class="preview-area">
+                    <div class="safe-area"></div>
+                    <div class="text-display" id="text-display">Kinetic Typography Studio</div>
+                </div>
+            </div>
+            
+            <div class="timeline-container">
+                <div class="timeline-header">
+                    <h2>Timeline</h2>
+                    <div class="timeline-controls">
+                        <button id="add-keyframe" class="btn" aria-label="Add keyframe">
+                            <i>➕</i> Keyframe
+                        </button>
+                        <button id="snap-beat" class="btn" aria-label="Snap to beat">
+                            <i>🎵</i> Beat
+                        </button>
+                    </div>
+                </div>
+                <div class="timeline" id="timeline">
+                    <!-- Timeline markers will be generated by JS -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <div class="status-bar">
+            <span>Frame: 0 / 120</span>
+            <span>Duration: 5s</span>
+            <span>Resolution: 1280×720</span>
+        </div>
+        <div class="export-options">
+            <button class="export-btn" data-format="mp4">MP4</button>
+            <button class="export-btn" data-format="webm">WebM</button>
+            <button class="export-btn" data-format="gif">GIF</button>
+            <button class="export-btn" data-format="png">PNG Sequence</button>
+        </div>
+    </footer>
+
+    <script>
+        // DOM Elements
+        const textDisplay = document.getElementById('text-display');
+        const textInput = document.getElementById('text-input');
+        const fontSelect = document.getElementById('font-select');
+        const weightSelect = document.getElementById('weight-select');
+        const italicBtn = document.getElementById('italic-btn');
+        const underlineBtn = document.getElementById('underline-btn');
+        const fillColor = document.getElementById('fill-color');
+        const strokeColor = document.getElementById('stroke-color');
+        const shadowColor = document.getElementById('shadow-color');
+        const motionBlurBtn = document.getElementById('motion-blur-btn');
+        const gradientBtn = document.getElementById('gradient-btn');
+        const presetButtons = document.querySelectorAll('.preset-btn');
+        const staggerRange = document.getElementById('stagger-range');
+        const playBtn = document.getElementById('play-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const addKeyframeBtn = document.getElementById('add-keyframe');
+        const snapBeatBtn = document.getElementById('snap-beat');
+        const timeline = document.getElementById('timeline');
+        const exportBtn = document.getElementById('export-btn');
+
+        // State variables
+        let isPlaying = false;
+        let animationId = null;
+        let currentFrame = 0;
+        let totalFrames = 120;
+        let animationSpeed = 1;
+
+        // Initialize the app
+        function init() {
+            setupEventListeners();
+            createTimelineMarkers();
+            updateTextDisplay();
+            setupPresetButtons();
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Text input
+            textInput.addEventListener('input', updateTextDisplay);
+            
+            // Font settings
+            fontSelect.addEventListener('change', updateTextDisplay);
+            weightSelect.addEventListener('change', updateTextDisplay);
+            italicBtn.addEventListener('click', toggleItalic);
+            underlineBtn.addEventListener('click', toggleUnderline);
+            
+            // Colors
+            fillColor.addEventListener('input', updateTextDisplay);
+            strokeColor.addEventListener('input', updateTextDisplay);
+            shadowColor.addEventListener('input', updateTextDisplay);
+            
+            // Effects
+            motionBlurBtn.addEventListener('click', toggleMotionBlur);
+            gradientBtn.addEventListener('click', toggleGradient);
+            
+            // Animation controls
+            playBtn.addEventListener('click', playAnimation);
+            pauseBtn.addEventListener('click', pauseAnimation);
+            stopBtn.addEventListener('click', stopAnimation);
+            
+            // Timeline
+            addKeyframeBtn.addEventListener('click', addKeyframe);
+            snapBeatBtn.addEventListener('click', snapToBeat);
+            
+            // Export
+            exportBtn.addEventListener('click', exportAnimation);
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', handleKeyboardShortcuts);
+        }
+
+        // Update text display based on inputs
+        function updateTextDisplay() {
+            const text = textInput.value || "Kinetic Typography Studio";
+            const fontFamily = fontSelect.value;
+            const fontWeight = weightSelect.value;
+            const fill = fillColor.value;
+            const stroke = strokeColor.value;
+            const shadow = shadowColor.value;
+            
+            textDisplay.textContent = text;
+            textDisplay.style.fontFamily = fontFamily;
+            textDisplay.style.fontWeight = fontWeight;
+            textDisplay.style.color = fill;
+            textDisplay.style.textShadow = `0 0 5px ${shadow}`;
+            
+            // Apply stroke effect
+            if (stroke !== '#4361ee') {
+                textDisplay.style.webkitTextStroke = `2px ${stroke}`;
+            } else {
+                textDisplay.style.webkitTextStroke = 'none';
+            }
+        }
+
+        // Toggle italic style
+        function toggleItalic() {
+            const currentStyle = textDisplay.style.fontStyle;
+            textDisplay.style.fontStyle = currentStyle === 'italic' ? 'normal' : 'italic';
+        }
+
+        // Toggle underline style
+        function toggleUnderline() {
+            const currentTextDecoration = textDisplay.style.textDecoration;
+            textDisplay.style.textDecoration = currentTextDecoration === 'underline' ? 'none' : 'underline';
+        }
+
+        // Toggle motion blur effect
+        function toggleMotionBlur() {
+            motionBlurBtn.classList.toggle('active');
+            if (motionBlurBtn.classList.contains('active')) {
+                textDisplay.style.filter = 'blur(0.5px)';
+            } else {
+                textDisplay.style.filter = 'none';
+            }
+        }
+
+        // Toggle gradient effect
+        function toggleGradient() {
+            gradientBtn.classList.toggle('active');
+            if (gradientBtn.classList.contains('active')) {
+                textDisplay.style.background = 'linear-gradient(45deg, #4361ee, #f72585)';
+                textDisplay.style.webkitBackgroundClip = 'text';
+                textDisplay.style.backgroundClip = 'text';
+                textDisplay.style.webkitTextFillColor = 'transparent';
+            } else {
+                textDisplay.style.background = 'none';
+                textDisplay.style.webkitBackgroundClip = 'initial';
+                textDisplay.style.backgroundClip = 'initial';
+                textDisplay.style.webkitTextFillColor = 'initial';
+            }
+        }
+
+        // Setup preset buttons
+        function setupPresetButtons() {
+            presetButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    presetButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    applyPreset(btn.dataset.preset);
+                });
+            });
+        }
+
+        // Apply animation preset
+        function applyPreset(preset) {
+            switch(preset) {
+                case 'typewriter':
+                    textDisplay.style.animation = 'typing 3s steps(40, end) forwards';
+                    break;
+                case 'bounce':
+                    textDisplay.style.animation = 'bounce 1s infinite';
+                    break;
+                case 'liquid':
+                    textDisplay.style.animation = 'liquid 2s ease-in-out infinite';
+                    break;
+                case 'glitch':
+                    textDisplay.style.animation = 'glitch 0.5s infinite';
+                    break;
+                case 'fadeup':
+                    textDisplay.style.animation = 'fadeIn 1s ease-out forwards';
+                    break;
+                case 'cascade':
+                    textDisplay.style.animation = 'cascade 2s ease-in-out forwards';
+                    break;
+                default:
+                    textDisplay.style.animation = 'none';
+            }
+        }
+
+        // Create timeline markers
+        function createTimelineMarkers() {
+            timeline.innerHTML = '';
+            
+            // Create time markers
+            for (let i = 0; i <= 10; i++) {
+                const marker = document.createElement('div');
+                marker.className = 'time-marker';
+                marker.style.left = `${i * 10}%`;
+                timeline.appendChild(marker);
+                
+                // Add label
+                const label = document.createElement('div');
+                label.textContent = `${i}s`;
+                label.style.position = 'absolute';
+                label.style.left = `${i * 10}%`;
+                label.style.transform = 'translateX(-50%)';
+                label.style.fontSize = '0.7rem';
+                label.style.color = 'rgba(255, 255, 255, 0.6)';
+                timeline.appendChild(label);
+            }
+            
+            // Add playhead
+            const playhead = document.createElement('div');
+            playhead.className = 'playhead';
+            playhead.id = 'playhead';
+            playhead.style.left = '0%';
+            timeline.appendChild(playhead);
+        }
+
+        // Add keyframe
+        function addKeyframe() {
+            const keyframe = document.createElement('div');
+            keyframe.className = 'keyframe';
+            keyframe.style.left = `${Math.random() * 90 + 5}%`;
+            timeline.appendChild(keyframe);
+        }
+
+        // Snap to beat
+        function snapToBeat() {
+            // In a real app, this would detect audio beats
+            // For demo, we'll just add a keyframe at random position
+            addKeyframe();
+        }
+
+        // Animation functions
+        function playAnimation() {
+            if (isPlaying) return;
+            
+            isPlaying = true;
+            animate();
+        }
+
+        function pauseAnimation() {
+            isPlaying = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+        }
+
+        function stopAnimation() {
+            isPlaying = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            currentFrame = 0;
+            updatePlayhead();
+        }
+
+        function animate() {
+            if (!isPlaying) return;
+            
+            currentFrame++;
+            if (currentFrame > totalFrames) {
+                currentFrame = 0;
+            }
+            
+            updatePlayhead();
+            animationId = requestAnimationFrame(animate);
+        }
+
+        function updatePlayhead() {
+            const playhead = document.getElementById('playhead');
+            if (playhead) {
+                const percentage = (currentFrame / totalFrames) * 100;
+                playhead.style.left = `${percentage}%`;
+            }
+        }
+
+        // Handle keyboard shortcuts
+        function handleKeyboardShortcuts(e) {
+            // Spacebar to play/pause
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (isPlaying) {
+                    pauseAnimation();
+                } else {
+                    playAnimation();
+                }
+            }
+            
+            // S to stop
+            if (e.key === 's' || e.key === 'S') {
+                stopAnimation();
+            }
+            
+            // Right arrow to next frame
+            if (e.key === 'ArrowRight') {
+                currentFrame = Math.min(currentFrame + 1, totalFrames);
+                updatePlayhead();
+            }
+            
+            // Left arrow to previous frame
+            if (e.key === 'ArrowLeft') {
+                currentFrame = Math.max(currentFrame - 1, 0);
+                updatePlayhead();
+            }
+        }
+
+        // Export animation
+        function exportAnimation() {
+            alert('Export functionality would be implemented in a full application.\n\nFor this demo, you can see the animation preview.');
+        }
+
+        // Initialize the app when the page loads
+        window.addEventListener('DOMContentLoaded', init);
+
+        // Add CSS animations dynamically
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = `
+            @keyframes typing {
+                from { width: 0 }
+                to { width: 100% }
+            }
+            
+            @keyframes bounce {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-20px); }
+            }
+            
+            @keyframes liquid {
+                0%, 100% { transform: skew(0deg); }
+                25% { transform: skew(5deg); }
+                50% { transform: skew(-5deg); }
+                75% { transform: skew(3deg); }
+            }
+            
+            @keyframes glitch {
+                0% { transform: translate(0); }
+                20% { transform: translate(-2px, 2px); }
+                40% { transform: translate(-2px, -2px); }
+                60% { transform: translate(2px, 2px); }
+                80% { transform: translate(2px, -2px); }
+                100% { transform: translate(0); }
+            }
+            
+            @keyframes cascade {
+                0% { opacity: 0; transform: translateY(20px); }
+                100% { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+    </script>
+</body>
+</html>

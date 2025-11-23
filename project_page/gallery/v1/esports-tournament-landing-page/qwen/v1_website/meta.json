@@ -1,0 +1,9 @@
+{
+  "model": "qwen",
+  "app": "esports-tournament-landing-page",
+  "variant": "integrated",
+  "v0_signature": null,
+  "analyzed_failures": null,
+  "destylized": true,
+  "generated_at": "2025-09-23T02:35:38.795740"
+}

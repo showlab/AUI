@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8" />
+  <title>Warm & Fun Holiday Card Workshop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <style>
+    :root{
+      --bg-sky-day: linear-gradient(#8fd3ff 0%, #bdeaff 60%, #ffffff 100%);
+      --bg-sky-night: linear-gradient(#001737 0%, #022b59 60%, #eef6ff 100%);
+      --accent: #ff3b3b;
+      --accent-2: #ffd74d;
+      --accent-3: #3bd3ff;
+      --control-bg: rgba(255,255,255,0.75);
+      --control-border: rgba(0,0,0,0.1);
+      --ink: #183b56;
+      --shadow: 0 8px 20px rgba(0,0,0,0.18);
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      color: var(--ink);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: #f1fbff;
+    }
+
+    header {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      padding: 12px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.75));
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--control-border);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0.4px;
+      white-space: nowrap;
+    }
+    header p {
+      margin: 0;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+    #top-controls {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--control-border);
+      background: var(--control-bg);
+      color: var(--ink);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform .05s ease, background .2s ease, box-shadow .2s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      user-select: none;
+    }
+    .btn:hover { background: rgba(255,255,255,0.9); }
+    .btn:active { transform: translateY(1px); }
+    .btn[data-active="true"] {
+      background: #fff;
+      border-color: rgba(0,0,0,0.15);
+      box-shadow: 0 3px 12px rgba(0,0,0,0.12) inset;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: 270px 1fr;
+      gap: 12px;
+      padding: 12px;
+      max-width: 1400px;
+      margin: 0 auto;
+      height: calc(100% - 66px);
+      min-height: 600px;
+    }
+    aside#item-palette {
+      background: #ffffff80;
+      border: 1px solid var(--control-border);
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    #palette-title {
+      font-weight: 800;
+      font-size: 16px;
+      margin: 0 0 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #palette-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      overflow: auto;
+      padding-right: 6px;
+    }
+    .palette-item {
+      border-radius: 12px;
+      background: #fff;
+      border: 1px solid var(--control-border);
+      cursor: grab;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      user-select: none;
+      text-align: center;
+    }
+    .palette-item:active { cursor: grabbing; }
+    .palette-item .thumb {
+      width: 64px; height: 64px;
+      display: grid; place-items: center;
+    }
+    .palette-item .label {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    section#card-wrapper {
+      position: relative;
+      min-width: 0;
+    }
+    #card-canvas {
+      position: relative;
+      height: 100%;
+      width: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--control-border);
+      box-shadow: var(--shadow);
+      background: var(--bg-sky-day);
+      transition: background 0.6s ease;
+      isolation: isolate;
+    }
+    #card-canvas.night {
+      background: var(--bg-sky-night);
+      color: #e8f5ff;
+    }
+
+    /* Happy Holidays Title */
+    #greeting {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: clamp(20px, 2.4vw, 30px);
+      font-weight: 900;
+      color: #ffffff;
+      text-shadow: 0 2px 0 rgba(0,0,0,0.08), 0 6px 20px rgba(0,0,0,0.28);
+      padding: 6px 12px;
+      border-radius: 10px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.06));
+      border: 1px solid rgba(255,255,255,0.35);
+      backdrop-filter: blur(3px);
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    /* Sun & Moon */
+    #sun, #moon {
+      position: absolute;
+      top: 50px; right: 50px;
+      width: 70px; height: 70px;
+      border-radius: 50%;
+      z-index: 2;
+      box-shadow: 0 0 0 12px rgba(255,255,255,0.25),
+                  0 0 30px 12px rgba(255,215,0,0.35);
+      transition: opacity .5s ease, transform .5s ease;
+    }
+    #sun { background: radial-gradient(circle at 35% 35%, #fff9b0 0%, #ffd84d 40%, #ffbf00 60%); }
+    #moon {
+      background: radial-gradient(circle at 35% 35%, #f8fbff 0%, #d6e8ff 60%, #b9d1ff 100%);
+      opacity: 0;
+      transform: translateY(-8px);
+      box-shadow: 0 0 0 10px rgba(255,255,255,0.12),
+                  0 0 18px 6px rgba(160,200,255,0.35);
+    }
+    #card-canvas.night #sun { opacity: 0; transform: translateY(8px) scale(0.9); }
+    #card-canvas.night #moon { opacity: 1; transform: translateY(0); }
+
+    /* Stars at night */
+    #stars {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity .4s ease;
+    }
+    #card-canvas.night #stars { opacity: 1; }
+    .star {
+      position: absolute;
+      width: 3px; height: 3px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 6px 2px rgba(255,255,255,0.6);
+      animation: twinkle 2.4s infinite ease-in-out;
+    }
+    @keyframes twinkle {
+      0%,100% { transform: scale(0.6); opacity: 0.6; }
+      50% { transform: scale(1.3); opacity: 1; }
+    }
+
+    /* Snow ground */
+    #ground {
+      position: absolute;
+      bottom: -20px; left: -10%;
+      width: 120%;
+      height: 160px;
+      border-radius: 50%;
+      background: radial-gradient(120% 100% at 50% 10%, #ffffff 0%, #f4fbff 60%, #e6f7ff 100%);
+      z-index: 3;
+      filter: drop-shadow(0 -2px 12px rgba(0,0,0,0.12));
+      pointer-events: none;
+    }
+
+    /* Snowflakes */
+    #snow {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .flake {
+      position: absolute;
+      top: -20px;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.95);
+      box-shadow: 0 0 8px rgba(255,255,255,0.9);
+      opacity: 0.95;
+      animation-name: fall, sway;
+      animation-timing-function: linear, ease-in-out;
+      animation-iteration-count: infinite, infinite;
+    }
+    @keyframes fall {
+      0% { transform: translateY(-5%); }
+      100% { transform: translateY(110vh); }
+    }
+    @keyframes sway {
+      0% { margin-left: -10px; }
+      50% { margin-left: 10px; }
+      100% { margin-left: -10px; }
+    }
+    #snow.storm .flake {
+      animation-duration: var(--fall, 8s), var(--sway, 3s);
+      opacity: 1;
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.9));
+    }
+
+    /* Items container */
+    #items-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 6;
+    }
+
+    .scene-item {
+      position: absolute;
+      width: 90px; height: 90px;
+      transform-origin: center center;
+      transition: filter .15s ease;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      will-change: transform, left, top;
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,0.2));
+    }
+    .scene-item:active { cursor: grabbing; }
+    .scene-item.selected {
+      outline: 3px solid rgba(255, 215, 77, 0.85);
+      border-radius: 12px;
+      filter: drop-shadow(0 8px 18px rgba(255, 215, 77, 0.5));
+    }
+    .wiggle {
+      animation: wiggle 0.6s ease;
+    }
+    @keyframes wiggle {
+      0% { transform: rotate(0deg) scale(1); }
+      25% { transform: rotate(-6deg) scale(1.02); }
+      50% { transform: rotate(5deg) scale(1.02); }
+      100% { transform: rotate(0deg) scale(1); }
+    }
+
+    /* Item toolbar */
+    #item-toolbar {
+      position: absolute;
+      left: 50%;
+      bottom: 10px;
+      transform: translateX(-50%);
+      z-index: 20;
+      display: none;
+      gap: 8px;
+      background: rgba(255,255,255,0.9);
+      border: 1px solid var(--control-border);
+      padding: 6px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+    #item-toolbar[data-visible="true"] { display: flex; }
+    .tool-btn {
+      appearance: none;
+      border: 1px solid var(--control-border);
+      background: #fff;
+      padding: 8px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      min-width: 36px;
+      min-height: 36px;
+      display: inline-grid;
+      place-items: center;
+      transition: transform .05s ease, background .2s ease;
+    }
+    .tool-btn:active { transform: translateY(1px); }
+
+    /* Layout responsiveness */
+    @media (max-width: 980px) {
+      main {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr auto;
+        height: auto;
+      }
+      #card-wrapper { height: 60vh; min-height: 420px; }
+      aside#item-palette { order: 2; }
+      #palette-grid {
+        grid-template-columns: repeat(4, minmax(0,1fr));
+        max-height: 240px;
+      }
+    }
+
+    footer {
+      padding: 10px 16px 20px;
+      font-size: 13px;
+      opacity: 0.8;
+      text-align: center;
+    }
+
+    /* Small helper badge */
+    .badge {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 8px;
+      color: #fff;
+      background: linear-gradient(45deg, #ff7e66, #ffcc66);
+    }
+  </style>
+</head>
+<body id="app-root">
+  <header>
+    <h1>Holiday Card Workshop</h1>
+    <p aria-hidden="true">Drag cute things onto your snowy scene!</p>
+    <nav id="top-controls" aria-label="Card controls">
+      <button id="btn-undo" class="btn" type="button" role="button" title="Undo last change">
+        ↶ Undo
+      </button>
+      <button id="btn-clear" class="btn" type="button" role="button" title="Clear all items">
+        🧹 Clear
+      </button>
+      <button id="btn-night" class="btn" type="button" role="button" aria-pressed="false" data-active="false" title="Toggle Day/Night">
+        🌙 Night
+      </button>
+      <button id="btn-snowburst" class="btn" type="button" role="button" title="Let it snow more!">
+        ❄️ Snowburst
+      </button>
+      <button id="btn-carol" class="btn" type="button" role="button" title="Play a mini carol">
+        🎵 Carol
+      </button>
+      <button id="btn-sound" class="btn" type="button" role="button" aria-pressed="true" data-active="true" title="Toggle sounds">
+        🔈 Sound
+      </button>
+    </nav>
+  </header>
+
+  <main>
+    <aside id="item-palette" aria-label="Toy shelf">
+      <h2 id="palette-title">Toy Shelf <span class="badge">Drag me!</span></h2>
+      <div id="palette-grid"></div>
+    </aside>
+
+    <section id="card-wrapper" aria-label="Your Holiday Card">
+      <div id="card-canvas" aria-live="polite">
+        <div id="greeting" aria-hidden="true">Happy Holidays! ❄️</div>
+        <div id="sun" aria-hidden="true"></div>
+        <div id="moon" aria-hidden="true"></div>
+        <div id="stars" aria-hidden="true"></div>
+        <div id="items-layer" aria-label="Items on card"></div>
+        <div id="snow" aria-hidden="true"></div>
+        <div id="ground" aria-hidden="true"></div>
+
+        <div id="item-toolbar" role="group" aria-label="Selected item tools" data-visible="false">
+          <button id="tool-rotate" class="tool-btn" type="button" role="button" title="Rotate">⤾</button>
+          <button id="tool-bigger" class="tool-btn" type="button" role="button" title="Bigger">＋</button>
+          <button id="tool-smaller" class="tool-btn" type="button" role="button" title="Smaller">－</button>
+          <button id="tool-duplicate" class="tool-btn" type="button" role="button" title="Duplicate">⧉</button>
+          <button id="tool-delete" class="tool-btn" type="button" role="button" title="Delete">🗑️</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Tip: Drag from the shelf to the snowy card. Tap an item to select and use the mini tools. Double-tap the card to toss a playful snowball!
+  </footer>
+
+  <script>
+    // Data: Palette items
+    const ITEM_TYPES = [
+      { type: 'tree', label: 'Tree', sound: 'ting' },
+      { type: 'gift', label: 'Gift', sound: 'pop' },
+      { type: 'snowman', label: 'Snowman', sound: 'boing' },
+      { type: 'star', label: 'Star', sound: 'ting' },
+      { type: 'candy', label: 'Candy Cane', sound: 'pop' },
+      { type: 'penguin', label: 'Penguin', sound: 'boing' },
+      { type: 'bell', label: 'Bell', sound: 'bell' },
+      { type: 'reindeer', label: 'Reindeer', sound: 'whoosh' },
+      { type: 'stocking', label: 'Stocking', sound: 'pop' },
+      { type: 'ginger', label: 'Gingerbread', sound: 'ting' },
+      { type: 'mitten', label: 'Mitten', sound: 'pop' },
+      { type: 'sled', label: 'Sled', sound: 'whoosh' },
+    ];
+
+    const state = {
+      items: [], // {id, type, x, y, rot, scale, z}
+      idCounter: 1,
+      selectedId: null,
+      history: [],
+      soundEnabled: true,
+      audio: { ctx: null, unlocked: false }
+    };
+
+    // Elements
+    const paletteGrid = document.getElementById('palette-grid');
+    const canvas = document.getElementById('card-canvas');
+    const itemsLayer = document.getElementById('items-layer');
+    const snow = document.getElementById('snow');
+    const stars = document.getElementById('stars');
+    const toolbar = document.getElementById('item-toolbar');
+
+    const btnUndo = document.getElementById('btn-undo');
+    const btnClear = document.getElementById('btn-clear');
+    const btnNight = document.getElementById('btn-night');
+    const btnSnowburst = document.getElementById('btn-snowburst');
+    const btnCarol = document.getElementById('btn-carol');
+    const btnSound = document.getElementById('btn-sound');
+
+    const toolRotate = document.getElementById('tool-rotate');
+    const toolBigger = document.getElementById('tool-bigger');
+    const toolSmaller = document.getElementById('tool-smaller');
+    const toolDelete = document.getElementById('tool-delete');
+    const toolDuplicate = document.getElementById('tool-duplicate');
+
+    function saveHistory() {
+      // keep snapshot of items
+      const snapshot = JSON.stringify(state.items);
+      state.history.push(snapshot);
+      if (state.history.length > 30) state.history.shift();
+    }
+
+    function undo() {
+      // remove current and revert to previous snapshot
+      if (state.history.length < 2) return;
+      state.history.pop(); // discard current
+      const prev = state.history[state.history.length - 1];
+      try {
+        state.items = JSON.parse(prev);
+        state.selectedId = null;
+        renderAll();
+      } catch(e){}
+    }
+
+    // Audio
+    function initAudioCtx() {
+      if (state.audio.unlocked) return;
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      state.audio.ctx = ctx;
+      // create silent buffer to unlock on iOS
+      const buffer = ctx.createBuffer(1, 1, 22050);
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(ctx.destination);
+      source.start(0);
+      state.audio.unlocked = true;
+    }
+
+    function playSound(type) {
+      if (!state.soundEnabled) return;
+      if (!state.audio.ctx) initAudioCtx();
+      const ctx = state.audio.ctx;
+      if (ctx.state === 'suspended') ctx.resume();
+
+      const now = ctx.currentTime;
+      const gain = ctx.createGain();
+      gain.connect(ctx.destination);
+
+      function env(g, a=0.005, d=0.15, s=0, r=0.2, peak=0.8) {
+        const t = ctx.currentTime;
+        g.gain.cancelScheduledValues(t);
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(peak, t + a);
+        g.gain.exponentialRampToValueAtTime(Math.max(0.0001, s), t + a + d);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + a + d + r);
+      }
+
+      if (type === 'pop') {
+        // short filtered noise "pop"
+        const bufferSize = 256;
+        const b = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = b.getChannelData(0);
+        for (let i=0;i<bufferSize;i++) data[i] = (Math.random()*2-1) * (1 - i/bufferSize);
+        const src = ctx.createBufferSource();
+        src.buffer = b;
+        const biquad = ctx.createBiquadFilter();
+        biquad.type = 'bandpass';
+        biquad.frequency.setValueAtTime(900, now);
+        src.connect(biquad).connect(gain);
+        env(gain, 0.001, 0.05, 0, 0.07, 0.8);
+        src.start(now);
+        src.stop(now + 0.1);
+      } else if (type === 'bell') {
+        // simple bell: mix of sines
+        const o1 = ctx.createOscillator();
+        const o2 = ctx.createOscillator();
+        const o3 = ctx.createOscillator();
+        o1.type='sine'; o2.type='sine'; o3.type='triangle';
+        o1.frequency.setValueAtTime(880, now);
+        o2.frequency.setValueAtTime(1320, now);
+        o3.frequency.setValueAtTime(1760, now);
+        const g1 = ctx.createGain(), g2 = ctx.createGain(), g3 = ctx.createGain();
+        g1.gain.value = 0.6; g2.gain.value = 0.3; g3.gain.value = 0.2;
+        o1.connect(g1).connect(gain);
+        o2.connect(g2).connect(gain);
+        o3.connect(g3).connect(gain);
+        env(gain, 0.002, 0.25, 0, 0.6, 0.9);
+        o1.start(now); o2.start(now); o3.start(now);
+        o1.stop(now+0.8); o2.stop(now+0.8); o3.stop(now+0.8);
+      } else if (type === 'ting') {
+        const o = ctx.createOscillator();
+        o.type = 'triangle';
+        o.frequency.setValueAtTime(1400, now);
+        const g2 = ctx.createGain();
+        o.connect(g2).connect(gain);
+        g2.gain.value = 0.7;
+        env(gain, 0.001, 0.08, 0, 0.2, 0.7);
+        o.start(now);
+        o.stop(now+0.22);
+      } else if (type === 'boing') {
+        const o = ctx.createOscillator();
+        o.type = 'sine';
+        const f = o.frequency;
+        f.setValueAtTime(220, now);
+        f.exponentialRampToValueAtTime(140, now + 0.12);
+        f.exponentialRampToValueAtTime(440, now + 0.28);
+        o.connect(gain);
+        env(gain, 0.002, 0.18, 0, 0.2, 0.75);
+        o.start(now);
+        o.stop(now+0.3);
+      } else if (type === 'whoosh') {
+        const src = ctx.createBufferSource();
+        const length = 0.26 * ctx.sampleRate;
+        const b = ctx.createBuffer(1, length, ctx.sampleRate);
+        const d = b.getChannelData(0);
+        for (let i=0;i<length;i++) d[i] = (Math.random()*2-1)*(1-i/length);
+        const filt = ctx.createBiquadFilter();
+        filt.type = 'highpass';
+        filt.frequency.setValueAtTime(400, now);
+        src.buffer = b;
+        src.connect(filt).connect(gain);
+        env(gain, 0.001, 0.12, 0, 0.2, 0.7);
+        src.start(now);
+        src.stop(now+0.3);
+      } else if (type === 'jingle') {
+        // Little melody
+        const notes = [659, 659, 659, 659, 659, 659, 659, 784, 523, 587, 659]; // simple snippet
+        notes.forEach((freq, i) => {
+          const start = now + i * 0.18;
+          const o = ctx.createOscillator();
+          const g3 = ctx.createGain();
+          o.type='square';
+          o.frequency.setValueAtTime(freq, start);
+          o.connect(g3).connect(ctx.destination);
+          g3.gain.setValueAtTime(0, start);
+          g3.gain.linearRampToValueAtTime(0.25, start + 0.02);
+          g3.gain.exponentialRampToValueAtTime(0.0001, start + 0.16);
+          o.start(start);
+          o.stop(start + 0.2);
+        });
+      }
+    }
+
+    // SVG Factory
+    function svgFor(type) {
+      const base = (content, view='0 0 100 100') => `
+        <svg viewBox="${view}" width="100" height="100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          ${content}
+        </svg>`;
+      switch(type) {
+        case 'tree': return base(`
+          <defs>
+            <linearGradient id="lg1" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="#3bd67b"/>
+              <stop offset="100%" stop-color="#1ea65a"/>
+            </linearGradient>
+          </defs>
+          <polygon points="50,10 20,50 80,50" fill="url(#lg1)"/>
+          <polygon points="50,25 15,65 85,65" fill="url(#lg1)"/>
+          <polygon points="50,40 10,80 90,80" fill="url(#lg1)"/>
+          <rect x="44" y="80" width="12" height="16" rx="2" fill="#8a5a3a"/>
+          <circle cx="35" cy="50" r="3.6" fill="#ff4d6d"/>
+          <circle cx="62" cy="60" r="3.6" fill="#ffd84d"/>
+          <circle cx="45" cy="70" r="3.6" fill="#59ddff"/>
+          <polygon points="50,4 46,12 54,12" fill="#ffd84d"/>
+        `);
+        case 'gift': return base(`
+          <rect x="15" y="35" width="70" height="50" rx="8" fill="#ff6b6b"/>
+          <rect x="15" y="35" width="70" height="15" fill="#ff8787"/>
+          <rect x="46" y="35" width="8" height="50" fill="#ffd84d"/>
+          <rect x="15" y="58" width="70" height="6" fill="#ffd84d"/>
+          <path d="M50 35c-10 0-16-8-12-12s12 4 12 12z" fill="#ffd84d"/>
+          <path d="M50 35c10 0 16-8 12-12s-12 4-12 12z" fill="#ffd84d"/>
+        `);
+        case 'snowman': return base(`
+          <circle cx="50" cy="40" r="18" fill="#fff" stroke="#e6f3ff"/>
+          <circle cx="50" cy="75" r="22" fill="#fff" stroke="#e6f3ff"/>
+          <circle cx="44" cy="38" r="2.8" fill="#2b2b2b"/>
+          <circle cx="56" cy="38" r="2.8" fill="#2b2b2b"/>
+          <polygon points="50,42 70,47 50,50" fill="#ff8f3d"/>
+          <rect x="38" y="23" width="24" height="6" fill="#2b2b2b"/>
+          <rect x="42" y="18" width="16" height="6" fill="#2b2b2b"/>
+          <circle cx="50" cy="65" r="2" fill="#2b2b2b"/>
+          <circle cx="50" cy="75" r="2" fill="#2b2b2b"/>
+          <circle cx="50" cy="85" r="2" fill="#2b2b2b"/>
+          <path d="M30,55 Q38,50 46,55" stroke="#8b5a2b" stroke-width="3" fill="none"/>
+          <path d="M54,55 Q62,50 70,55" stroke="#8b5a2b" stroke-width="3" fill="none"/>
+          <path d="M38,48 Q50,54 62,48" stroke="#2b2b2b" stroke-width="2" fill="none"/>
+          <path d="M40,60 Q50,66 60,60" stroke="#ff3b3b" stroke-width="4" fill="none"/>
+        `);
+        case 'star': return base(`
+          <polygon points="50,10 58,38 88,38 62,54 70,82 50,64 30,82 38,54 12,38 42,38"
+            fill="#ffd84d" stroke="#f6c645" stroke-width="2"/>
+        `);
+        case 'candy': return base(`
+          <defs>
+            <linearGradient id="candyGrad" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="#fff"/>
+              <stop offset="50%" stop-color="#ff4d6d"/>
+              <stop offset="100%" stop-color="#fff"/>
+            </linearGradient>
+          </defs>
+          <path d="M55 20c15-15 35 10 20 25l-30 30c-15 15-35-10-20-25L55 20z"
+            stroke="#cc2244" stroke-width="3" fill="url(#candyGrad)"/>
+          <rect x="23" y="68" width="16" height="8" rx="4" fill="#fff" stroke="#cc2244"/>
+          <rect x="14" y="55" width="8" height="16" rx="4" fill="#fff" stroke="#cc2244"/>
+        `);
+        case 'penguin': return base(`
+          <ellipse cx="50" cy="60" rx="24" ry="30" fill="#2b2b2b"/>
+          <ellipse cx="50" cy="62" rx="16" ry="22" fill="#fff"/>
+          <circle cx="42" cy="46" r="4" fill="#fff"/>
+          <circle cx="58" cy="46" r="4" fill="#fff"/>
+          <circle cx="42" cy="46" r="2" fill="#2b2b2b"/>
+          <circle cx="58" cy="46" r="2" fill="#2b2b2b"/>
+          <polygon points="50,52 46,58 54,58" fill="#ffb24d"/>
+          <ellipse cx="42" cy="86" rx="6" ry="3" fill="#ffb24d"/>
+          <ellipse cx="58" cy="86" rx="6" ry="3" fill="#ffb24d"/>
+          <rect x="34" y="24" width="32" height="10" rx="5" fill="#ff3b3b"/>
+          <rect x="34" y="30" width="32" height="5" rx="4" fill="#ffd74d"/>
+        `);
+        case 'bell': return base(`
+          <path d="M50 20c-12 0-20 12-20 24v8c0 6-6 8-6 10h52c0-2-6-4-6-10v-8c0-12-8-24-20-24z"
+            fill="#ffd84d" stroke="#e4bd44" stroke-width="2"/>
+          <circle cx="50" cy="66" r="5" fill="#e4bd44"/>
+          <rect x="44" y="16" width="12" height="6" rx="3" fill="#e4bd44"/>
+        `);
+        case 'reindeer': return base(`
+          <ellipse cx="50" cy="56" rx="22" ry="20" fill="#a56a43"/>
+          <circle cx="40" cy="50" r="4" fill="#2b2b2b"/>
+          <circle cx="60" cy="50" r="4" fill="#2b2b2b"/>
+          <circle cx="50" cy="64" r="5" fill="#ff3b3b"/>
+          <path d="M34,36 C24,30 20,22 20,20" stroke="#8b5a2b" stroke-width="4" fill="none"/>
+          <path d="M66,36 C76,30 80,22 80,20" stroke="#8b5a2b" stroke-width="4" fill="none"/>
+          <ellipse cx="36" cy="60" rx="6" ry="8" fill="#8e5a3a"/>
+          <ellipse cx="64" cy="60" rx="6" ry="8" fill="#8e5a3a"/>
+        `);
+        case 'stocking': return base(`
+          <path d="M40 18h20v30c0 8-14 14-20 16-6 2-14-2-16-8s4-10 10-10c4 0 6-2 6-6V18z"
+            fill="#ff3b3b" stroke="#d53131" stroke-width="2"/>
+          <rect x="38" y="12" width="24" height="10" rx="4" fill="#fff"/>
+          <circle cx="44" cy="42" r="3" fill="#fff"/>
+          <circle cx="52" cy="48" r="3" fill="#fff"/>
+        `);
+        case 'ginger': return base(`
+          <g fill="#b5753a" stroke="#9c5f2b" stroke-width="2">
+            <circle cx="50" cy="32" r="12"/>
+            <rect x="38" y="42" width="24" height="26" rx="8"/>
+            <rect x="26" y="46" width="12" height="18" rx="6"/>
+            <rect x="62" y="46" width="12" height="18" rx="6"/>
+            <rect x="42" y="68" width="8" height="12" rx="4"/>
+            <rect x="50" y="68" width="8" height="12" rx="4"/>
+          </g>
+          <circle cx="46" cy="30" r="2" fill="#fff"/>
+          <circle cx="54" cy="30" r="2" fill="#fff"/>
+          <path d="M44,36 Q50,40 56,36" stroke="#fff" stroke-width="2" fill="none"/>
+          <circle cx="50" cy="50" r="3" fill="#59ddff"/>
+          <circle cx="50" cy="58" r="3" fill="#ffda4d"/>
+          <circle cx="50" cy="66" r="3" fill="#ff6b6b"/>
+        `);
+        case 'mitten': return base(`
+          <path d="M30 40c0-10 8-18 18-18s18 8 18 18v8H30v-8z" fill="#ff3b3b"/>
+          <rect x="30" y="46" width="36" height="14" rx="6" fill="#fff"/>
+          <rect x="18" y="44" width="12" height="12" rx="6" fill="#ff3b3b"/>
+        `);
+        case 'sled': return base(`
+          <rect x="22" y="60" width="56" height="8" rx="4" fill="#8a5a3a"/>
+          <rect x="28" y="50" width="8" height="10" rx="3" fill="#8a5a3a"/>
+          <rect x="44" y="50" width="8" height="10" rx="3" fill="#8a5a3a"/>
+          <rect x="60" y="50" width="8" height="10" rx="3" fill="#8a5a3a"/>
+          <path d="M20,68 Q30,78 80,68" stroke="#6b3d1f" stroke-width="4" fill="none" stroke-linecap="round"/>
+        `);
+      }
+      return base(`<circle cx="50" cy="50" r="40" fill="#ccc"/>`);
+    }
+
+    function buildPalette() {
+      ITEM_TYPES.forEach((it, idx) => {
+        const el = document.createElement('button');
+        el.className = 'palette-item';
+        el.id = `palette-item-${it.type}`;
+        el.type = 'button';
+        el.role = 'button';
+        el.setAttribute('aria-label', `Add ${it.label}`);
+        el.innerHTML = `
+          <div class="thumb">${svgFor(it.type)}</div>
+          <div class="label">${it.label}</div>
+        `;
+        // Drag/Click behavior
+        el.addEventListener('pointerdown', e => {
+          initAudioCtx();
+          startDragFromPalette(e, it.type);
+        }, {passive:false});
+        el.addEventListener('click', e => {
+          // Quick add at random near center
+          const rect = canvas.getBoundingClientRect();
+          const x = Math.random() * (rect.width - 120) + 60;
+          const y = Math.random() * (rect.height - 250) + 120;
+          addItem(it.type, x, y, {play: true, select: true});
+          saveHistory();
+        });
+        paletteGrid.appendChild(el);
+      });
+    }
+
+    function createItemEl(item) {
+      const el = document.createElement('div');
+      el.className = 'scene-item';
+      el.id = `scene-item-${item.id}`;
+      el.setAttribute('role', 'img');
+      el.setAttribute('aria-label', item.type);
+      el.dataset.id = item.id;
+      el.dataset.type = item.type;
+      el.innerHTML = svgFor(item.type);
+      positionItemEl(el, item);
+      // Events
+      el.addEventListener('pointerdown', (e)=> {
+        startDragSceneItem(e, item.id);
+      });
+      el.addEventListener('click', (e)=> {
+        selectItem(item.id);
+        // Tiny rotate for fun
+        nudgeRotate(item.id, 15);
+        actionSound(item.type);
+      });
+      el.addEventListener('dblclick', (e)=> {
+        // Wiggle on double click
+        el.classList.add('wiggle');
+        setTimeout(()=> el.classList.remove('wiggle'), 600);
+        actionSound(item.type);
+      });
+      return el;
+    }
+
+    function positionItemEl(el, item) {
+      el.style.left = `${item.x - 45}px`;
+      el.style.top = `${item.y - 45}px`;
+      el.style.zIndex = item.z || 5;
+      el.style.transform = `rotate(${item.rot}deg) scale(${item.scale})`;
+    }
+
+    function addItem(type, x, y, opts={}) {
+      const rect = canvas.getBoundingClientRect();
+      const safeX = clamp(x, 50, rect.width - 50);
+      const safeY = clamp(y, 50, rect.height - 70);
+      const id = state.idCounter++;
+      const item = { id, type, x: safeX, y: safeY, rot: 0, scale: 1, z: 5 };
+      state.items.push(item);
+      const el = createItemEl(item);
+      itemsLayer.appendChild(el);
+      if (opts.play) playSound('pop');
+      if (opts.select) selectItem(id);
+      return id;
+    }
+
+    function renderAll() {
+      // Clear and rebuild items
+      itemsLayer.innerHTML = '';
+      state.items.forEach(it => {
+        const el = createItemEl(it);
+        itemsLayer.appendChild(el);
+      });
+      if (state.selectedId) {
+        const el = document.getElementById(`scene-item-${state.selectedId}`);
+        if (el) el.classList.add('selected');
+        toolbar.dataset.visible = 'true';
+      } else {
+        toolbar.dataset.visible = 'false';
+      }
+    }
+
+    function selectItem(id) {
+      state.selectedId = id;
+      document.querySelectorAll('.scene-item').forEach(el => el.classList.remove('selected'));
+      const el = document.getElementById(`scene-item-${id}`);
+      if (el) {
+        el.classList.add('selected');
+        toolbar.dataset.visible = 'true';
+      }
+    }
+
+    function clearSelection() {
+      state.selectedId = null;
+      document.querySelectorAll('.scene-item').forEach(el => el.classList.remove('selected'));
+      toolbar.dataset.visible = 'false';
+    }
+
+    function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+    // Dragging from palette (creates a new one)
+    function startDragFromPalette(e, type) {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const startX = e.clientX, startY = e.clientY;
+      const id = addItem(type, startX - rect.left, startY - rect.top, {play:false, select:true});
+      saveHistory();
+      const move = (ev)=> {
+        const item = getItem(id);
+        if (!item) return;
+        const nx = ev.clientX - rect.left;
+        const ny = ev.clientY - rect.top;
+        updateItemPos(id, nx, ny, true);
+      };
+      const up = (ev)=> {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', up);
+        playSound('pop');
+        saveHistory();
+      };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', up);
+    }
+
+    // Dragging scene item (move existing)
+    function startDragSceneItem(e, id) {
+      e.preventDefault();
+      initAudioCtx();
+      selectItem(id);
+      const item = getItem(id);
+      const rect = canvas.getBoundingClientRect();
+      const el = document.getElementById(`scene-item-${id}`);
+      const offsetX = e.clientX - (rect.left + item.x);
+      const offsetY = e.clientY - (rect.top + item.y);
+      el.setPointerCapture(e.pointerId);
+
+      const move = (ev)=> {
+        const nx = ev.clientX - rect.left - offsetX;
+        const ny = ev.clientY - rect.top - offsetY;
+        updateItemPos(id, nx, ny, false);
+      };
+      const up = (ev)=> {
+        el.releasePointerCapture(e.pointerId);
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', up);
+        saveHistory();
+      };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', up);
+    }
+
+    function updateItemPos(id, x, y, raw=false) {
+      const item = getItem(id);
+      if (!item) return;
+      const rect = canvas.getBoundingClientRect();
+      const nx = clamp(raw ? x : x + 45, 50, rect.width - 50);
+      const ny = clamp(raw ? y : y + 45, 50, rect.height - 70);
+      item.x = nx;
+      item.y = ny;
+      const el = document.getElementById(`scene-item-${id}`);
+      positionItemEl(el, item);
+    }
+
+    function getItem(id) {
+      return state.items.find(it => it.id === id);
+    }
+
+    // Toolbar actions
+    function nudgeRotate(id, deg=15) {
+      const it = getItem(id);
+      if (!it) return;
+      it.rot = (it.rot + deg) % 360;
+      const el = document.getElementById(`scene-item-${id}`);
+      positionItemEl(el, it);
+    }
+    function scaleItem(id, factor) {
+      const it = getItem(id);
+      if (!it) return;
+      it.scale = clamp(it.scale * factor, 0.6, 2.2);
+      const el = document.getElementById(`scene-item-${id}`);
+      positionItemEl(el, it);
+    }
+    function deleteItem(id) {
+      state.items = state.items.filter(x => x.id !== id);
+      const el = document.getElementById(`scene-item-${id}`);
+      if (el) el.remove();
+      clearSelection();
+    }
+    function duplicateItem(id) {
+      const it = getItem(id);
+      if (!it) return;
+      const nid = addItem(it.type, it.x + 20, it.y + 20, {play:true, select:true});
+      const newIt = getItem(nid);
+      newIt.rot = it.rot;
+      newIt.scale = it.scale;
+      renderAll();
+      saveHistory();
+    }
+
+    toolRotate.addEventListener('click', ()=> {
+      if (!state.selectedId) return;
+      nudgeRotate(state.selectedId, 20);
+      saveHistory();
+      playSound('ting');
+    });
+    toolBigger.addEventListener('click', ()=> {
+      if (!state.selectedId) return;
+      scaleItem(state.selectedId, 1.12);
+      saveHistory();
+    });
+    toolSmaller.addEventListener('click', ()=> {
+      if (!state.selectedId) return;
+      scaleItem(state.selectedId, 0.9);
+      saveHistory();
+    });
+    toolDelete.addEventListener('click', ()=> {
+      if (!state.selectedId) return;
+      deleteItem(state.selectedId);
+      saveHistory();
+      playSound('whoosh');
+    });
+    toolDuplicate.addEventListener('click', ()=> {
+      if (!state.selectedId) return;
+      duplicateItem(state.selectedId);
+    });
+
+    // Top controls
+    btnUndo.addEventListener('click', ()=> { undo(); playSound('ting'); });
+    btnClear.addEventListener('click', ()=> {
+      if (!state.items.length) return;
+      state.items = [];
+      renderAll();
+      saveHistory();
+      playSound('whoosh');
+    });
+    btnNight.addEventListener('click', ()=> {
+      const ni = canvas.classList.toggle('night');
+      btnNight.dataset.active = ni ? 'true' : 'false';
+      btnNight.setAttribute('aria-pressed', ni ? 'true' : 'false');
+      if (ni && !stars.childElementCount) spawnStars(80);
+      playSound('ting');
+    });
+    btnSnowburst.addEventListener('click', ()=> {
+      snow.classList.add('storm');
+      playSound('whoosh');
+      setTimeout(()=> snow.classList.remove('storm'), 2200);
+    });
+    btnCarol.addEventListener('click', ()=> {
+      playSound('jingle');
+    });
+    btnSound.addEventListener('click', ()=> {
+      state.soundEnabled = !state.soundEnabled;
+      btnSound.dataset.active = state.soundEnabled ? 'true' : 'false';
+      btnSound.setAttribute('aria-pressed', state.soundEnabled ? 'true' : 'false');
+      playSound('ting');
+    });
+
+    // Click off selection when clicking empty canvas
+    canvas.addEventListener('pointerdown', (e)=> {
+      if (e.target === canvas || e.target.id === 'ground' || e.target.id === 'snow') {
+        clearSelection();
+      }
+    });
+
+    // Fun double-tap: snowball toss
+    canvas.addEventListener('dblclick', (e)=> {
+      const rect = canvas.getBoundingClientRect();
+      spawnSnowball(e.clientX - rect.left, e.clientY - rect.top);
+      playSound('pop');
+    });
+
+    function spawnSnowball(x, y) {
+      const ball = document.createElement('div');
+      ball.style.position = 'absolute';
+      ball.style.left = `${x - 8}px`;
+      ball.style.top = `${y - 8}px`;
+      ball.style.width = '16px';
+      ball.style.height = '16px';
+      ball.style.borderRadius = '50%';
+      ball.style.background = 'white';
+      ball.style.boxShadow = '0 0 10px rgba(255,255,255,0.9)';
+      ball.style.zIndex = 15;
+      ball.style.transition = 'transform 0.6s cubic-bezier(.2,.8,.2,1), opacity .3s ease';
+      canvas.appendChild(ball);
+      requestAnimationFrame(()=> {
+        ball.style.transform = 'translateY(220px) scale(1.6)';
+        ball.style.opacity = '1';
+      });
+      setTimeout(()=> {
+        ball.style.transform = 'translateY(260px) scale(0.2)';
+        ball.style.opacity = '0';
+      }, 600);
+      setTimeout(()=> ball.remove(), 1000);
+    }
+
+    function actionSound(type) {
+      const map = {
+        bell: 'bell',
+        tree: 'ting',
+        star: 'ting',
+        penguin: 'boing',
+        snowman: 'boing',
+        reindeer: 'whoosh',
+        sled: 'whoosh',
+        ginger: 'ting',
+        gift: 'pop',
+        candy: 'pop',
+        stocking: 'pop',
+        mitten: 'pop'
+      };
+      playSound(map[type] || 'ting');
+    }
+
+    // Snow creation
+    function spawnSnowflakes(count=120) {
+      snow.innerHTML = '';
+      for (let i=0;i<count;i++){
+        const f = document.createElement('i');
+        f.className = 'flake';
+        const size = Math.random()*4 + 2;
+        f.style.width = `${size}px`;
+        f.style.height = `${size}px`;
+        f.style.left = `${Math.random()*100}%`;
+        const fallDur = 10 + Math.random()*12;
+        const swayDur = 3 + Math.random()*5;
+        f.style.animationDuration = `${fallDur}s, ${swayDur}s`;
+        f.style.animationDelay = `${Math.random()*-20}s, ${Math.random()*-4}s`;
+        f.style.opacity = String(0.7 + Math.random()*0.3);
+        f.style.setProperty('--fall', `${fallDur}s`);
+        f.style.setProperty('--sway', `${swayDur}s`);
+        snow.appendChild(f);
+      }
+    }
+
+    // Stars
+    function spawnStars(count=80) {
+      for (let i=0;i<count;i++){
+        const s = document.createElement('i');
+        s.className = 'star';
+        s.style.left = `${Math.random()*100}%`;
+        s.style.top = `${Math.random()*60}%`;
+        const sz = Math.random() < 0.7 ? 2 : 3;
+        s.style.width = `${sz}px`;
+        s.style.height = `${sz}px`;
+        s.style.animationDelay = `${Math.random()*2}s`;
+        stars.appendChild(s);
+      }
+    }
+
+    // Pre-placed items
+    function placeDefaults() {
+      const rect = canvas.getBoundingClientRect();
+      const midx = rect.width/2;
+      addItem('tree', midx - 160, rect.height - 170, {play:false});
+      addItem('snowman', midx + 140, rect.height - 160, {play:false});
+      addItem('gift', midx - 120, rect.height - 120, {play:false});
+      addItem('star', midx - 160, rect.height - 250, {play:false});
+      saveHistory();
+    }
+
+    // Initialization
+    function init() {
+      buildPalette();
+      spawnSnowflakes(130);
+      placeDefaults();
+      // First history snapshot
+      saveHistory();
+      // Resize handling: keep items within bounds if resized
+      window.addEventListener('resize', ()=> {
+        state.items.forEach(it => {
+          const rect = canvas.getBoundingClientRect();
+          it.x = clamp(it.x, 50, rect.width - 50);
+          it.y = clamp(it.y, 50, rect.height - 70);
+          const el = document.getElementById(`scene-item-${it.id}`);
+          if (el) positionItemEl(el, it);
+        });
+      }, {passive:true});
+      // First user interaction unlock audio
+      window.addEventListener('pointerdown', initAudioCtx, {once:true});
+    }
+
+    init();
+  </script>
+</body>
+</html>

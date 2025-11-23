@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloud Painter - Improved</title>
+  <style>
+    /* General Styles */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #ffffff;
+      color: #000000;
+      overflow: hidden;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      position: relative;
+    }
+
+    canvas {
+      border: 2px solid #000000;
+      box-sizing: border-box;
+    }
+
+    /* Toolbar Styles */
+    .toolbar {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      background: #ffffff;
+      border: 2px solid #000000;
+      padding: 10px;
+    }
+
+    .toolbar button, .toolbar select, .toolbar input {
+      border: 2px solid #000000;
+      background: #ffffff;
+      color: #000000;
+      padding: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .toolbar button:hover, .toolbar select:hover, .toolbar input:hover {
+      background: #000000;
+      color: #ffffff;
+    }
+
+    /* Airplane Animation */
+    .airplane {
+      position: absolute;
+      width: 50px;
+      animation: fly 10s linear infinite;
+    }
+
+    @keyframes fly {
+      from {
+        left: -60px;
+        top: 20%;
+      }
+      to {
+        left: 110%;
+        top: 50%;
+      }
+    }
+
+    /* Status Indicators */
+    #statusBar {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ffffff;
+      border: 2px solid #000000;
+      padding: 5px;
+      font-size: 14px;
+    }
+
+    #statusBar span {
+      font-weight: bold;
+    }
+
+    /* Tooltip */
+    .tooltip {
+      position: absolute;
+      background: #000000;
+      color: #ffffff;
+      font-size: 12px;
+      padding: 5px;
+      border-radius: 3px;
+      visibility: hidden;
+      z-index: 10;
+    }
+
+    .tooltip[data-visible="true"] {
+      visibility: visible;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <label for="brushShape">Brush Shape:</label>
+      <select id="brushShape">
+        <option value="circle">Circle</option>
+        <option value="cloud">Cloud</option>
+        <option value="star">Star</option>
+      </select>
+      <label for="brushSize">Brush Size:</label>
+      <input type="number" id="brushSize" value="20" min="5" max="100" step="5" />
+      <button id="clearCanvas">Clear</button>
+      <button id="saveImage">Save</button>
+    </div>
+
+    <!-- Canvas -->
+    <canvas id="skyCanvas" width="1280" height="720"></canvas>
+
+    <!-- Airplane -->
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Airplane_silhouette.svg/1200px-Airplane_silhouette.svg.png" alt="Airplane" class="airplane" id="airplane">
+
+    <!-- Status Bar -->
+    <div id="statusBar">
+      Status: <span id="feedbackMessage">Ready</span>
+    </div>
+
+    <!-- Tooltip -->
+    <div id="tooltip" class="tooltip"></div>
+  </div>
+
+  <script>
+    // Get DOM elements
+    const canvas = document.getElementById('skyCanvas');
+    const ctx = canvas.getContext('2d');
+    const brushShape = document.getElementById('brushShape');
+    const brushSize = document.getElementById('brushSize');
+    const clearCanvas = document.getElementById('clearCanvas');
+    const saveImage = document.getElementById('saveImage');
+    const feedbackMessage = document.getElementById('feedbackMessage');
+    const tooltip = document.getElementById('tooltip');
+    const airplane = document.getElementById('airplane');
+
+    let painting = false;
+
+    // Helper Functions
+    function updateFeedback(message) {
+      feedbackMessage.textContent = message;
+    }
+
+    function showTooltip(event, message) {
+      tooltip.style.left = `${event.clientX + 10}px`;
+      tooltip.style.top = `${event.clientY + 10}px`;
+      tooltip.textContent = message;
+      tooltip.dataset.visible = "true";
+    }
+
+    function hideTooltip() {
+      tooltip.dataset.visible = "false";
+    }
+
+    // Painting Functions
+    function startPainting(e) {
+      painting = true;
+      draw(e);
+      updateFeedback("Painting...");
+    }
+
+    function stopPainting() {
+      painting = false;
+      ctx.beginPath();
+      updateFeedback("Ready");
+    }
+
+    function draw(e) {
+      if (!painting) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const shape = brushShape.value;
+      const size = parseInt(brushSize.value, 10);
+
+      if (shape === 'circle') {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (shape === 'cloud') {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.arc(x - size * 0.7, y + size * 0.5, size * 0.7, 0, Math.PI * 2);
+        ctx.arc(x + size * 0.7, y + size * 0.5, size * 0.7, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (shape === 'star') {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        drawStar(ctx, x, y, 5, size, size * 0.5);
+      }
+    }
+
+    function drawStar(ctx, x, y, spikes, outerRadius, innerRadius) {
+      let rot = Math.PI / 2 * 3;
+      let cx = x;
+      let cy = y;
+      let step = Math.PI / spikes;
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - outerRadius);
+      for (let i = 0; i < spikes; i++) {
+        cx = x + Math.cos(rot) * outerRadius;
+        cy = y + Math.sin(rot) * outerRadius;
+        ctx.lineTo(cx, cy);
+        rot += step;
+
+        cx = x + Math.cos(rot) * innerRadius;
+        cy = y + Math.sin(rot) * innerRadius;
+        ctx.lineTo(cx, cy);
+        rot += step;
+      }
+      ctx.lineTo(x, y - outerRadius);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Event Listeners
+    canvas.addEventListener('mousedown', startPainting);
+    canvas.addEventListener('mouseup', stopPainting);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mousemove', (e) => showTooltip(e, "Draw here!"));
+    canvas.addEventListener('mouseleave', hideTooltip);
+
+    clearCanvas.addEventListener('click', () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      updateFeedback("Canvas cleared");
+    });
+
+    saveImage.addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.download = 'cloud_painting.png';
+      link.href = canvas.toDataURL();
+      link.click();
+      updateFeedback("Image saved");
+    });
+
+    // Airplane Interaction
+    airplane.addEventListener('mouseover', () => showTooltip(event, "Airplane is flying!"));
+    airplane.addEventListener('mouseleave', hideTooltip);
+
+    updateFeedback("Ready");
+  </script>
+</body>
+</html>

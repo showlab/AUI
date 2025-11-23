@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roman Empire Tic Tac Toe</title>
+  <style>
+    /* General Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      font-family: 'Roboto', sans-serif;
+      height: 100%;
+      background: url('https://upload.wikimedia.org/wikipedia/commons/2/2b/Marble_pattern.jpg') center/cover no-repeat;
+      color: #333;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    h1 {
+      font-size: 2rem;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    /* Board Styling */
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      width: 90%;
+      max-width: 500px;
+      aspect-ratio: 1;
+    }
+
+    .cell {
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .cell:hover {
+      background: #f0f0f0;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .cell {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Roman Empire Tic Tac Toe</h1>
+  <div class="board">
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+  </div>
+
+  <script>
+    const cells = document.querySelectorAll('.cell');
+    let currentPlayer = 'X';
+
+    cells.forEach(cell => {
+      cell.addEventListener('click', () => {
+        if (cell.textContent === '') {
+          cell.textContent = currentPlayer;
+          currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

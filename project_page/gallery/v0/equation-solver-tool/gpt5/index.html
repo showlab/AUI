@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Equation Solver Tool</title>
+  <style>
+    :root{
+      --bg:#fbfbfd;
+      --panel:#ffffff;
+      --ink:#1b1b1d;
+      --muted:#5a5a60;
+      --accent:#004d7a;
+      --accent-weak:#e1f0f8;
+      --error:#9b1c1c;
+      --ok:#0e6245;
+      --border:#e6e6ea;
+      --shadow:0 8px 24px rgba(0,0,0,0.06);
+      --radius:12px;
+    }
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink);
+      font:16px/1.5 Georgia, "Times New Roman", Times, serif;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    header{
+      padding:24px 16px 8px;
+      text-align:center;
+    }
+    header h1{
+      margin:0 0 6px;
+      font-size:28px;
+      letter-spacing:.3px;
+    }
+    header p{
+      margin:0;
+      color:var(--muted);
+      font-size:15px;
+    }
+    main{
+      max-width:920px;
+      margin:16px auto 32px;
+      padding:0 16px;
+    }
+    .card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+    .stack{display:grid; gap:12px}
+    .row{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+    label{font-weight:600}
+    input[type="text"]{
+      flex:1 1 520px;
+      font:18px/1.2 "Times New Roman", Georgia, serif;
+      padding:12px 14px;
+      border:1px solid var(--border);
+      border-radius:10px;
+      background:#fff;
+      outline:none;
+      transition:border-color .15s ease, box-shadow .15s ease;
+    }
+    input[type="text"]:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 3px var(--accent-weak);
+    }
+    button{
+      appearance:none;
+      border:1px solid var(--border);
+      background:#fff;
+      color:var(--ink);
+      padding:10px 14px;
+      border-radius:10px;
+      font:600 14px/1 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      cursor:pointer;
+      transition:transform .02s ease, box-shadow .15s ease, background .15s ease, color .15s ease, border-color .15s ease;
+    }
+    button.primary{
+      background:var(--accent);
+      color:#fff;
+      border-color:transparent;
+    }
+    button:hover{box-shadow:0 2px 10px rgba(0,0,0,0.06)}
+    button:active{transform:translateY(1px)}
+    select{
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:#fff;
+      font:600 14px/1 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+    }
+    .hint{color:var(--muted); font-size:14px}
+    .samples{
+      display:flex; gap:8px; flex-wrap:wrap; margin-top:4px
+    }
+    .sample-btn{
+      font-size:13px; padding:6px 10px; border-radius:999px; border:1px dashed var(--border); background:#fafafa
+    }
+    #alertBox{
+      min-height:20px;
+      padding:8px 12px;
+      border-left:4px solid transparent;
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:8px;
+      color:var(--muted);
+    }
+    #alertBox.ok{border-left-color:var(--ok); color:var(--ok); background:#f2fbf7}
+    #alertBox.error{border-left-color:var(--error); color:var(--error); background:#fff5f5}
+    section+section{margin-top:16px}
+    h2{margin:0 0 6px; font-size:20px}
+    .summary{
+      font-weight:600;
+      padding:10px 12px;
+      border-radius:8px;
+      background:#f7f9fb;
+      border:1px solid var(--border);
+      min-height:24px;
+    }
+    ol#stepsList{
+      margin:12px 0 6px 20px;
+      padding:0 0 0 8px;
+    }
+    #stepsList li{
+      margin:8px 0;
+      padding-left:4px;
+    }
+    .export-row{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
+    details{border:1px solid var(--border); border-radius:10px; background:#fff; padding:8px 12px}
+    details summary{cursor:pointer; font-weight:700}
+    code.inline{
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      background:#f5f7f9;
+      border:1px solid var(--border);
+      padding:1px 6px;
+      border-radius:6px;
+      font-size:90%;
+    }
+    footer{
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+      padding:22px 16px 40px;
+    }
+    @media (max-width:600px){
+      input[type="text"]{flex-basis:100%}
+      .row .btns{width:100%; display:flex; gap:8px; flex-wrap:wrap}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Equation Solver Tool</h1>
+    <p>Solve and explain single-variable equations with clear, step-by-step reasoning.</p>
+  </header>
+
+  <main>
+    <section class="card stack" aria-label="Equation Input">
+      <form id="solverForm" class="stack" autocomplete="off" novalidate>
+        <div class="stack">
+          <label for="inputEquation">Enter equation (in x)</label>
+          <div class="row">
+            <input id="inputEquation" name="inputEquation" type="text" placeholder="e.g., 2x + 3 = 11  or  x^2 - 5x + 6 = 0" aria-describedby="syntaxHint" />
+            <div class="btns">
+              <button id="btnSolve" class="primary" type="submit">Solve</button>
+              <button id="btnReset" type="button">Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="row" aria-label="Options">
+          <label for="precisionSelect" class="hint">Precision</label>
+          <select id="precisionSelect" name="precisionSelect" title="Decimal precision (2-10)">
+            <option value="3">3 decimals</option>
+            <option value="4">4 decimals</option>
+            <option value="5">5 decimals</option>
+            <option value="6" selected>6 decimals</option>
+            <option value="7">7 decimals</option>
+            <option value="8">8 decimals</option>
+            <option value="9">9 decimals</option>
+            <option value="10">10 decimals</option>
+          </select>
+          <span id="syntaxHint" class="hint">Use x as the variable; supports linear and quadratic forms without parentheses.</span>
+        </div>
+
+        <div class="samples" aria-label="Examples">
+          <button type="button" class="sample-btn" id="sample1" data-eqn="2x + 3 = 11">2x + 3 = 11</button>
+          <button type="button" class="sample-btn" id="sample2" data-eqn="x^2 - 5x + 6 = 0">x^2 - 5x + 6 = 0</button>
+          <button type="button" class="sample-btn" id="sample3" data-eqn="3x^2 = 12x - 12">3x^2 = 12x - 12</button>
+          <button type="button" class="sample-btn" id="sample4" data-eqn="x^2 + 1 = 0">x^2 + 1 = 0</button>
+        </div>
+      </form>
+      <div id="alertBox" role="status" aria-live="polite"></div>
+    </section>
+
+    <section class="card stack" aria-label="Solution">
+      <h2 id="solutionTitle">Solution</h2>
+      <div id="solutionSummary" class="summary" tabindex="-1" aria-live="polite"></div>
+      <ol id="stepsList"></ol>
+      <div class="export-row">
+        <button id="btnCopy" type="button">Copy Steps</button>
+        <button id="btnExport" type="button">Download .txt</button>
+      </div>
+    </section>
+
+    <section class="card" aria-label="Help">
+      <details id="helpDetails" open>
+        <summary>Guide and supported syntax</summary>
+        <div id="helpText">
+          <p>Supported now:</p>
+          <ul>
+            - Single variable x only<br/>
+            - Linear: <code class="inline">ax + b = c</code> (e.g., <code class="inline">2x + 3 = 11</code>)<br/>
+            - Quadratic: <code class="inline">ax^2 + bx + c = d</code> (e.g., <code class="inline">x^2 - 5x + 6 = 0</code>)<br/>
+            - Coefficients may be integers or decimals. Scientific notation is accepted (e.g., <code class="inline">1.2e3x</code>).
+          </ul>
+          <p>Notes and limitations:</p>
+          <ul>
+            - Parentheses and general products are not expanded (e.g., <code class="inline">3(x-2)</code> is not supported). Write expanded polynomials.<br/>
+            - Exponents other than 2 are not supported (<code class="inline">x^3</code> etc.).<br/>
+            - Multiplication between number and x can be written as <code class="inline">2x</code> or <code class="inline">2*x</code>.
+          </ul>
+        </div>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    Built with HTML5, CSS3, and vanilla JavaScript. No external libraries.
+  </footer>
+
+  <script>
+    // Utilities
+    const $ = sel => document.querySelector(sel);
+    const byId = id => document.getElementById(id);
+
+    const els = {
+      form: byId('solverForm'),
+      input: byId('inputEquation'),
+      alert: byId('alertBox'),
+      summary: byId('solutionSummary'),
+      steps: byId('stepsList'),
+      btnSolve: byId('btnSolve'),
+      btnReset: byId('btnReset'),
+      btnCopy: byId('btnCopy'),
+      btnExport: byId('btnExport'),
+      precision: byId('precisionSelect'),
+      samples: [byId('sample1'), byId('sample2'), byId('sample3'), byId('sample4')]
+    };
+
+    function setAlert(msg, type=''){
+      els.alert.className = '';
+      if(type) els.alert.classList.add(type);
+      els.alert.textContent = msg || '';
+    }
+
+    function fmt(n, d){
+      if(!isFinite(n)) return String(n);
+      const s = Number(n).toFixed(d);
+      // Trim trailing zeros while preserving at least one decimal if needed
+      return s.replace(/(\.\d*?[1-9])0+$/,'$1').replace(/\.0+$/,'');
+    }
+
+    function polyToString(a2,a1,a0, precision){
+      const parts = [];
+      const d = parseInt(els.precision.value,10) || precision || 6;
+      function pushTerm(coef, label){
+        if(Math.abs(coef) < 1e-15) return;
+        const abs = Math.abs(coef);
+        const sign = coef >= 0 ? '+' : '-';
+        let cstr = fmt(abs, d);
+        if(label === 'x^2' || label === 'x'){
+          if(cstr === '1') cstr = ''; // omit 1x or 1x^2
+        }
+        parts.push(`${sign} ${cstr}${label ? (cstr && label ? '' : '') + label : ''}`.trim());
+      }
+      pushTerm(a2,'x^2');
+      pushTerm(a1,'x');
+      pushTerm(a0,'');
+      if(parts.length===0) return '0';
+      // Fix first sign
+      let s = parts.join(' ');
+      s = s.replace(/^\+\s*/,'');
+      return s;
+    }
+
+    function cleanInput(s){
+      if(!s) return '';
+      // Normalize unicode minus and multiply signs, collapse spaces
+      return s
+        .replace(/[−–—]/g,'-')
+        .replace(/[×·]/g,'*')
+        .replace(/[A-WYZa-wyz]/g, ch => ch.toLowerCase()) // lower-case letters
+        .replace(/\s+/g,'')
+        .replace(/x/g,'x'); // keep x
+    }
+
+    function parsePolynomial(expr){
+      // Returns {a2, a1, a0, issues:[], tokens:[]}
+      let a2=0, a1=0, a0=0;
+      const issues=[];
+      const tokens=[];
+      if(expr === '' || expr == null){ issues.push('Empty expression'); return {a2,a1,a0,issues,tokens}; }
+
+      // Normalize into sum of signed terms: replace '-' with '+-'
+      // But avoid turning scientific notation 'e-' into '+-': handle carefully
+      let e = expr;
+      // Temporarily mark scientific notation e+/- signs
+      e = e.replace(/e\+/ig, 'EPLUS');
+      e = e.replace(/e\-/ig, 'EMINUS');
+      e = e.replace(/e/ig, 'E');
+      e = e.replace(/\-/g, '+-');
+      if(e.startsWith('+-')) e = e.slice(1);
+      let parts = e.split('+').filter(p => p.length>0);
+      parts = parts.map(p=>{
+        p = p.replace(/EPLUS/ig, 'e+').replace(/EMINUS/ig, 'e-').replace(/E/ig,'e');
+        return p;
+      });
+
+      const numRe = /^([+-])?(\d*\.?\d+(?:e[+-]?\d+)?)$/i;
+      const xRe = /^([+-])?(?:(\d*\.?\d+(?:e[+-]?\d+)?)\*?)?x(?:\^([+-]?\d+))?$/i;
+
+      for(const raw of parts){
+        if(!raw) continue;
+        let part = raw;
+        tokens.push(part);
+        let m;
+        if((m = xRe.exec(part))){
+          const sign = m[1] === '-' ? -1 : 1;
+          const coefStr = m[2];
+          const expStr = m[3];
+          const baseCoef = (coefStr==='' || coefStr==null) ? 1 : Number(coefStr);
+          if(!isFinite(baseCoef)){ issues.push(`Invalid coefficient in term "${part}"`); continue; }
+          const exp = expStr==null ? 1 : Number(expStr);
+          if(!Number.isFinite(exp) || Math.floor(exp)!=exp){ issues.push(`Non-integer exponent in term "${part}"`); continue; }
+          if(exp < 0 || exp > 2){ issues.push(`Unsupported exponent x^${exp} in term "${part}" (only 0,1,2 supported)`); continue; }
+          const c = sign * baseCoef;
+          if(exp===2) a2 += c;
+          else if(exp===1) a1 += c;
+          else a0 += c; // x^0
+        } else if((m = numRe.exec(part))){
+          const sign = m[1] === '-' ? -1 : 1;
+          const val = Number(m[2]);
+          if(!isFinite(val)){ issues.push(`Invalid number "${part}"`); continue; }
+          a0 += sign * val;
+        } else {
+          issues.push(`Unrecognized term "${part}"`);
+        }
+      }
+      return {a2,a1,a0,issues,tokens};
+    }
+
+    function solveEquation(input, precision){
+      const steps = [];
+      const meta = { type:null, roots:[], complex:false };
+      const d = precision || 6;
+
+      const original = input;
+      const s = cleanInput(input);
+      if(!s.includes('=')){
+        throw { user:true, message:'Please include an equals sign "=" in your equation.' };
+      }
+      const [leftRaw, rightRaw] = s.split('=');
+      if(rightRaw === undefined) throw { user:true, message:'Malformed equation. Please ensure it has one "=" sign.' };
+      if(leftRaw.trim()==='' || rightRaw.trim()==='') throw { user:true, message:'Both sides of the equation must be non-empty.' };
+
+      steps.push(`Start with the equation: ${original.trim()}`);
+
+      const L = parsePolynomial(leftRaw);
+      const R = parsePolynomial(rightRaw);
+
+      if(L.issues.length || R.issues.length){
+        const msg = [...L.issues.map(i=>'LHS: '+i), ...R.issues.map(i=>'RHS: '+i)].join('; ');
+        throw { user:true, message:`Parsing issue: ${msg}. See "Guide and supported syntax" for help.` };
+      }
+
+      const lhsStr = polyToString(L.a2,L.a1,L.a0,d);
+      const rhsStr = polyToString(R.a2,R.a1,R.a0,d);
+      steps.push(`Combine like terms on each side: LHS = ${lhsStr},  RHS = ${rhsStr}`);
+
+      // Move all to left: LHS - RHS = 0
+      const A = L.a2 - R.a2;
+      const B = L.a1 - R.a1;
+      const C = L.a0 - R.a0;
+
+      const stdStr = polyToString(A,B,C,d);
+      steps.push(`Bring all terms to the left: ${stdStr} = 0`);
+
+      // Classify
+      if(Math.abs(A) < 1e-15 && Math.abs(B) < 1e-15 && Math.abs(C) < 1e-15){
+        meta.type = 'identity';
+        steps.push('All coefficients are zero (0 = 0).');
+        return {
+          summary: 'Infinitely many solutions (identity). Any real x satisfies the equation.',
+          steps, meta
+        };
+      }
+
+      if(Math.abs(A) < 1e-15 && Math.abs(B) < 1e-15){
+        meta.type = 'contradiction';
+        steps.push('No variable term remains, but the constant is nonzero.');
+        return {
+          summary: 'No solution (contradiction).',
+          steps, meta
+        };
+      }
+
+      if(Math.abs(A) < 1e-15){
+        // Linear: Bx + C = 0
+        meta.type = 'linear';
+        const Bn = B, Cn = C;
+        steps.push(`This is linear: ${fmt(Bn,d)}x + ${fmt(Cn,d)} = 0`);
+        steps.push(`Isolate x: ${fmt(Bn,d)}x = ${fmt(-Cn,d)}`);
+        const x = -Cn / Bn;
+        steps.push(`Divide both sides by ${fmt(Bn,d)}: x = ${fmt(-Cn,d)} / ${fmt(Bn,d)} = ${fmt(x,d)}`);
+        meta.roots = [x];
+        return {
+          summary: `Solution: x = ${fmt(x,d)}`,
+          steps, meta
+        };
+      } else {
+        // Quadratic
+        meta.type = 'quadratic';
+        const a=A, b=B, c=C;
+        steps.push(`This is quadratic: a = ${fmt(a,d)}, b = ${fmt(b,d)}, c = ${fmt(c,d)}.`);
+        const D = b*b - 4*a*c;
+        steps.push(`Compute the discriminant: D = b^2 - 4ac = ${fmt(b*b,d)} - 4·${fmt(a,d)}·${fmt(c,d)} = ${fmt(D,d)}`);
+        steps.push('Quadratic formula: x = (-b ± sqrt(D)) / (2a)');
+
+        if(D > 0){
+          const sqrtD = Math.sqrt(D);
+          const denom = 2*a;
+          const x1 = (-b + sqrtD) / denom;
+          const x2 = (-b - sqrtD) / denom;
+          steps.push(`sqrt(D) = ${fmt(sqrtD,d)}, 2a = ${fmt(denom,d)}`);
+          steps.push(`x₁ = (${fmt(-b,d)} + ${fmt(sqrtD,d)}) / ${fmt(denom,d)} = ${fmt(x1,d)}`);
+          steps.push(`x₂ = (${fmt(-b,d)} - ${fmt(sqrtD,d)}) / ${fmt(denom,d)} = ${fmt(x2,d)}`);
+          meta.roots = [x1,x2];
+          return {
+            summary: `Two real solutions: x₁ = ${fmt(x1,d)}, x₂ = ${fmt(x2,d)}`,
+            steps, meta
+          };
+        } else if (Math.abs(D) < 1e-15){
+          const denom = 2*a;
+          const x0 = (-b) / denom;
+          steps.push(`D = 0 ⇒ one repeated real root.`);
+          steps.push(`x = (-b) / (2a) = ${fmt(-b,d)} / ${fmt(2*a,d)} = ${fmt(x0,d)}`);
+          meta.roots = [x0];
+          return {
+            summary: `One real solution (double root): x = ${fmt(x0,d)}`,
+            steps, meta
+          };
+        } else {
+          const absD = Math.abs(D);
+          const sqrtAbsD = Math.sqrt(absD);
+          const denom = 2*a;
+          const real = (-b) / denom;
+          const imag = sqrtAbsD / Math.abs(denom); // sign of denom goes to both; common to take |2a| in imag magnitude
+          steps.push(`D < 0 ⇒ complex roots.`);
+          steps.push(`|D| = ${fmt(absD,d)}, sqrt(|D|) = ${fmt(sqrtAbsD,d)}, 2a = ${fmt(2*a,d)}`);
+          steps.push(`x = ${fmt(real,d)} ± ${fmt(imag,d)}i`);
+          meta.complex = true;
+          meta.roots = [real+' + '+fmt(imag,d)+'i', real+' - '+fmt(imag,d)+'i'];
+          return {
+            summary: `Two complex solutions: x = ${fmt(real,d)} ± ${fmt(imag,d)}i`,
+            steps, meta
+          };
+        }
+      }
+    }
+
+    function buildExportText(input, result){
+      const now = new Date();
+      const ts = now.toISOString().replace('T',' ').replace('Z',' UTC');
+      const lines = [];
+      lines.push('Equation Solver Tool');
+      lines.push('====================');
+      lines.push(`Timestamp: ${ts}`);
+      lines.push(`Input: ${input}`);
+      lines.push('');
+      lines.push('Summary:');
+      lines.push(`  ${result.summary}`);
+      lines.push('');
+      lines.push('Steps:');
+      result.steps.forEach((s,i)=> lines.push(`  ${i+1}. ${s}`));
+      lines.push('');
+      lines.push('— end —');
+      return lines.join('\n');
+    }
+
+    // State
+    let lastResult = null;
+    let lastInput = '';
+
+    // Events
+    els.form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      setAlert('', '');
+      const eqn = els.input.value.trim();
+      lastInput = eqn;
+      if(!eqn){
+        setAlert('Please enter an equation to solve.', 'error');
+        els.summary.textContent = '';
+        els.steps.innerHTML = '';
+        return;
+      }
+      const precision = parseInt(els.precision.value, 10) || 6;
+      try{
+        const res = solveEquation(eqn, precision);
+        lastResult = res;
+        // Render
+        els.summary.textContent = res.summary;
+        els.steps.innerHTML = '';
+        res.steps.forEach((s)=>{
+          const li = document.createElement('li');
+          li.textContent = s;
+          els.steps.appendChild(li);
+        });
+        setAlert('Solved successfully.', 'ok');
+        // Focus summary for screen readers
+        els.summary.focus({preventScroll:true});
+        els.summary.scrollIntoView({behavior:'smooth', block:'nearest'});
+      }catch(err){
+        lastResult = null;
+        els.summary.textContent = '';
+        els.steps.innerHTML = '';
+        if(err && err.user){
+          setAlert(err.message, 'error');
+        }else{
+          console.error(err);
+          setAlert('An unexpected error occurred while solving. Please check your input.', 'error');
+        }
+      }
+    });
+
+    els.btnReset.addEventListener('click', ()=>{
+      els.input.value = '';
+      els.summary.textContent = '';
+      els.steps.innerHTML = '';
+      lastResult = null;
+      setAlert('Cleared.', 'ok');
+      els.input.focus();
+    });
+
+    els.btnCopy.addEventListener('click', async ()=>{
+      if(!lastResult){
+        setAlert('Nothing to copy. Solve an equation first.', 'error');
+        return;
+      }
+      const text = buildExportText(lastInput, lastResult);
+      try{
+        await navigator.clipboard.writeText(text);
+        setAlert('Steps copied to clipboard.', 'ok');
+      }catch(e){
+        setAlert('Clipboard copy failed. Try the Download option.', 'error');
+      }
+    });
+
+    els.btnExport.addEventListener('click', ()=>{
+      if(!lastResult){
+        setAlert('Nothing to export. Solve an equation first.', 'error');
+        return;
+      }
+      const text = buildExportText(lastInput, lastResult);
+      const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      const safe = (lastInput || 'equation').replace(/[^\w\-]+/g,'_').slice(0,40);
+      a.download = `solution_${safe || 'equation'}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      URL.revokeObjectURL(a.href);
+      a.remove();
+      setAlert('Download started.', 'ok');
+    });
+
+    els.samples.forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        els.input.value = btn.getAttribute('data-eqn') || '';
+        setAlert(`Loaded example: ${els.input.value}`, 'ok');
+        els.input.focus();
+      });
+    });
+
+    // Enter key on input triggers solve (form submit already handles it)
+    // Save precision preference
+    const savedP = localStorage.getItem('est_precision');
+    if(savedP && els.precision.querySelector(`option[value="${savedP}"]`)){
+      els.precision.value = savedP;
+    }
+    els.precision.addEventListener('change', ()=>{
+      localStorage.setItem('est_precision', els.precision.value);
+      if(lastResult){
+        // Recompute summary formatting with new precision (re-solve)
+        els.form.dispatchEvent(new Event('submit', {cancelable:true}));
+      }
+    });
+
+    // Initial friendly alert
+    setAlert('Enter an equation and press Solve.', '');
+  </script>
+</body>
+</html>

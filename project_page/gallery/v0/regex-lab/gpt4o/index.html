@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Regex Playground</title>
+  <style>
+    /* General Styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #1e1e1e;
+      color: #d4d4d4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 1280px;
+      padding: 20px;
+      background-color: #252526;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input, textarea, button, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #3c3c3c;
+      border-radius: 4px;
+      background-color: #1e1e1e;
+      color: #d4d4d4;
+    }
+
+    textarea {
+      resize: vertical;
+      height: 100px;
+    }
+
+    button {
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #3a3a3a;
+    }
+
+    .output {
+      margin-top: 20px;
+    }
+
+    .output-pane {
+      margin-bottom: 20px;
+    }
+
+    .highlighted-text {
+      white-space: pre-wrap;
+      background-color: #1e1e1e;
+      padding: 10px;
+      border: 1px solid #3c3c3c;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+
+    .highlighted-text .match {
+      background-color: #007acc;
+      color: #ffffff;
+      border-radius: 3px;
+      padding: 2px 4px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #3c3c3c;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #333333;
+    }
+
+    .error {
+      color: #ff5c5c;
+      font-weight: bold;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar button {
+      flex: 1;
+    }
+
+    .dark-mode-toggle {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .dark-mode-toggle button {
+      width: auto;
+    }
+
+    @media (max-width: 768px) {
+      .toolbar {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Regex Playground</h1>
+    <div class="form-group">
+      <label for="regex-pattern">Pattern</label>
+      <input type="text" id="regex-pattern" placeholder="Enter regex pattern">
+    </div>
+    <div class="form-group">
+      <label for="regex-flags">Flags</label>
+      <input type="text" id="regex-flags" placeholder="e.g., g, i, m">
+    </div>
+    <div class="form-group">
+      <label for="test-text">Test Text</label>
+      <textarea id="test-text" placeholder="Enter text to test"></textarea>
+    </div>
+    <div class="toolbar">
+      <button id="insert-digit">Insert \\d</button>
+      <button id="insert-word">Insert \\w</button>
+      <button id="insert-space">Insert \\s</button>
+      <button id="insert-uppercase">Insert [A-Z]</button>
+      <button id="insert-lookahead">Insert (?=...)</button>
+      <button id="clear-all">Clear</button>
+    </div>
+    <div class="output">
+      <div class="output-pane">
+        <h3>Highlighted Matches</h3>
+        <div id="highlighted-matches" class="highlighted-text"></div>
+      </div>
+      <div class="output-pane">
+        <h3>Matches Table</h3>
+        <table id="matches-table">
+          <thead>
+            <tr>
+              <th>Match</th>
+              <th>Index</th>
+              <th>Groups</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="output-pane">
+        <h3>Pattern Explanation</h3>
+        <div id="pattern-explanation"></div>
+      </div>
+      <div id="error-message" class="error"></div>
+    </div>
+    <div class="dark-mode-toggle">
+      <button id="toggle-theme">Toggle Light/Dark Mode</button>
+    </div>
+  </div>
+
+  <script>
+    // DOM Elements
+    const regexPatternInput = document.getElementById('regex-pattern');
+    const regexFlagsInput = document.getElementById('regex-flags');
+    const testTextInput = document.getElementById('test-text');
+    const highlightedMatchesDiv = document.getElementById('highlighted-matches');
+    const matchesTableBody = document.querySelector('#matches-table tbody');
+    const patternExplanationDiv = document.getElementById('pattern-explanation');
+    const errorMessageDiv = document.getElementById('error-message');
+    const toggleThemeButton = document.getElementById('toggle-theme');
+
+    // Utilities
+    const quickInsertButtons = {
+      '\\d': document.getElementById('insert-digit'),
+      '\\w': document.getElementById('insert-word'),
+      '\\s': document.getElementById('insert-space'),
+      '[A-Z]': document.getElementById('insert-uppercase'),
+      '(?=...)': document.getElementById('insert-lookahead'),
+    };
+
+    const clearButton = document.getElementById('clear-all');
+
+    // State
+    let isDarkMode = true;
+
+    // Event Listeners
+    regexPatternInput.addEventListener('input', updateRegex);
+    regexFlagsInput.addEventListener('input', updateRegex);
+    testTextInput.addEventListener('input', updateRegex);
+
+    Object.entries(quickInsertButtons).forEach(([token, button]) => {
+      button.addEventListener('click', () => {
+        regexPatternInput.value += token;
+        regexPatternInput.focus();
+        updateRegex();
+      });
+    });
+
+    clearButton.addEventListener('click', () => {
+      regexPatternInput.value = '';
+      regexFlagsInput.value = '';
+      testTextInput.value = '';
+      updateRegex();
+    });
+
+    toggleThemeButton.addEventListener('click', () => {
+      isDarkMode = !isDarkMode;
+      document.body.style.backgroundColor = isDarkMode ? '#1e1e1e' : '#ffffff';
+      document.body.style.color = isDarkMode ? '#d4d4d4' : '#000000';
+    });
+
+    // Functions
+    function updateRegex() {
+      const pattern = regexPatternInput.value;
+      const flags = regexFlagsInput.value;
+      const testText = testTextInput.value;
+
+      try {
+        const regex = new RegExp(pattern, flags);
+        errorMessageDiv.textContent = '';
+
+        // Highlight Matches
+        const matches = [...testText.matchAll(regex)];
+        highlightedMatchesDiv.innerHTML = testText.replace(regex, (match) => `<span class="match">${match}</span>`);
+
+        // Populate Matches Table
+        matchesTableBody.innerHTML = matches.map((match) => `
+          <tr>
+            <td>${match[0]}</td>
+            <td>${match.index}</td>
+            <td>${match.slice(1).join(', ')}</td>
+          </tr>
+        `).join('');
+
+        // Pattern Explanation
+        patternExplanationDiv.textContent = explainPattern(pattern);
+      } catch (e) {
+        errorMessageDiv.textContent = `Error: ${e.message}`;
+      }
+    }
+
+    function explainPattern(pattern) {
+      // Basic explanation for common tokens
+      const explanations = {
+        '\\d': 'Digit (0-9)',
+        '\\w': 'Word character (alphanumeric + underscore)',
+        '\\s': 'Whitespace',
+        '[A-Z]': 'Uppercase letters (A-Z)',
+        '(?=...)': 'Lookahead assertion',
+      };
+
+      return pattern.split(/(\\d|\\w|\\s|\[A-Z\]|\(\?=...\))/).map((token) => explanations[token] || token).join(' ');
+    }
+
+    // Initialize
+    updateRegex();
+  </script>
+</body>
+</html>

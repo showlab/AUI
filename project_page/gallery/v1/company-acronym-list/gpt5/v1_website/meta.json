@@ -1,0 +1,9 @@
+{
+  "model": "gpt5",
+  "app": "company-acronym-list",
+  "variant": "integrated",
+  "v0_signature": null,
+  "analyzed_failures": null,
+  "destylized": true,
+  "generated_at": "2025-09-23T00:35:18.309088"
+}

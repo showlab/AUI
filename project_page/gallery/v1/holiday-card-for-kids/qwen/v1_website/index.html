@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Holiday Card</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-container {
+            width: 100%;
+            max-width: 1200px;
+            height: 700px;
+            background: linear-gradient(145deg, #ff9a9e, #fad0c4);
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            border: 8px solid #d4af37;
+        }
+
+        .card-header {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(to right, #ff6b6b, #ffd166);
+            color: white;
+            font-size: 2.5rem;
+            text-shadow: 3px 3px 0 #8b0000;
+            border-bottom: 5px solid #8b0000;
+            position: relative;
+        }
+
+        .card-header h1 {
+            letter-spacing: 2px;
+        }
+
+        .card-body {
+            display: flex;
+            height: calc(100% - 100px);
+            padding: 20px;
+        }
+
+        .drop-zone {
+            flex: 3;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f8f9fa"/><path d="M0 0L100 100M100 0L0 100" stroke="%23e9ecef" stroke-width="1"/></svg>');
+            background-size: 20px 20px;
+            border: 3px dashed #8b0000;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            min-height: 500px;
+        }
+
+        .items-container {
+            flex: 1;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            border: 3px solid #d4af37;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+        }
+
+        .item {
+            width: 100%;
+            height: 80px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+            border: 2px solid #d4af37;
+            font-size: 1.5rem;
+            user-select: none;
+        }
+
+        .item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .item:active {
+            cursor: grabbing;
+        }
+
+        .item.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+
+        .snowflake {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+
+        .present {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            animation: bounce 2s infinite;
+        }
+
+        .present::before {
+            content: "";
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            background: linear-gradient(45deg, #ffd166, #ffd166);
+            border-radius: 5px;
+        }
+
+        .present::after {
+            content: "🎁";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+        }
+
+        .tree {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+        }
+
+        .tree-top {
+            width: 0;
+            height: 0;
+            border-left: 80px solid transparent;
+            border-right: 80px solid transparent;
+            border-bottom: 120px solid #2e8b57;
+            position: relative;
+        }
+
+        .tree-trunk {
+            width: 20px;
+            height: 40px;
+            background: #8b4513;
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .star {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 30px;
+            color: gold;
+            text-shadow: 0 0 10px yellow;
+            animation: twinkle 1.5s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .sound-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            border: 3px solid white;
+            z-index: 20;
+            transition: all 0.3s ease;
+        }
+
+        .sound-btn:hover {
+            transform: scale(1.1);
+            background: #ff8e8e;
+        }
+
+        .sound-btn.off {
+            background: #cccccc;
+        }
+
+        .sound-btn::after {
+            content: "🔊";
+            font-size: 24px;
+        }
+
+        .sound-btn.off::after {
+            content: "🔇";
+        }
+
+        .instructions {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border: 2px solid #d4af37;
+        }
+
+        .counter {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border: 2px solid #d4af37;
+        }
+
+        .counter span {
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        .surprise-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 20;
+        }
+
+        .surprise-btn:hover {
+            background: #45a049;
+        }
+
+        .snow-control {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border: 2px solid #d4af37;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .snow-control input[type="range"] {
+            width: 150px;
+        }
+
+        .snow-control label {
+            margin-right: 5px;
+        }
+
+        .text-tool {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border: 2px solid #d4af37;
+            z-index: 20;
+            display: none;
+        }
+
+        .text-tool input {
+            padding: 5px;
+            margin: 0 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .text-tool button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .text-tool button:hover {
+            background: #1976D2;
+        }
+
+        .text-display {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border: 2px solid #d4af37;
+            z-index: 15;
+            word-break: break-word;
+            max-width: 300px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .card-body {
+                flex-direction: column;
+            }
+            
+            .drop-zone {
+                min-height: 400px;
+            }
+            
+            .items-container {
+                min-height: 200px;
+            }
+            
+            .card-header h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="card-container">
+        <header class="card-header">
+            <h1>🎄 Happy Holidays! 🎄</h1>
+        </header>
+        
+        <div class="card-body">
+            <div class="drop-zone" id="dropZone">
+                <!-- Default items -->
+                <div class="present" style="top: 100px; left: 150px;" id="present1"></div>
+                <div class="present" style="top: 200px; left: 400px;" id="present2"></div>
+                <div class="present" style="top: 300px; left: 250px;" id="present3"></div>
+                <div class="snowman" style="top: 150px; left: 300px;" id="snowman"></div>
+                
+                <!-- Snowflakes will be generated here -->
+            </div>
+            
+            <div class="items-container" id="itemsContainer">
+                <div class="item" data-item="snowflake">❄️</div>
+                <div class="item" data-item="gift">🎁</div>
+                <div class="item" data-item="candy">🍬</div>
+                <div class="item" data-item="cookie">🍪</div>
+                <div class="item" data-item="tree">🎄</div>
+                <div class="item" data-item="bell">🔔</div>
+                <div class="item" data-item="star">⭐</div>
+                <div class="item" data-item="snowman">⛄</div>
+                <div class="item" data-item="reindeer">🦌</div>
+                <div class="item" data-item="santa">🎅</div>
+                <div class="item" data-item="sleigh">🛷</div>
+                <div class="item" data-item="ornament">🔴</div>
+                <div class="item" data-item="garland"> Garland</div>
+                <div class="item" data-item="sparkle">✨</div>
+            </div>
+        </div>
+        
+        <div class="tree">
+            <div class="tree-top"></div>
+            <div class="tree-trunk"></div>
+            <div class="star">⭐</div>
+        </div>
+        
+        <div class="counter">Items in card: <span id="itemCount">3</span></div>
+        <div class="instructions">Drag items from the right to the card!</div>
+        <div class="sound-btn" id="soundBtn"></div>
+        <button class="surprise-btn" id="surpriseBtn">Surprise Me!</button>
+        <div class="snow-control">
+            <label for="snowIntensity">Snow:</label>
+            <input type="range" id="snowIntensity" min="0" max="100" value="30">
+        </div>
+        <div class="text-tool" id="textTool">
+            <input type="text" id="textInput" placeholder="Enter text">
+            <input type="color" id="textColor" value="#000000">
+            <input type="number" id="textSize" min="10" max="50" value="20">
+            <button id="addTextBtn">Add Text</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const dropZone = document.getElementById('dropZone');
+            const itemsContainer = document.getElementById('itemsContainer');
+            const soundBtn = document.getElementById('soundBtn');
+            const itemCountElement = document.getElementById('itemCount');
+            const surpriseBtn = document.getElementById('surpriseBtn');
+            const snowIntensity = document.getElementById('snowIntensity');
+            const textTool = document.getElementById('textTool');
+            const textInput = document.getElementById('textInput');
+            const textColor = document.getElementById('textColor');
+            const textSize = document.getElementById('textSize');
+            const addTextBtn = document.getElementById('addTextBtn');
+            
+            // Sound effects
+            const sounds = {
+                drop: new Audio("data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb25vQ29tcG9uZW50Q29udGVudFZQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0JQV0ZGAAAAA0lNQ1dFQkRJQ0NQQ0

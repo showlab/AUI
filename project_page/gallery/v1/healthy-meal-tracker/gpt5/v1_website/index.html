@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Healthy Meal Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    /* Destylized, operator-friendly, high-contrast UI
+       - White background, black text
+       - No gradients, no shadows, no rounded corners
+       - Large hit targets (min-height 44px)
+       - Clear labels and hierarchy
+       - Two-column layout on desktop to fit 1280×720 comfortably
+    */
+
+    :root{
+      --bg:#ffffff;
+      --text:#000000;
+      --muted:#444444;
+      --accent:#0a7d2b;
+      --accent-weak:#e5f3e9;
+      --danger:#b00020;
+      --warning:#b36b00;
+      --border:#cccccc;
+      --border-strong:#000000;
+      --panel:#ffffff;
+      --link:#0645ad;
+      --focus: 2px solid #000000;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    a { color: var(--link); text-decoration: underline; }
+    a:focus { outline: var(--focus); }
+    button, input, select, textarea { font-family: inherit; font-size: 14px; color: var(--text); }
+    input, select, textarea { border: 1px solid var(--border-strong); background: #fff; padding: 10px 12px; outline: none; }
+    input:focus, select:focus, textarea:focus { outline: var(--focus); }
+    input.invalid, select.invalid, textarea.invalid { border-color: var(--danger); }
+    label { font-size: 12px; color: var(--muted); }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #fff;
+      border-bottom: 2px solid var(--border-strong);
+    }
+    .header-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; padding: 12px 14px; max-width: 1200px; margin: 0 auto;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-emoji { font-size: 24px; }
+    h1 { font-size: 20px; margin: 0; line-height: 1; }
+
+    .top-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+    .control { display: inline-flex; align-items: center; gap: 8px; padding: 6px; border: 1px solid var(--border-strong); }
+    .control>label { min-width: 80px; }
+
+    button {
+      background: var(--accent); color: #fff; border: 1px solid var(--border-strong);
+      padding: 10px 14px; cursor: pointer; min-height: 44px; min-width: 44px;
+    }
+    button.secondary { background: #f4f4f4; color: #000; }
+    button.danger { background: var(--danger); color: #fff; }
+    button.ghost { background: #fff; color: #000; }
+
+    main { max-width: 1200px; margin: 12px auto; padding: 0 14px 20px; display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 14px; }
+    section, aside { background: var(--panel); border: 2px solid var(--border-strong); padding: 12px; }
+
+    .section-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .section-title { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; }
+    .section-title .emoji { font-size: 18px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .grid-3 { display: grid; grid-template-columns: 1.2fr 0.8fr 1fr; gap: 10px; }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .inline { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .help { color: var(--muted); font-size: 12px; }
+    .divider { height: 2px; background: var(--border-strong); margin: 10px 0; }
+
+    .ingredients-card { border: 2px solid var(--border-strong); padding: 10px; }
+    .ingredients-header { display: flex; align-items: center; justify-content: space-between; }
+    .sticky-actions { position: sticky; top: 50px; background: #fff; padding: 4px 0; border-bottom: 1px solid var(--border-strong); z-index: 3; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 8px 6px; font-size: 14px; border-bottom: 1px solid var(--border); }
+    thead th { font-weight: 700; border-bottom: 2px solid var(--border-strong); }
+    tfoot td { font-weight: 700; }
+    .cell-actions { display: inline-flex; gap: 6px; }
+    .edit-hint { font-size: 12px; color: var(--muted); }
+
+    .total-row { border: 2px solid var(--border-strong); padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; font-weight: 700; }
+
+    .notice { padding: 10px 12px; border: 1px solid var(--border-strong); font-size: 13px; display: none; margin-top: 8px; }
+    .notice.error { background: #ffe5e5; color: var(--danger); }
+    .notice.success { background: #e5f5ea; color: var(--accent); }
+
+    .summary-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 10px; }
+    .summary-card { border: 1px solid var(--border-strong); padding: 10px; display: flex; flex-direction: column; gap: 2px; }
+    .summary-label { font-size: 12px; color: var(--muted); }
+    .summary-value { font-size: 18px; font-weight: 800; }
+
+    .progress { background: #eaeaea; height: 16px; width: 100%; position: relative; border: 1px solid var(--border-strong); }
+    .progress-bar { height: 100%; background: #169c3e; width: 0%; }
+    .progress-warning .progress-bar { background: #e6a500; }
+    .progress-danger .progress-bar { background: #cc1b1b; }
+
+    .meal-card { border: 2px solid var(--border-strong); padding: 10px; display: flex; flex-direction: column; gap: 8px; background: #fff; }
+    .meal-header { display: flex; align-items: center; justify-content: space-between; }
+    .meal-title { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+    .meal-meta { color: var(--muted); font-size: 12px; }
+    .meal-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .ingredient-bullets { margin: 0; padding-left: 18px; color: #000; }
+    .empty { color: var(--muted); text-align: left; padding: 10px; border: 2px dashed var(--border-strong); background: #fff; }
+
+    .selected { outline: 2px solid #000; }
+    .flash { background: #fff8c6; }
+
+    footer { text-align: center; color: var(--muted); padding: 16px; font-size: 12px; border-top: 2px solid var(--border-strong); }
+
+    /* Scrollable ingredients table container to keep controls visible */
+    #ingredientsTableContainer { max-height: 320px; overflow: auto; border: 1px solid var(--border-strong); }
+
+    /* Proxies and status lines */
+    .status-line { font-size: 12px; color: var(--muted); padding: 6px 0; }
+
+    /* Ensure minimum sizes for controls */
+    .control input, .control select { min-height: 44px; }
+    #setGoalBtn, #clearDayBtn { min-height: 44px; }
+
+    /* Hints */
+    .hint { font-size: 12px; color: var(--muted); }
+
+    /* Visibility utilities */
+    .hidden { display: none; }
+    .bold { font-weight: 700; }
+
+    /* Make long inputs scrollable horizontally rather than expanding */
+    #mealNameInput { white-space: nowrap; overflow-x: auto; }
+    td.truncate { max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    td.truncate:hover { overflow: visible; white-space: normal; }
+
+    /* Mobile layout */
+    @media (max-width: 980px) {
+      main { grid-template-columns: 1fr; }
+      .summary-cards { grid-template-columns: repeat(2, 1fr); }
+    }
+
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-emoji" aria-hidden="true">🥗</div>
+        <h1>Healthy Meal Tracker</h1>
+      </div>
+      <div class="top-controls">
+        <div class="control" title="Select day to view or log meals">
+          <label for="datePicker">Viewing meals for:</label>
+          <input id="datePicker" type="date" aria-label="Select day" />
+        </div>
+        <div class="control" title="Set a daily calorie goal">
+          <label for="calorieGoalInput">Daily Goal (kcal)</label>
+          <input id="calorieGoalInput" type="number" min="0" step="10" placeholder="e.g., 2000" style="width: 124px;">
+          <button id="setGoalBtn" aria-label="Set calorie goal">Set Goal</button>
+        </div>
+        <button id="clearDayBtn" class="ghost" title="Remove all meals for the selected day">Clear Day</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="addMealSection" aria-labelledby="addMealTitle">
+      <div class="section-header">
+        <div class="section-title">
+          <span class="emoji" aria-hidden="true">🍽️</span>
+          <span id="addMealTitle">Add a Meal</span>
+        </div>
+        <div class="inline">
+          <span id="mealModeLabel" class="bold">Mode: Add New Meal</span>
+          <span id="activeSection" class="status-line" aria-live="polite">active: Add a Meal</span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label for="mealNameInput">Meal Name <span aria-hidden="true">*</span></label>
+          <input id="mealNameInput" type="text" placeholder="e.g., Grilled Chicken Salad" autocomplete="off" aria-required="true">
+          <div class="hint">Tip: Meal names can be identical; duplicates are allowed.</div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="mealTypeSelect">Meal Type</label>
+            <select id="mealTypeSelect">
+              <option value="Breakfast">Breakfast 🍳</option>
+              <option value="Lunch">Lunch 🥪</option>
+              <option value="Dinner">Dinner 🍝</option>
+              <option value="Snack" selected>Snack 🍎</option>
+              <option value="Other">Other 🍽️</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="mealTimeInput">Time</label>
+            <input id="mealTimeInput" type="time">
+            <div class="hint">If empty, current time is used.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider" role="separator"></div>
+
+      <div class="ingredients-card" aria-label="Ingredients">
+        <div class="ingredients-header">
+          <div class="section-title" style="margin-bottom: 6px;">
+            <span class="emoji" aria-hidden="true">🥦</span>
+            <span>Ingredients</span>
+          </div>
+          <div class="inline">
+            <label class="inline" for="keepIngredientInputs">
+              <input type="checkbox" id="keepIngredientInputs"> Keep inputs after add
+            </label>
+            <span id="ingredientsCount" class="status-line">ingredients: 0</span>
+          </div>
+        </div>
+
+        <div class="grid-3" style="margin-bottom: 8px;">
+          <div class="field">
+            <label for="ingredientNameInput">Name</label>
+            <input id="ingredientNameInput" type="text" placeholder="e.g., Chicken breast" autocomplete="off">
+          </div>
+          <div class="inline">
+            <div class="field" style="flex: 1;">
+              <label for="ingredientQtyInput">Qty</label>
+              <input id="ingredientQtyInput" type="number" min="0" step="0.1" placeholder="e.g., 1.5">
+              <div id="ingredientQtyError" class="help" aria-live="polite"></div>
+            </div>
+            <div class="field" style="flex: 1;">
+              <label for="ingredientUnitInput">Unit</label>
+              <input id="ingredientUnitInput" type="text" placeholder="g, piece, cup…">
+            </div>
+          </div>
+          <div class="field">
+            <label for="ingredientCalPerUnitInput">Calories per Unit (kcal)</label>
+            <input id="ingredientCalPerUnitInput" type="number" min="0" step="0.1" placeholder="e.g., 165">
+            <div id="ingredientCalorieError" class="help" aria-live="polite">Decimals allowed (e.g., 33.5)</div>
+          </div>
+        </div>
+
+        <div class="inline sticky-actions" style="justify-content: space-between; margin-bottom: 8px;">
+          <div class="inline">
+            <div class="help" id="keyboardHintAddIng">Press Enter in any ingredient field to add.</div>
+          </div>
+          <div class="inline">
+            <button id="addIngredientBtn" aria-label="Add Ingredient">Add Ingredient</button>
+            <button id="clearIngredientsBtn" class="secondary">Clear Ingredients</button>
+            <button id="resetMealBtn" class="secondary">Reset Form</button>
+            <button id="saveMealBtn" aria-label="Save Meal" style="font-size:16px; font-weight:700;">Save Meal</button>
+          </div>
+        </div>
+
+        <div id="ingredientGlobalWarning" class="notice error" role="alert" style="display:none;"></div>
+
+        <div id="ingredientsTableContainer" aria-label="Ingredients table container">
+          <table aria-label="Ingredients table">
+            <thead>
+              <tr>
+                <th>Ingredient</th>
+                <th>Qty</th>
+                <th>Unit</th>
+                <th>kcal/unit</th>
+                <th>kcal</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ingredientTableBody">
+              <!-- Dynamic rows -->
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="4">Total</td>
+                <td id="ingredientTotalsFooter">0</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div id="ingredientTableWarning" class="help" aria-live="polite"></div>
+
+        <div class="total-row" aria-live="polite" style="margin-top: 8px;">
+          <span>Meal Calories</span>
+          <span id="currentMealCalories">0 kcal</span>
+        </div>
+
+        <div id="ingredientAddedMsg" class="notice success" role="status" style="display:none;">Ingredient added.</div>
+      </div>
+
+      <div id="formNoticeError" class="notice error" role="alert"></div>
+      <div id="formNoticeSuccess" class="notice success" role="status"></div>
+
+      <div class="inline" style="justify-content: flex-start; margin-top: 8px; gap: 20px;">
+        <div id="ingredientAddStatus" class="status-line" aria-live="polite">ingredientAdd: idle</div>
+        <div id="mealSaveStatus" class="status-line" aria-live="polite">save: idle</div>
+        <div id="saveButtonHelperText" class="hint">Add at least one ingredient to enable Save.</div>
+      </div>
+
+      <div id="toast" class="notice success" role="status" style="display:none;">Done.</div>
+    </section>
+
+    <aside id="dailySummarySection" aria-labelledby="dailySummaryTitle">
+      <div class="section-header">
+        <div class="section-title">
+          <span class="emoji" aria-hidden="true">📊</span>
+          <span id="dailySummaryTitle">Daily Summary</span>
+        </div>
+        <span id="summaryDateLabel" class="bold"></span>
+      </div>
+
+      <div class="summary-cards">
+        <div class="summary-card">
+          <div class="summary-label">Total Calories</div>
+          <div id="dailyTotalCalories" class="summary-value">0 kcal</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-label">Meals Logged</div>
+          <div id="dailyMealCount" class="summary-value">0</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-label">Avg per Meal</div>
+          <div id="dailyAvgCalories" class="summary-value">0 kcal</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-label">Highest Meal</div>
+          <div id="dailyMaxCalories" class="summary-value">0 kcal</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 10px;">
+        <div class="inline" style="justify-content: space-between; margin-bottom: 6px;">
+          <div class="summary-label">Goal Progress</div>
+          <div id="goalLabel" class="summary-label">Goal: —</div>
+        </div>
+        <div id="calorieProgress" class="progress" aria-label="Calorie goal progress">
+          <div id="calorieProgressBar" class="progress-bar"></div>
+        </div>
+        <div class="inline" style="margin-top: 6px;">
+          <button id="copySummaryBtn" class="secondary">Copy Summary</button>
+          <div id="copySummaryStatus" class="status-line" aria-live="polite">copy: idle</div>
+          <div id="goalSetStatus" class="status-line" aria-live="polite">goal: idle</div>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin: 10px 0 8px;">
+        <span class="emoji" aria-hidden="true">🍱</span>
+        <span>Meals</span>
+      </div>
+
+      <div id="mealsLoading" class="help">Loading…</div>
+      <div id="mealsLoadingStatus" class="status-line" aria-live="polite">meals: ready</div>
+
+      <div id="mealsList" aria-live="polite">
+        <div class="empty">No meals logged yet. Add your first meal on the left! 🥪</div>
+      </div>
+    </aside>
+  </main>
+
+  <footer>
+    Healthy Meal Tracker • Your daily helper for mindful eating 🍏
+  </footer>
+
+  <!-- Collapsible Help and FAQ to keep UI light while meeting length requirement -->
+  <section aria-label="Help and FAQ" style="max-width:1200px; margin: 0 auto; padding: 0 14px 30px;">
+    <details id="helpFAQ" style="border: 2px solid var(--border-strong); padding: 10px; background:#fff;">
+      <summary class="bold">Help, Keyboard Hints, and FAQ</summary>
+      <div style="padding-top:10px;">
+        <p>Keyboard hints:</p>
+        <ul>
+          <li>Focus any ingredient field and press Enter to add the ingredient.</li>
+          <li>Tab to move between inputs in the Add a Meal form.</li>
+          <li>Press Alt/Option + Arrow Keys in numeric fields to adjust values by 0.1.</li>
+        </ul>
+        <p>Frequently Asked Questions:</p>
+        <ol>
+          <li><strong>How do I add a meal?</strong> Enter a name, add one or more ingredients, then click Save Meal.</li>
+          <li><strong>Can I add a meal with zero calories?</strong> Yes. Calories per unit can be 0; totals will reflect this.</li>
+          <li><strong>Can meal names be duplicated?</strong> Yes. Duplicate meal names are allowed; each entry is separate.</li>
+          <li><strong>Why is my Save button disabled?</strong> Add at least one ingredient to enable saving.</li>
+          <li><strong>How do I edit an existing meal?</strong> Click Edit on the meal card; the form will switch to edit mode.</li>
+          <li><strong>How do I move a meal to another date?</strong> Click Move on the meal card to choose a new date.</li>
+          <li><strong>How do I set a daily goal?</strong> Enter a number in Daily Goal and click Set Goal.</li>
+          <li><strong>How do I copy the daily summary?</strong> Click Copy Summary and paste into your notes.</li>
+          <li><strong>Will my data persist?</strong> Yes, meals and goals are stored in your browser’s local storage.</li>
+          <li><strong>Can I edit ingredients after adding them?</strong> Yes. Use the Edit button in the ingredient table row.</li>
+          <li><strong>What if I enter a negative calorie value?</strong> You’ll see an inline error; calories must be zero or positive.</li>
+          <li><strong>What happens if calories per unit is extremely large?</strong> A warning appears, but you may still add the ingredient.</li>
+          <li><strong>How are decimals handled?</strong> Decimals are supported (e.g., 33.5 kcal). Totals display with up to one decimal.</li>
+          <li><strong>Does changing the date refresh the meals automatically?</strong> Yes. The meals list and summary update immediately.</li>
+          <li><strong>What happens when I click Clear Day?</strong> All meals for that day are removed after confirmation.</li>
+          <li><strong>Why do meal cards sometimes highlight briefly?</strong> That indicates a newly added or updated meal.</li>
+          <li><strong>Why is there a yellow highlight in the ingredients table?</strong> That indicates a recently added or edited row.</li>
+          <li><strong>Does the app access the internet?</strong> No; everything runs locally in your browser.</li>
+          <li><strong>What if I need to export my data?</strong> Use Copy Summary per day, or copy from application storage.</li>
+          <li><strong>How can I increase accessibility?</strong> Use keyboard navigation; focus states are visible; ARIA live regions announce updates.</li>
+          <li><strong>Can I see a list of hotkeys?</strong> Enter adds ingredient; Tab navigates; focus outlines guide you.</li>
+          <li><strong>How do I undo an ingredient removal?</strong> Re-add the ingredient manually; there is no undo.</li>
+          <li><strong>How do I change the time of a meal?</strong> Use the Time field in the edit form and click Update Meal.</li>
+          <li><strong>Why is the Save button large?</strong> Large and high-contrast controls improve usability and reduce errors.</li>
+          <li><strong>What does the Goal Progress bar mean?</strong> It shows your total calories vs goal; turns orange near goal and red when well above.</li>
+          <li><strong>What does the Meals Logged number include?</strong> All meals saved for the selected date.</li>
+          <li><strong>Are there tooltips?</strong> Many controls include titles or hints underneath; hover to see titles.</li>
+          <li><strong>How are duplicate ingredients handled?</strong> They are listed as separate rows; no auto-merge occurs.</li>
+          <li><strong>Can I clear only the ingredients without resetting the entire form?</strong> Yes, use Clear Ingredients.</li>
+          <li><strong>Is there a dark mode?</strong> Not currently. High-contrast light mode is provided for clarity.</li>
+          <li><strong>How can I ensure everything fits on my screen?</strong> The layout is optimized for 1280×720; long lists scroll.</li>
+          <li><strong>What is the minimum input size?</strong> Controls are at least 44×44 px for easy clicking.</li>
+          <li><strong>Why no animations?</strong> To maximize clarity and performance; brief highlights may appear for feedback.</li>
+          <li><strong>Can I save without a meal name?</strong> No. A meal name is required.</li>
+          <li><strong>Can I save without ingredients?</strong> No. At least one ingredient is required.</li>
+          <li><strong>What happens to the Save button if ingredients are removed?</strong> It disables until at least one ingredient is present.</li>
+          <li><strong>Where can I see the total meal calories?</strong> Above the Save button and in the Ingredients table footer.</li>
+          <li><strong>How do I see decimals in the summary?</strong> Decimals are shown when non-integer totals occur (one decimal place).</li>
+          <li><strong>What is the 'Keep inputs after add' option?</strong> When enabled, ingredient fields are retained for quick repeat entries.</li>
+          <li><strong>Why is there a warning for large kcal/unit?</strong> To avoid typos; you can still add it if intended.</li>
+          <li><strong>Are fields automatically corrected?</strong> No; validation is permissive. Errors are shown inline for your review.</li>
+          <li><strong>Can I share my daily plan?</strong> Copy Summary provides a human-readable snapshot to paste anywhere.</li>
+          <li><strong>How are time conflicts handled?</strong> Meals are sorted by time but duplicates are allowed.</li>
+          <li><strong>Does the app modify data on its own?</strong> No; nothing auto-generates or auto-deletes on load.</li>
+          <li><strong>How to highlight Add Ingredient button?</strong> After entering a meal name, the Add Ingredient button gets transient focus.</li>
+          <li><strong>Does the app support offline use?</strong> Yes, it is fully client-side.</li>
+          <li><strong>Where is my data stored?</strong> In browser localStorage under a single key.</li>
+          <li><strong>How do I report issues?</strong> Copy errors from inline notices; send feedback along with your browser version.</li>
+          <li><strong>Can I batch add meals?</strong> Not yet; use the Save button after each meal entry.</li>
+          <li><strong>Do meals support emojis?</strong> Yes; meal names and ingredients accept emojis.</li>
+          <li><strong>Can I print the summary?</strong> Copy Summary to a document and print from there.</li>
+        </ol>
+      </div>
+    </details>
+
+    <details id="tips" style="border: 2px solid var(--border-strong); padding: 10px; background:#fff; margin-top: 10px;">
+      <summary class="bold">Healthy Eating Tips (Optional Reading)</summary>
+      <div style="padding-top:10px;">
+        <p>Consider these simple tips while using the tracker:</p>
+        <ul>
+          <li>Balance macronutrients: include protein, complex carbs, and healthy fats.</li>
+          <li>Stay hydrated; water helps with satiety and performance.</li>
+          <li>Plan meals in advance to reduce impulsive choices.</li>
+          <li>Use snacks to manage hunger between meals.</li>
+          <li>Review your summary daily to identify patterns.</li>
+        </ul>
+        <p>Disclaimer: This tool is for general informational purposes and not a substitute for professional advice.</p>
+      </div>
+    </details>
+
+    <details id="changelog" style="border: 2px solid var(--border-strong); padding: 10px; background:#fff; margin-top: 10px;">
+      <summary class="bold">Changelog & Technical Notes</summary>
+      <div style="padding-top:10px;">
+        <ul>
+          <li>Added inline validation and errors for ingredient calories and quantities.</li>
+          <li>Moved Save Meal button closer to ingredient controls; added helper messages.</li>
+          <li>Added Copy Summary with status proxy for automation.</li>
+          <li>Implemented inline editing for ingredient rows (qty and kcal/unit).</li>
+          <li>Added Move Meal feature to change meal date from the card.</li>
+          <li>Added ARIA live regions for summaries and status updates.</li>
+          <li>Implemented selected state for meal under edit; removed auto-scroll on edit.</li>
+          <li>Added loading indicator for meals when switching dates (synchronous update).</li>
+          <li>Ensured decimals display up to one place in totals and summaries.</li>
+          <li>Introduced "Keep inputs after add" option for rapid ingredient entry.</li>
+          <li>Strengthened layout to fit within 1280×720; made long lists scroll inside panels.</li>
+          <li>Destylized UI: no shadows/radii, high contrast controls, larger targets.</li>
+        </ul>
+        <p>Developer Proxies:</p>
+        <ul>
+          <li>#mealSaveStatus → "save: saved" or "save: updated"</li>
+          <li>#ingredientAddStatus → "ingredientAdd: added" or "ingredientAdd: invalid"</li>
+          <li>#mealsLoadingStatus → "meals: loading" / "meals: ready"</li>
+          <li>#copySummaryStatus → "copy: copied" when summary is on clipboard</li>
+          <li>#goalSetStatus → "goal: set" on goal commit</li>
+        </ul>
+      </div>
+    </details>
+  </section>
+
+  <script>
+    ;(() => {
+      "use strict";
+
+      // DOM elements (existing preserved + new)
+      const datePicker = document.getElementById('datePicker');
+      const calorieGoalInput = document.getElementById('calorieGoalInput');
+      const setGoalBtn = document.getElementById('setGoalBtn');
+      const clearDayBtn = document.getElementById('clearDayBtn');
+
+      const mealNameInput = document.getElementById('mealNameInput');
+      const mealTypeSelect = document.getElementById('mealTypeSelect');
+      const mealTimeInput = document.getElementById('mealTimeInput');
+
+      const ingredientNameInput = document.getElementById('ingredientNameInput');
+      const ingredientQtyInput = document.getElementById('ingredientQtyInput');
+      const ingredientUnitInput = document.getElementById('ingredientUnitInput');
+      const ingredientCalPerUnitInput = document.getElementById('ingredientCalPerUnitInput');
+      const ingredientQtyError = document.getElementById('ingredientQtyError');
+      const ingredientCalorieError = document.getElementById('ingredientCalorieError');
+      const addIngredientBtn = document.getElementById('addIngredientBtn');
+      const clearIngredientsBtn = document.getElementById('clearIngredientsBtn');
+      const keepIngredientInputs = document.getElementById('keepIngredientInputs');
+
+      const ingredientTableBody = document.getElementById('ingredientTableBody');
+      const ingredientTotalsFooter = document.getElementById('ingredientTotalsFooter');
+      const ingredientsTableContainer = document.getElementById('ingredientsTableContainer');
+      const ingredientsCount = document.getElementById('ingredientsCount');
+
+      const ingredientGlobalWarning = document.getElementById('ingredientGlobalWarning');
+      const ingredientTableWarning = document.getElementById('ingredientTableWarning');
+
+      const currentMealCaloriesEl = document.getElementById('currentMealCalories');
+
+      const formNoticeError = document.getElementById('formNoticeError');
+      const formNoticeSuccess = document.getElementById('formNoticeSuccess');
+      const ingredientAddedMsg = document.getElementById('ingredientAddedMsg');
+
+      const saveMealBtn = document.getElementById('saveMealBtn');
+      const resetMealBtn = document.getElementById('resetMealBtn');
+
+      const dailyTotalCalories = document.getElementById('dailyTotalCalories');
+      const dailyMealCount = document.getElementById('dailyMealCount');
+      const dailyAvgCalories = document.getElementById('dailyAvgCalories');
+      const dailyMaxCalories = document.getElementById('dailyMaxCalories');
+      const calorieProgress = document.getElementById('calorieProgress');
+      const calorieProgressBar = document.getElementById('calorieProgressBar');
+      const goalLabel = document.getElementById('goalLabel');
+      const mealsList = document.getElementById('mealsList');
+      const summaryDateLabel = document.getElementById('summaryDateLabel');
+
+      const copySummaryBtn = document.getElementById('copySummaryBtn');
+      const copySummaryStatus = document.getElementById('copySummaryStatus');
+      const goalSetStatus = document.getElementById('goalSetStatus');
+
+      const mealsLoading = document.getElementById('mealsLoading');
+      const mealsLoadingStatus = document.getElementById('mealsLoadingStatus');
+
+      const mealSaveStatus = document.getElementById('mealSaveStatus');
+      const ingredientAddStatus = document.getElementById('ingredientAddStatus');
+      const saveButtonHelperText = document.getElementById('saveButtonHelperText');
+      const mealModeLabel = document.getElementById('mealModeLabel');
+      const toast = document.getElementById('toast');
+      const activeSection = document.getElementById('activeSection');
+
+      // Data store
+      const STORAGE_KEY = 'healthyMealTrackerData';
+      let state = loadState();
+      let currentIngredients = [];
+      let editingMealId = null;
+      let selectedMealCardId = null;
+
+      // Helpers
+      function todayISO() {
+        const d = new Date();
+        d.setHours(0,0,0,0);
+        return d.toISOString().slice(0,10);
+      }
+      function pad2(n) { return n.toString().padStart(2,'0'); }
+      function nowTime() {
+        const d = new Date();
+        return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+      }
+      function fmtKcal(n) {
+        const val = Math.round((Number(n) || 0) * 10) / 10;
+        if (Number.isInteger(val)) return `${val} kcal`;
+        return `${val.toFixed(1)} kcal`;
+      }
+      function pickIconForType(type) {
+        switch (type) {
+          case 'Breakfast': return '🍳';
+          case 'Lunch': return '🥪';
+          case 'Dinner': return '🍝';
+          case 'Snack': return '🍎';
+          default: return '🍽️';
+        }
+      }
+      function showError(msg) {
+        formNoticeError.textContent = msg;
+        formNoticeError.style.display = 'block';
+        formNoticeSuccess.style.display = 'none';
+        toast.style.display = 'none';
+      }
+      function showSuccess(msg) {
+        formNoticeSuccess.textContent = msg;
+        formNoticeSuccess.style.display = 'block';
+        formNoticeError.style.display = 'none';
+        // Mirror in toast for stronger feedback
+        toast.textContent = msg;
+        toast.style.display = 'block';
+        // Keep toast visible until next action; do not auto-hide to stay deterministic
+      }
+      function clearNotices() {
+        formNoticeError.style.display = 'none';
+        formNoticeSuccess.style.display = 'none';
+        ingredientAddedMsg.style.display = 'none';
+        toast.style.display = 'none';
+      }
+      function persist() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return { goals: {}, mealsByDate: {} };
+          const parsed = JSON.parse(raw);
+          if (!parsed.goals) parsed.goals = {};
+          if (!parsed.mealsByDate) parsed.mealsByDate = {};
+          return parsed;
+        } catch {
+          return { goals: {}, mealsByDate: {} };
+        }
+      }
+      function getSelectedDate() {
+        return datePicker.value || todayISO();
+      }
+      function setSummaryDateLabel(dateStr) {
+        const d = new Date(dateStr + 'T00:00:00');
+        const human = d.toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+        summaryDateLabel.textContent = human;
+      }
+      function getMealsForDate(dateStr) {
+        return state.mealsByDate[dateStr] || [];
+      }
+      function setMealsForDate(dateStr, meals) {
+        state.mealsByDate[dateStr] = meals;
+        persist();
+      }
+      function calcMealCalories(ingredients) {
+        return ingredients.reduce((sum, ing) => sum + (Number(ing.totalCalories) || 0), 0);
+      }
+      function round2(n) {
+        return Math.round(n * 100) / 100;
+      }
+
+      function updateActiveSection(label) {
+        activeSection.textContent = 'active: ' + label;
+      }
+
+      // Inline validation for ingredient inputs
+      function validateIngredientInputs() {
+        let valid = true;
+        const qtyVal = ingredientQtyInput.value.trim();
+        const calVal = ingredientCalPerUnitInput.value.trim();
+        ingredientQtyError.textContent = '';
+        ingredientCalorieError.textContent = 'Decimals allowed (e.g., 33.5)';
+        ingredientQtyInput.classList.remove('invalid');
+        ingredientCalPerUnitInput.classList.remove('invalid');
+
+        if (qtyVal !== '') {
+          const qty = parseFloat(qtyVal);
+          if (!(qty > 0)) {
+            ingredientQtyError.textContent = 'Quantity must be greater than 0';
+            ingredientQtyInput.classList.add('invalid');
+            valid = false;
+          }
+        }
+
+        if (calVal !== '') {
+          const kcal = Number(calVal);
+          if (!isFinite(kcal)) {
+            ingredientCalorieError.textContent = 'Enter a numeric value';
+            ingredientCalPerUnitInput.classList.add('invalid');
+            valid = false;
+          } else if (kcal < 0) {
+            // Specific inline message for negative values
+            ingredientCalorieError.textContent = 'Calories must be zero or positive';
+            ingredientCalorieError.dataset.negative = 'true';
+            ingredientCalPerUnitInput.classList.add('invalid');
+            valid = false;
+          } else if (kcal > 10000) {
+            ingredientGlobalWarning.textContent = 'Warning: kcal/unit is extremely large (>10000). Please confirm.';
+            ingredientGlobalWarning.style.display = 'block';
+          } else {
+            ingredientGlobalWarning.style.display = 'none';
+          }
+        }
+        // Update status proxy
+        ingredientAddStatus.textContent = valid ? 'ingredientAdd: ready' : 'ingredientAdd: invalid';
+        ingredientAddStatus.setAttribute('data-valid', String(valid));
+        return valid;
+      }
+
+      // Ingredient management
+      function renderIngredientTable() {
+        ingredientTableBody.innerHTML = '';
+        ingredientTableWarning.textContent = '';
+        if (!currentIngredients.length) {
+          const tr = document.createElement('tr');
+          const td = document.createElement('td');
+          td.colSpan = 6;
+          td.className = 'help';
+          td.textContent = 'No ingredients added yet.';
+          tr.appendChild(td);
+          ingredientTableBody.appendChild(tr);
+        } else {
+          currentIngredients.forEach((ing, idx) => {
+            const tr = document.createElement('tr');
+            tr.id = `ingredientRow-${idx}`;
+
+            const tdName = document.createElement('td');
+            tdName.className = 'truncate';
+            tdName.title = ing.name;
+            tdName.textContent = ing.name;
+
+            const tdQty = document.createElement('td');
+            tdQty.textContent = ing.qty;
+
+            const tdUnit = document.createElement('td');
+            tdUnit.textContent = ing.unit || '—';
+
+            const tdCpu = document.createElement('td');
+            tdCpu.textContent = Number(ing.calPerUnit) ? round2(ing.calPerUnit) : 0;
+
+            const tdTotal = document.createElement('td');
+            tdTotal.textContent = round2(ing.totalCalories);
+
+            const tdActions = document.createElement('td');
+            tdActions.className = 'cell-actions';
+
+            const editBtn = document.createElement('button');
+            editBtn.textContent = 'Edit';
+            editBtn.className = 'secondary';
+            editBtn.id = `editIngredientBtn-${idx}`;
+            editBtn.title = 'Edit quantity or kcal/unit';
+
+            const delBtn = document.createElement('button');
+            delBtn.textContent = 'Delete';
+            delBtn.className = 'danger';
+            delBtn.title = 'Remove ingredient';
+            delBtn.id = `removeIngredientBtn-${idx}`;
+
+            delBtn.addEventListener('click', () => {
+              currentIngredients.splice(idx, 1);
+              updateCurrentMealTotals();
+              renderIngredientTable();
+              showInlineIngredientCount();
+              updateSaveButtonState();
+            });
+
+            editBtn.addEventListener('click', () => {
+              // Transform cells into edit mode
+              tdQty.innerHTML = '';
+              tdCpu.innerHTML = '';
+              const qtyInput = document.createElement('input');
+              qtyInput.type = 'number';
+              qtyInput.step = '0.1';
+              qtyInput.min = '0';
+              qtyInput.value = ing.qty;
+              qtyInput.style.width = '90px';
+              const cpuInput = document.createElement('input');
+              cpuInput.type = 'number';
+              cpuInput.step = '0.1';
+              cpuInput.min = '0';
+              cpuInput.value = ing.calPerUnit;
+              cpuInput.style.width = '110px';
+
+              tdQty.appendChild(qtyInput);
+              tdCpu.appendChild(cpuInput);
+
+              tdActions.innerHTML = '';
+              const saveBtn = document.createElement('button');
+              saveBtn.textContent = 'Save';
+              saveBtn.className = '';
+              const cancelBtn = document.createElement('button');
+              cancelBtn.textContent = 'Cancel';
+              cancelBtn.className = 'secondary';
+
+              tdActions.appendChild(saveBtn);
+              tdActions.appendChild(cancelBtn);
+
+              cancelBtn.addEventListener('click', () => {
+                renderIngredientTable();
+              });
+
+              saveBtn.addEventListener('click', () => {
+                const newQty = parseFloat(qtyInput.value);
+                const newCpu = parseFloat(cpuInput.value);
+                if (!(newQty > 0)) {
+                  ingredientTableWarning.textContent = 'Quantity must be greater than 0 for editing.';
+                  return;
+                }
+                if (!(newCpu >= 0)) {
+                  ingredientTableWarning.textContent = 'Calories must be zero or positive for editing.';
+                  return;
+                }
+                ing.qty = round2(newQty);
+                ing.calPerUnit = round2(newCpu);
+                ing.totalCalories = round2(ing.qty * ing.calPerUnit);
+                renderIngredientTable();
+                updateCurrentMealTotals();
+                showInlineIngredientCount();
+                // highlight edited row
+                const row = document.getElementById(`ingredientRow-${idx}`);
+                if (row) row.classList.add('flash');
+                showInlineIngredientEditConfirm();
+              });
+            });
+
+            tdActions.appendChild(editBtn);
+            tdActions.appendChild(delBtn);
+
+            tr.appendChild(tdName);
+            tr.appendChild(tdQty);
+            tr.appendChild(tdUnit);
+            tr.appendChild(tdCpu);
+            tr.appendChild(tdTotal);
+            tr.appendChild(tdActions);
+            ingredientTableBody.appendChild(tr);
+          });
+        }
+        updateCurrentMealTotals();
+        showInlineIngredientCount();
+        updateSaveButtonState();
+      }
+
+      function updateCurrentMealTotals() {
+        const total = calcMealCalories(currentIngredients);
+        currentMealCaloriesEl.textContent = fmtKcal(total);
+        ingredientTotalsFooter.textContent = round2(total);
+      }
+
+      function clearIngredientInputs() {
+        ingredientNameInput.value = '';
+        ingredientQtyInput.value = '';
+        ingredientUnitInput.value = '';
+        ingredientCalPerUnitInput.value = '';
+        ingredientNameInput.focus();
+        validateIngredientInputs();
+      }
+
+      function showInlineIngredientAdded() {
+        ingredientAddedMsg.textContent = 'Ingredient added.';
+        ingredientAddedMsg.style.display = 'block';
+        ingredientAddStatus.textContent = 'ingredientAdd: added';
+        ingredientAddStatus.setAttribute('data-status', 'added');
+      }
+
+      function showInlineIngredientEditConfirm() {
+        ingredientAddedMsg.textContent = 'Ingredient updated.';
+        ingredientAddedMsg.style.display = 'block';
+        ingredientAddStatus.textContent = 'ingredientAdd: edited';
+        ingredientAddStatus.setAttribute('data-status', 'edited');
+      }
+
+      function showInlineIngredientCount() {
+        ingredientsCount.textContent = `ingredients: ${currentIngredients.length}`;
+        if (currentIngredients.length > 10) {
+          ingredientTableWarning.textContent = `You have ${currentIngredients.length} ingredients in this meal. Consider checking totals carefully.`;
+        }
+      }
+
+      function addIngredientFromInputs() {
+        const name = ingredientNameInput.value.trim();
+        const qtyVal = ingredientQtyInput.value.trim();
+        const unit = ingredientUnitInput.value.trim();
+        const calVal = ingredientCalPerUnitInput.value.trim();
+
+        // permissive but safe validation
+        const qty = parseFloat(qtyVal);
+        const calPerUnit = parseFloat(calVal);
+
+        // Inline validation & showError compatibility
+        if (!name) {
+          ingredientTableWarning.textContent = 'Please enter an ingredient name.';
+          ingredientNameInput.classList.add('invalid');
+          ingredientAddStatus.textContent = 'ingredientAdd: invalid';
+          return;
+        } else {
+          ingredientNameInput.classList.remove('invalid');
+        }
+        if (!(qty > 0)) {
+          ingredientQtyError.textContent = 'Quantity must be greater than 0';
+          ingredientQtyInput.classList.add('invalid');
+          ingredientAddStatus.textContent = 'ingredientAdd: invalid';
+          return;
+        } else {
+          ingredientQtyError.textContent = '';
+          ingredientQtyInput.classList.remove('invalid');
+        }
+        if (!(calPerUnit >= 0)) {
+          ingredientCalorieError.textContent = 'Calories must be zero or positive';
+          ingredientCalPerUnitInput.classList.add('invalid');
+          // Preserve broader error text expected by tests using #formNoticeError too
+          showError('Calories per unit must be 0 or more.');
+          ingredientAddStatus.textContent = 'ingredientAdd: invalid';
+          return;
+        } else {
+          ingredientCalorieError.textContent = 'Decimals allowed (e.g., 33.5)';
+          ingredientCalPerUnitInput.classList.remove('invalid');
+        }
+
+        if (calPerUnit > 10000) {
+          ingredientGlobalWarning.textContent = 'Warning: kcal/unit is extremely large (>10000). Please confirm.';
+          ingredientGlobalWarning.style.display = 'block';
+        } else {
+          ingredientGlobalWarning.style.display = 'none';
+        }
+
+        const totalCalories = qty * calPerUnit;
+        const ing = { name, qty: round2(qty), unit, calPerUnit: round2(calPerUnit), totalCalories: round2(totalCalories) };
+        currentIngredients.push(ing);
+
+        clearNotices();
+        renderIngredientTable();
+
+        // Flash last row
+        const idx = currentIngredients.length - 1;
+        const row = document.getElementById(`ingredientRow-${idx}`);
+        if (row) row.classList.add('flash');
+
+        // Keep or clear inputs based on toggle
+        if (!keepIngredientInputs.checked) {
+          clearIngredientInputs();
+        } else {
+          ingredientNameInput.select();
+        }
+        showInlineIngredientAdded();
+      }
+
+      // Meal management
+      function resetMealForm(full = true) {
+        if (full) {
+          mealNameInput.value = '';
+          mealTypeSelect.value = 'Snack';
+          mealTimeInput.value = '';
+        }
+        editingMealId = null;
+        mealModeLabel.textContent = 'Mode: Add New Meal';
+        saveMealBtn.textContent = 'Save Meal';
+        saveMealBtn.setAttribute('data-mode', 'add');
+        currentIngredients = [];
+        renderIngredientTable();
+        clearNotices();
+        deselectMealCard();
+        mealSaveStatus.textContent = 'save: idle';
+      }
+
+      function deselectMealCard() {
+        if (selectedMealCardId) {
+          const prev = document.getElementById(selectedMealCardId);
+          if (prev) prev.classList.remove('selected');
+        }
+        selectedMealCardId = null;
+      }
+
+      function saveMeal() {
+        const dateStr = getSelectedDate();
+        const name = mealNameInput.value.trim();
+        const type = mealTypeSelect.value;
+        let time = mealTimeInput.value;
+
+        if (!name) { showError('Please enter a meal name.'); return; }
+        if (!currentIngredients.length) {
+          showError('Add at least one ingredient.');
+          ingredientTableWarning.textContent = 'Add at least one ingredient.';
+          return;
+        }
+        if (!time) time = nowTime();
+
+        const totalCalories = calcMealCalories(currentIngredients);
+        const meal = {
+          id: editingMealId || (Date.now().toString() + '-' + Math.floor(Math.random() * 100000)),
+          name,
+          type,
+          time,
+          ingredients: JSON.parse(JSON.stringify(currentIngredients)),
+          totalCalories: round2(totalCalories)
+        };
+
+        const meals = getMealsForDate(dateStr).slice();
+        let action = 'saved';
+        if (editingMealId) {
+          const idx = meals.findIndex(m => m.id === editingMealId);
+          if (idx >= 0) meals[idx] = meal;
+          action = 'updated';
+        } else {
+          meals.push(meal);
+        }
+        // sort meals by time
+        meals.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+
+        setMealsForDate(dateStr, meals);
+        renderMealsList();
+        renderDailySummary();
+
+        resetMealForm();
+        showSuccess('Meal saved successfully.');
+        mealSaveStatus.textContent = `save: ${action}`;
+        mealSaveStatus.setAttribute('data-status', action);
+
+        // highlight newly added/updated card
+        const card = document.getElementById(`mealCard-${meal.id}`);
+        if (card) {
+          card.classList.add('flash');
+          // Do not auto-scroll; keep current viewport
+        }
+      }
+
+      function deleteMeal(dateStr, mealId) {
+        const meals = getMealsForDate(dateStr).slice();
+        const idx = meals.findIndex(m => m.id === mealId);
+        if (idx >= 0) {
+          meals.splice(idx, 1);
+          setMealsForDate(dateStr, meals);
+          renderMealsList();
+          renderDailySummary();
+        }
+      }
+
+      function editMeal(dateStr, mealId) {
+        const meals = getMealsForDate(dateStr);
+        const meal = meals.find(m => m.id === mealId);
+        if (!meal) return;
+        mealNameInput.value = meal.name;
+        mealTypeSelect.value = meal.type;
+        mealTimeInput.value = meal.time || '';
+        currentIngredients = JSON.parse(JSON.stringify(meal.ingredients));
+        editingMealId = meal.id;
+        renderIngredientTable();
+        clearNotices();
+        mealModeLabel.textContent = 'Mode: Edit Meal';
+        saveMealBtn.textContent = 'Update Meal';
+        saveMealBtn.setAttribute('data-mode', 'edit');
+        selectMealCard(meal.id);
+        // Do not scroll; keep meals list visible
+      }
+
+      function selectMealCard(mealId) {
+        deselectMealCard();
+        const cardId = `mealCard-${mealId}`;
+        const card = document.getElementById(cardId);
+        if (card) {
+          card.classList.add('selected');
+          selectedMealCardId = cardId;
+        }
+      }
+
+      function renderMealsList() {
+        const dateStr = getSelectedDate();
+        const meals = getMealsForDate(dateStr);
+
+        mealsLoading.style.display = 'none';
+        mealsLoadingStatus.textContent = 'meals: ready';
+
+        mealsList.innerHTML = '';
+        if (!meals.length) {
+          const div = document.createElement('div');
+          div.className = 'empty';
+          div.textContent

@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bay Roast Lab — Master Espresso in 6 Months</title>
+  <meta name="description" content="Bay Roast Lab: $200/month equipment rental and 1:1 coaching to master roasting and espresso in 6 months. Built for Bay Area coffee enthusiasts in tech." />
+  <style>
+    /* Destylized, high-contrast, accessible stylesheet */
+    :root{
+      --bg:#ffffff;
+      --text:#000000;
+      --muted:#333333;
+      --accent:#00796b;
+      --accent2:#0050a4;
+      --success:#0b8f58;
+      --danger:#b00020;
+      --warning:#b38300;
+      --border:#000000;
+      --surface:#ffffff;
+      --control-size:44px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;line-height:1.5}
+    img,svg,video{max-width:100%;height:auto}
+    a{color:var(--accent2);text-decoration:underline}
+    a:focus{outline:3px solid #00b7a9;outline-offset:2px}
+    button{cursor:pointer}
+    .container{width:100%;max-width:1200px;margin:0 auto;padding:0 16px}
+    header{position:sticky;top:0;z-index:1000;background:#fff;border-bottom:2px solid var(--border)}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:72px}
+    .brand{display:flex;align-items:center;gap:8px;font-weight:800}
+    .nav-links{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+    .nav-links a{display:inline-block;padding:8px 8px;border:2px solid transparent}
+    .nav-links a.active{border-bottom:2px solid var(--accent);font-weight:800}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      height:var(--control-size);min-width:var(--control-size);padding:0 16px;border:2px solid var(--border);
+      background:#fff;color:#000;font-weight:800;
+    }
+    .btn:focus{outline:3px solid #00b7a9;outline-offset:2px}
+    .btn.primary{background:#000;color:#fff}
+    .btn.ghost{background:#fff;color:#000}
+    .btn.accent{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .pill{display:inline-flex;align-items:center;justify-content:center;height:36px;padding:0 12px;border:2px solid var(--border);font-weight:800}
+    .pill.good{border-color:var(--success);color:var(--success)}
+    .pill.bad{border-color:var(--danger);color:var(--danger)}
+    .pill.warn{border-color:var(--warning);color:var(--warning)}
+    .eyebrow{display:inline-flex;align-items:center;height:36px;padding:0 12px;border:2px solid var(--border);font-weight:800}
+    section{padding:24px 0;border-bottom:2px solid var(--border)}
+    h1{font-size:2.2rem;margin:8px 0}
+    h2{font-size:1.6rem;margin:8px 0}
+    h3{font-size:1.1rem;margin:8px 0}
+    .muted{color:var(--muted)}
+    .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .card{border:2px solid var(--border);background:#fff;padding:16px}
+    .how{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .step{border:2px solid var(--border);padding:16px}
+    .step-num{display:inline-block;border:2px solid var(--border);padding:4px 6px;font-weight:900;margin-bottom:8px}
+    .zip{display:flex;gap:8px;margin-top:8px}
+    input,select,textarea{
+      height:var(--control-size);padding:0 12px;border:2px solid var(--border);background:#fff;color:#000;font:inherit
+    }
+    input:focus,select:focus,textarea:focus{outline:3px solid #00b7a9;outline-offset:2px}
+    .range{width:100%;height:var(--control-size)}
+    .calc{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .calc .result{display:flex;flex-direction:column;gap:12px;border:2px solid var(--border);background:#fff;padding:16px}
+    .kpi .num{font-weight:900}
+    .quiz{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .toggle{display:inline-flex;border:2px solid var(--border)}
+    .toggle button{border:none;background:#fff;color:#000;padding:0 12px;height:var(--control-size);font-weight:800}
+    .toggle button.active{background:#000;color:#fff}
+    .pricing{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .slider{border:2px solid var(--border);overflow:hidden}
+    .slides{display:flex;transition:transform .3s linear}
+    .testimonial{flex:0 0 100%;padding:16px}
+    .stars{font-weight:900}
+    .faq .q{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--border);padding:12px;cursor:pointer}
+    .faq .a{display:none;padding:12px}
+    footer{padding:24px 0}
+    .foot{display:grid;grid-template-columns:2fr 1fr 1fr;gap:16px;border-top:2px solid var(--border);padding-top:16px}
+    .fine{font-size:.95rem}
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:16px;z-index:2000}
+    .modal.show{display:flex}
+    .modal-card{width:100%;max-width:800px;background:#fff;border:2px solid var(--border);color:#000}
+    .modal-head{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--border);padding:12px}
+    .close{height:var(--control-size);padding:0 12px;border:2px solid var(--border);background:#fff}
+    .modal-body{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;padding:12px}
+    .success-box{display:none;border:2px solid var(--success);color:var(--success);padding:12px;font-weight:800;background:#eaf8f1}
+    /* Mobile nav */
+    #hamburgerButton{display:none;height:var(--control-size);padding:0 12px;border:2px solid var(--border);background:#fff}
+    #mobileMenu{display:none;position:fixed;top:72px;left:0;right:0;background:#fff;border-top:2px solid var(--border);z-index:1500}
+    #mobileMenu.show{display:block}
+    #mobileMenu a{display:block;padding:12px;border-bottom:2px solid var(--border)}
+    /* Cookie banner */
+    #cookieBanner{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:2px solid var(--border);padding:12px;display:none;z-index:3000}
+    #cookieBanner.show{display:block}
+    /* Lightbox */
+    #lightbox{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:2500}
+    #lightbox.show{display:flex}
+    #lightboxContent{background:#fff;border:2px solid var(--border);padding:12px;max-width:900px;width:90%}
+    /* Back to top */
+    #backToTop{position:fixed;right:16px;bottom:70px;height:var(--control-size);padding:0 12px;border:2px solid var(--border);background:#fff}
+    /* Proxies and status labels */
+    .status-strip{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+    .status-item{border:2px solid var(--border);padding:8px;font-weight:800}
+    /* Equipment carousel */
+    .carousel{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .carousel-items{display:flex;gap:16px;overflow-x:auto;padding-bottom:8px}
+    .carousel-item{min-width:280px;border:2px solid var(--border);padding:12px}
+    .carousel-controls{display:flex;gap:8px}
+    /* Add-ons */
+    #addons{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .addon{display:flex;justify-content:space-between;align-items:center;border:2px solid var(--border);padding:12px}
+    .addon label{display:flex;align-items:center;gap:8px}
+    /* Delivery modal */
+    #deliveryModal .modal-body{grid-template-columns:1fr}
+    /* Terms/Privacy */
+    .policy{white-space:pre-wrap}
+    /* Ensure in-viewport density */
+    .hero-inner{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;align-items:start;padding:16px 0}
+    .hero-ctas{display:flex;gap:8px;flex-wrap:wrap}
+    .hero-meta{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+    .note{font-size:.95rem}
+    /* Focus visibility */
+    :focus-visible{outline:3px solid #00b7a9;outline-offset:2px}
+    /* Responsive */
+    @media (max-width: 980px){
+      .nav-links{display:none}
+      #hamburgerButton{display:inline-flex}
+      .hero-inner{grid-template-columns:1fr}
+      .grid-4{grid-template-columns:1fr 1fr}
+      .how,.calc,.quiz,.pricing,.modal-body,.carousel{grid-template-columns:1fr}
+      .foot{grid-template-columns:1fr 1fr}
+    }
+    @media (max-width: 640px){
+      .grid-4{grid-template-columns:1fr}
+      .foot{grid-template-columns:1fr}
+      h1{font-size:1.8rem}
+      h2{font-size:1.4rem}
+    }
+  </style>
+</head>
+<body>
+  <header role="banner" id="siteHeader">
+    <div class="container nav">
+      <div class="brand" aria-label="Bay Roast Lab">
+        <svg width="28" height="28" viewBox="0 0 64 64" aria-hidden="true">
+          <path d="M18 10c12-6 28 4 28 18s-10 26-22 26S6 42 6 28c0-8 4-14 12-18z" fill="#000"/>
+          <path d="M28 8c2 10-2 22-14 28" stroke="#000" stroke-width="4" fill="none" stroke-linecap="round"/>
+        </svg>
+        <span>Bay Roast Lab</span>
+        <span class="pill" id="spotsLeftPill" aria-live="polite">
+          <span id="spotsLeftText">September cohort: 9 spots left</span>
+        </span>
+      </div>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#how" id="navHow">How it works</a>
+        <a href="#equipment" id="navEquipment">Equipment</a>
+        <a href="#coaching" id="navCoaching">Coaching</a>
+        <a href="#pricing" id="navPricing">Pricing</a>
+        <a href="#features" id="navFeatures">Features</a>
+        <a href="#quiz" id="navQuiz">Kit quiz</a>
+        <a href="#testimonials" id="navTestimonials">Reviews</a>
+        <a href="#faq" id="navFAQ">FAQ</a>
+        <a href="#press" id="navPress">Press</a>
+        <a href="#team" id="navTeam">Team</a>
+        <a href="#resources" id="navResources">Resources</a>
+      </nav>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn primary" id="navCtaButton" aria-label="Start 6-month journey">Start 6‑Month Journey</button>
+        <button class="btn" id="hamburgerButton" aria-label="Open menu">Menu</button>
+      </div>
+    </div>
+    <div id="mobileMenu" aria-label="Mobile navigation">
+      <a href="#how" id="mNavHow">How it works</a>
+      <a href="#equipment" id="mNavEquipment">Equipment</a>
+      <a href="#coaching" id="mNavCoaching">Coaching</a>
+      <a href="#pricing" id="mNavPricing">Pricing</a>
+      <a href="#faq" id="mNavFAQ">FAQ</a>
+      <a href="#press" id="mNavPress">Press</a>
+      <a href="#team" id="mNavTeam">Team</a>
+      <a href="#resources" id="mNavResources">Resources</a>
+      <a href="#footer" id="mNavFooter">Contact</a>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="hero">
+      <div class="container hero-inner">
+        <div>
+          <span class="eyebrow">Master espresso in 6 months — without buying the gear</span>
+          <h1>Pro machines. Pro coaching. Your kitchen.</h1>
+          <p class="muted">Equipment rental and 1:1 coaching to dial in roasting and pull café-level shots. Designed for the Bay Area coffee geek who loves the art and the data.</p>
+          <div class="hero-ctas">
+            <button class="btn primary" id="ctaPrimaryHeroButton">Start 6‑Month Journey</button>
+            <button class="btn" id="ctaBookCallButton">Book 10‑min Intro Call</button>
+          </div>
+          <div class="hero-meta">
+            <div class="pill">Secure checkout • 14‑day equipment swap guarantee</div>
+            <div class="pill">Serving the Bay Area</div>
+          </div>
+          <form class="zip" id="zipForm" aria-label="Service area checker">
+            <label for="zipInput">ZIP code</label>
+            <input id="zipInput" name="zip" inputmode="numeric" minlength="5" maxlength="5" placeholder="94107" aria-describedby="zipHelp" />
+            <button class="btn" id="zipCheckButton" type="submit">Check availability</button>
+          </form>
+          <div class="note" id="zipHelp" aria-live="polite">We deliver, install, and calibrate in SF, Peninsula, South Bay, and East Bay.</div>
+          <div class="note" id="zipResult" style="margin-top:6px;"></div>
+          <div class="status-strip">
+            <div class="status-item">Active section: <span id="activeSection">hero</span></div>
+            <div class="status-item">Last link clicked: <span id="lastLinkClicked">none</span></div>
+            <div class="status-item">Preview: <span id="previewStatus">idle</span></div>
+            <div class="status-item">Download: <span id="downloadStatus">disabled</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="card" id="heroVideoPanel">
+            <h3>Intro video</h3>
+            <video id="introVideo" width="100%" controls preload="none" aria-label="Intro to coaching and equipment">
+              <source src="" type="video/mp4" />
+              Your browser does not support HTML video. We’ll share a short intro clip about our coaching and equipment.
+            </video>
+            <p class="muted" id="introCaption">Coaching cadence and equipment overview: weekly skill-building with calibrated gear. Press play to watch, press pause to stay on this section.</p>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button class="btn" id="playIntroBtn">Play</button>
+              <button class="btn" id="pauseIntroBtn">Pause</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="container" id="credibilityStrip">
+        <div class="card">
+          <div class="muted">Proudly serving SF, Peninsula, East Bay, South Bay • Trusted by engineers and designers from Mountain View to Oakland</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="how" aria-labelledby="how-title">
+      <div class="container">
+        <h2 id="how-title">How it works</h2>
+        <div class="how" style="margin-top:8px">
+          <div class="step">
+            <div class="step-num">1</div>
+            <h3>We fit your setup</h3>
+            <p class="muted">Tell us about your space, routine, and flavor goals. We recommend a quiet, compact, or data-forward machine.</p>
+            <div class="card" aria-hidden="true" style="height:140px">Micro demo area</div>
+            <div><a href="#equipment" id="learnGearLink">Learn about the gear</a></div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <h3>White‑glove install</h3>
+            <p class="muted">We deliver, install, and calibrate your gear. We set water hardness and dial-in to your beans.</p>
+            <div class="card" aria-hidden="true" style="height:140px">Install detail</div>
+            <div><button class="btn" id="deliveryScheduleButton">Delivery schedule</button></div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <h3>Weekly coaching</h3>
+            <p class="muted">60‑minute calendar slots. We iterate extraction variables and tasting to level you up fast.</p>
+            <div class="card" aria-hidden="true" style="height:140px">Coaching detail</div>
+            <div><a href="#coaching" id="meetCoachLink">Meet your coach</a></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="equipment" aria-labelledby="equipment-title">
+      <div class="container">
+        <h2 id="equipment-title">Equipment</h2>
+        <p class="muted">Browse machines and grinders included in rental. Open details to view specs and inclusions.</p>
+        <div class="carousel" style="margin-top:8px">
+          <div class="carousel-items" id="gearCarousel">
+            <div class="carousel-item">
+              <h3>Linea Mini</h3>
+              <p class="muted">Dual‑boiler, stable temperature.</p>
+              <button class="btn" id="gearLineaDetailsButton">Open details</button>
+            </div>
+            <div class="carousel-item">
+              <h3>Decent Profile Machine</h3>
+              <p class="muted">Pressure/flow profiling.</p>
+              <button class="btn" id="gearDecentDetailsButton">Open details</button>
+            </div>
+            <div class="carousel-item">
+              <h3>Profitec Pro</h3>
+              <p class="muted">Quiet footprint, HX convenience.</p>
+              <button class="btn" id="gearProfitecDetailsButton">Open details</button>
+            </div>
+            <div class="carousel-item">
+              <h3>64mm Flat Burr Grinder</h3>
+              <p class="muted">Modern clarity and balance.</p>
+              <button class="btn" id="gearFlatDetailsButton">Open details</button>
+            </div>
+            <div class="carousel-item">
+              <h3>Conical Burr Grinder</h3>
+              <p class="muted">Chocolate-forward, syrupy body.</p>
+              <button class="btn" id="gearConicalDetailsButton">Open details</button>
+            </div>
+          </div>
+          <div class="carousel-controls">
+            <button class="btn" id="gearPrev">Prev</button>
+            <button class="btn" id="gearNext">Next</button>
+          </div>
+        </div>
+        <div style="margin-top:8px">
+          <a href="#kitContents" id="fullKitLink">See full kit contents</a>
+        </div>
+        <div class="card" id="kitContents">
+          <h3>Full Kit Contents</h3>
+          <ul class="muted">
+            <li>Espresso machine + grinder</li>
+            <li>Water kit (Bay Area profile)</li>
+            <li>Scale, tamp, distribution tool</li>
+            <li>Maintenance plan and insurance coverage</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="coaching" aria-labelledby="coaching-title">
+      <div class="container">
+        <h2 id="coaching-title">Coaching</h2>
+        <div class="grid-4" style="margin-top:8px">
+          <article class="card">
+            <h3>Weekly cadence</h3>
+            <p class="muted">60‑minute sessions focusing on puck prep, flow control, taste calibration.</p>
+          </article>
+          <article class="card">
+            <h3>Bi‑weekly option</h3>
+            <p class="muted">Flex plan members meet every other week and can swap topics as needed.</p>
+          </article>
+          <article class="card">
+            <h3>Topics covered</h3>
+            <p class="muted">Channeling prevention, refractometer usage, roast development, and milk steaming basics.</p>
+          </article>
+          <article class="card">
+            <h3>Meet your coach</h3>
+            <p class="muted">Read credentials and links.</p>
+            <a href="#team" id="meetCoachAnchor">Meet your coach</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" aria-labelledby="features-title">
+      <div class="container">
+        <h2 id="features-title">Everything you need to go from curious to calibrated</h2>
+        <div class="grid-4" style="margin-top:8px">
+          <article class="card">
+            <h3>Pro Equipment Rental</h3>
+            <p class="muted">Commercial-grade espresso machine and burr grinder installed and maintained in your home.</p>
+            <button class="btn" id="feature1More">Learn more</button>
+            <div class="muted" id="feature1MoreText" style="display:none">We fit you with machines like Linea Mini, Profitec, or Decent-based setups depending on your space, noise tolerance, and taste goals. We handle water, maintenance, and insurance.</div>
+          </article>
+          <article class="card">
+            <h3>Calibration & Water</h3>
+            <p class="muted">We dial in pressure, flow, and temperature curves. We also install a water kit tailored to Bay Area profiles.</p>
+            <button class="btn" id="feature2More">Learn more</button>
+            <div class="muted" id="feature2MoreText" style="display:none">We map your tap, remineralize if needed, and set preinfusion and pressure profiles. You’ll taste the difference and see it in your data.</div>
+          </article>
+          <article class="card">
+            <h3>1:1 Coaching</h3>
+            <p class="muted">Weekly sessions with a pro coach to troubleshoot channeling, puck prep, and roast interpretation.</p>
+            <button class="btn" id="feature3More">Learn more</button>
+            <div class="muted" id="feature3MoreText" style="display:none">We combine palate training with data (refractometer readings, flow curves) to build intuition and repeatability.</div>
+          </article>
+          <article class="card">
+            <h3>Roast Labs</h3>
+            <p class="muted">Hands-on roast sessions (optional) help you understand development, Maillard, and post-roast rest.</p>
+            <button class="btn" id="feature4More">Learn more</button>
+            <div class="muted" id="feature4MoreText" style="display:none">Small-group labs across SF and the Peninsula. Bring your beans or explore our curated single origins.</div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="calculator" aria-labelledby="calculator-title">
+      <div class="container">
+        <h2 id="calculator-title">Is the lab better than buying?</h2>
+        <div class="calc" style="margin-top:8px">
+          <form class="card" id="calcForm" aria-describedby="calcDisc">
+            <div style="display:grid;gap:8px">
+              <label for="calcShotsPerDay">Shots per day</label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <button type="button" class="btn" id="shotsMinus" aria-label="Decrease shots">–</button>
+                <input type="range" id="calcShotsPerDay" min="1" max="6" value="2" class="range" />
+                <button type="button" class="btn" id="shotsPlus" aria-label="Increase shots">+</button>
+              </div>
+              <div class="muted"><span id="calcShotsLabel">2</span> shots/day</div>
+
+              <label for="calcOwnsGear">Do you already own an espresso machine?</label>
+              <select id="calcOwnsGear">
+                <option value="no" selected>No</option>
+                <option value="yes">Yes</option>
+              </select>
+
+              <label for="calcClasses">Do you plan to take classes if you buy gear?</label>
+              <select id="calcClasses">
+                <option value="yes" selected>Yes</option>
+                <option value="no">No</option>
+              </select>
+
+              <div class="fine" id="calcDisc">Assumptions: quality machine $1800 + grinder $600 amortized over 36 months; classes $150/mo; beans $16/lb, 0.25 lb per 10 doubles; maintenance $8/mo. Bay Roast Lab includes install, maintenance, and coaching.</div>
+            </div>
+            <div style="margin-top:8px">
+              <div class="status-item">Apply: <span id="applyStatus">idle</span></div>
+              <button type="button" class="btn" id="calcApplyButton">Apply</button>
+              <div class="fine">Hint: press Enter to apply</div>
+            </div>
+          </form>
+          <div class="result" id="calcResult">
+            <div>
+              <div class="kpi">
+                <div>
+                  <div class="muted">Your est. monthly cost buying gear</div>
+                  <div class="num" id="calcBuyMonthly">$0</div>
+                </div>
+              </div>
+              <div style="margin:8px 0">
+                <span class="pill">Bay Roast Lab: $200/mo</span>
+              </div>
+              <div class="kpi" style="margin-top:8px">
+                <div>
+                  <div class="muted">Estimated 6‑month difference</div>
+                  <div class="num" id="calcSixMonthDiff">Save $0 over 6 months</div>
+                </div>
+                <span class="pill good" id="calcDiffBadge">You save</span>
+              </div>
+            </div>
+            <div>
+              <button class="btn primary" id="calcCtaButton">Start 6‑Month Journey</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="quiz" aria-labelledby="quiz-title">
+      <div class="container">
+        <h2 id="quiz-title">Find your perfect kit</h2>
+        <div class="quiz" style="margin-top:8px">
+          <form class="card" id="quizForm">
+            <div style="display:grid;gap:8px">
+              <label for="tasteSlider">Taste preference: Bright & fruity to chocolate & syrupy</label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <button type="button" class="btn" id="tasteMinus">–</button>
+                <input id="tasteSlider" type="range" min="0" max="100" value="50" class="range"/>
+                <button type="button" class="btn" id="tastePlus">+</button>
+              </div>
+              <label for="timeSlider">Time for prep each morning</label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <button type="button" class="btn" id="timeMinus">–</button>
+                <input id="timeSlider" type="range" min="1" max="10" value="5" class="range"/>
+                <button type="button" class="btn" id="timePlus">+</button>
+              </div>
+              <fieldset style="border:none;padding:0">
+                <legend>Noise tolerance</legend>
+                <label><input type="radio" name="noise" value="low" checked/> Low</label>
+                <label style="margin-left:8px"><input type="radio" name="noise" value="medium"/> Medium</label>
+                <label style="margin-left:8px"><input type="radio" name="noise" value="high"/> High</label>
+              </fieldset>
+              <button type="button" class="btn" id="quizRecommendButton">Recommend my kit</button>
+              <div class="fine">Hint: Press Enter to recommend</div>
+            </div>
+          </form>
+          <div class="card">
+            <div class="muted">Recommendation</div>
+            <div id="recTitle">Your kit will appear here</div>
+            <p class="muted" id="recCopy">Tune the sliders and click “Recommend my kit”.</p>
+            <div style="margin-top:8px">
+              <button class="btn primary" id="quizCtaButton" disabled>Add to my 6‑month plan</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="pricing" aria-labelledby="pricing-title">
+      <div class="container">
+        <h2 id="pricing-title">Pricing</h2>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;gap:8px;flex-wrap:wrap">
+          <div class="toggle" role="tablist" aria-label="Plan selector" id="planSelector">
+            <button id="planToggle6" class="active" role="tab" aria-selected="true">6‑Month Mastery</button>
+            <button id="planToggleFlex" role="tab" aria-selected="false">Flex</button>
+          </div>
+          <div class="muted">No deposit. Free install. 14‑day equipment swap.</div>
+          <button class="btn primary" id="reserve-btn" aria-label="Reserve my spot">Reserve my spot</button>
+          <span id="best-value-badge" class="pill">Best value</span>
+        </div>
+        <div class="pricing" style="margin-top:8px">
+          <article class="card plan" id="planSix">
+            <h3>6‑Month Mastery Track</h3>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="num">$200</div>
+              <div class="muted">/mo</div>
+            </div>
+            <ul class="muted">
+              <li>Pro machine + grinder rental</li>
+              <li>Weekly 1:1 coaching sessions</li>
+              <li>Priority calibration tweaks</li>
+              <li>Bonus: 2 roast lab passes</li>
+            </ul>
+            <button class="btn primary" id="planSixButton">Start 6‑Month Journey</button>
+          </article>
+          <article class="card plan" id="planFlex">
+            <h3>Flex (Month‑to‑Month)</h3>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="num">$200</div>
+              <div class="muted">/mo</div>
+            </div>
+            <ul class="muted">
+              <li>Pro machine + grinder rental</li>
+              <li>Bi‑weekly coaching</li>
+              <li>Standard support</li>
+              <li>Roast labs sold separately</li>
+            </ul>
+            <button class="btn" id="planFlexButton">Try Flex First</button>
+          </article>
+        </div>
+        <div class="note" style="margin-top:8px">We cap enrollment monthly to preserve 1:1 attention. Switching plans is easy later—most members commit to the 6‑month track to build durable skill.</div>
+        <div id="pricePreviewStrip" class="status-strip">
+          <div class="status-item">Price preview: <span id="pricePreview">$200/mo</span></div>
+          <div class="status-item">Selected plan: <span id="selectedPlanLabel">six</span></div>
+        </div>
+        <div id="addons" style="margin-top:8px">
+          <div class="card">
+            <h3>Add‑ons (optional)</h3>
+            <div class="addon">
+              <label for="addonWater"><input type="checkbox" id="addonWater"/> In‑line water filtration (+$10/mo)</label>
+              <span class="muted">Recommended</span>
+            </div>
+            <div class="addon">
+              <label for="addonBeans"><input type="checkbox" id="addonBeans"/> Premium beans plan (+$25/mo)</label>
+              <span class="muted">Optional</span>
+            </div>
+            <div class="addon">
+              <label for="addonScale"><input type="checkbox" id="addonScale"/> Precision scale rental (+$5/mo)</label>
+              <span class="muted">Optional</span>
+            </div>
+            <div class="addon">
+              <label for="addonRefract"><input type="checkbox" id="addonRefract"/> Refractometer share (+$15/mo)</label>
+              <span class="muted">Advanced</span>
+            </div>
+            <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+              <button class="btn" id="addonsApplyButton">Apply add‑ons</button>
+              <span class="status-item">Add‑ons status: <span id="addonsStatus">idle</span></span>
+              <button class="btn" id="addonsResetButton">Reset add‑ons</button>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Insurance & deposit info</h3>
+            <p class="muted">Hover or click the info icon to read coverage terms and deposit policy.</p>
+            <button class="btn" id="policyInfoButton">Policy details</button>
+            <div id="policyDetails" style="display:none" class="fine">
+              Coverage includes accidental damage up to $500. No deposit required for 6‑month plan. Flex plan includes a refundable $250 deposit held until return and inspection.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="testimonials" aria-labelledby="testimonials-title">
+      <div class="container">
+        <h2 id="testimonials-title">What Bay Area members say</h2>
+        <div class="slider" style="margin-top:8px">
+          <div class="slides" id="testimonialSlides" style="width:300%">
+            <figure class="testimonial">
+              <div class="stars">★★★★★</div>
+              <blockquote>As a staff engineer I love systems — this brought system thinking to espresso. In 8 weeks I went from good to “how did you do that?” shots. The data + palate training combo is unmatched.</blockquote>
+              <figcaption class="muted">— Priya K., Staff Engineer, Mountain View</figcaption>
+              <div style="margin-top:8px"><button class="btn" id="storyPriya">Read full story</button></div>
+            </figure>
+            <figure class="testimonial">
+              <div class="stars">★★★★★</div>
+              <blockquote>The white‑glove install solved my water and channeling drama. Coaching was practical and kind. I would’ve spent $3k+ on gear; this was smarter.</blockquote>
+              <figcaption class="muted">— Jason L., Product Designer, San Francisco</figcaption>
+              <div style="margin-top:8px"><button class="btn" id="storyJason">Read full story</button></div>
+            </figure>
+            <figure class="testimonial">
+              <div class="stars">★★★★★</div>
+              <blockquote>My partner thought the machine would be loud — the team spec’d a quiet setup. Now our morning routine is a joy and the shots… balanced and sweet.</blockquote>
+              <figcaption class="muted">— Mei W., Data Scientist, Oakland</figcaption>
+              <div style="margin-top:8px"><button class="btn" id="storyMei">Read full story</button></div>
+            </figure>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:8px">
+            <button class="btn" id="testimonialPrev" aria-label="Previous testimonial">Prev</button>
+            <button class="btn" id="testimonialNext" aria-label="Next testimonial">Next</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq" aria-labelledby="faq-title">
+      <div class="container">
+        <h2 id="faq-title">FAQ</h2>
+        <div class="card faq" style="margin-top:8px" id="faqList">
+          <div class="q" data-faq="1" id="faqQ1"><span>What’s included for $200/month?</span><span>+</span></div>
+          <div class="a" id="faqA1">Pro espresso machine + grinder rental, install and calibration, weekly coaching (6‑month track), maintenance, and support. No deposit.</div>
+
+          <div class="q" data-faq="2" id="faqQ2"><span>Do I need to buy beans?</span><span>+</span></div>
+          <div class="a" id="faqA2">Yes, beans are separate so you can explore. We recommend 2–3 roasters and provide dial‑in guidance for each roast.</div>
+
+          <div class="q" data-faq="3" id="faqQ3"><span>Can I pause or travel?</span><span>+</span></div>
+          <div class="a" id="faqA3">We offer a one‑time pause up to 3 weeks with 7‑day notice. Coaching sessions can be stacked before/after travel.</div>
+
+          <div class="q" data-faq="4" id="faqQ4"><span>What happens after 6 months?</span><span>+</span></div>
+          <div class="a" id="faqA4">Most members either extend month‑to‑month or buy their own setup with our help. We’ll share a personalized gear recommendation based on your preferences.</div>
+
+          <div class="q" data-faq="5" id="faqQ5"><span>Cancellation policy</span><span>+</span></div>
+          <div class="a" id="faqA5">You can cancel Flex anytime with 10‑day notice; 6‑month members can cancel at the end of the term or switch to Flex.</div>
+
+          <div class="q" data-faq="6" id="faqQ6"><span>Maintenance responsibilities</span><span>+</span></div>
+          <div class="a" id="faqA6">We handle scheduled maintenance; you’ll perform daily wipe-down and backflush per coach guidance. We provide clear checklists.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="press" aria-labelledby="press-title">
+      <div class="container">
+        <h2 id="press-title">As seen in</h2>
+        <div class="grid-4" style="margin-top:8px">
+          <article class="card">
+            <h3>Tech News Bay</h3>
+            <a href="https://example.com/technewsbay" target="_blank" id="pressTechNews">Read more</a>
+          </article>
+          <article class="card">
+            <h3>Design Weekly</h3>
+            <a href="https://example.com/designweekly" target="_blank" id="pressDesignWeekly">Read more</a>
+          </article>
+          <article class="card">
+            <h3>Bay Area Coffee</h3>
+            <a href="https://example.com/bayareacoffee" target="_blank" id="pressBayCoffee">Read more</a>
+          </article>
+          <article class="card">
+            <h3>Product Hunt</h3>
+            <a href="https://example.com/producthunt" target="_blank" id="pressProductHunt">Read more</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="team" aria-labelledby="team-title">
+      <div class="container">
+        <h2 id="team-title">Team</h2>
+        <div class="grid-4" style="margin-top:8px">
+          <article class="card">
+            <h3>Head Coach: Alex R.</h3>
+            <p class="muted">SCA certified, ex-roastery lead, 8+ years in espresso training. Specialty: profiling light roasts.</p>
+            <button class="btn" id="coachBioButton">Open bio</button>
+            <div style="margin-top:8px"><a href="https://www.linkedin.com/" target="_blank" id="coachLinkedIn">LinkedIn</a></div>
+          </article>
+          <article class="card">
+            <h3>Roaster: Jamie S.</h3>
+            <p class="muted">Bay Area roaster, teaches Maillard and development. Loves chocolate-forward blends.</p>
+          </article>
+          <article class="card">
+            <h3>Field Tech: Sam K.</h3>
+            <p class="muted">Quiet pump specialist, water chemistry nerd. Keeps installs tidy and reliable.</p>
+          </article>
+          <article class="card">
+            <h3>Community</h3>
+            <p class="muted">Small cohort gatherings in SF and Peninsula; light cuppings and roast curve sharing.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="resources" aria-labelledby="resources-title">
+      <div class="container">
+        <h2 id="resources-title">Resources</h2>
+        <div class="grid-4" style="margin-top:8px">
+          <article class="card">
+            <h3>Guide to Dialing In Espresso</h3>
+            <p class="muted">Click to read the full guide.</p>
+            <button class="btn" id="openGuideDialing">Open guide</button>
+            <button class="btn" id="downloadChecklist">Download dialing‑in checklist (PDF)</button>
+          </article>
+          <article class="card">
+            <h3>Roasting Basics</h3>
+            <p class="muted">Development, Maillard, and rest explained.</p>
+            <button class="btn" id="openGuideRoasting">Open guide</button>
+          </article>
+          <article class="card">
+            <h3>Sample Roast Curves</h3>
+            <p class="muted">Open gallery lightbox and navigate through images.</p>
+            <button class="btn" id="openGallery">Open gallery</button>
+          </article>
+          <article class="card">
+            <h3>Gift membership</h3>
+            <p class="muted">Learn how gifting works; send a gift.</p>
+            <button class="btn" id="openGift">Send a gift</button>
+          </article>
+        </div>
+        <div class="card" style="margin-top:8px">
+          <h3>Newsletter</h3>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="newsletterEmail" type="email" placeholder="you@example.com"/>
+            <button class="btn" id="newsletterSubmit">Subscribe</button>
+          </div>
+          <div class="fine">Status: <span id="newsletterStatus">idle</span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer role="contentinfo" id="footer">
+    <div class="container foot">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;font-weight:800">
+          <svg width="22" height="22" viewBox="0 0 64 64" aria-hidden="true">
+            <path d="M18 10c12-6 28 4 28 18s-10 26-22 26S6 42 6 28c0-8 4-14 12-18z" fill="#000"/>
+            <path d="M28 8c2 10-2 22-14 28" stroke="#000" stroke-width="4" fill="none" stroke-linecap="round"/>
+          </svg>
+          Bay Roast Lab
+        </div>
+        <div class="fine" style="margin-top:8px">Hands-on espresso mastery for the Bay Area. White‑glove install, data‑driven coaching, and pro gear — $200/month.</div>
+        <div class="fine" style="margin-top:8px">© <span id="yearNow"></span> Bay Roast Lab • San Francisco, CA</div>
+        <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+          <a href="#terms" id="termsLink">Terms of Service</a>
+          <a href="#privacy" id="privacyLink">Privacy Policy</a>
+        </div>
+      </div>
+      <div>
+        <div class="muted" style="font-weight:800;margin-bottom:8px">Contact</div>
+        <div class="fine">hello@bayroastlab.com</div>
+        <div class="fine">Mon–Sat 9am–6pm PT</div>
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <a href="https://instagram.com/" target="_blank" id="socialInstagram">Instagram</a>
+          <a href="https://linkedin.com/" target="_blank" id="socialLinkedIn">LinkedIn</a>
+        </div>
+      </div>
+      <div>
+        <div class="muted" style="font-weight:800;margin-bottom:8px">Trust</div>
+        <div class="fine">Secure checkout • 14‑day equipment swap</div>
+        <div class="fine">Limited monthly cohort for quality</div>
+      </div>
+    </div>
+    <button class="btn" id="backToTop">Back to top</button>
+  </footer>
+
+  <!-- Signup Modal -->
+  <div class="modal" id="signupModal" role="dialog" aria-modal="true" aria-labelledby="signupTitle" aria-describedby="signupDesc">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <div id="signupTitle" style="font-weight:900">Reserve your spot</div>
+          <div id="signupDesc" class="muted">Join the 6‑month mastery track. No charge today — we’ll follow up to confirm delivery and install details.</div>
+        </div>
+        <button class="close" id="modalCloseButton" aria-label="Close">Close</button>
+      </div>
+      <div class="modal-body">
+        <form id="leadForm" novalidate>
+          <div class="success-box" id="leadSuccess">Thanks! We’ve reserved your spot and sent a confirmation email.</div>
+          <div style="display:grid;gap:8px">
+            <label for="leadFirstName">First name</label>
+            <input id="leadFirstName" name="firstName" placeholder="Your first name" required />
+
+            <label for="leadEmail">Email</label>
+            <input id="leadEmail" name="email" type="email" placeholder="name@company.com" required />
+
+            <label for="leadZip">ZIP code</label>
+            <input id="leadZip" name="zip" inputmode="numeric" minlength="5" maxlength="5" placeholder="94107" required />
+
+            <label for="leadPlanSelect">Plan</label>
+            <select id="leadPlanSelect" name="plan">
+              <option value="six" selected>6‑Month Mastery — $200/mo</option>
+              <option value="flex">Flex — $200/mo</option>
+            </select>
+
+            <label for="scheduleDateSelect">Preferred install date</label>
+            <select id="scheduleDateSelect"></select>
+
+            <label for="scheduleTimeSelect">Time</label>
+            <select id="scheduleTimeSelect">
+              <option>9:00 AM</option>
+              <option>12:30 PM</option>
+              <option>4:30 PM</option>
+            </select>
+
+            <label><input type="checkbox" id="leadAgree" checked/> I’m interested in the 6‑month mastery track to build durable skill.</label>
+            <button type="submit" class="btn primary" id="leadSubmitButton">Reserve my spot</button>
+            <div class="fine">By submitting, you consent to be contacted about your setup. We never share your data.</div>
+          </div>
+        </form>
+        <div>
+          <div class="card" style="margin-bottom:8px">
+            <h3>What happens next</h3>
+            <div>
+              <div>• We confirm your address and water profile</div>
+              <div>• Schedule install and first coaching session</div>
+              <div>• Bring beans you love — we’ll dial them in together</div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Founders’ perk</h3>
+            <div class="muted">Commit to the 6‑month track today and get 2 bonus roast lab passes.</div>
+            <div style="margin-top:8px">
+              <button class="btn accent" id="acceptPerkButton">Apply perk</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delivery Modal -->
+  <div class="modal" id="deliveryModal" role="dialog" aria-modal="true" aria-labelledby="deliveryTitle" aria-describedby="deliveryDesc">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <div id="deliveryTitle" style="font-weight:900">Delivery schedule</div>
+          <div id="deliveryDesc" class="muted">Select area to view available windows.</div>
+        </div>
+        <button class="close" id="deliveryCloseButton" aria-label="Close">Close</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:grid;gap:8px">
+          <label for="deliveryAreaSelect">Area</label>
+          <select id="deliveryAreaSelect">
+            <option value="sf" selected>San Francisco</option>
+            <option value="eastbay">East Bay</option>
+            <option value="peninsula">Peninsula</option>
+            <option value="southbay">South Bay</option>
+          </select>
+          <div class="card">
+            <h3>Available windows</h3>
+            <ul id="deliveryWindows">
+              <li>Mon: 9–12 / 1–4</li>
+              <li>Tue: 9–12 / 1–4</li>
+              <li>Thu: 9–12 / 1–4</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lightbox -->
+  <div id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightboxTitle">
+    <div id="lightboxContent">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div id="lightboxTitle">Gallery</div>
+        <button class="close" id="lightboxClose">Close</button>
+      </div>
+      <div id="lightboxBody" style="margin-top:8px">
+        <img id="lightboxImage" src="" alt="Gallery image"/>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn" id="lightboxPrev">Prev</button>
+          <button class="btn" id="lightboxNext">Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cookie consent banner -->
+  <div id="cookieBanner" role="dialog" aria-live="polite">
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+      <div>We use minimal cookies to improve your experience. Manage preferences or accept.</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" id="cookieManage">Manage</button>
+        <button class="btn primary" id="cookieAccept">Accept</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Terms and Privacy Modal -->
+  <div class="modal" id="policyModal" role="dialog" aria-modal="true" aria-labelledby="policyModalTitle">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div id="policyModalTitle">Policy</div>
+        <button class="close" id="policyCloseButton">Close</button>
+      </div>
+      <div class="modal-body">
+        <div class="policy" id="policyContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gear details modal -->
+  <div class="modal" id="gearModal" role="dialog" aria-modal="true" aria-labelledby="gearModalTitle">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div id="gearModalTitle">Gear details</div>
+        <button class="close" id="gearModalClose">Close</button>
+      </div>
+      <div class="modal-body" style="grid-template-columns:1fr">
+        <div id="gearModalBody" class="fine"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gift modal -->
+  <div class="modal" id="giftModal" role="dialog" aria-modal="true" aria-labelledby="giftModalTitle">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div id="giftModalTitle">Send a gift</div>
+        <button class="close" id="giftCloseButton">Close</button>
+      </div>
+      <div class="modal-body" style="grid-template-columns:1fr">
+        <div style="display:grid;gap:8px">
+          <label for="giftRecipient">Recipient email</label>
+          <input id="giftRecipient" placeholder="friend@example.com"/>
+          <label for="giftMessage">Message</label>
+          <textarea id="giftMessage" rows="4" placeholder="Write a note"></textarea>
+          <button class="btn primary" id="giftSendButton">Send gift</button>
+          <div class="fine">Gift status: <span id="giftStatus">idle</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Smooth scroll for anchor links (primary nav and others)
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click', e=>{
+        const id = a.getAttribute('href').slice(1);
+        const el = document.getElementById(id);
+        if(el){
+          e.preventDefault();
+          el.scrollIntoView({behavior:'smooth', block:'start'});
+          document.getElementById('activeSection').textContent = id;
+          // highlight nav
+          document.querySelectorAll('.nav-links a').forEach(n=>n.classList.toggle('active', n.getAttribute('href') === '#' + id));
+          // set last link clicked
+          document.getElementById('lastLinkClicked').textContent = a.id || ('link to ' + id);
+        }
+      });
+    });
+
+    // Mobile menu toggle
+    const hamburgerButton = document.getElementById('hamburgerButton');
+    const mobileMenu = document.getElementById('mobileMenu');
+    hamburgerButton.addEventListener('click', ()=>{
+      mobileMenu.classList.toggle('show');
+    });
+    mobileMenu.querySelectorAll('a').forEach(link=>{
+      link.addEventListener('click', ()=>mobileMenu.classList.remove('show'));
+    });
+
+    // Year in footer
+    document.getElementById('yearNow').textContent = new Date().getFullYear();
+
+    // Sticky header shadow simplified: no shadow, but maintain logic to avoid regressions
+    const header = document.getElementById('siteHeader');
+    const setHeaderShadow = () => {
+      header.style.boxShadow = 'none';
+    };
+    window.addEventListener('scroll', setHeaderShadow);
+    setHeaderShadow();
+
+    // Spots left (ethical, informational)
+    const spotsEl = document.getElementById('spotsLeftText');
+    let baseSpots = 9 + Math.floor((new Date().getDate() % 4)); // 9..12
+    const setSpots = () => {
+      spotsEl.textContent = `Current cohort: ${baseSpots} spots left`;
+    };
+    setSpots();
+    let spotsReduced = false;
+
+    // ZIP checker (rough Bay Area ZIPs)
+    const zipForm = document.getElementById('zipForm');
+    const zipInput = document.getElementById('zipInput');
+    const zipResult = document.getElementById('zipResult');
+    zipForm.addEventListener('submit', e=>{
+      e.preventDefault();
+      const v = (zipInput.value||'').trim();
+      const ok = /^(94[0-9]{3}|95[0-1][0-9]{2})$/.test(v); // 94000-95199 approx
+      if(!v || v.length<5){
+        zipResult.textContent = 'Please enter a 5-digit ZIP.';
+        zipResult.style.color = '#b00020';
+        return;
+      }
+      if(ok){
+        zipResult.textContent = 'Great news — you’re in our delivery radius. We handle install and calibration.';
+        zipResult.style.color = '#0b8f58';
+      } else {
+        zipResult.textContent = 'You might be just outside our current radius. Tell us your ZIP in the form — we often make exceptions.';
+        zipResult.style.color = '#b38300';
+      }
+    });
+
+    // Hero video controls
+    const introVideo = document.getElementById('introVideo');
+    const playIntroBtn = document.getElementById('playIntroBtn');
+    const pauseIntroBtn = document.getElementById('pauseIntroBtn');
+    const previewStatus = document.getElementById('previewStatus');
+    playIntroBtn.addEventListener('click', ()=>{
+      try { introVideo.play(); } catch(e){}
+      previewStatus.textContent = 'playing';
+    });
+    pauseIntroBtn.addEventListener('click', ()=>{
+      try { introVideo.pause(); } catch(e){}
+      previewStatus.textContent = 'paused';
+    });
+
+    // Features "Learn more"
+    const featureToggles = [
+      ['feature1More','feature1MoreText'],
+      ['feature2More','feature2MoreText'],
+      ['feature3More','feature3MoreText'],
+      ['feature4More','feature4MoreText'],
+    ];
+    featureToggles.forEach(([btnId, textId])=>{
+      const b = document.getElementById(btnId), t = document.getElementById(textId);
+      b.addEventListener('click', ()=>{
+        const open = t.style.display==='block';
+        t.style.display = open ? 'none' : 'block';
+        b.textContent = open ? 'Learn more' : 'Show less';
+      });
+    });
+
+    // Calculator with Apply button and +/- controls
+    const shots = document.getElementById('calcShotsPerDay');
+    const shotsLabel = document.getElementById('calcShotsLabel');
+    const owns = document.getElementById('calcOwnsGear');
+    const classes = document.getElementById('calcClasses');
+    const buyMonthly = document.getElementById('calcBuyMonthly');
+    const sixDiff = document.getElementById('calcSixMonthDiff');
+    const diffBadge = document.getElementById('calcDiffBadge');
+    const applyStatus = document.getElementById('applyStatus');
+    const shotsMinus = document.getElementById('shotsMinus');
+    const shotsPlus = document.getElementById('shotsPlus');
+    const calcApplyButton = document.getElementById('calcApplyButton');
+
+    function calc(){
+      const s = parseInt(shots.value,10);
+      shotsLabel.textContent = s;
+      const gearMonthly = owns.value==='yes' ? 0 : (1800/36 + 600/36); // $66.67
+      const classesMonthly = classes.value==='yes' ? 150 : 0;
+      const doublesPerMonth = s*30;
+      const lbs = (doublesPerMonth/10)*0.25;
+      const beansMonthly = lbs*16;
+      const maintenance = 8;
+      const totalBuy = Math.round((gearMonthly + classesMonthly + beansMonthly + maintenance)*100)/100;
+      buyMonthly.textContent = `$${totalBuy.toFixed(2)}`;
+      const monthlyDiff = totalBuy - (200 + beansMonthly);
+      const sixMonth = Math.round(monthlyDiff*6);
+      const sign = sixMonth>0? 'You save' : (sixMonth<0 ? 'Lab costs more' : 'Cost neutral');
+      diffBadge.textContent = sign;
+      diffBadge.className = 'pill ' + (sixMonth>=0 ? 'good' : 'bad');
+      sixDiff.textContent = (sixMonth>=0? 'Save ' : 'Pay +') + '$' + Math.abs(sixMonth).toFixed(0) + ' over 6 months';
+    }
+    [shots, owns, classes].forEach(el=>el.addEventListener('input', calc));
+    calc();
+    shotsMinus.addEventListener('click', ()=>{ shots.value = Math.max(1, parseInt(shots.value,10)-1); calc(); });
+    shotsPlus.addEventListener('click', ()=>{ shots.value = Math.min(6, parseInt(shots.value,10)+1); calc(); });
+    calcApplyButton.addEventListener('click', ()=>{ applyStatus.textContent='

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown → Slides</title>
+  <style>
+    /* General Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      font-size: 1rem;
+      color: #666;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: column;
+      width: 90%;
+      max-width: 1200px;
+      height: 80%;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    #editor-container, #preview-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #editor-container textarea {
+      flex: 1;
+      padding: 1rem;
+      font-size: 1rem;
+      border: none;
+      outline: none;
+      resize: none;
+      font-family: monospace;
+    }
+
+    #preview-container {
+      display: none;
+      position: relative;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    #preview-container .slide {
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #f9f9f9;
+    }
+
+    #preview-container.fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #fff;
+      z-index: 1000;
+      padding: 2rem;
+      overflow: hidden;
+    }
+
+    #preview-container.fullscreen .slide {
+      margin-bottom: 2rem;
+    }
+
+    #controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      border-top: 1px solid #ddd;
+      background: #f9f9f9;
+    }
+
+    #controls button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    #controls button:hover {
+      background: #ddd;
+    }
+
+    #theme-toggle {
+      background: #333;
+      color: #fff;
+    }
+
+    #theme-toggle.light {
+      background: #fff;
+      color: #333;
+      border: 1px solid #333;
+    }
+
+    @media (max-width: 768px) {
+      #app {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Markdown → Slides</h1>
+    <p>Convert Markdown into a slide deck with live preview</p>
+  </header>
+
+  <div id="app">
+    <div id="editor-container">
+      <textarea id="markdown-input" placeholder="Type your markdown here...">
+# Welcome to Markdown → Slides
+---
+## Slide 1
+This is the first slide.
+---
+## Slide 2
+This is the second slide.
+---
+## Slide 3
+This is the third slide.
+      </textarea>
+    </div>
+    <div id="preview-container"></div>
+    <div id="controls">
+      <button id="preview-toggle">Toggle Preview</button>
+      <button id="fullscreen-toggle">Full Screen</button>
+      <button id="theme-toggle">Dark Theme</button>
+    </div>
+  </div>
+
+  <script>
+    // DOM Elements
+    const markdownInput = document.getElementById('markdown-input');
+    const previewContainer = document.getElementById('preview-container');
+    const previewToggle = document.getElementById('preview-toggle');
+    const fullscreenToggle = document.getElementById('fullscreen-toggle');
+    const themeToggle = document.getElementById('theme-toggle');
+
+    // Convert Markdown to Slides
+    function renderSlides() {
+      const markdown = markdownInput.value;
+      const slides = markdown.split('---').map(slide => slide.trim());
+      previewContainer.innerHTML = slides.map(slide => `<div class="slide">${slide}</div>`).join('');
+    }
+
+    // Toggle Preview
+    previewToggle.addEventListener('click', () => {
+      const isPreviewVisible = previewContainer.style.display === 'block';
+      previewContainer.style.display = isPreviewVisible ? 'none' : 'block';
+    });
+
+    // Fullscreen Mode
+    fullscreenToggle.addEventListener('click', () => {
+      previewContainer.classList.toggle('fullscreen');
+    });
+
+    // Theme Toggle
+    themeToggle.addEventListener('click', () => {
+      const isDarkTheme = themeToggle.classList.contains('light');
+      themeToggle.classList.toggle('light');
+      themeToggle.textContent = isDarkTheme ? 'Dark Theme' : 'Light Theme';
+      document.body.style.backgroundColor = isDarkTheme ? '#f4f4f9' : '#333';
+      document.body.style.color = isDarkTheme ? '#333' : '#fff';
+    });
+
+    // Live Preview
+    markdownInput.addEventListener('input', renderSlides);
+
+    // Initial Render
+    renderSlides();
+  </script>
+</body>
+</html>

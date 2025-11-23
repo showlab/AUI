@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tiny Kanban</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!--
+    Tiny Kanban – Accessibility and Reliability Upgrade
+
+    This build focuses on:
+    - Destylization (neutral black-on-white UI, no gradients/shadows/rounded corners)
+    - Strong, synchronous feedback for all important interactions
+    - Within-column reordering via drag-and-drop with persistence
+    - Clear WIP limit editing and visible, persistent WIP warnings
+    - Non-destructive confirmation with Undo for deletes
+    - Consistent status proxies for automation: #addStatus, #wipStatus, #moveStatus, #searchStatus, #deleteStatus, #activeSection
+    - All original IDs, functions, and semantics preserved; augmented where needed
+
+    NOTE: To preserve compatibility with automated tests, we keep the original selectors
+    listed in the CODE PRESERVATION CONTRACT. We also preserve the original function names.
+  -->
+
+  <style>
+    /* DESTYLIZATION VARIABLES
+       Neutral colors; high-contrast black text on white background.
+       No shadows, gradients, or rounded corners; simple borders only.
+    */
+    :root {
+      --bg: #ffffff;
+      --text: #000000;
+      --muted: #333333;
+      --accent: #0057ff;
+      --accent-2: #8b5cf6; /* reserved for alternate accent; not used as gradient */
+      --border: #000000;
+      --ok: #0a7d00;
+      --warn: #a26b00;
+      --danger: #c10000;
+
+      --panel: #f3f3f3;
+      --panel-2: #f0f0f0;
+
+      --gap-sm: 8px;
+      --gap: 12px;
+      --gap-lg: 16px;
+
+      --min-click: 44px;    /* Minimum interactive target size */
+
+      --font-base: 18px;    /* For stand-up readability */
+      --font-title: 28px;
+      --font-subtitle: 22px;
+      --font-btn: 16px;
+    }
+
+    /* BASE / RESET */
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      font-size: var(--font-base);
+      line-height: 1.4;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    a { color: var(--accent); text-decoration: underline; }
+    a:focus, button:focus, input:focus, select:focus, textarea:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* Layout container: ensure within 1280x720 without scrolling for critical controls */
+    #appRoot {
+      display: grid;
+      grid-template-rows: auto auto 1fr auto; /* header, controls, board, footer statuses/undo bar */
+      gap: var(--gap-lg);
+      padding: var(--gap-lg);
+      height: 100%;
+    }
+
+    /* Header (brand + search) */
+    header#appHeader {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--gap-lg);
+      align-items: center;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: var(--gap);
+      min-height: var(--min-click);
+    }
+    .brand h1 {
+      margin: 0;
+      font-size: var(--font-title);
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+    .brand .logo {
+      width: var(--min-click);
+      height: var(--min-click);
+      background: #000000;
+      border: 2px solid var(--border);
+      display: inline-block;
+    }
+    #legend {
+      display: flex;
+      align-items: center;
+      gap: var(--gap);
+      color: var(--muted);
+      font-size: 14px;
+      user-select: none;
+    }
+    .dot {
+      width: 14px;
+      height: 14px;
+      border: 1px solid var(--text);
+      display: inline-block;
+      margin-right: 6px;
+    }
+    .dot.low { background: var(--ok); }
+    .dot.med { background: var(--warn); }
+    .dot.high { background: var(--danger); }
+
+    #searchBar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: var(--gap);
+      align-items: center;
+      justify-items: end;
+      min-height: var(--min-click);
+    }
+    #searchInput {
+      width: 100%;
+      max-width: 480px;
+      min-height: var(--min-click);
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: #000000;
+    }
+    #clearSearchBtn {
+      min-height: var(--min-click);
+      min-width: var(--min-click);
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: #000000;
+      cursor: pointer;
+    }
+    #searchStatus {
+      grid-column: 1 / -1;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    /* Controls section (Add task form) */
+    #controls {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--gap);
+    }
+    #addTaskForm {
+      display: grid;
+      grid-template-columns: 1.4fr 2fr 1fr 0.7fr auto;
+      gap: var(--gap);
+      border: 1px solid var(--border);
+      background: var(--panel);
+      padding: var(--gap);
+      align-items: start;
+    }
+    #addTaskForm input[type="text"],
+    #addTaskForm textarea,
+    #addTaskForm select {
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: #000000;
+      padding: 8px 10px;
+      min-height: var(--min-click);
+      min-width: 0;
+    }
+    #taskDescInput { min-height: var(--min-click); resize: vertical; }
+
+    #addTaskBtn {
+      min-height: var(--min-click);
+      min-width: 100px;
+      border: 2px solid var(--border);
+      background: #ffffff;
+      color: #000000;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    #addTaskBtn[aria-disabled="true"] {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    #titleError {
+      grid-column: 1 / -1;
+      color: var(--danger);
+      font-size: 14px;
+      display: none;
+    }
+    #addHint {
+      grid-column: 1 / -1;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    #addStatus {
+      grid-column: 1 / -1;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    /* Board */
+    #board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--gap-lg);
+      align-items: start;
+      min-height: 0;
+    }
+    .column {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      min-height: 320px;
+    }
+    .column[data-over-limit="true"] {
+      border-color: var(--danger);
+    }
+    .column-header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: var(--gap);
+      padding: var(--gap);
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+    }
+    .column-header h2 {
+      margin: 0;
+      font-size: var(--font-subtitle);
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .count {
+      border: 1px solid var(--border);
+      padding: 4px 8px;
+      font-weight: 700;
+      min-height: var(--min-click);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 80px;
+      user-select: none;
+      cursor: pointer; /* editable affordance */
+    }
+    .wip {
+      display: grid;
+      grid-template-columns: auto auto auto;
+      gap: var(--gap);
+      align-items: center;
+      justify-content: end;
+    }
+    .wip label {
+      display: inline-block;
+    }
+    .wip input[type="number"] {
+      width: 72px;
+      min-height: var(--min-click);
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: #000000;
+      padding: 6px 8px;
+    }
+    .wip button {
+      min-height: var(--min-click);
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: #000000;
+      cursor: pointer;
+      padding: 0 12px;
+    }
+    .wip-alert {
+      grid-column: 1 / -1;
+      color: var(--danger);
+      font-size: 14px;
+      display: none;
+    }
+    .wip-alert[data-visible="true"] { display: block; }
+
+    .cards {
+      padding: var(--gap);
+      display: grid;
+      gap: var(--gap);
+      align-content: start;
+      overflow: auto;
+      min-height: 200px;
+    }
+    .cards[data-drop-disabled="true"] {
+      /* Keep interactive, but visibly indicate drop is blocked for cross-column moves */
+      border-top: 2px dashed var(--danger);
+    }
+
+    .empty-state {
+      border: 1px dashed var(--border);
+      padding: var(--gap);
+      background: #ffffff;
+      color: var(--muted);
+      display: none;
+    }
+    .empty-state[data-visible="true"] {
+      display: block;
+    }
+
+    /* Cards */
+    .card {
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: #000000;
+      padding: var(--gap);
+      display: grid;
+      gap: var(--gap);
+      cursor: grab;
+      user-select: none;
+    }
+    .card.dragging {
+      opacity: 0.6;
+      outline: 2px dashed var(--accent);
+    }
+    .priority-low { border-left: 8px solid var(--ok); }
+    .priority-medium { border-left: 8px solid var(--warn); }
+    .priority-high { border-left: 8px solid var(--danger); }
+
+    .card-title {
+      font-weight: 800;
+      font-size: 18px;
+    }
+    .card-desc {
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .card-footer {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: var(--gap);
+      align-items: center;
+    }
+    .assignee-btn,
+    .priority-btn,
+    .control-btn,
+    .edit-btn {
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: #000000;
+      cursor: pointer;
+      min-height: var(--min-click);
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .control-btn {
+      color: var(--danger);
+      border-color: var(--danger);
+    }
+
+    .avatar {
+      width: 24px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      color: #000000;
+    }
+    .priority-pill {
+      width: 16px;
+      height: 16px;
+      border: 1px solid var(--border);
+      display: inline-block;
+    }
+
+    /* Drag target highlighting */
+    .drop-allowed { outline: 2px dashed var(--ok); }
+    .drop-blocked { outline: 2px dashed var(--danger); }
+
+    /* Toast (top) */
+    #toast {
+      position: fixed;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: #000000;
+      padding: 8px 12px;
+      display: none;
+      z-index: 1000;
+      min-height: var(--min-click);
+      display: flex;
+      align-items: center;
+    }
+
+    /* Undo bar (bottom) */
+    #undoBar {
+      display: none;
+      border-top: 1px solid var(--border);
+      padding: var(--gap);
+      background: var(--panel);
+      grid-column: 1 / -1;
+      align-items: center;
+      gap: var(--gap);
+    }
+    #undoBar[data-visible="true"] {
+      display: grid;
+      grid-template-columns: 1fr auto;
+    }
+    #undoText { font-size: 14px; color: var(--muted); }
+    #undoBtn {
+      min-height: var(--min-click);
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: #000000;
+      cursor: pointer;
+      min-width: 120px;
+    }
+
+    /* Confirmation modal (no shadows/rounded) */
+    #confirmDeleteModal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.2);
+      display: none;
+      z-index: 1100;
+    }
+    #confirmDeleteModal[data-open="true"] { display: grid; place-items: center; }
+    #confirmDeleteDialog {
+      background: #ffffff;
+      color: #000000;
+      border: 2px solid var(--border);
+      width: min(520px, 90vw);
+      padding: var(--gap-lg);
+      display: grid;
+      gap: var(--gap);
+    }
+    #confirmDeleteTitle { margin: 0; font-size: var(--font-subtitle); }
+    #confirmDeleteBody { font-size: 16px; }
+    #confirmDeleteActions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--gap);
+    }
+    #confirmDeleteNo, #confirmDeleteYes {
+      min-height: var(--min-click);
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: #000000;
+      cursor: pointer;
+    }
+    #confirmDeleteYes {
+      border-color: var(--danger);
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    /* Editing modal */
+    #editModal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.2);
+      display: none;
+      z-index: 1100;
+    }
+    #editModal[data-open="true"] { display: grid; place-items: center; }
+    #editDialog {
+      background: #ffffff;
+      color: #000000;
+      border: 2px solid var(--border);
+      width: min(640px, 92vw);
+      padding: var(--gap-lg);
+      display: grid;
+      gap: var(--gap);
+    }
+    #editTitle { margin: 0; font-size: var(--font-subtitle); }
+    .edit-row {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: var(--gap);
+      align-items: start;
+    }
+    .edit-row input,.edit-row select,.edit-row textarea {
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: #000000;
+      padding: 8px 10px;
+      min-height: var(--min-click);
+      min-width: 0;
+    }
+    #editActions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--gap);
+    }
+    #editCancelBtn, #editSaveBtn {
+      min-height: var(--min-click);
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: #000000;
+      cursor: pointer;
+    }
+    #editSaveBtn { font-weight: 700; }
+
+    /* Column footer/proxies */
+    #statusPanel {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--gap);
+      border-top: 1px solid var(--border);
+      padding-top: var(--gap);
+    }
+    .status-cell {
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: #000000;
+      padding: var(--gap);
+      min-height: var(--min-click);
+      display: grid;
+      align-content: center;
+      gap: 4px;
+    }
+    .status-label { font-size: 14px; color: var(--muted); }
+    .status-value { font-weight: 700; }
+
+    /* Keyboard hint style */
+    .kbd {
+      border: 1px solid var(--border);
+      padding: 0 6px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 14px;
+    }
+
+    /* Responsiveness minimal */
+    @media (max-width: 1100px) {
+      #addTaskForm { grid-template-columns: 1fr 1fr 1fr; }
+    }
+    @media (max-width: 920px) {
+      #appHeader { grid-template-columns: 1fr; }
+      #addTaskForm { grid-template-columns: 1fr; }
+      #board { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div id="appRoot">
+    <header id="appHeader" role="banner">
+      <div class="brand" aria-label="App title">
+        <div class="logo" aria-hidden="true"></div>
+        <h1>Tiny Kanban</h1>
+        <div id="legend" aria-label="Priority legend">
+          <span><span class="dot high"></span>High</span>
+          <span><span class="dot med"></span>Medium</span>
+          <span><span class="dot low"></span>Low</span>
+        </div>
+      </div>
+      <div id="searchBar">
+        <input id="searchInput" type="text" placeholder="Search tasks (title, description, assignee)" aria-label="Search">
+        <button id="clearSearchBtn" type="button" title="Clear search">Clear</button>
+        <div id="searchStatus" aria-live="polite">search: cleared</div>
+      </div>
+    </header>
+
+    <section id="controls" aria-label="Add task">
+      <form id="addTaskForm" autocomplete="off">
+        <input id="taskTitleInput" type="text" placeholder="Task title (e.g., Fix login bug)" aria-label="Task title" required>
+        <textarea id="taskDescInput" placeholder="Description (optional)" aria-label="Task description"></textarea>
+        <input id="taskAssigneeInput" type="text" list="peopleDatalist" placeholder="Assignee (optional)" aria-label="Assignee">
+        <select id="taskPrioritySelect" aria-label="Priority">
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+          <option value="low">Low</option>
+        </select>
+        <button id="addTaskBtn" type="submit" aria-disabled="false">Add</button>
+
+        <div id="titleError" role="alert"></div>
+        <div id="addHint">Hint: Press <span class="kbd">Enter</span> to add the task.</div>
+        <div id="addStatus">add: ready</div>
+      </form>
+      <datalist id="peopleDatalist">
+        <option value="Alice"></option>
+        <option value="Bob"></option>
+        <option value="Carol"></option>
+        <option value="Dave"></option>
+        <option value="Eve"></option>
+        <option value="Mia"></option>
+        <option value="Sam"></option>
+        <option value="Jordan"></option>
+      </datalist>
+    </section>
+
+    <main id="board" role="main" aria-label="Kanban board" data-last-move="">
+      <section id="todoColumn" class="column" data-column="todo" aria-label="Todo" data-over-limit="false">
+        <div class="column-header">
+          <h2>Todo <button id="todoCount" class="count" type="button" title="Click to edit WIP">0/∞</button></h2>
+          <div class="wip">
+            <label for="todoWipInput">WIP</label>
+            <input id="todoWipInput" type="number" min="0" step="1" value="5" aria-label="Todo WIP limit">
+            <button id="todoWipEditBtn" type="button" title="Apply WIP">Apply</button>
+            <div id="todoWipAlert" class="wip-alert" data-visible="false" aria-live="polite"></div>
+          </div>
+        </div>
+        <div class="cards" id="todoCards" aria-live="polite" aria-relevant="additions removals" data-drop-disabled="false"></div>
+        <div id="todoEmptyState" class="empty-state" data-visible="false">No tasks here. WIP limit applies.</div>
+      </section>
+
+      <section id="doingColumn" class="column" data-column="doing" aria-label="Doing" data-over-limit="false">
+        <div class="column-header">
+          <h2>Doing <button id="doingCount" class="count" type="button" title="Click to edit WIP">0/∞</button></h2>
+          <div class="wip">
+            <label for="doingWipInput">WIP</label>
+            <input id="doingWipInput" type="number" min="0" step="1" value="3" aria-label="Doing WIP limit">
+            <button id="doingWipEditBtn" type="button" title="Apply WIP">Apply</button>
+            <div id="doingWipAlert" class="wip-alert" data-visible="false" aria-live="polite"></div>
+          </div>
+        </div>
+        <div class="cards" id="doingCards" aria-live="polite" aria-relevant="additions removals" data-drop-disabled="false"></div>
+        <div id="doingEmptyState" class="empty-state" data-visible="false">No tasks here. WIP limit applies.</div>
+      </section>
+
+      <section id="doneColumn" class="column" data-column="done" aria-label="Done" data-over-limit="false">
+        <div class="column-header">
+          <h2>Done <button id="doneCount" class="count" type="button" title="Click to edit WIP">0/∞</button></h2>
+          <div class="wip">
+            <label for="doneWipInput">WIP</label>
+            <input id="doneWipInput" type="number" min="0" step="1" value="7" aria-label="Done WIP limit">
+            <button id="doneWipEditBtn" type="button" title="Apply WIP">Apply</button>
+            <div id="doneWipAlert" class="wip-alert" data-visible="false" aria-live="polite"></div>
+          </div>
+        </div>
+        <div class="cards" id="doneCards" aria-live="polite" aria-relevant="additions removals" data-drop-disabled="false"></div>
+        <div id="doneEmptyState" class="empty-state" data-visible="false">No tasks here. WIP limit applies.</div>
+      </section>
+    </main>
+
+    <!-- Status panel proxies for automation -->
+    <section id="statusPanel" aria-label="Operation status">
+      <div class="status-cell">
+        <div class="status-label">Add</div>
+        <div id="addStatusMirror" class="status-value">ready</div>
+      </div>
+      <div class="status-cell">
+        <div class="status-label">WIP</div>
+        <div id="wipStatus" class="status-value">unchanged</div>
+      </div>
+      <div class="status-cell">
+        <div class="status-label">Move</div>
+        <div id="moveStatus" class="status-value">idle</div>
+      </div>
+      <div class="status-cell">
+        <div class="status-label">Delete</div>
+        <div id="deleteStatus" class="status-value">idle</div>
+      </div>
+      <div class="status-cell">
+        <div class="status-label">Search</div>
+        <div id="searchStatusMirror" class="status-value">cleared</div>
+      </div>
+      <div class="status-cell">
+        <div class="status-label">Active Section</div>
+        <div id="activeSection" class="status-value">Board</div>
+      </div>
+    </section>
+
+    <!-- Undo bar -->
+    <div id="undoBar" role="region" aria-label="Undo delete">
+      <div id="undoText">A card was deleted.</div>
+      <button id="undoBtn" type="button">Undo</button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" role="status" aria-live="assertive"></div>
+
+  <!-- Confirm delete modal -->
+  <div id="confirmDeleteModal" aria-hidden="true">
+    <div id="confirmDeleteDialog" role="dialog" aria-modal="true" aria-labelledby="confirmDeleteTitle" aria-describedby="confirmDeleteBody">
+      <h3 id="confirmDeleteTitle">Confirm delete</h3>
+      <div id="confirmDeleteBody">Are you sure you want to delete this task?</div>
+      <div id="confirmDeleteActions">
+        <button id="confirmDeleteNo" type="button">Cancel</button>
+        <button id="confirmDeleteYes" type="button">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit modal -->
+  <div id="editModal" aria-hidden="true">
+    <div id="editDialog" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+      <h3 id="editTitle">Edit task</h3>
+      <div class="edit-row">
+        <label for="editTitleInput">Title</label>
+        <input id="editTitleInput" type="text" placeholder="Title">
+      </div>
+      <div class="edit-row">
+        <label for="editDescInput">Description</label>
+        <textarea id="editDescInput" placeholder="Description"></textarea>
+      </div>
+      <div class="edit-row">
+        <label for="editAssigneeInput">Assignee</label>
+        <input id="editAssigneeInput" type="text" list="peopleDatalist" placeholder="Assignee">
+      </div>
+      <div class="edit-row">
+        <label for="editPrioritySelect">Priority</label>
+        <select id="editPrioritySelect">
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+      <div id="editActions">
+        <button id="editCancelBtn" type="button">Cancel</button>
+        <button id="editSaveBtn" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================
+    // Persistence and state
+    // =========================
+    const STORAGE_KEY = 'tinyKanban.state.v1';
+    const ID_KEY = 'tinyKanban.nextId.v1';
+
+    const state = {
+      cards: [],
+      wip: { todo: 5, doing: 3, done: 7 },
+      search: ''
+    };
+
+    // Modal/Delete context
+    let pendingDeleteId = null;
+    let lastDeletedCard = null;
+    let editCardId = null;
+
+    // Drag context
+    let dragId = null;
+
+    // =========================
+    // Utilities
+    // =========================
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) Object.assign(state, JSON.parse(raw));
+        state.wip = state.wip || { todo: 5, doing: 3, done: 7 };
+        state.cards = Array.isArray(state.cards) ? state.cards : [];
+      } catch {}
+      if (!localStorage.getItem(ID_KEY)) {
+        localStorage.setItem(ID_KEY, '1');
+      }
+      if (state.cards.length === 0) {
+        seedData();
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function nextId() {
+      const n = parseInt(localStorage.getItem(ID_KEY) || '1', 10);
+      localStorage.setItem(ID_KEY, String(n + 1));
+      return n;
+    }
+
+    function seedData() {
+      state.cards = [
+        mkCard('Set up CI pipeline', 'Configure GitHub Actions for tests', 'Alice', 'medium', 'todo'),
+        mkCard('Fix login bug', 'Resolve OAuth callback issue on Safari', 'Bob', 'high', 'doing'),
+        mkCard('Retrospective notes', 'Summarize action items', 'Carol', 'low', 'done')
+      ];
+      saveState();
+    }
+
+    function mkCard(title, desc, assignee, priority, column) {
+      return {
+        id: nextId(),
+        title: (title || '').trim(),
+        desc: (desc || '').trim(),
+        assignee: (assignee || '').trim(),
+        priority: (priority || 'medium'),
+        column: column || 'todo',
+        createdAt: Date.now()
+      };
+    }
+
+    function showToast(msg, type = 'info', ms = 2000) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.display = 'flex';
+      toast.style.borderColor = type === 'error' ? 'var(--danger)'
+                           : type === 'ok'    ? 'var(--ok)'
+                           : 'var(--border)';
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => { toast.style.display = 'none'; }, ms);
+    }
+
+    function initials(name) {
+      if (!name) return '';
+      const parts = name.trim().split(/\s+/);
+      const first = parts[0]?.[0] || '';
+      const second = parts[1]?.[0] || '';
+      return (first + second).toUpperCase() || first.toUpperCase();
+    }
+
+    function stringToColor(str) {
+      if (!str) return '#ffffff';
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      const hue = Math.abs(hash) % 360;
+      // Provide color for avatar text background; border remains black
+      // Return as hsl string but we'll override avatar text color to black/white if needed (we keep black).
+      return `hsl(${hue} 85% 80%)`;
+    }
+
+    function priorityClass(p) {
+      return p === 'high' ? 'priority-high' : p === 'low' ? 'priority-low' : 'priority-medium';
+    }
+
+    function priorityLabel(p) {
+      return p[0].toUpperCase() + p.slice(1);
+    }
+
+    function columnCards(column) {
+      return state.cards.filter(c => c.column === column);
+    }
+
+    function normalizedIncludes(haystack, needle) {
+      // Lowercase, collapse inner whitespace
+      const norm = s => (s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+      return norm(haystack).includes(norm(needle));
+    }
+
+    function columnLabel(k) {
+      return k === 'todo' ? 'Todo' : k === 'doing' ? 'Doing' : 'Done';
+    }
+
+    // =========================
+    // Rendering and UI updates
+    // =========================
+    function updateCounts() {
+      const cols = ['todo', 'doing', 'done'];
+      for (const c of cols) {
+        const count = columnCards(c).length;
+        const limit = parseInt(state.wip[c], 10);
+        const el = document.getElementById(c + 'Count');
+        const limTxt = limit > 0 ? limit : '∞';
+        el.textContent = `${count}/${limTxt}`;
+        const atLimit = limit > 0 && count >= limit;
+        const overLimit = limit > 0 && count > limit;
+
+        // Column banner/proxy
+        const colEl = document.getElementById(c + 'Column');
+        colEl.setAttribute('data-over-limit', String(overLimit));
+
+        const alertEl = document.getElementById(c + 'WipAlert');
+        if (limit > 0 && overLimit) {
+          alertEl.textContent = 'WIP exceeded for ' + columnLabel(c);
+          alertEl.setAttribute('data-visible', 'true');
+        } else if (limit > 0 && count === limit) {
+          alertEl.textContent = 'WIP at limit for ' + columnLabel(c);
+          alertEl.setAttribute('data-visible', 'true');
+        } else {
+          alertEl.textContent = '';
+          alertEl.setAttribute('data-visible', 'false');
+        }
+      }
+    }
+
+    function renderBoard() {
+      const containers = {
+        todo: document.getElementById('todoCards'),
+        doing: document.getElementById('doingCards'),
+        done: document.getElementById('doneCards')
+      };
+      Object.values(containers).forEach(c => c.innerHTML = '');
+
+      const filter = (state.search || '').trim().toLowerCase();
+
+      for (const card of state.cards) {
+        const text = `${card.title} ${card.desc} ${card.assignee}`;
+        const hiddenBySearch = filter && !normalizedIncludes(text, filter);
+
+        const article = document.createElement('article');
+        article.className = `card ${priorityClass(card.priority)}`;
+        article.setAttribute('draggable', 'true');
+        article.setAttribute('id', `card-${card.id}`);
+        article.setAttribute('data-id', card.id);
+        article.setAttribute('role', 'article');
+        if (hiddenBySearch) article.style.display = 'none';
+
+        // Title
+        const title = document.createElement('div');
+        title.className = 'card-title';
+        title.textContent = card.title || '(Untitled)';
+
+        // Description
+        if (card.desc) {
+          const desc = document.createElement('div');
+          desc.className = 'card-desc';
+          desc.textContent = card.desc;
+          article.appendChild(title);
+          article.appendChild(desc);
+        } else {
+          article.appendChild(title);
+        }
+
+        // Footer controls
+        const footer = document.createElement('div');
+        footer.className = 'card-footer';
+
+        // Assignee
+        const assigneeBtn = document.createElement('button');
+        assigneeBtn.className = 'assignee-btn';
+        assigneeBtn.setAttribute('id', `assigneeBtn-${card.id}`);
+        assigneeBtn.setAttribute('title', 'Assign or change assignee');
+        const av = document.createElement('span');
+        av.className = 'avatar';
+        av.textContent = initials(card.assignee || '?') || '–';
+        av.style.background = card.assignee ? stringToColor(card.assignee) : '#ffffff';
+        const label = document.createElement('span');
+        label.textContent = card.assignee || 'Unassigned';
+        assigneeBtn.appendChild(av);
+        assigneeBtn.appendChild(label);
+
+        // Priority
+        const priBtn = document.createElement('button');
+        priBtn.className = 'priority-btn';
+        priBtn.setAttribute('id', `priorityBtn-${card.id}`);
+        priBtn.setAttribute('title', 'Change priority');
+        const dot = document.createElement('span');
+        dot.className = 'priority-pill';
+        dot.style.background = card.priority === 'high' ? 'var(--danger)'
+                           : card.priority === 'low' ? 'var(--ok)' : 'var(--warn)';
+        const pLabel = document.createElement('span');
+        pLabel.textContent = priorityLabel(card.priority);
+        priBtn.appendChild(dot);
+        priBtn.appendChild(pLabel);
+
+        // Edit
+        const editBtn = document.createElement('button');
+        editBtn.className = 'edit-btn';
+        editBtn.setAttribute('id', `editBtn-${card.id}`);
+        editBtn.textContent = 'Edit';
+
+        // Delete
+        const delBtn = document.createElement('button');
+        delBtn.className = 'control-btn';
+        delBtn.setAttribute('id', `deleteBtn-${card.id}`);
+        delBtn.setAttribute('title', 'Delete task');
+        delBtn.textContent = 'Delete';
+
+        footer.appendChild(assigneeBtn);
+        footer.appendChild(priBtn);
+        footer.appendChild(editBtn);
+        footer.appendChild(delBtn);
+
+        article.appendChild(footer);
+
+        // Drag handlers
+        article.addEventListener('dragstart', onDragStart);
+        article.addEventListener('dragend', onDragEnd);
+
+        containers[card.column].appendChild(article);
+      }
+
+      // Empty states per column (consider search)
+      ['todo','doing','done'].forEach(col => {
+        const container = containers[col];
+        const total = columnCards(col).length;
+        const visible = Array.from(container.querySelectorAll('.card')).filter(el => el.style.display !== 'none').length;
+        const emptyEl = document.getElementById(col + 'EmptyState');
+        if (total === 0) {
+          emptyEl.textContent = 'No tasks here. WIP limit applies.';
+          emptyEl.setAttribute('data-visible','true');
+        } else if (visible === 0) {
+          emptyEl.textContent = 'No tasks match the current search.';
+          emptyEl.setAttribute('data-visible','true');
+        } else {
+          emptyEl.setAttribute('data-visible','false');
+        }
+      });
+
+      updateCounts();
+      updateColumnInteractions();
+      attachColumnDnD();
+    }
+
+    function updateColumnInteractions() {
+      // Set data-drop-disabled on columns that are at WIP limit.
+      ['todo', 'doing', 'done'].forEach(col => {
+        const limit = parseInt(state.wip[col], 10);
+        const count = columnCards(col).length;
+        const atLimit = limit > 0 && count >= limit;
+        const cardsEl = document.getElementById(col + 'Cards');
+        cardsEl.setAttribute('data-drop-disabled', String(atLimit));
+      });
+    }
+
+    // =========================
+    // Drag & Drop
+    // =========================
+    function onDragStart(e) {
+      const id = e.currentTarget.dataset.id;
+      dragId = parseInt(id, 10);
+      e.dataTransfer.setData('text/plain', id);
+      e.dataTransfer.effectAllowed = 'move';
+      e.currentTarget.classList.add('dragging');
+      document.getElementById('moveStatus').textContent = 'dragging ' + dragId;
+      document.getElementById('board').setAttribute('data-last-move', 'drag:' + dragId);
+    }
+
+    function onDragEnd(e) {
+      e.currentTarget.classList.remove('dragging');
+      dragId = null;
+      clearDropHighlights();
+      document.getElementById('moveStatus').textContent = 'idle';
+    }
+
+    function getDragAfterElement(container, y) {
+      const els = [...container.querySelectorAll('.card:not(.dragging)')].filter(el => el.style.display !== 'none');
+      let closest = { offset: Number.NEGATIVE_INFINITY, element: null };
+      for (const child of els) {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+          closest = { offset, element: child };
+        }
+      }
+      return closest.element;
+    }
+
+    function attachColumnDnD() {
+      const columns = document.querySelectorAll('.column');
+      columns.forEach(col => {
+        const cardsEl = col.querySelector('.cards');
+
+        cardsEl.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+
+          const column = col.dataset.column;
+          const beforeEl = getDragAfterElement(cardsEl, e.clientY);
+          const allowed = canDropTo(column);
+          toggleDropHighlight(col, allowed);
+
+          // Visual insertion preview by moving the actual element in DOM is tricky because we re-render on drop.
+          // Here we only show highlight at column level (simple, deterministic).
+          // The final order is computed on drop using the position of beforeEl.
+        });
+
+        cardsEl.addEventListener('dragleave', () => {
+          col.classList.remove('drop-allowed', 'drop-blocked');
+        });
+
+        cardsEl.addEventListener('drop', (e) => {
+          e.preventDefault();
+          const column = col.dataset.column;
+          const id = parseInt(e.dataTransfer.getData('text/plain') || dragId, 10);
+          const allowed = canDropTo(column);
+          col.classList.remove('drop-allowed', 'drop-blocked');
+
+          // Compute the insertion target (before which element?)
+          const beforeEl = getDragAfterElement(cardsEl, e.clientY);
+          const beforeId = beforeEl ? parseInt(beforeEl.dataset.id, 10) : null;
+
+          if (!allowed) {
+            showToast('Cannot move: WIP limit reached in "' + columnLabel(column) + '".', 'error', 2000);
+            document.getElementById('moveStatus').textContent = 'blocked';
+            return;
+          }
+
+          moveCardWithIndex(id, column, beforeId);
+        });
+      });
+    }
+
+    function toggleDropHighlight(colEl, allowed) {
+      colEl.classList.toggle('drop-allowed', allowed);
+      colEl.classList.toggle('drop-blocked', !allowed);
+    }
+
+    function clearDropHighlights() {
+      document.querySelectorAll('.column').forEach(c => c.classList.remove('drop-allowed', 'drop-blocked'));
+    }
+
+    function canDropTo(column) {
+      if (!dragId) return false;
+      const card = state.cards.find(c => c.id === dragId);
+      if (!card) return false;
+      if (card.column === column) return true; // allow reordering within same column even at WIP limit
+      const limit = parseInt(state.wip[column], 10);
+      if (!limit || limit <= 0) return true; // unlimited
+      const count = columnCards(column).length;
+      return count < limit;
+    }
+
+    // Keep for compatibility; append to end of column
+    function moveCard(id, toColumn) {
+      const card = state.cards.find(c => c.id === id);
+      if (!card) return;
+      const fromColumn = card.column;
+      card.column = toColumn;
+      // default: push positioning to end by array reordering
+      const idx = state.cards.findIndex(c => c.id === id);
+      state.cards.splice(idx, 1);
+      state.cards.push(card);
+      saveState();
+      renderBoard();
+      updateMoveStatus('moved', id, fromColumn, toColumn);
+    }
+
+    function moveCardWithIndex(id, toColumn, beforeId) {
+      const idx = state.cards.findIndex(c => c.id === id);
+      if (idx === -1) return;
+      const card = state.cards[idx];
+      const fromColumn = card.column;
+      card.column = toColumn;
+      // Remove card from current position
+      state.cards.splice(idx, 1);
+      if (beforeId != null) {
+        const beforeIdx = state.cards.findIndex(c => c.id === beforeId);
+        if (beforeIdx !== -1) {
+          state.cards.splice(beforeIdx, 0, card);
+        } else {
+          state.cards.push(card);
+        }
+      } else {
+        // Insert after last in target column by scanning from end
+        let insertIdx = state.cards.length;
+        for (let i = state.cards.length - 1; i >= 0; i--) {
+          if (state.cards[i].column === toColumn) { insertIdx = i + 1; break; }
+        }
+        state.cards.splice(insertIdx, 0, card);
+      }
+      saveState();
+      renderBoard();
+      updateMoveStatus('moved', id, fromColumn, toColumn);
+      // Keep search filtering consistent after moving under a filter
+      applySearchFilter();
+    }
+
+    // =========================
+    // Control bindings
+    // =========================
+    function bindControls() {
+      const addForm = document.getElementById('addTaskForm');
+      const titleInput = document.getElementById('taskTitleInput');
+      const descInput = document.getElementById('taskDescInput');
+      const assignInput = document.getElementById('taskAssigneeInput');
+      const prioritySelect = document.getElementById('taskPrioritySelect');
+      const addBtn = document.getElementById('addTaskBtn');
+      const titleError = document.getElementById('titleError');
+
+      function setAddStatus(text) {
+        document.getElementById('addStatus').textContent = 'add: ' + text;
+        document.getElementById('addStatusMirror').textContent = text;
+      }
+
+      addForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const title = titleInput.value.trim();
+        if (!title) {
+          titleError.textContent = 'Title is required.';
+          titleError.style.display = 'block';
+          addBtn.setAttribute('aria-disabled', 'true');
+          setAddStatus('error: empty title');
+          titleInput.focus();
+          return;
+        }
+        titleError.style.display = 'none';
+        addBtn.setAttribute('aria-disabled', 'false');
+
+        // Enforce WIP only for Todo (new tasks go to Todo)
+        const limit = parseInt(state.wip.todo, 10);
+        const count = columnCards('todo').length;
+        if (limit > 0 && count >= limit) {
+          showToast('Cannot add: WIP limit reached in "Todo".', 'error', 2000);
+          setAddStatus('blocked by WIP');
+          return;
+        }
+
+        const desc = descInput.value;
+        const assignee = assignInput.value;
+        const priority = prioritySelect.value;
+        const card = mkCard(title, desc, assignee, priority, 'todo');
+        state.cards.push(card);
+        saveState();
+
+        // Reset inputs (keep assignee and priority to speed up repeated entries)
+        titleInput.value = '';
+        descInput.value = '';
+        titleInput.focus();
+        setAddStatus('added');
+        showToast('Task added to Todo.', 'ok', 1200);
+        renderBoard();
+      });
+
+      // Search behavior
+      const searchInput = document.getElementById('searchInput');
+      const clearBtn = document.getElementById('clearSearchBtn');
+      function updateSearchStatus() {
+        const active = (state.search || '').trim().length > 0;
+        document.getElementById('searchStatus').textContent = 'search: ' + (active ? ('active: ' + state.search) : 'cleared');
+        document.getElementById('searchStatusMirror').textContent = active ? ('active: ' + state.search) : 'cleared';
+        searchInput.setAttribute('data-active', active ? 'true' : 'false');
+      }
+      searchInput.addEventListener('input', () => {
+        state.search = searchInput.value;
+        applySearchFilter();
+        updateSearchStatus();
+      });
+      clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        state.search = '';
+        applySearchFilter();
+        updateSearchStatus();
+        searchInput.focus();
+      });
+
+      // WIP inputs, buttons, and count buttons (click-to-edit affordance)
+      ['todo', 'doing', 'done'].forEach(col => {
+        const inp = document.getElementById(col + 'WipInput');
+        const btn = document.getElementById(col + 'WipEditBtn');
+        const countBtn = document.getElementById(col + 'Count');
+
+        if (state.wip[col] != null) inp.value = state.wip[col];
+
+        function applyWip() {
+          const val = parseInt(inp.value, 10);
+          state.wip[col] = Number.isFinite(val) ? val : 0;
+          saveState();
+          renderBoard();
+          document.getElementById('wipStatus').textContent = col + '=' + state.wip[col];
+          showToast('WIP updated for ' + columnLabel(col) + ': ' + state.wip[col], 'ok', 1200);
+        }
+
+        btn.addEventListener('click', applyWip);
+        inp.addEventListener('change', applyWip);
+        countBtn.addEventListener('click', () => {
+          // Focus input to indicate editability
+          inp.focus();
+          inp.select();
+        });
+      });
+
+      // Delegate card controls: delete (with modal), assign, priority, edit
+      document.getElementById('board').addEventListener('click', (e) => {
+        const target = e.target.closest('button');
+        if (!target) return;
+        const idMatch = target.id && target.id.match(/(assigneeBtn|priorityBtn|deleteBtn|editBtn)-(\d+)/);
+        if (!idMatch) return;
+        const [, type, sid] = idMatch;
+        const id = parseInt(sid, 10);
+        const card = state.cards.find(c => c.id === id);
+        if (!card) return;
+
+        if (type === 'deleteBtn') {
+          openDeleteModal(id, card.title);
+        } else if (type === 'assigneeBtn') {
+          const newName = prompt('Assign to (leave blank to unassign):', card.assignee || '');
+          if (newName !== null) {
+            card.assignee = newName.trim();
+            saveState();
+            renderBoard();
+            showToast('Assignee updated.', 'ok', 1000);
+          }
+        } else if (type === 'priorityBtn') {
+          card.priority = nextPriority(card.priority);
+          saveState();
+          renderBoard();
+          showToast('Priority: ' + priorityLabel(card.priority), 'ok', 1000);
+        } else if (type === 'editBtn') {
+          openEditModal(id);
+        }
+      });
+
+      // Confirm delete modal handlers
+      document.getElementById('confirmDeleteNo').addEventListener('click', () => {
+        closeDeleteModal(false);
+      });
+      document.getElementById('confirmDeleteYes').addEventListener('click', () => {
+        closeDeleteModal(true);
+      });
+
+      // Undo button
+      document.getElementById('undoBtn').addEventListener('click', () => {
+        if (lastDeletedCard) {
+          state.cards.push(lastDeletedCard);
+          saveState();
+          renderBoard();
+          showToast('Delete undone.', 'ok', 1200);
+          lastDeletedCard = null;
+          document.getElementById('undoBar').setAttribute('data-visible', 'false');
+          document.getElementById('deleteStatus').textContent = 'undone';
+        }
+      });
+
+      // Edit modal buttons
+      document.getElementById('editCancelBtn').addEventListener('click', () => {
+        closeEditModal(false);
+      });
+      document.getElementById('editSaveBtn').addEventListener('click', () => {
+        closeEditModal(true);
+      });
+    }
+
+    function nextPriority(p) {
+      return p === 'high' ? 'medium' : p === 'medium' ? 'low' : 'high';
+    }
+
+    function applySearchFilter() {
+      const filter = (state.search || '').trim().toLowerCase();
+      const cards = document.querySelectorAll('.card');
+      cards.forEach(cardEl => {
+        const id = parseInt(cardEl.dataset.id, 10);
+        const card = state.cards.find(c => c.id === id);
+        if (!card) return;
+        const text = `${card.title} ${card.desc} ${card.assignee}`.toLowerCase();
+        const visible = !(filter && !normalizedIncludes(text, filter));
+        cardEl.style.display = visible ? '' : 'none';
+      });
+      // update empty states since visibility may have changed
+      ['todo','doing','done'].forEach(col => {
+        const container = document.getElementById(col + 'Cards');
+        const total = columnCards(col).length;
+        const visible = Array.from(container.querySelectorAll('.card')).filter(el => el.style.display !== 'none').length;
+        const emptyEl = document.getElementById(col + 'EmptyState');
+        if (total === 0) {
+          emptyEl.textContent = 'No tasks here. WIP limit applies.';
+          emptyEl.setAttribute('data-visible','true');
+        } else if (visible === 0) {
+          emptyEl.textContent = 'No tasks match the current search.';
+          emptyEl.setAttribute('data-visible','true');
+        } else {
+          emptyEl.setAttribute('data-visible','false');
+        }
+      });
+    }
+
+    // =========================
+    // Delete modal & Undo
+    // =========================
+    function openDeleteModal(id, title) {
+      pendingDeleteId = id;
+      const modal = document.getElementById('confirmDeleteModal');
+      document.getElementById('confirmDeleteBody').textContent = 'Delete this task?\n\n' + title;
+      modal.setAttribute('data-open', 'true');
+      modal.setAttribute('aria-hidden', 'false');
+      document.getElementById('deleteStatus').textContent = 'pending';
+    }
+
+    function closeDeleteModal(confirmed) {
+      const modal = document.getElementById('confirmDeleteModal');

@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Online Academy — Learn Coding, Design, Marketing and more</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Online Academy: Explore courses in coding, design, marketing and more. View syllabi, meet instructors, and enroll easily." />
+  <style>
+    /* 
+      Destylized, high-contrast design.
+      Requirements applied:
+      - White background, black text
+      - No gradients, shadows, rounded corners
+      - Clear focus outlines
+      - Minimum target 44x44 for primary controls
+      - Two-column layout at desktop (1280x720 friendly)
+    */
+
+    :root{
+      --bg: #ffffff;
+      --panel: #f5f5f5;
+      --muted: #444444;
+      --text: #000000;
+      --card: #ffffff;
+      --border: #cccccc;
+      --accent: #0a7cff;
+      --accent-2: #0055cc;
+      --accent-3: #ff9900;
+      --success: #16a34a;
+      --danger: #d00000;
+      --warning: #d97706;
+      --radius: 0px;     /* no rounding */
+      --radius-sm: 0px;  /* no rounding */
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      line-height: 1.5;
+      margin: 0;
+    }
+    img { max-width: 100%; display: block; }
+    a { color: var(--accent); text-decoration: underline; }
+    a:focus, button:focus, input:focus, select:focus, textarea:focus {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    header {
+      position: sticky; top: 0; z-index: 50;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+    }
+    .container { width: min(1200px, 94vw); margin: 0 auto; padding: 12px; }
+    .topbar { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-logo {
+      width: 44px; height: 44px;
+      background: #000000;
+    }
+    .brand h1 { margin: 0; font-size: 18px; }
+
+    nav { display: flex; gap: 8px; flex-wrap: wrap; }
+    .nav-btn, .header-cta-btn {
+      min-width: 44px; min-height: 44px;
+      background: #ffffff; border: 1px solid var(--border);
+      color: var(--text); padding: 8px 12px; cursor: pointer; font-weight: 700;
+    }
+    .nav-btn[aria-current="page"], .nav-btn:hover {
+      background: #e6f0ff; border-color: #99c2ff;
+    }
+
+    main { padding: 12px 0 80px; }
+
+    /* Status bar (Landing & Navigation Proxies) */
+    #statusBar {
+      display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center;
+      border: 1px solid var(--border); padding: 8px; background: var(--panel);
+      margin: 12px 0;
+    }
+    .status-chip {
+      display: inline-block; border: 1px solid var(--border); padding: 6px 10px; margin-right: 6px;
+      background: #fff; min-height: 32px;
+    }
+
+    /* Hero (kept simple) */
+    .hero {
+      display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; align-items: start;
+      border: 1px solid var(--border); padding: 12px; background: #ffffff;
+      margin-bottom: 12px;
+    }
+    .hero h2 { margin: 0 0 8px; font-size: 24px; }
+    .hero p { margin: 0 0 12px; color: var(--muted); }
+    .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .cta-btn {
+      min-width: 44px; min-height: 44px;
+      background: var(--accent-3); color: #000000; border: 1px solid var(--border); padding: 8px 12px; font-weight: 800; cursor: pointer;
+    }
+    .cta-btn.secondary { background: #ffffff; color: #000; }
+    .pill {
+      display: inline-flex; align-items: center;
+      border: 1px solid var(--border); padding: 6px 10px; min-height: 32px; background: #fff; font-weight: 700;
+    }
+
+    /* Controls row: ensure fits at 1280x720 */
+    .controls {
+      display: grid; grid-template-columns: 1.4fr 0.8fr 0.8fr 0.8fr auto; gap: 8px;
+      margin: 8px 0 12px;
+    }
+    .control {
+      display: flex; gap: 8px; border: 1px solid var(--border);
+      padding: 8px 10px; align-items: center; background: #fff; min-height: 44px;
+    }
+    .control input, .control select { border: none; outline: none; width: 100%; font-size: 14px; background: #fff; }
+    .btn, .btn.alt, .btn.enroll {
+      min-width: 44px; min-height: 44px;
+      padding: 8px 12px; border: 1px solid var(--border); background: #ffffff; color: #000; font-weight: 700; cursor: pointer;
+    }
+    .btn:hover { background: #e6f0ff; border-color: #99c2ff; }
+    .btn.enroll { background: var(--accent-3); border-color: var(--border); color: #000; }
+    .btn.enroll:hover { background: #ffb84d; }
+    .btn.alt { background: #ffffff; }
+
+    /* Grid of course cards: two columns default to fit 1280x720 easily */
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .card {
+      background: #ffffff; border: 1px solid var(--border);
+    }
+    .card-header { padding: 10px; border-bottom: 1px solid var(--border); }
+    .card-title { margin: 0; font-size: 18px; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .badge { border: 1px solid var(--border); padding: 4px 8px; font-size: 12px; background: #fff; }
+    .card-body { padding: 10px; display: grid; gap: 8px; }
+    .progress { height: 8px; background: #eee; outline: 1px solid var(--border); }
+    .progress > span { height: 8px; display: block; background: #0a7cff; width: 0%; }
+
+    .muted { color: var(--muted); }
+
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px solid var(--border); padding-top: 8px; }
+    .action-row { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; }
+
+    /* Inline syllabus inside cards (requested) */
+    .inline-syllabus { display: none; border-top: 1px solid var(--border); padding-top: 8px; }
+    .inline-syllabus[data-open="true"] { display: block; }
+    .inline-syll-header { position: sticky; top: 56px; background: #ffffff; border: 1px solid var(--border); padding: 8px; margin-bottom: 8px; }
+    .syll-list { display: grid; gap: 6px; }
+    .syll-item-box { border: 1px solid var(--border); padding: 8px; }
+    .syll-item-title { font-weight: 800; margin-bottom: 4px; }
+
+    /* Syllabus View */
+    #view-syllabus .summary {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;
+      border: 1px solid var(--border); padding: 10px; background: #fff;
+    }
+    details.syll-item { border: 1px solid var(--border); background: #fff; }
+    details.syll-item + details.syll-item { margin-top: 8px; }
+    details.syll-item summary { list-style: none; cursor: pointer; padding: 10px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+    .syll-content { padding: 0 10px 10px 10px; color: var(--muted); }
+
+    .crumbs { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+    .crumbs button { background: #fff; border: 1px solid var(--border); color: #000; padding: 8px 10px; cursor: pointer; min-height: 44px; }
+    .crumbs button:hover { background: #e6f0ff; }
+
+    /* Instructors view */
+    .instructor-card {
+      display: grid; grid-template-columns: 64px 1fr auto; align-items: center; gap: 12px;
+      border: 1px solid var(--border); padding: 10px; background: #fff;
+    }
+    .avatar {
+      width: 64px; height: 64px; background: #000; color: #fff; display: grid; place-items: center; font-weight: 900; font-size: 16px;
+    }
+    .instructor-links { display: flex; gap: 8px; margin-top: 6px; }
+    .icon-btn {
+      width: 44px; height: 44px; border: 1px solid var(--border); background: #fff; display: grid; place-items: center; cursor: pointer;
+    }
+    .icon-btn:hover { background: #e6f0ff; }
+
+    /* Enrollment Form */
+    form { display: grid; gap: 10px; border: 1px solid var(--border); padding: 12px; background: #fff; }
+    .field { display: grid; gap: 6px; }
+    label { font-weight: 700; }
+    input[type="text"], input[type="email"], select, textarea {
+      width: 100%; padding: 10px; border: 1px solid var(--border); background: #fff; color: #000; font-size: 14px;
+    }
+    input.error-border, select.error-border, textarea.error-border { border-color: var(--danger); }
+    .help { font-size: 12px; color: var(--muted); }
+    .error { color: var(--danger); font-size: 14px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .radio-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .form-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .hint { color: var(--muted); font-size: 12px; }
+
+    /* Enroll list */
+    .enroll-list { margin-top: 12px; display: grid; gap: 8px; }
+    .enroll-item { border: 1px solid var(--border); padding: 8px; background: #fff; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 80;
+    }
+    .modal {
+      width: min(800px, 94vw); background: #ffffff; border: 1px solid var(--border);
+    }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--border); }
+    .modal-body { padding: 12px; display: grid; gap: 8px; }
+    .close-btn { background: #fff; color: #000; border: 1px solid var(--border); padding: 8px 10px; cursor: pointer; min-height: 44px; }
+    .close-btn:hover { background: #e6f0ff; }
+
+    /* Toast (kept simple) */
+    .toast {
+      position: fixed; right: 16px; bottom: 16px; z-index: 60; padding: 12px 14px;
+      color: #000; background: #d1fae5; border: 1px solid #10b981;
+      display: none;
+    }
+
+    /* Compare panel */
+    #compare-panel { border: 1px solid var(--border); padding: 10px; background: #fff; margin-bottom: 12px; display: none; }
+    #compare-panel[data-open="true"] { display: block; }
+    #compare-courses { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .compare-box { border: 1px solid var(--border); padding: 8px; }
+    .compare-title { font-weight: 800; margin-bottom: 6px; }
+    .compare-sticky { position: sticky; top: 56px; background: #fff; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+
+    /* Contact + FAQ + Back-to-top */
+    #view-contact, #view-faq { border: 1px solid var(--border); padding: 12px; background: #fff; }
+    .contact-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .copy-btn { min-height: 44px; border: 1px solid var(--border); background: #fff; cursor: pointer; }
+    #backToTopBtn { position: fixed; right: 16px; bottom: 80px; border: 1px solid var(--border); background: #fff; padding: 8px 12px; min-height:44px; display: none; }
+    #backToTopBtn[data-visible="true"] { display: block; }
+
+    footer { border-top: 1px solid var(--border); background: #fff; color: var(--muted); }
+    .footer-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 12px 0; }
+    .footer-cta { display: flex; gap: 8px; align-items: center; }
+
+    /* Responsive */
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .controls { grid-template-columns: 1fr 1fr 1fr; }
+      .hero { grid-template-columns: 1fr; }
+      #view-syllabus .summary { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .contact-row { grid-template-columns: 1fr; }
+      #compare-courses { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .grid { grid-template-columns: 1fr; }
+      .controls { grid-template-columns: 1fr; }
+    }
+
+    /* Extra: visible focus and action affordances */
+    .view-syllabus-btn, .enroll-btn, .syllabus-toggle-btn {
+      min-height: 44px;
+      border: 1px solid var(--border);
+      background: #fff;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .syllabus-toggle-btn[data-active="true"] { background: #e6f0ff; border-color: #99c2ff; }
+
+    /* Proxies text style */
+    .proxy-label { font-weight: 800; }
+
+    /* Ensure inputs with errors stand out */
+    .error-inline { color: var(--danger); font-weight: 700; }
+
+    /* Keep "hidden" utility for compatibility */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container topbar" role="navigation" aria-label="Primary">
+      <div class="brand" aria-label="Online Academy">
+        <div class="brand-logo" aria-hidden="true"></div>
+        <h1>Online Academy</h1>
+      </div>
+      <nav>
+        <button class="nav-btn" id="nav-courses" aria-current="page">Courses</button>
+        <button class="nav-btn" id="nav-instructors">Instructors</button>
+        <button class="nav-btn" id="nav-enroll">Enroll</button>
+        <button class="nav-btn" id="nav-faq">FAQ</button>
+        <button class="nav-btn" id="nav-contact">Contact</button>
+        <button class="header-cta-btn" id="header-enroll-cta" aria-label="Enroll now from header">Enroll Now</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="app" class="container">
+    <!-- Status Bar: proxies for automation and clarity -->
+    <div id="statusBar" aria-live="polite">
+      <div><span class="proxy-label">Active Section:</span> <span id="activeSection">Courses</span></div>
+      <div><span class="proxy-label">Enrollment:</span> <span id="enrollmentStatus">idle</span></div>
+      <div><span class="proxy-label">Error Status:</span> <span id="errorStatus">none</span></div>
+    </div>
+
+    <section class="hero" aria-label="Intro" id="hero-section">
+      <div>
+        <h2>Learn skills that launch careers</h2>
+        <div id="hero-thankyou" class="hidden" aria-live="polite">
+          <div class="status-chip" id="heroThankYouStatus">hidden</div>
+          <p><strong>Thank you for enrolling!</strong> Check your email for confirmation. Next, explore our community and prepare for your first session.</p>
+          <div class="cta-row">
+            <button class="btn" id="hero-next-cta">Go to Courses</button>
+            <button class="btn alt" id="hero-contact-cta">Contact Support</button>
+          </div>
+        </div>
+        <p id="hero-subtitle">Master coding, design, marketing and more with industry-ready syllabi and instructors who teach what they practice.</p>
+        <div class="cta-row">
+          <button class="cta-btn" id="cta-explore">Explore Courses</button>
+          <button class="cta-btn secondary" id="cta-enroll">Quick Enroll</button>
+          <span class="pill" aria-label="Completion rate">92% completion</span>
+        </div>
+        <div class="hint">Hint: Press Enter in search to refresh results.</div>
+      </div>
+      <div aria-hidden="false">
+        <div class="progress" title="Overall student satisfaction">
+          <span style="width: 86%"></span>
+        </div>
+        <small class="muted">Students recommend us to friends</small>
+        <div style="height: 8px"></div>
+        <div class="badge-row">
+          <span class="badge">Live mentor feedback</span>
+          <span class="badge">Career projects</span>
+          <span class="badge">Flexible schedules</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Comparison panel -->
+    <section id="compare-panel" aria-labelledby="compare-heading">
+      <div class="action-row">
+        <h3 id="compare-heading" style="margin:0;">Syllabus Compare</h3>
+        <button class="btn" id="compare-clear">Clear Selection</button>
+        <span class="muted" id="compare-count-label">0 selected</span>
+      </div>
+      <div id="compare-courses" aria-live="polite">
+        <div class="compare-box" id="compare-slot-1">
+          <div class="compare-sticky">
+            <div class="compare-title">Slot 1: None</div>
+            <div class="muted">Select a course checkbox to add here.</div>
+          </div>
+          <div id="compare-content-1" class="muted">No content.</div>
+        </div>
+        <div class="compare-box" id="compare-slot-2">
+          <div class="compare-sticky">
+            <div class="compare-title">Slot 2: None</div>
+            <div class="muted">Select another course checkbox to add here.</div>
+          </div>
+          <div id="compare-content-2" class="muted">No content.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-courses" aria-labelledby="heading-courses">
+      <h2 id="heading-courses" style="margin: 0 0 8px;">Explore Courses</h2>
+
+      <div class="controls" role="search">
+        <div class="control" aria-label="Search courses">
+          <svg width="18" height="18" fill="currentColor" aria-hidden="true" viewBox="0 0 24 24"><path d="M10 4a6 6 0 104.472 10.027l4.251 4.25 1.414-1.414-4.25-4.251A6 6 0 0010 4zm0 2a4 4 0 110 8 4 4 0 010-8z"/></svg>
+          <input id="search-input" type="text" placeholder="Search by title or keyword" autocomplete="off" />
+        </div>
+        <div class="control">
+          <select id="category-filter" aria-label="Filter by category">
+            <option value="">All Categories</option>
+          </select>
+        </div>
+        <div class="control">
+          <select id="level-filter" aria-label="Filter by level">
+            <option value="">All Levels</option>
+            <option>Beginner</option>
+            <option>Intermediate</option>
+            <option>Advanced</option>
+          </select>
+        </div>
+        <div class="control">
+          <select id="sort-select" aria-label="Sort courses">
+            <option value="popular">Sort: Most Popular</option>
+            <option value="rating">Sort: Highest Rated</option>
+            <option value="duration-asc">Sort: Shortest First</option>
+            <option value="duration-desc">Sort: Longest First</option>
+            <option value="title">Sort: Title A–Z</option>
+          </select>
+        </div>
+        <button class="btn alt" id="clear-filters-btn" title="Clear filters">Clear</button>
+      </div>
+
+      <div id="course-grid" class="grid" role="list" aria-label="Course list"></div>
+    </section>
+
+    <section id="view-syllabus" class="hidden" aria-labelledby="heading-syllabus">
+      <div class="crumbs">
+        <button id="syll-back">← Back to Courses</button>
+        <span class="muted">You’re viewing the detailed syllabus</span>
+      </div>
+      <h2 id="heading-syllabus" style="margin: 0 0 10px;">Course Syllabus</h2>
+      <div id="syllabus-summary" class="summary" role="region" aria-live="polite"></div>
+      <div id="syllabus-list" aria-label="Syllabus content"></div>
+    </section>
+
+    <section id="view-instructors" class="hidden" aria-labelledby="heading-instructors">
+      <h2 id="heading-instructors" style="margin: 0 0 10px;">Meet Our Instructors</h2>
+      <p class="muted" style="margin-top:0;margin-bottom:10px;">Learn from practitioners with real-world experience.</p>
+      <div id="instructor-grid" class="grid" role="list" aria-label="Instructor list"></div>
+    </section>
+
+    <section id="view-enroll" class="hidden" aria-labelledby="heading-enroll">
+      <h2 id="heading-enroll" style="margin: 0 0 10px;">Enrollment Form</h2>
+      <p class="muted" style="margin-top:0;margin-bottom:14px;">Secure your spot in a course. We’ll email confirmation instantly.</p>
+
+      <form id="enroll-form" novalidate>
+        <div class="form-row">
+          <div class="field">
+            <label for="enroll-name">Full Name</label>
+            <input type="text" id="enroll-name" autocomplete="name" required aria-describedby="name-help"/>
+            <small id="name-help" class="help">Enter your legal name for certification.</small>
+            <div class="error" id="err-name" aria-live="polite"></div>
+          </div>
+          <div class="field">
+            <label for="enroll-email">Email</label>
+            <input type="email" id="enroll-email" autocomplete="email" required />
+            <div class="error" id="err-email" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="enroll-phone">Phone (optional)</label>
+            <input type="text" id="enroll-phone" autocomplete="tel" placeholder="+1 555 555 5555" />
+          </div>
+          <div class="field">
+            <label for="enroll-course">Course</label>
+            <select id="enroll-course" required></select>
+            <div class="error" id="err-course" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Schedule</label>
+          <div class="radio-row" role="radiogroup" aria-label="Schedule">
+            <label><input type="radio" name="schedule" id="enroll-schedule-flex" value="Flexible" checked /> Flexible pace</label>
+            <label><input type="radio" name="schedule" id="enroll-schedule-full" value="Full-time" /> Full-time (intensive)</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="enroll-notes">Notes (optional)</label>
+          <textarea id="enroll-notes" rows="3" placeholder="Tell us anything that could help your learning experience"></textarea>
+        </div>
+
+        <div class="field">
+          <label><input type="checkbox" id="enroll-terms" /> I agree to the terms and privacy policy</label>
+          <div class="error" id="err-terms" aria-live="polite"></div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn enroll" id="enroll-submit">Submit Enrollment</button>
+          <span class="hint">Press Enter to Submit</span>
+          <button type="button" class="btn alt" id="enroll-reset">Reset</button>
+        </div>
+      </form>
+
+      <div class="enroll-list" aria-live="polite" id="enrollments-list"></div>
+    </section>
+
+    <section id="view-faq" class="hidden" aria-labelledby="heading-faq">
+      <h2 id="heading-faq" style="margin: 0 0 10px;">Frequently Asked Questions</h2>
+      <details>
+        <summary>How do I enroll in a course?</summary>
+        <div>Click any Enroll button on a course card or in the header/footer. The Enrollment form will appear with the selected course prefilled.</div>
+      </details>
+      <details>
+        <summary>Can I switch courses after enrolling?</summary>
+        <div>Yes. Reply to your confirmation email or use the Contact section. We’ll update your enrollment within one business day.</div>
+      </details>
+      <details>
+        <summary>Do you offer refunds?</summary>
+        <div>We offer a 7-day money-back guarantee. See our Terms of Service for details.</div>
+      </details>
+      <details>
+        <summary>What are the schedules like?</summary>
+        <div>Choose between Flexible pace and Full-time. Full-time courses include more live sessions. Both include asynchronous learning.</div>
+      </details>
+      <details>
+        <summary>Will I receive a certificate?</summary>
+        <div>Yes. Upon successful completion, a shareable certificate is issued.</div>
+      </details>
+    </section>
+
+    <section id="view-contact" class="hidden" aria-labelledby="heading-contact">
+      <h2 id="heading-contact" style="margin: 0 0 10px;">Contact</h2>
+      <div class="contact-row">
+        <div>
+          <div><strong>Email:</strong> <span id="contact-email-text">learn@onlineacademy.test</span></div>
+          <button class="copy-btn" id="copy-email-btn">Copy Email</button>
+          <div class="muted" id="copy-email-status">idle</div>
+        </div>
+        <div>
+          <div><strong>Phone:</strong> <span id="contact-phone-text">+1 415 555 0199</span></div>
+          <button class="copy-btn" id="copy-phone-btn">Copy Phone</button>
+          <div class="muted" id="copy-phone-status">idle</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Instructor Modal -->
+  <div class="modal-backdrop" id="instructor-modal" role="dialog" aria-modal="true" aria-labelledby="instr-modal-title" aria-hidden="true">
+    <div class="modal">
+      <div class="modal-header">
+        <strong id="instr-modal-title">Instructor</strong>
+        <button class="close-btn" id="instructor-modal-close" aria-label="Close instructor details">Close ✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:grid; grid-template-columns: 80px 1fr; gap: 12px; align-items: center;">
+          <div class="avatar" id="instr-avatar">IN</div>
+          <div>
+            <div style="font-weight:800;" id="instr-name">Instructor Name</div>
+            <div class="muted" id="instr-title">Title</div>
+          </div>
+        </div>
+        <div id="instr-bio" class="muted">Bio</div>
+        <div id="instr-courses" class="badge-row" aria-label="Instructor courses"></div>
+        <div class="instructor-links" id="instr-socials">
+          <a id="instr-twitter" class="icon-btn" href="https://twitter.com" target="_blank" rel="noopener" aria-label="Instructor Twitter">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22.46 6c-.77.35-1.6.58-2.47.69a4.26 4.26 0 001.87-2.35 8.55 8.55 0 01-2.7 1.03A4.25 4.25 0 0015.5 4c-2.37 0-4.29 1.92-4.29 4.29 0 .34.04.68.11 1A12.06 12.06 0 013 5.15a4.28 4.28 0 001.32 5.72 4.21 4.21 0 01-1.94-.54v.05c0 2.1 1.49 3.86 3.47 4.26a4.28 4.28 0 01-1.93.07 4.29 4.29 0 004 2.97A8.53 8.53 0 012 19.54a12.06 12.06 0 006.53 1.91c7.84 0 12.13-6.5 12.13-12.13 0-.18 0-.36-.01-.54A8.68 8.68 0 0024 5.1a8.4 8.4 0 01-2.4.66z"/></svg>
+          </a>
+          <a id="instr-linkedin" class="icon-btn" href="https://linkedin.com" target="_blank" rel="noopener" aria-label="Instructor LinkedIn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM0 8h5v16H0V8zm7.5 0h4.8v2.2h.07c.67-1.26 2.29-2.6 4.72-2.6C21.65 7.6 24 10 24 14.18V24h-5v-8.6c0-2.05-.73-3.45-2.58-3.45-1.41 0-2.26.95-2.63 1.86-.14.34-.18.82-.18 1.31V24h-5V8z"/></svg>
+          </a>
+          <a id="instr-website" class="icon-btn" href="https://example.com" target="_blank" rel="noopener" aria-label="Instructor Website">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1 3.1A7.98 7.98 0 004.1 11H11V5.1zM13 5.1V11h6.9A7.98 7.98 0 0013 5.1zM4.1 13A7.98 7.98 0 0011 18.9V13H4.1zM13 13v5.9A7.98 7.98 0 0019.9 13H13z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Legal Modal -->
+  <div class="modal-backdrop" id="legal-modal" role="dialog" aria-modal="true" aria-labelledby="legal-title" aria-hidden="true">
+    <div class="modal">
+      <div class="modal-header">
+        <strong id="legal-title">Legal</strong>
+        <button class="close-btn" id="legal-close-btn" aria-label="Close legal">Close ✕</button>
+      </div>
+      <div class="modal-body" id="legal-content" style="max-height:60vh; overflow:auto;">
+        <!-- populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="enroll-success-toast" role="status" aria-live="polite">
+    Enrollment submitted! Check your inbox for confirmation.
+  </div>
+
+  <button id="backToTopBtn" aria-label="Back to Top">Back to Top</button>
+
+  <footer>
+    <div class="container footer-row">
+      <small>© <span id="year"></span> Online Academy. Learn brighter.</small>
+      <div class="footer-cta">
+        <button class="btn enroll" id="footer-enroll-btn">Enroll</button>
+        <a class="icon-btn" id="footer-twitter" href="https://twitter.com/onlineacademy" target="_blank" rel="noopener" title="Follow us on Twitter" aria-label="Twitter">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22.46 6c-.77.35-1.6.58-2.47.69a4.26 4.26 0 001.87-2.35 8.55 8.55 0 01-2.7 1.03A4.25 4.25 0 0015.5 4c-2.37 0-4.29 1.92-4.29 4.29 0 .34.04.68.11 1A12.06 12.06 0 013 5.15a4.28 4.28 0 001.32 5.72 4.21 4.21 0 01-1.94-.54v.05c0 2.1 1.49 3.86 3.47 4.26a4.28 4.28 0 01-1.93.07 4.29 4.29 0 004 2.97A8.53 8.53 0 012 19.54a12.06 12.06 0 006.53 1.91c7.84 0 12.13-6.5 12.13-12.13 0-.18 0-.36-.01-.54A8.68 8.68 0 0024 5.1a8.4 8.4 0 01-2.4.66z"/></svg>
+        </a>
+        <a class="icon-btn" id="footer-linkedin" href="https://linkedin.com/company/onlineacademy" target="_blank" rel="noopener" title="Follow us on LinkedIn" aria-label="LinkedIn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM0 8h5v16H0V8zm7.5 0h4.8v2.2h.07c.67-1.26 2.29-2.6 4.72-2.6C21.65 7.6 24 10 24 14.18V24h-5v-8.6c0-2.05-.73-3.45-2.58-3.45-1.41 0-2.26.95-2.63 1.86-.14.34-.18.82-.18 1.31V24h-5V8z"/></svg>
+        </a>
+        <a class="icon-btn" id="footer-youtube" href="https://youtube.com/@onlineacademy" target="_blank" rel="noopener" title="Subscribe on YouTube" aria-label="YouTube">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.4 3.6 12 3.6 12 3.6s-7.4 0-9.4.5A3 3 0 00.5 6.2 31.4 31.4 0 000 12a31.4 31.4 0 00.5 5.8 3 3 0 002.1 2.1c2 .5 9.4.5 9.4.5s7.4 0 9.4-.5a3 3 0 002.1-2.1 31.4 31.4 0 00.5-5.8 31.4 31.4 0 00-.5-5.8zM9.8 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
+        </a>
+        <a href="#" id="footer-terms" class="muted">Terms of Service</a>
+        <a href="#" id="footer-privacy" class="muted">Privacy Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Data Model (added nextStart and outcomes for each course)
+    const courses = [
+      {
+        id: "js101",
+        title: "JavaScript Foundations",
+        category: "Coding",
+        level: "Beginner",
+        duration: 6,
+        rating: 4.8,
+        popular: 1200,
+        nextStart: "2025-10-07",
+        outcomes: [
+          "Write modern ES6+ JavaScript",
+          "Manipulate the DOM and handle events",
+          "Work with async code and APIs",
+          "Ship a small interactive project"
+        ],
+        description: "Start coding with modern JavaScript. Build interactive interfaces and learn the language of the web.",
+        instructor: {
+          id: "ins-lee",
+          name: "Avery Lee",
+          title: "Senior Frontend Engineer",
+          bio: "Avery has shipped experiences for millions at SaaS startups and Big Tech. Passionate about accessible, performant web apps.",
+          initials: "AL",
+          socials: {
+            twitter: "https://twitter.com",
+            linkedin: "https://linkedin.com",
+            website: "https://example.com"
+          }
+        },
+        syllabus: [
+          { title: "Week 1 — JS Basics", topics: ["Syntax & Variables", "Data Types", "Control Flow", "Developer Tools"] },
+          { title: "Week 2 — Functions & Scope", topics: ["Functions", "Arrow functions", "Scope & Hoisting", "Debugging"] },
+          { title: "Week 3 — Arrays & Objects", topics: ["Array methods", "Object patterns", "Immutability"] },
+          { title: "Week 4 — DOM & Events", topics: ["DOM API", "Events", "State & UI patterns"] },
+          { title: "Week 5 — Async JS", topics: ["Promises", "async/await", "Fetching data"] },
+          { title: "Week 6 — Capstone", topics: ["Mini project", "Code review", "Deployment"] }
+        ]
+      },
+      {
+        id: "ui201",
+        title: "UI/UX Design Essentials",
+        category: "Design",
+        level: "Beginner",
+        duration: 5,
+        rating: 4.7,
+        popular: 980,
+        nextStart: "2025-11-02",
+        outcomes: [
+          "Apply design thinking to real problems",
+          "Create wireframes and interactive prototypes",
+          "Conduct usability testing and iterate",
+          "Present a portfolio-ready case study"
+        ],
+        description: "Learn to design intuitive interfaces. Principles, prototyping, usability, and handoff to devs.",
+        instructor: {
+          id: "ins-khan",
+          name: "Nadia Khan",
+          title: "Product Designer",
+          bio: "Nadia designs delightful products for education and finance. She mentors designers transitioning into product roles.",
+          initials: "NK",
+          socials: {
+            twitter: "https://twitter.com",
+            linkedin: "https://linkedin.com",
+            website: "https://example.com"
+          }
+        },
+        syllabus: [
+          { title: "Week 1 — Design Thinking", topics: ["Research", "Personas", "User journeys"] },
+          { title: "Week 2 — Interface Patterns", topics: ["Layout", "Typography", "Color & Contrast"] },
+          { title: "Week 3 — Prototyping", topics: ["Wireframes", "Prototyping tools", "Microinteractions"] },
+          { title: "Week 4 — Usability", topics: ["Heuristics", "Testing", "Iteration"] },
+          { title: "Week 5 — Portfolio Project", topics: ["Case study", "Presentation", "Handoff"] }
+        ]
+      },
+      {
+        id: "mk301",
+        title: "Digital Marketing Strategy",
+        category: "Marketing",
+        level: "Intermediate",
+        duration: 6,
+        rating: 4.6,
+        popular: 860,
+        nextStart: "2025-09-30",
+        outcomes: [
+          "Build a cross‑channel marketing plan",
+          "Execute SEO and content programs",
+          "Design experiments and analyze results",
+          "Create dashboards for stakeholders"
+        ],
+        description: "SEO, content, paid media, email and analytics. Build a cross-channel strategy that converts.",
+        instructor: {
+          id: "ins-wood",
+          name: "Jordan Wood",
+          title: "Growth Marketer",
+          bio: "Jordan scaled marketing at B2B startups. Loves experimentation, copy, and analytics.",
+          initials: "JW",
+          socials: {
+            twitter: "https://twitter.com",
+            linkedin: "https://linkedin.com",
+            website: "https://example.com"
+          }
+        },
+        syllabus: [
+          { title: "Week 1 — Market Research", topics: ["ICP", "Positioning", "Competitor analysis"] },
+          { title: "Week 2 — SEO & Content", topics: ["Keyword research", "On-page SEO", "Content briefs"] },
+          { title: "Week 3 — Paid Media", topics: ["Channels", "Budgets", "Creative testing"] },
+          { title: "Week 4 — Email & CRM", topics: ["Lifecycle", "Segmentation", "Automation"] },
+          { title: "Week 5 — Analytics", topics: ["Attribution", "Dashboards", "KPI tracking"] },
+          { title: "Week 6 — Go-to-market", topics: ["Plan", "Forecasts", "Presentation"] }
+        ]
+      },
+      {
+        id: "ds101",
+        title: "Data Science with Python",
+        category: "Coding",
+        level: "Intermediate",
+        duration: 8,
+        rating: 4.9,
+        popular: 1500,
+        nextStart: "2025-10-21",
+        outcomes: [
+          "Use Python and Pandas for data wrangling",
+          "Visualize data and tell stories",
+          "Train and evaluate ML models",
+          "Complete a data science capstone"
+        ],
+        description: "Python, Pandas, visualization, and machine learning foundations with real datasets.",
+        instructor: {
+          id: "ins-chen",
+          name: "Riley Chen",
+          title: "Data Scientist",
+          bio: "Riley builds ML-powered features and analytics stacks. Focused on clear communication with stakeholders.",
+          initials: "RC",
+          socials: {
+            twitter: "https://twitter.com",
+            linkedin: "https://linkedin.com",
+            website: "https://example.com"
+          }
+        },
+        syllabus: [
+          { title: "Week 1 — Python Essentials", topics: ["Syntax", "Data structures", "Notebooks"] },
+          { title: "Week 2 — Data Wrangling", topics: ["Pandas", "Cleaning", "Merging"] },
+          { title: "Week 3 — Visualization", topics: ["Matplotlib", "Seaborn", "Storytelling"] },
+          { title: "Week 4 — Statistics", topics: ["Distributions", "Hypothesis testing"] },
+          { title: "Week 5 — ML Basics", topics: ["Train/test", "Regression", "Classification"] },
+          { title: "Week 6 — Model Eval", topics: ["Metrics", "Cross-val", "Overfitting"] },
+          { title: "Week 7 — Feature Eng", topics: ["Pipelines", "Scaling", "Encoding"] },
+          { title: "Week 8 — Capstone", topics: ["Project", "Report", "Presentation"] }
+        ]
+      },
+      {
+        id: "py201",
+        title: "Python for Web Backends",
+        category: "Coding",
+        level: "Advanced",
+        duration: 7,
+        rating: 4.7,
+        popular: 650,
+        nextStart: "2025-12-01",
+        outcomes: [
+          "Design and build RESTful APIs",
+          "Integrate databases and ORMs",
+          "Implement auth and testing",
+          "Deploy and monitor services"
+        ],
+        description: "APIs, auth, databases, and deployment. Build robust services from scratch.",
+        instructor: {
+          id: "ins-ram",
+          name: "Priya Ram",
+          title: "Backend Engineer",
+          bio: "Priya builds reliable, scalable backends. She’s passionate about developer tooling and clean architecture.",
+          initials: "PR",
+          socials: {
+            twitter: "https://twitter.com",
+            linkedin: "https://linkedin.com",
+            website: "https://example.com"
+          }
+        },
+        syllabus: [
+          { title: "Week 1 — HTTP & APIs", topics: ["REST", "Request lifecycle", "Routing"] },
+          { title: "Week 2 — Databases", topics: ["Relational vs NoSQL", "ORM basics"] },
+          { title: "Week 3 — Auth", topics: ["Sessions", "JWT", "Best practices"] },
+          { title: "Week 4 — Testing", topics: ["Unit", "Integration", "CI"] },
+          { title: "Week 5 — Caching & Perf", topics: ["Caching layers", "Profiling"] },
+          { title: "Week 6 — Deploy", topics: ["Containers", "Cloud", "Observability"] },
+          { title: "Week 7 — Project", topics: ["Ship an API", "Docs", "Monitoring"] }
+        ]
+      },
+      {
+        id: "wd301",
+        title: "Modern Web Development",
+        category: "Coding",
+        level: "Intermediate",
+        duration: 6,
+        rating: 4.8,
+        popular: 1100,
+        nextStart: "2025-10-14",
+        outcomes: [
+          "Use semantic HTML and accessible patterns",
+          "Build responsive layouts with CSS",
+          "Architect maintainable JS modules",
+          "Ship a production-grade frontend"
+        ],
+        description: "From semantic HTML5 to performance and accessibility. Build production-grade frontends.",
+        instructor: {
+          id: "ins-mora",
+          name: "Luis Mora",
+          title: "Full‑Stack Developer",
+          bio: "Luis has led web teams across e‑commerce and media. Believes in craftsmanship and inclusive design.",
+          initials: "LM",
+          socials: {
+            twitter: "https://twitter.com",
+            linkedin: "https://linkedin.com",
+            website: "https://example.com"
+          }
+        },
+        syllabus: [
+          { title: "Week 1 — HTML5 & Semantics", topics: ["Document structure", "A11y basics"] },
+          { title: "Week 2 — CSS Architecture", topics: ["Flexbox", "Grid", "Responsive"] },
+          { title: "Week 3 — JS Patterns", topics: ["Modules", "State", "APIs"] },
+          { title: "Week 4 — Performance", topics: ["Lighthouse", "Optimization", "Caching"] },
+          { title: "Week 5 — Accessibility", topics: ["ARIA", "Keyboard", "Color contrast"] },
+          { title: "Week 6 — Project", topics: ["Build & deploy", "Docs"] }
+        ]
+      }
+    ];
+
+    // State
+    let state = {
+      view: "courses",
+      selectedCourseId: null,
+      filters: { q: "", category: "", level: "", sort: "popular" },
+      compare: [] // array of course ids
+    };
+
+    // Utilities
+    const $ = sel => document.querySelector(sel);
+    function $all(sel, parent=document){ return Array.from(parent.querySelectorAll(sel)); }
+    const pad = (n) => String(n).padStart(2, "0");
+
+    function setActiveNav(id) {
+      ["nav-courses","nav-instructors","nav-enroll","nav-faq","nav-contact"].forEach(nid => {
+        const el = $("#"+nid);
+        if (!el) return;
+        el.setAttribute("aria-current", nid === id ? "page" : "false");
+      });
+    }
+
+    function updateStatusBar(viewLabel) {
+      $("#activeSection").textContent = viewLabel;
+    }
+
+    function setHash(view, courseId=null) {
+      // update URL hash for deep linking
+      const params = new URLSearchParams();
+      if (view) params.set("view", view);
+      if (courseId) params.set("course", courseId);
+      location.hash = params.toString();
+    }
+
+    function navigateTo(view, opts={}) {
+      state.view = view;
+      ["view-courses","view-syllabus","view-instructors","view-enroll","view-faq","view-contact"].forEach(id=>{
+        const el = $("#"+id);
+        if (!el) return;
+        el.classList.toggle("hidden", id !== "view-"+view);
+      });
+      if (view === "courses") { setActiveNav("nav-courses"); updateStatusBar("Courses"); }
+      if (view === "instructors") { setActiveNav("nav-instructors"); updateStatusBar("Instructors"); }
+      if (view === "enroll") { setActiveNav("nav-enroll"); updateStatusBar("Enroll"); }
+      if (view === "faq") { setActiveNav("nav-faq"); updateStatusBar("FAQ"); }
+      if (view === "contact") { setActiveNav("nav-contact"); updateStatusBar("Contact"); }
+
+      if (view === "courses") $("#search-input")?.focus();
+      if (view === "enroll") { $("#enroll-name")?.focus(); scrollIntoViewAndHighlight("#view-enroll"); }
+      if (view === "faq") $("#heading-faq")?.focus();
+      if (view === "contact") $("#heading-contact")?.focus();
+
+      if (view === "syllabus" && opts.courseId) {
+        state.selectedCourseId = opts.courseId;
+        renderSyllabus(opts.courseId);
+        updateStatusBar("Syllabus");
+      }
+      if (view === "instructors") renderInstructors();
+
+      // update hash to reflect current view
+      const cid = (opts.courseId || state.selectedCourseId || "");
+      setHash(view, cid || undefined);
+    }
+
+    function unique(list) { return [...new Set(list)]; }
+
+    function renderFilters() {
+      const categories = unique(courses.map(c => c.category)).sort();
+      const catSel = $("#category-filter");
+      catSel.innerHTML = `<option value="">All Categories</option>` + categories.map(c=>`<option>${c}</option>`).join("");
+    }
+
+    function matchFilters(course) {
+      const { q, category, level } = state.filters;
+      let ok = true;
+      if (q) {
+        const qlc = q.toLowerCase();
+        ok = ok && (
+          course.title.toLowerCase().includes(qlc) ||
+          course.description.toLowerCase().includes(qlc) ||
+          course.category.toLowerCase().includes(qlc) ||
+          course.level.toLowerCase().includes(qlc) ||
+          course.instructor.name.toLowerCase().includes(qlc)
+        );
+      }
+      if (category) ok = ok && course.category === category;
+      if (level) ok = ok && course.level === level;
+      return ok;
+    }
+
+    function sortCourses(list) {
+      const s = state.filters.sort;
+      const arr = [...list];
+      switch(s) {
+        case "rating": arr.sort((a,b)=> b.rating - a.rating); break;
+        case "duration-asc": arr.sort((a,b)=> a.duration - b.duration); break;
+        case "duration-desc": arr.sort((a,b)=> b.duration - a.duration); break;
+        case "title": arr.sort((a,b)=> a.title.localeCompare(b.title)); break;
+        case "popular":
+        default: arr.sort((a,b)=> b.popular - a.popular); break;
+      }
+      return arr;
+    }
+
+    function courseOutcomesHTML(outcomes) {
+      const items = outcomes.map(o => `<li>${o}</li>`).join("");
+      return `
+        <div>
+          <div style="font-weight:800; margin-bottom:4px;" class="outcomes-title">What you'll learn</div>
+          <ul style="margin-top:0;">${items}</ul>
+        </div>
+      `;
+    }
+
+    function inlineSyllabusHTML(c) {
+      const firstThree = c.syllabus.slice(0, Math.min(3, c.syllabus.length));
+      return `
+        <div class="inline-syll-header">
+          <div><strong>${c.title}</strong> — ${c.syllabus.length} modules • ${c.duration} weeks</div>
+        </div>
+        <div class="syll-list">
+          ${firstThree.map(item => `
+            <div class="syll-item-box">
+              <div class="syll-item-title">${item.title}</div>
+              <ul>${item.topics.map(t=>`<li>${t}</li>`).join("")}</ul>
+            </div>
+          `).join("")}
+          <div><button class="btn" data-action="open-full-syllabus" data-id="${c.id}">Open Full Syllabus</button></div>
+        </div>
+      `;
+    }
+
+    function renderCourseCards() {
+      const grid = $("#course-grid");
+      const filtered = sortCourses(courses.filter(matchFilters));
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div class="card" role="listitem" style="grid-column: 1/-1;"><div class="card-body"><strong>No courses match your filters.</strong><span class="muted"> Try clearing filters or searching a different keyword.</span></div></div>`;
+        return;
+      }
+      grid.innerHTML = filtered.map(c => {
+        const pct = Math.min(95, Math.round((c.rating/5)*100));
+        const outcomes = courseOutcomesHTML(c.outcomes || []);
+        const startDate = new Date(c.nextStart);
+        const startDateLabel = isNaN(startDate.getTime()) ? "TBA" : `${startDate.getFullYear()}-${pad(startDate.getMonth()+1)}-${pad(startDate.getDate())}`;
+        return `
+          <article class="card" role="listitem" aria-label="${c.title}">
+            <div class="card-header">
+              <h3 class="card-title">${c.title}</h3>
+              <div class="badge-row">
+                <span class="badge">${c.category}</span>
+                <span class="badge">${c.level}</span>
+                <span class="badge">⏱ ${c.duration} wk</span>
+                <span class="badge">⭐ ${c.rating}</span>
+                <span class="badge">Next start: ${startDateLabel}</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <p class="muted" style="margin-top:0;">${c.description}</p>
+              ${outcomes}
+              <div>
+                <div class="progress" title="Student rating score">
+                  <span style="width:${pct}%"></span>
+                </div>
+                <small class="muted">${c.popular.toLocaleString()} learners</small>
+              </div>
+              <div style="display:flex;align-items:center; gap:10px;">
+                <div class="avatar" style="width:44px;height:44px;font-size:14px;">${c.instructor.initials}</div>
+                <div>
+                  <div style="font-weight:700;">
+                    <a href="#" class="instructor-name-link" id="link-instructor-${c.instructor.id}" data-instructor="${c.instructor.id}" aria-label="View instructor ${c.instructor.name}">${c.instructor.name}</a>
+                  </div>
+                  <div class="muted" style="font-size:12px;">${c.instructor.title}</div>
+                </div>
+              </div>
+              <div class="action-row">
+                <label style="display:flex;align-items:center;gap:6px;">
+                  <input type="checkbox" class="compare-checkbox" data-id="${c.id}" aria-label="Select ${c.title} for comparison"> Compare
+                </label>
+                <button class="syllabus-toggle-btn" id="btn-inline-syllabus-${c.id}" data-action="toggle-inline-syllabus" data-id="${c.id}" aria-label="Toggle inline syllabus for ${c.title}">Toggle Syllabus</button>
+                <div class="actions" style="border-top:none; padding-top:0; justify-content:flex-end;">
+                  <button class="btn view-syllabus-btn" id="btn-syllabus-${c.id}" data-action="syllabus" data-id="${c.id}"

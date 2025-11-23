@@ -1,0 +1,9 @@
+{
+  "model": "gpt5",
+  "app": "camping-gear-checklist",
+  "variant": "integrated",
+  "v0_signature": null,
+  "analyzed_failures": null,
+  "destylized": true,
+  "generated_at": "2025-09-23T00:18:00.328069"
+}

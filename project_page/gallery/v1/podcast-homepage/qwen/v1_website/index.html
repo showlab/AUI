@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Podcast Home Page</title>
+    <style>
+        /* Base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #ffffff;
+            color: #000000;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header styles */
+        header {
+            text-align: center;
+            padding: 30px 0;
+            color: #000000;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Subscribe section */
+        .subscribe-section {
+            background: #f0f0f0;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+
+        .subscribe-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .subscribe-btn {
+            background: #000000;
+            color: #ffffff;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            min-width: 180px;
+            text-align: center;
+        }
+
+        .subscribe-btn:hover {
+            background: #333333;
+        }
+
+        /* Search container */
+        .search-container {
+            background: #f8f8f8;
+            padding: 20px;
+            margin: 30px 0;
+            border: 1px solid #ccc;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+            outline: none;
+            min-width: 200px;
+        }
+
+        .search-button {
+            background: #000000;
+            color: #ffffff;
+            border: none;
+            padding: 0 25px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .clear-search {
+            background: #cccccc;
+            color: #000000;
+            border: none;
+            padding: 0 10px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Results container */
+        .results-info {
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        /* Episodes container */
+        .episodes-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .episode-card {
+            background: #ffffff;
+            border: 1px solid #ccc;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .episode-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .episode-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid #eee;
+        }
+
+        .episode-content {
+            padding: 20px;
+        }
+
+        .episode-title {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: #000000;
+        }
+
+        .episode-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            color: #666666;
+            font-size: 0.9rem;
+        }
+
+        .episode-description {
+            color: #333333;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .episode-description::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 50%;
+            height: 1.2em;
+            background: linear-gradient(to right, transparent, #ffffff 50%);
+        }
+
+        .episode-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .subscribe-btn-card {
+            flex: 1;
+            background: #000000;
+            color: #ffffff;
+            border: none;
+            padding: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .subscribe-btn-card:hover {
+            background: #333333;
+        }
+
+        .play-btn {
+            background: #000000;
+            color: #ffffff;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .play-btn:hover {
+            background: #333333;
+        }
+
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 50px;
+            color: #000000;
+            font-size: 1.2rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: #666666;
+            margin-top: 40px;
+            font-size: 0.9rem;
+            border-top: 1px solid #ccc;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .episodes-container {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .search-button {
+                padding: 15px;
+            }
+            
+            .subscribe-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .subscribe-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            header {
+                padding: 20px 0;
+            }
+            
+            header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .episode-content {
+                padding: 15px;
+            }
+            
+            .episode-title {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Tooltip for long descriptions */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            border-bottom: 1px dotted #000000;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 300px;
+            background-color: #000000;
+            color: #ffffff;
+            text-align: center;
+            border-radius: 4px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Podcast Home Page</h1>
+            <p>Your favorite episodes, all in one place</p>
+        </header>
+
+        <!-- Subscribe section added -->
+        <section class="subscribe-section">
+            <h2>Subscribe to Our Podcast</h2>
+            <p>Get notified when new episodes drop</p>
+            <div class="subscribe-buttons">
+                <a href="#" class="subscribe-btn" id="apple-podcasts">Subscribe on Apple Podcasts</a>
+                <a href="#" class="subscribe-btn" id="spotify">Subscribe on Spotify</a>
+                <a href="#" class="subscribe-btn" id="rss">RSS Feed</a>
+            </div>
+        </section>
+
+        <section class="search-container">
+            <div class="search-box">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search episodes..." aria-label="Search episodes">
+                <button id="searchButton" class="search-button">Search</button>
+                <button id="clearSearch" class="clear-search">Clear</button>
+            </div>
+            <div class="results-info" id="resultsInfo"></div>
+        </section>
+
+        <main id="episodesContainer" class="episodes-container">
+            <!-- Episodes will be dynamically inserted here -->
+        </main>
+
+        <footer>
+            <p>© 2023 Podcast Home Page | All rights reserved</p>
+            <p><a href="#">Terms</a> | <a href="#">Privacy</a></p>
+        </footer>
+    </div>
+
+    <script>
+        // Sample podcast data
+        const podcastEpisodes = [
+            {
+                id: 1,
+                title: "The Future of AI in Everyday Life",
+                description: "Exploring how artificial intelligence is transforming our daily routines and what to expect in the coming years. We discuss practical applications of AI in home automation, personal assistants, and decision-making tools that are becoming increasingly sophisticated.",
+                date: "2023-06-15",
+                duration: "45:22",
+                image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80"
+            },
+            {
+                id: 2,
+                title: "Building Sustainable Habits",
+                description: "Practical strategies for creating lasting positive changes in your lifestyle and environment. We explore the psychology behind habit formation, how to overcome common obstacles, and techniques for integrating sustainability into daily routines.",
+                date: "2023-06-08",
+                duration: "38:45",
+                image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80"
+            },
+            {
+                id: 3,
+                title: "Remote Work Revolution",
+                description: "How remote work has changed the landscape of business and what it means for the future of employment. We examine productivity trends, communication tools, and the long-term implications for workplace culture and geography.",
+                date: "2023-06-01",
+                duration: "52:18",
+                image: "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80"
+            },
+            {
+                id: 4,
+                title: "Mindfulness in the Digital Age",
+                description: "Finding balance between technology and mental well-being in our hyperconnected world. This episode explores digital detox practices, mindful tech usage, and strategies for maintaining focus and presence despite constant connectivity.",
+                date: "2023-05-25",
+                duration: "41:33",
+                image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80"
+            },
+            {
+                id: 5,
+                title: "The Art of Storytelling",
+                description: "How narrative techniques shape our understanding of the world and influence human behavior. We dive into storytelling methods used in literature, film, advertising, and how these principles apply to personal communication and leadership.",
+                date: "2023-05-18",
+                duration: "36:57",
+                image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80"
+            },
+            {
+                id: 6,
+                title: "Climate Change Solutions",
+                description: "Innovative approaches to addressing environmental challenges and building sustainable communities. We highlight emerging technologies, policy initiatives, and grassroots movements that are making a difference in the fight against climate change.",
+                date: "2023-05-11",
+                duration: "48:12",
+                image: "https://images.unsplash.com/photo-1501854140801-50d01698950b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80"
+            }
+        ];
+
+        // DOM Elements
+        const episodesContainer = document.getElementById('episodesContainer');
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const clearSearch = document.getElementById('clearSearch');
+        const resultsInfo = document.getElementById('resultsInfo');
+
+        // Function to render episodes
+        function renderEpisodes(episodes) {
+            episodesContainer.innerHTML = '';
+            
+            // Update results info
+            if (episodes.length === 0) {
+                episodesContainer.innerHTML = `
+                    <div class="no-results">
+                        <p>No episodes found matching your search.</p>
+                    </div>
+                `;
+                resultsInfo.textContent = "0 episodes found";
+                return;
+            }
+            
+            resultsInfo.textContent = `${episodes.length} episode${episodes.length !== 1 ? 's' : ''} found`;
+            
+            episodes.forEach(episode => {
+                const episodeCard = document.createElement('article');
+                episodeCard.className = 'episode-card';
+                episodeCard.setAttribute('data-id', episode.id);
+                
+                // Create tooltip for long descriptions
+                const descriptionWithTooltip = `<span class="tooltip">${episode.description.substring(0, 100)}...
+                    <span class="tooltip-text">${episode.description}</span>
+                </span>`;
+                
+                episodeCard.innerHTML = `
+                    <img src="${episode.image}" alt="${episode.title}" class="episode-image">
+                    <div class="episode-content">
+                        <h2 class="episode-title">${episode.title}</h2>
+                        <div class="episode-meta">
+                            <span>${new Date(episode.date).toLocaleDateString()}</span>
+                            <span>${episode.duration}</span>
+                        </div>
+                        <p class="episode-description">${descriptionWithTooltip}</p>
+                        <div class="episode-actions">
+                            <button class="subscribe-btn-card" id="subscribe-${episode.id}">
+                                Subscribe
+                            </button>
+                            <button class="play-btn" id="play-${episode.id}">
+                                Play
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                episodesContainer.appendChild(episodeCard);
+                
+                // Add event listeners to buttons
+                const subscribeBtn = document.getElementById(`subscribe-${episode.id}`);
+                const playBtn = document.getElementById(`play-${episode.id}`);
+                
+                subscribeBtn.addEventListener('click', () => {
+                    alert(`Subscribed to "${episode.title}"!`);
+                });
+                
+                playBtn.addEventListener('click', () => {
+                    alert(`Playing "${episode.title}"...`);
+                });
+            });
+        }
+
+        // Function to filter episodes based on search term
+        function filterEpisodes(searchTerm) {
+            if (!searchTerm.trim()) {
+                return podcastEpisodes;
+            }
+            
+            return podcastEpisodes.filter(episode => 
+                episode.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                episode.description.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+
+        // Event Listeners
+        searchButton.addEventListener('click', () => {
+            const searchTerm = searchInput.value;
+            const filteredEpisodes = filterEpisodes(searchTerm);
+            renderEpisodes(filteredEpisodes);
+        });
+
+        searchInput.addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') {
+                searchButton.click();
+            }
+        });
+
+        // Clear search functionality
+        clearSearch.addEventListener('click', () => {
+            searchInput.value = '';
+            renderEpisodes(podcastEpisodes);
+            searchInput.focus();
+        });
+
+        // Focus on search input when page loads
+        window.addEventListener('load', () => {
+            searchInput.focus();
+        });
+
+        // Initial render
+        renderEpisodes(podcastEpisodes);
+
+        // Add focus styling to search input
+        searchInput.addEventListener('focus', () => {
+            searchInput.style.border = '2px solid #000000';
+        });
+
+        searchInput.addEventListener('blur', () => {
+            searchInput.style.border = '1px solid #ccc';
+        });
+
+        // Add event listeners for subscribe buttons
+        document.getElementById('apple-podcasts').addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('Opening Apple Podcasts subscription...');
+        });
+
+        document.getElementById('spotify').addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('Opening Spotify subscription...');
+        });
+
+        document.getElementById('rss').addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('Opening RSS feed...');
+        });
+    </script>
+</body>
+</html>

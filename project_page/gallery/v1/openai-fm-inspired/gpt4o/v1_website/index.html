@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Audio Explorer</title>
+  <style>
+    /* Base Styles */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
+      color: #000000;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background-color: #f4f4f4;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      margin: 0;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+      gap: 15px;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: #0078d7;
+      font-size: 1rem;
+    }
+
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    main {
+      flex: 1;
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    section {
+      margin-bottom: 40px;
+    }
+
+    section h2 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+
+    .audio-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .audio-item {
+      background: #f9f9f9;
+      padding: 15px;
+      border: 1px solid #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .audio-item h3 {
+      font-size: 1.2rem;
+      margin: 0;
+    }
+
+    .audio-item button {
+      background: #0078d7;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .audio-item button:hover {
+      background: #005fa3;
+    }
+
+    .cta-section {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .cta-section button {
+      background: #0078d7;
+      color: white;
+      padding: 15px 25px;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .cta-section button:hover {
+      background: #005fa3;
+    }
+
+    footer {
+      background-color: #f4f4f4;
+      text-align: center;
+      padding: 20px;
+      border-top: 1px solid #ddd;
+      font-size: 0.9rem;
+    }
+
+    footer a {
+      color: #0078d7;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 1.8rem;
+      }
+
+      .audio-item h3 {
+        font-size: 1rem;
+      }
+
+      .audio-item button {
+        padding: 8px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header Section -->
+  <header>
+    <h1>AI Audio Explorer</h1>
+    <nav>
+      <a href="#features">Features</a>
+      <a href="#episodes">Episodes</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Features Section -->
+    <section id="features">
+      <h2>Features</h2>
+      <p>Explore cutting-edge AI-generated music, customize your listening experience, and discover unique audio creations.</p>
+      <div>
+        <button id="learn-more-features">Learn More</button>
+      </div>
+    </section>
+
+    <!-- Audio Episodes Section -->
+    <section id="episodes">
+      <h2>Episodes</h2>
+      <div class="audio-list" id="audio-list">
+        <!-- Audio items will be dynamically added here -->
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about">
+      <h2>About</h2>
+      <p>AI Audio Explorer is a platform that brings you the best AI-generated audio tracks. Built by a team of passionate engineers, our mission is to revolutionize how you experience music.</p>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact">
+      <h2>Contact</h2>
+      <p>Have questions? Reach out to us via email:</p>
+      <p><a href="mailto:support@aiexplorer.com">support@aiexplorer.com</a></p>
+    </section>
+  </main>
+
+  <!-- Footer Section -->
+  <footer>
+    <p>Built with ❤️ by AI Enthusiasts | <a href="#privacy">Privacy Policy</a> | <a href="#terms">Terms of Service</a></p>
+  </footer>
+
+  <script>
+    // JavaScript Logic
+    const audioTracks = [
+      { id: 1, title: "AI Symphony #1", src: "https://example.com/audio1.mp3" },
+      { id: 2, title: "Neural Beats", src: "https://example.com/audio2.mp3" },
+      { id: 3, title: "Machine Melody", src: "https://example.com/audio3.mp3" },
+    ];
+
+    const audioListElement = document.getElementById('audio-list');
+
+    // Function to create audio item elements
+    function createAudioItem(track) {
+      const audioItem = document.createElement('div');
+      audioItem.className = 'audio-item';
+
+      const title = document.createElement('h3');
+      title.textContent = track.title;
+
+      const playButton = document.createElement('button');
+      playButton.textContent = 'Play';
+      playButton.id = `play-button-${track.id}`;
+      playButton.addEventListener('click', () => playAudio(track));
+
+      audioItem.appendChild(title);
+      audioItem.appendChild(playButton);
+
+      return audioItem;
+    }
+
+    // Function to play audio
+    function playAudio(track) {
+      const existingAudio = document.getElementById('current-audio');
+      if (existingAudio) {
+        existingAudio.pause();
+        existingAudio.remove();
+      }
+
+      const audio = document.createElement('audio');
+      audio.id = 'current-audio';
+      audio.src = track.src;
+      audio.autoplay = true;
+
+      document.body.appendChild(audio);
+      alert(`Now playing: ${track.title}`);
+    }
+
+    // Initialize the app
+    function init() {
+      audioTracks.forEach(track => {
+        const audioItem = createAudioItem(track);
+        audioListElement.appendChild(audioItem);
+      });
+    }
+
+    // Run the app
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <title>SPQR Tic Tac Toe</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg: #f2f2f2;
+      --bg-marble-1: rgba(255,255,255,0.85);
+      --bg-marble-2: rgba(210,210,210,0.35);
+      --bg-marble-vein: rgba(160,160,160,0.20);
+      --fg: #1c1c1c;
+      --muted: #5a5a5a;
+      --panel: rgba(255,255,255,0.65);
+      --panel-border: rgba(0,0,0,0.05);
+      --gold: #C9A227;
+      --gold-deep:#a8830f;
+      --crimson:#7f1d1d;
+      --accent:#b2912e;
+      --shadow: 0 10px 30px rgba(0,0,0,0.12);
+      --ring: 0 0 0 3px rgba(201,162,39,0.35);
+      --cell-bg: rgba(255,255,255,0.65);
+      --cell-hover: rgba(255,255,255,0.9);
+      --cell-press: rgba(255,255,255,0.98);
+      --x-color:#1f2937;
+      --o-color:#7f1d1d;
+      --win-glow: 0 0 0 8px rgba(201,162,39,0.12), 0 8px 20px rgba(201,162,39,0.35);
+      --banner-bg: linear-gradient(135deg,#f8f2d6,#f0e1a5);
+      --banner-fg:#3b2e07;
+      --btn-bg: rgba(255,255,255,0.75);
+      --btn-fg: #1c1c1c;
+      --btn-hover: rgba(255,255,255,0.95);
+      --btn-border: rgba(0,0,0,0.08);
+      --crest-filter: drop-shadow(0 6px 14px rgba(0,0,0,0.2));
+    }
+    /* Night Legion theme */
+    [data-theme="night"]{
+      --bg: #121316;
+      --bg-marble-1: rgba(18,19,22,0.88);
+      --bg-marble-2: rgba(35,36,41,0.45);
+      --bg-marble-vein: rgba(80,80,90,0.25);
+      --fg: #e8e8ea;
+      --muted: #a7a7ad;
+      --panel: rgba(22,23,27,0.7);
+      --panel-border: rgba(255,255,255,0.06);
+      --gold: #D1B55C;
+      --gold-deep:#b3953f;
+      --crimson:#c43b3b;
+      --accent:#d1b55c;
+      --shadow: 0 12px 36px rgba(0,0,0,0.45);
+      --ring: 0 0 0 3px rgba(209,181,92,0.32);
+      --cell-bg: rgba(30,31,36,0.8);
+      --cell-hover: rgba(40,42,48,0.95);
+      --cell-press: rgba(48,50,56,1);
+      --x-color:#e8e8ea;
+      --o-color:#d66a6a;
+      --win-glow: 0 0 0 8px rgba(209,181,92,0.16), 0 8px 28px rgba(209,181,92,0.4);
+      --banner-bg: linear-gradient(135deg,#2b2a25,#4b4124);
+      --banner-fg:#e8debf;
+      --btn-bg: rgba(24,25,30,0.9);
+      --btn-fg: #e8e8ea;
+      --btn-hover: rgba(42,43,50,0.95);
+      --btn-border: rgba(255,255,255,0.06);
+      --crest-filter: drop-shadow(0 8px 18px rgba(0,0,0,0.6));
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      color:var(--fg);
+      background: var(--bg);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      line-height:1.35;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x:hidden;
+    }
+    /* Faux marble background with subtle veins */
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      background:
+        radial-gradient(1200px 900px at 20% 10%, var(--bg-marble-2), transparent 60%),
+        radial-gradient(1000px 700px at 80% 0%, var(--bg-marble-2), transparent 60%),
+        radial-gradient(1400px 900px at 50% 100%, var(--bg-marble-2), transparent 65%),
+        repeating-linear-gradient(135deg, transparent 0 18px, var(--bg-marble-vein) 19px 20px, transparent 21px 42px),
+        linear-gradient(180deg, var(--bg-marble-1), var(--bg));
+      z-index:-3;
+    }
+    /* Colosseum silhouette at bottom */
+    body::after{
+      content:"";
+      position:fixed;
+      left:0;right:0;bottom:-2vh;height:40vh;
+      background:
+        url("data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 400'><defs><linearGradient id='g' x1='0' x2='0' y1='0' y2='1'><stop offset='0' stop-color='%23c9a227' stop-opacity='0.12'/><stop offset='1' stop-color='%23c9a227' stop-opacity='0.02'/></linearGradient></defs><g fill='url(%23g)'><path d='M0 320c95-12 167-34 248-82 113-68 160-109 269-147 76-26 153-35 259-29 74 4 173 18 235 49 42 21 61 46 79 85 29 62 73 84 110 97v107H0z'/><g opacity='0.45'><rect x='100' y='240' width='900' height='100' rx='20'/><g fill='%23c9a227' opacity='0.12'><rect x='130' y='260' width='50' height='50' rx='8'/><rect x='200' y='260' width='50' height='50' rx='8'/><rect x='270' y='260' width='50' height='50' rx='8'/><rect x='340' y='260' width='50' height='50' rx='8'/><rect x='410' y='260' width='50' height='50' rx='8'/><rect x='480' y='260' width='50' height='50' rx='8'/><rect x='550' y='260' width='50' height='50' rx='8'/><rect x='620' y='260' width='50' height='50' rx='8'/><rect x='690' y='260' width='50' height='50' rx='8'/><rect x='760' y='260' width='50' height='50' rx='8'/><rect x='830' y='260' width='50' height='50' rx='8'/><rect x='900' y='260' width='50' height='50' rx='8'/></g></g></g></svg>") bottom center/cover no-repeat;
+      pointer-events:none;
+      z-index:-2;
+      filter: blur(0.5px) var(--crest-filter);
+    }
+
+    .app{
+      min-height:100%;
+      display:grid;
+      grid-template-rows: auto auto auto 1fr auto;
+      gap: clamp(8px, 1vmin, 16px);
+      padding: clamp(10px, 1.5vmin, 16px);
+    }
+
+    header{
+      display:flex;
+      gap:8px;
+      justify-content:flex-end;
+      align-items:center;
+      background: var(--panel);
+      border:1px solid var(--panel-border);
+      border-radius:14px;
+      padding:10px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
+      position:sticky;
+      top: clamp(8px, 1vmin, 16px);
+      z-index:5;
+    }
+    .btn{
+      appearance:none;
+      border:1px solid var(--btn-border);
+      background: var(--btn-bg);
+      color: var(--btn-fg);
+      padding: 10px 14px;
+      border-radius:12px;
+      font-weight:600;
+      letter-spacing:.2px;
+      cursor:pointer;
+      transition: transform .06s ease, background-color .15s ease, box-shadow .15s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      outline:none;
+    }
+    .btn:hover{ background: var(--btn-hover) }
+    .btn:active{ transform: translateY(1px) scale(0.99) }
+    .btn:focus-visible{ box-shadow: var(--ring) }
+
+    .crest-row{
+      display:flex;
+      align-items:center;
+      gap: 16px;
+    }
+    .crest{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      background: var(--panel);
+      border:1px solid var(--panel-border);
+      border-radius:14px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
+    }
+    .crest svg{
+      height:38px;
+      width:auto;
+      filter: var(--crest-filter);
+    }
+    .spqr{
+      font-family: Cinzel, serif;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: var(--gold);
+      text-shadow: 0 1px 0 rgba(0,0,0,0.08);
+      font-size: clamp(18px, 2.4vmin, 24px);
+      user-select:none;
+    }
+
+    .scoreboard{
+      display:flex;
+      gap: 10px;
+      margin-left:auto;
+    }
+    .score{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 14px;
+      background: var(--panel);
+      border:1px solid var(--panel-border);
+      border-radius:14px;
+      box-shadow: var(--shadow);
+      min-width: 92px;
+      justify-content:center;
+      font-weight:700;
+    }
+    .score .label{
+      opacity:.8;
+      font-weight:600;
+      font-family: Cinzel, serif;
+      letter-spacing: .5px;
+    }
+    .score .count{
+      font-variant-numeric: tabular-nums;
+      font-weight:800;
+      color: var(--gold-deep);
+    }
+
+    #victoryBanner{
+      display:none;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      gap:10px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: var(--banner-bg);
+      color: var(--banner-fg);
+      border: 1px solid rgba(201,162,39,0.35);
+      box-shadow: 0 8px 22px rgba(0,0,0,0.12);
+      min-height: 44px;
+      font-weight:700;
+    }
+    #victoryBanner.show{display:flex}
+
+    main{
+      display:grid;
+      place-items:center;
+      position:relative;
+    }
+
+    /* Board sizing: dynamic vmin, constrained to available main height */
+    :root { --header-estimate: 120px; }
+    main{ --availH: calc(var(--vh, 1vh) * 100 - var(--header-estimate)); }
+    #board{
+      width: min(92vmin, 100%, var(--availH));
+      height: min(92vmin, 100%, var(--availH));
+      aspect-ratio: 1/1;
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: clamp(8px, 1.2vmin, 14px);
+      padding: clamp(8px, 1.2vmin, 16px);
+      background: var(--panel);
+      border:1px solid var(--panel-border);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
+    }
+
+    .cell{
+      appearance:none;
+      border:1px solid var(--panel-border);
+      background: var(--cell-bg);
+      border-radius: 16px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 10px 24px rgba(0,0,0,0.08);
+      transition: transform .06s ease, background-color .2s ease, box-shadow .2s ease, border-color .2s ease, filter .2s ease;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      position:relative;
+      overflow:hidden;
+      color: var(--fg);
+      outline:none;
+    }
+    .cell:hover{ background: var(--cell-hover) }
+    .cell:active{ background: var(--cell-press); transform: translateY(1px) }
+    .cell:focus-visible{ box-shadow: var(--ring) }
+
+    .mark{
+      font-family: Cinzel, serif;
+      font-weight: 800;
+      font-size: clamp(36px, 10.2vmin, 120px);
+      line-height:1;
+      text-shadow: 0 1px 0 rgba(0,0,0,0.05);
+      user-select:none;
+    }
+    .mark.x{ color: var(--x-color) }
+    .mark.o{ color: var(--o-color) }
+
+    .cell.win{
+      border-color: rgba(201,162,39,0.6);
+      filter: drop-shadow(0 2px 0 rgba(201,162,39,0.2));
+      box-shadow: var(--win-glow);
+      animation: gild 850ms ease both;
+    }
+    @keyframes gild{
+      from{ box-shadow: 0 0 0 0 rgba(201,162,39,0), 0 0 0 rgba(0,0,0,0); transform:scale(0.98) }
+      to{ transform:scale(1) }
+    }
+
+    /* Dialog */
+    dialog{
+      border:none;
+      padding:0;
+      background: transparent;
+    }
+    .modal{
+      width: min(680px, 92vw);
+      background: var(--panel);
+      border:1px solid var(--panel-border);
+      border-radius: 16px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+      overflow:hidden;
+    }
+    .modal header{
+      position:static;
+      box-shadow:none;
+      justify-content:space-between;
+      border-radius:0;
+      padding:14px 16px;
+      background: transparent;
+    }
+    .modal h2{
+      margin:0;
+      font-family: Cinzel, serif;
+      letter-spacing: .6px;
+      font-size: 20px;
+    }
+    .modal .content{
+      padding: 4px 16px 16px 16px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 720px){
+      .modal .content{ grid-template-columns: 1fr }
+      .scoreboard{ flex-wrap:wrap }
+    }
+    fieldset{
+      border:1px dashed var(--panel-border);
+      border-radius:12px;
+      padding:10px 12px 12px 12px;
+    }
+    legend{
+      font-weight:700;
+      font-family: Cinzel, serif;
+      color: var(--gold);
+      padding:0 6px;
+    }
+    .option{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:8px 6px;
+      border-radius:10px;
+      transition: background-color .2s ease;
+    }
+    .option:hover{ background: rgba(201,162,39,0.08) }
+    .option input[type="radio"]{
+      width:18px;height:18px;
+      accent-color: var(--gold);
+    }
+    .modal .actions{
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      padding: 10px 16px 16px 16px;
+    }
+
+    .note{
+      font-size: 12px;
+      color: var(--muted);
+      margin-left: 6px;
+    }
+
+    /* Glyph SVGs inside cells */
+    .icon{
+      width: 70%;
+      height: 70%;
+    }
+    .icon path, .icon circle, .icon rect, .icon polygon{ vector-effect: non-scaling-stroke }
+
+    /* Live region off-screen but readable */
+    .sr-only{
+      position:absolute !important;
+      width:1px;height:1px;
+      padding:0;margin:-1px;
+      overflow:hidden;
+      clip:rect(0,0,0,0);
+      white-space:nowrap;border:0;
+    }
+
+    /* Confetti canvas */
+    #confettiCanvas{
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body data-theme="day">
+  <div class="app" id="appRoot">
+    <header aria-label="Actions">
+      <button class="btn" id="btnNewRound" type="button" title="Start a new round">New Round</button>
+      <button class="btn" id="btnCustomize" type="button" title="Customize appearance and rules">Customize</button>
+      <button class="btn" id="btnResetScores" type="button" title="Reset the scoreboard">Reset Scores</button>
+    </header>
+
+    <div class="crest-row" aria-hidden="true">
+      <div class="crest">
+        <svg viewBox="0 0 180 60" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0" stop-color="#f3d87b"/>
+              <stop offset="1" stop-color="#c9a227"/>
+            </linearGradient>
+          </defs>
+          <g fill="url(#g1)">
+            <path d="M25,35 C35,18 55,10 90,10 C125,10 145,18 155,35 L150,35 C140,23 120,18 90,18 C60,18 40,23 30,35 Z"/>
+            <path d="M25,35 c10,12 30,17 65,17 c35,0 55,-5 65,-17 l-5,0 c-10,9 -30,14 -60,14 c-30,0 -50,-5 -60,-14 Z"/>
+            <circle cx="15" cy="35" r="4"/>
+            <circle cx="165" cy="35" r="4"/>
+          </g>
+        </svg>
+        <div class="spqr" aria-hidden="true">SPQR</div>
+      </div>
+      <div class="scoreboard" aria-label="Scoreboard">
+        <div class="score" id="scoreXCard" aria-live="polite">
+          <span class="label" aria-hidden="true">X</span>
+          <span class="count" id="scoreX">0</span>
+        </div>
+        <div class="score" id="scoreOCard" aria-live="polite">
+          <span class="label" aria-hidden="true">O</span>
+          <span class="count" id="scoreO">0</span>
+        </div>
+        <div class="score" id="scoreDrawCard" aria-live="polite">
+          <span class="label" aria-hidden="true">Draw</span>
+          <span class="count" id="scoreDraw">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="victoryBanner" role="status" aria-live="polite"></div>
+
+    <main>
+      <div id="board"
+           role="grid"
+           aria-label="Tic Tac Toe board"
+           aria-rowcount="3"
+           aria-colcount="3">
+      </div>
+      <div id="statusLive" class="sr-only" aria-live="polite"></div>
+    </main>
+
+    <dialog id="dialogCustomize" aria-labelledby="dialogTitle">
+      <div class="modal" role="document">
+        <header>
+          <h2 id="dialogTitle">Customize</h2>
+          <button class="btn" id="closeCustomize" type="button" title="Close">Close</button>
+        </header>
+        <div class="content">
+          <fieldset>
+            <legend>Theme</legend>
+            <label class="option">
+              <input id="themeDay" name="theme" type="radio" value="day" checked>
+              <span>Marble Day</span>
+            </label>
+            <label class="option">
+              <input id="themeNight" name="theme" type="radio" value="night">
+              <span>Night Legion</span>
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Glyphs</legend>
+            <label class="option">
+              <input id="glyphStandard" name="glyphs" type="radio" value="standard" checked>
+              <span>Standard X / O</span>
+            </label>
+            <label class="option">
+              <input id="glyphLegion" name="glyphs" type="radio" value="legion">
+              <span>Gladius / Laurel</span>
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Mode</legend>
+            <label class="option">
+              <input id="modeTwo" name="mode" type="radio" value="two" checked>
+              <span>2-Player</span>
+            </label>
+            <label class="option">
+              <input id="modeAI" name="mode" type="radio" value="ai">
+              <span>vs AI</span>
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>First move</legend>
+            <label class="option">
+              <input id="firstMoveX" name="first" type="radio" value="X" checked>
+              <span>X</span>
+            </label>
+            <label class="option">
+              <input id="firstMoveO" name="first" type="radio" value="O">
+              <span>O</span>
+            </label>
+            <div class="note">In vs AI mode, AI plays the opponent symbol.</div>
+          </fieldset>
+
+          <fieldset>
+            <legend>AI discipline</legend>
+            <label class="option">
+              <input id="aiDisciplinePerfect" name="aiDiscipline" type="radio" value="perfect" checked disabled>
+              <span>Perfect</span>
+            </label>
+            <label class="option">
+              <input id="aiDisciplinePragmatic" name="aiDiscipline" type="radio" value="pragmatic" disabled>
+              <span>Pragmatic</span>
+            </label>
+            <label class="option">
+              <input id="aiDisciplineReckless" name="aiDiscipline" type="radio" value="reckless" disabled>
+              <span>Reckless</span>
+            </label>
+          </fieldset>
+        </div>
+        <div class="actions">
+          <button class="btn" id="saveCustomize" type="button">Save</button>
+        </div>
+      </div>
+    </dialog>
+  </div>
+
+  <canvas id="confettiCanvas"></canvas>
+
+  <script>
+    (function(){
+      // Viewport height CSS var for mobile
+      function setVh(){
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+      }
+      setVh();
+      window.addEventListener('resize', setVh);
+
+      // State
+      const state = {
+        board: Array(9).fill(null),
+        current: 'X',
+        gameOver: false,
+        scores: { X:0, O:0, D:0 },
+        config: {
+          theme: 'day', // 'night'
+          glyphs: 'standard', // 'legion'
+          mode: 'two', // 'ai'
+          first: 'X',
+          aiDiscipline: 'perfect'
+        }
+      };
+
+      // DOM elements
+      const elBoard = document.getElementById('board');
+      const elBanner = document.getElementById('victoryBanner');
+      const elScoreX = document.getElementById('scoreX');
+      const elScoreO = document.getElementById('scoreO');
+      const elScoreD = document.getElementById('scoreDraw');
+      const statusLive = document.getElementById('statusLive');
+      const btnNewRound = document.getElementById('btnNewRound');
+      const btnCustomize = document.getElementById('btnCustomize');
+      const btnResetScores = document.getElementById('btnResetScores');
+      const dialog = document.getElementById('dialogCustomize');
+      const btnCloseCustomize = document.getElementById('closeCustomize');
+      const btnSaveCustomize = document.getElementById('saveCustomize');
+      const confettiCanvas = document.getElementById('confettiCanvas');
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Create cells
+      for (let i=0;i<9;i++){
+        const btn = document.createElement('button');
+        btn.className = 'cell';
+        btn.id = `cell-${i}`;
+        btn.setAttribute('role','gridcell');
+        const row = Math.floor(i/3)+1;
+        const col = i%3 + 1;
+        btn.setAttribute('aria-rowindex', String(row));
+        btn.setAttribute('aria-colindex', String(col));
+        btn.setAttribute('aria-label', `Empty. Row ${row} column ${col}`);
+        btn.addEventListener('click', ()=> tryMove(i));
+        btn.addEventListener('keydown', (e)=> handleCellKeyNav(e,i));
+        elBoard.appendChild(btn);
+      }
+
+      function handleCellKeyNav(e,i){
+        const key = e.key;
+        let row = Math.floor(i/3), col = i%3;
+        if (key === 'ArrowUp'){ e.preventDefault(); row = Math.max(0,row-1); focusCell(row*3+col); }
+        else if (key === 'ArrowDown'){ e.preventDefault(); row = Math.min(2,row+1); focusCell(row*3+col); }
+        else if (key === 'ArrowLeft'){ e.preventDefault(); col = Math.max(0,col-1); focusCell(row*3+col); }
+        else if (key === 'ArrowRight'){ e.preventDefault(); col = Math.min(2,col+1); focusCell(row*3+col); }
+        else if (key === 'Enter' || key === ' '){
+          e.preventDefault(); tryMove(i);
+        }
+      }
+      function focusCell(i){
+        const cell = document.getElementById(`cell-${i}`);
+        if (cell) cell.focus();
+      }
+
+      // Glyph rendering
+      const GLADIUS_SVG = `
+        <svg class="icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="blade" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0" stop-color="#dfe8ef"/>
+              <stop offset="1" stop-color="#a9b5bf"/>
+            </linearGradient>
+          </defs>
+          <g transform="translate(50,50) rotate(45) translate(-50,-50)">
+            <rect x="44" y="12" width="12" height="46" rx="5" fill="url(#blade)" stroke="#8a99a3" stroke-width="1"/>
+            <polygon points="44,12 56,12 50,4" fill="#b7c5cf" stroke="#8a99a3" stroke-width="1"/>
+            <rect x="38" y="58" width="24" height="6" rx="3" fill="#d1b55c" stroke="#a8830f" stroke-width="1"/>
+            <rect x="45" y="64" width="10" height="18" rx="5" fill="#7a4a2b" stroke="#5b3a1f" stroke-width="1"/>
+            <circle cx="50" cy="83" r="5" fill="#5b3a1f" stroke="#3d2817" stroke-width="1"/>
+          </g>
+        </svg>`;
+      const LAUREL_SVG = `
+        <svg class="icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+          <g fill="none" stroke="#2f8a57" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M30,65 C20,50 20,40 28,28" />
+            <path d="M70,65 C80,50 80,40 72,28" />
+            <!-- left leaves -->
+            <path d="M28,28 c-6,2 -8,8 -9,12" />
+            <path d="M31,33 c-7,3 -8,9 -9,13" />
+            <path d="M34,38 c-6,4 -7,9 -7,13" />
+            <path d="M37,43 c-6,4 -6,9 -6,12" />
+            <path d="M40,48 c-6,4 -6,9 -6,12" />
+            <!-- right leaves -->
+            <path d="M72,28 c6,2 8,8 9,12" />
+            <path d="M69,33 c7,3 8,9 9,13" />
+            <path d="M66,38 c6,4 7,9 7,13" />
+            <path d="M63,43 c6,4 6,9 6,12" />
+            <path d="M60,48 c6,4 6,9 6,12" />
+          </g>
+        </svg>`;
+
+      function renderMark(symbol){
+        if (state.config.glyphs === 'standard'){
+          const span = document.createElement('span');
+          span.className = `mark ${symbol.toLowerCase()}`;
+          span.textContent = symbol;
+          return span;
+        } else {
+          const wrapper = document.createElement('div');
+          wrapper.innerHTML = symbol === 'X' ? GLADIUS_SVG : LAUREL_SVG;
+          return wrapper.firstElementChild;
+        }
+      }
+
+      function announce(msg){
+        statusLive.textContent = msg;
+      }
+
+      function updateBoardUI(){
+        for (let i=0;i<9;i++){
+          const btn = document.getElementById(`cell-${i}`);
+          btn.classList.remove('win');
+          btn.innerHTML = '';
+          const val = state.board[i];
+          const row = Math.floor(i/3)+1, col = i%3+1;
+          if (val){
+            btn.appendChild(renderMark(val));
+            btn.setAttribute('aria-label', `${val}. Row ${row} column ${col}`);
+            btn.disabled = true;
+          } else {
+            btn.setAttribute('aria-label', `Empty. Row ${row} column ${col}. ${state.current}'s turn`);
+            btn.disabled = state.gameOver;
+          }
+        }
+      }
+
+      function setTheme(theme){
+        document.body.dataset.theme = theme;
+      }
+
+      function newRound(){
+        state.board = Array(9).fill(null);
+        state.gameOver = false;
+        state.current = state.config.first;
+        elBanner.classList.remove('show');
+        elBanner.textContent = '';
+        updateBoardUI();
+        announce(`${state.current} to play.`);
+        if (state.config.mode === 'ai'){
+          const aiSymbol = state.config.first === 'X' ? 'O' : 'X';
+          if (state.current === aiSymbol){
+            maybeQueueAITurn();
+          }
+        }
+      }
+
+      function endRound(winner, line){
+        state.gameOver = true;
+        // Highlight
+        if (line){
+          line.forEach(i=>{
+            document.getElementById(`cell-${i}`).classList.add('win');
+          });
+        }
+        // Score and banner
+        if (winner === 'X' || winner === 'O'){
+          state.scores[winner]++;
+          elBanner.textContent = `${winner} triumphs!`;
+          announce(`${winner} wins.`);
+          fireConfetti();
+        } else {
+          state.scores.D++;
+          elBanner.textContent = `Stalemate: Pax Romana.`;
+          announce(`Draw.`);
+        }
+        elBanner.classList.add('show');
+        updateScoresUI();
+        // Enable cells but disable clicks
+        for (let i=0;i<9;i++){
+          const btn = document.getElementById(`cell-${i}`);
+          btn.disabled = true;
+        }
+      }
+
+      function updateScoresUI(){
+        elScoreX.textContent = state.scores.X;
+        elScoreO.textContent = state.scores.O;
+        elScoreD.textContent = state.scores.D;
+      }
+
+      function tryMove(i){
+        if (state.gameOver) return;
+        if (state.board[i]) return;
+        const current = state.current;
+        state.board[i] = current;
+        const row = Math.floor(i/3)+1, col = i%3+1;
+        announce(`${current} places at row ${row}, column ${col}.`);
+        const result = checkWinner(state.board);
+        updateBoardUI();
+        if (result.winner){
+          endRound(result.winner, result.line);
+          return;
+        }
+        if (result.draw){
+          endRound(null, null);
+          return;
+        }
+        // Switch turn
+        state.current = current === 'X' ? 'O' : 'X';
+        announce(`${state.current} to play.`);
+        // AI turn if applicable
+        maybeQueueAITurn();
+      }
+
+      function maybeQueueAITurn(){
+        if (state.gameOver) return;
+        if (state.config.mode !== 'ai') return;
+        const aiSymbol = state.config.first === 'X' ? 'O' : 'X';
+        if (state.current !== aiSymbol) return;
+        // small delay to feel human
+        setTimeout(()=>{
+          const move = chooseAIMove(state.board, aiSymbol, aiOpponent(aiSymbol), state.config.aiDiscipline);
+          if (move != null){
+            tryMove(move);
+          }
+        }, 360);
+      }
+      function aiOpponent(aiSymbol){ return aiSymbol === 'X' ? 'O' : 'X'; }
+
+      function checkWinner(b){
+        const wins = [
+          [0,1,2],[3,4,5],[6,7,8],
+          [0,3,6],[1,4,7],[2,5,8],
+          [0,4,8],[2,4,6]
+        ];
+        for (const line of wins){
+          const [a,b2,c]=line;
+          if (b[a] && b[a]===b[b2] && b[a]===b[c]){
+            return { winner: b[a], line, draw:false };
+          }
+        }
+        if (b.every(Boolean)) return { winner:null, line:null, draw:true };
+        return { winner:null, line:null, draw:false };
+      }
+
+      function emptyIndices(b){
+        const arr = [];
+        for (let i=0;i<9;i++) if (!b[i]) arr.push(i);
+        return arr;
+      }
+
+      function chooseAIMove(board, ai, human, discipline){
+        // If first move and center empty, prefer center for all but reckless
+        if (discipline !== 'reckless' && board.every(v=>v===null)){ return 4; }
+        if (discipline === 'perfect'){
+          const {index} = minimax(board.slice(), ai, ai, human);
+          return index;
+        } else if (discipline === 'pragmatic'){
+          // Take immediate win
+          const avail = emptyIndices(board);
+          for (const idx of avail){
+            const tmp = board.slice();
+            tmp[idx]=ai;
+            if (checkWinner(tmp).winner===ai) return idx;
+          }
+          // Block immediate loss
+          for (const idx of avail){
+            const tmp = board.slice();
+            tmp[idx]=human;
+            if (checkWinner(tmp).winner===human) return idx;
+          }
+          // 70% choose best, 30% choose random among remaining
+          const r = Math.random();
+          if (r < 0.7){
+            const {index} = minimax(board.slice(), ai, ai, human);
+            return index;
+          } else {
+            return avail[Math.floor(Math.random()*avail.length)];
+          }
+        } else {
+          // Reckless: if can win now, do; else random move
+          const avail = emptyIndices(board);
+          for (const idx of avail){
+            const tmp = board.slice();
+            tmp[idx]=ai;
+            if (checkWinner(tmp).winner===ai) return idx;
+          }
+          return avail[Math.floor(Math.random()*avail.length)];
+        }
+      }
+
+      function minimax(board, player, ai, human){
+        const res = checkWinner(board);
+        if (res.winner === ai) return { score: 10, index: null };
+        if (res.winner === human) return { score: -10, index: null };
+        if (res.draw) return { score: 0, index: null };
+
+        const avail = emptyIndices(board);
+        let bestMove = null;
+        if (player === ai){
+          let bestScore = -Infinity;
+          for (const idx of avail){
+            board[idx] = player;
+            const move = minimax(board, human, ai, human);
+            board[idx] = null;
+            const score = move.score - 1; // prefer fast wins
+            if (score > bestScore){
+              bestScore = score;
+              bestMove = { index: idx, score: bestScore };
+            }
+          }
+          return bestMove;
+        } else {
+          let bestScore = Infinity;
+          for (const idx of avail){
+            board[idx] = player;
+            const move = minimax(board, ai, ai, human);
+            board[idx] = null;
+            const score = move.score + 1; // delay opponent win
+            if (score < bestScore){
+              bestScore = score;
+              bestMove = { index: idx, score: bestScore };
+            }
+          }
+          return bestMove;
+        }
+      }
+
+      // Confetti
+      const ctx = confettiCanvas.getContext('2d');
+      let confettiParticles = [];
+      let confettiRunning = false;
+      function resizeCanvas(){
+        confettiCanvas.width = window.innerWidth;
+        confettiCanvas.height = window.innerHeight;
+      }
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+
+      function fireConfetti(){
+        if (prefersReducedMotion) return;
+        confettiParticles = [];
+        const colors = [
+          '#d1b55c','#c9a227','#e9d7a0','#b68a1e','#f2e6b3'
+        ];
+        const count = Math.min(220, Math.floor((window.innerWidth*window.innerHeight)/12000));
+        for (let i=0;i<count;i++){
+          confettiParticles.push({
+            x: Math.random()*confettiCanvas.width,
+            y: -10 - Math.random()*confettiCanvas.height*0.3,
+            r: 4 + Math.random()*4,
+            d: 2 + Math.random()*2.5,
+            tilt: Math.random()*10,
+            tiltAngle: Math.random()*Math.PI,
+            tiltAngleInc: 0.02 + Math.random()*0.08,
+            color: colors[Math.floor(Math.random()*colors.length)]
+          });
+        }
+        if (!confettiRunning){
+          confettiRunning = true;
+          requestAnimationFrame(confettiLoop);
+        }
+        setTimeout(()=>{ confettiParticles = []; }, 1600);
+      }
+      function confettiLoop(){
+        if (!confettiRunning) return;
+        ctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+        if (confettiParticles.length === 0){ confettiRunning = false; return; }
+        for (const p of confettiParticles){
+          ctx.beginPath();
+          ctx.fillStyle = p.color;
+          ctx.moveTo(p.x + p.tilt + p.r, p.y);
+          ctx.arc(p.x + p.tilt, p.y, p.r, 0, Math.PI*2);
+          ctx.fill();
+        }
+        // update
+        for (const p of confettiParticles){
+          p.tiltAngle += p.tiltAngleInc;
+          p.y += p.d;
+          p.x += Math.sin(p.tiltAngle) * 1.4;
+          p.tilt = Math.sin(p.tiltAngle) * 8;
+        }
+        // recycle
+        for (let i=confettiParticles.length-1;i>=0;i--){
+          const p = confettiParticles[i];
+          if (p.y > confettiCanvas.height + 20){
+            confettiParticles.splice(i,1);
+          }
+        }
+        requestAnimationFrame(confettiLoop);
+      }
+
+      // Top bar actions
+      btnNewRound.addEventListener('click', ()=>{
+        newRound();
+      });
+      btnResetScores.addEventListener('click', ()=>{
+        state.scores = {X:0,O:0,D:0};
+        updateScoresUI();
+        announce('Scores reset.');
+      });
+
+      // Customize dialog
+      const getEl = (id)=>document.getElementById(id);
+      const radio = {
+        theme: [getEl('themeDay'), getEl('themeNight')],
+        glyphs: [getEl('glyphStandard'), getEl('glyphLegion')],
+        mode: [getEl('modeTwo'), getEl('modeAI')],
+        first: [getEl('firstMoveX'), getEl('firstMoveO')],
+        ai: [getEl('aiDisciplinePerfect'), getEl('aiDisciplinePragmatic'), getEl('aiDisciplineReckless')]
+      };
+
+      function openCustomize(){
+        // set radios from state
+        radio.theme.forEach(r=> r.checked = (r.value === state.config.theme));
+        radio.glyphs.forEach(r=> r.checked = (r.value === state.config.glyphs));
+        radio.mode.forEach(r=> r.checked = (r.value === state.config.mode));
+        radio.first.forEach(r=> r.checked = (r.value === state.config.first));
+        radio.ai.forEach(r=> r.checked = (r.value === state.config.aiDiscipline));
+        setAIDisciplineDisabled(state.config.mode !== 'ai');
+
+        if (typeof dialog.showModal === 'function'){ dialog.showModal(); }
+        else { dialog.setAttribute('open',''); } // basic fallback
+        // focus
+        getEl('themeDay').focus();
+      }
+      function closeCustomize(){
+        if (dialog.open) dialog.close();
+      }
+      function saveCustomize(){
+        const sel = (list)=> list.find(r=>r.checked).value;
+        state.config.theme = sel(radio.theme);
+        state.config.glyphs = sel(radio.glyphs);
+        state.config.mode = sel(radio.mode);
+        state.config.first = sel(radio.first);
+        state.config.aiDiscipline = sel(radio.ai);
+        setTheme(state.config.theme);
+        updateBoardUI();
+        announce('Settings updated.');
+        closeCustomize();
+        // Start new round with new first player and perhaps AI
+        newRound();
+      }
+
+      function setAIDisciplineDisabled(disabled){
+        radio.ai.forEach(r => r.disabled = disabled);
+      }
+
+      radio.mode.forEach(r=>{
+        r.addEventListener('change', ()=>{
+          setAIDisciplineDisabled(r.value !== 'ai');
+        });
+      });
+
+      btnCustomize.addEventListener('click', openCustomize);
+      btnCloseCustomize.addEventListener('click', closeCustomize);
+      btnSaveCustomize.addEventListener('click', saveCustomize);
+
+      dialog.addEventListener('cancel', (e)=>{ e.preventDefault(); closeCustomize(); });
+
+      // Init
+      setTheme(state.config.theme);
+      updateScoresUI();
+      newRound();
+
+      // Expose IDs for testing - already set.
+
+      // Ensure board cells are focusable initially
+      focusCell(4);
+
+    })();
+  </script>
+</body>
+</html>

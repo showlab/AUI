@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Countdown</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      color: #000;
+      overflow-y: auto;
+      background: #fff;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      color: #000;
+    }
+
+    form {
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    label {
+      font-weight: bold;
+      text-align: left;
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 5px 0;
+      border: 1px solid #000;
+      border-radius: 5px;
+      font-size: 1rem;
+      width: 100%;
+    }
+
+    input[type="file"] {
+      padding: 5px;
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: bold;
+      background-color: #007BFF;
+      color: white;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .countdown {
+      font-size: 3rem;
+      font-weight: bold;
+      margin: 20px 0;
+      color: #000;
+    }
+
+    .feedback {
+      font-size: 0.9rem;
+      color: red;
+      text-align: left;
+      display: none;
+    }
+
+    .tooltip {
+      font-size: 0.8rem;
+      color: #555;
+      text-align: left;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      .countdown {
+        font-size: 2.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 id="event-name">Event Countdown</h1>
+    <form id="event-form">
+      <div>
+        <label for="input-event-name">Event Name</label>
+        <input type="text" id="input-event-name" placeholder="Enter Event Name" required>
+        <div id="event-name-feedback" class="feedback">Event name is required.</div>
+      </div>
+      <div>
+        <label for="input-event-date">Event Date and Time</label>
+        <input type="datetime-local" id="input-event-date" required>
+        <div id="event-date-feedback" class="feedback">Invalid date or time.</div>
+        <div class="tooltip">Format: YYYY-MM-DDTHH:MM</div>
+      </div>
+      <div>
+        <label for="input-event-location">Location</label>
+        <input type="text" id="input-event-location" placeholder="City, Venue" required>
+        <div id="event-location-feedback" class="feedback">Location is required.</div>
+      </div>
+      <div>
+        <label for="input-background-image">Background Image</label>
+        <input type="file" id="input-background-image" accept="image/*">
+        <div class="tooltip">Optional: Upload a custom background image.</div>
+      </div>
+      <button id="start-countdown-btn" type="submit" disabled>Start Countdown</button>
+    </form>
+    <div class="countdown" id="countdown">00:00:00:00</div>
+    <button id="save-to-calendar" style="display: none;">Save to Calendar</button>
+    <div id="completion-feedback" style="display: none; color: green; font-weight: bold;">
+      Event saved to calendar!
+    </div>
+  </div>
+
+  <script>
+    const eventForm = document.getElementById('event-form');
+    const eventNameInput = document.getElementById('input-event-name');
+    const eventDateInput = document.getElementById('input-event-date');
+    const eventLocationInput = document.getElementById('input-event-location');
+    const backgroundImageInput = document.getElementById('input-background-image');
+    const startCountdownButton = document.getElementById('start-countdown-btn');
+    const countdownDisplay = document.getElementById('countdown');
+    const saveToCalendarButton = document.getElementById('save-to-calendar');
+    const completionFeedback = document.getElementById('completion-feedback');
+    const eventNameFeedback = document.getElementById('event-name-feedback');
+    const eventDateFeedback = document.getElementById('event-date-feedback');
+    const eventLocationFeedback = document.getElementById('event-location-feedback');
+
+    let countdownInterval;
+
+    function validateInputs() {
+      const eventName = eventNameInput.value.trim();
+      const eventDate = eventDateInput.value.trim();
+      const eventLocation = eventLocationInput.value.trim();
+      let isValid = true;
+
+      if (!eventName) {
+        eventNameFeedback.style.display = 'block';
+        isValid = false;
+      } else {
+        eventNameFeedback.style.display = 'none';
+      }
+
+      if (!eventDate || new Date(eventDate) <= new Date()) {
+        eventDateFeedback.style.display = 'block';
+        isValid = false;
+      } else {
+        eventDateFeedback.style.display = 'none';
+      }
+
+      if (!eventLocation) {
+        eventLocationFeedback.style.display = 'block';
+        isValid = false;
+      } else {
+        eventLocationFeedback.style.display = 'none';
+      }
+
+      startCountdownButton.disabled = !isValid;
+    }
+
+    eventForm.addEventListener('input', validateInputs);
+
+    eventForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const eventName = eventNameInput.value.trim();
+      const eventDate = new Date(eventDateInput.value);
+      const eventLocation = eventLocationInput.value.trim();
+
+      document.getElementById('event-name').textContent = `${eventName} - ${eventLocation}`;
+      saveToCalendarButton.style.display = 'block';
+
+      if (backgroundImageInput.files.length > 0) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          document.body.style.backgroundImage = `url('${e.target.result}')`;
+          document.body.style.backgroundSize = 'cover';
+          document.body.style.backgroundPosition = 'center';
+        };
+        reader.readAsDataURL(backgroundImageInput.files[0]);
+      }
+
+      if (countdownInterval) clearInterval(countdownInterval);
+
+      countdownInterval = setInterval(() => {
+        const now = new Date();
+        const timeLeft = eventDate - now;
+
+        if (timeLeft <= 0) {
+          clearInterval(countdownInterval);
+          countdownDisplay.textContent = '00:00:00:00';
+          alert('The event has started!');
+          return;
+        }
+
+        const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+        countdownDisplay.textContent = `${String(days).padStart(2, '0')}:${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      }, 1000);
+    });
+
+    saveToCalendarButton.addEventListener('click', () => {
+      const eventName = eventNameInput.value.trim();
+      const eventDate = new Date(eventDateInput.value);
+      const eventLocation = eventLocationInput.value.trim();
+
+      const calendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventName)}&dates=${eventDate.toISOString().replace(/-|:|\.\d+/g, '')}/${eventDate.toISOString().replace(/-|:|\.\d+/g, '')}&location=${encodeURIComponent(eventLocation)}`;
+      window.open(calendarUrl, '_blank');
+      completionFeedback.style.display = 'block';
+
+      setTimeout(() => {
+        completionFeedback.style.display = 'none';
+      }, 3000);
+    });
+  </script>
+</body>
+</html>

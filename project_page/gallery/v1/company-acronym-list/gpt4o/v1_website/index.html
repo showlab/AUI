@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Company Acronym List - Improved</title>
+  <style>
+    /* General styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      background-color: #ffffff;
+      color: #000000;
+    }
+    header {
+      background-color: #000000;
+      color: #ffffff;
+      padding: 1rem;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    /* Main container */
+    .container {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: #ffffff;
+      border: 1px solid #ccc;
+    }
+
+    /* Search bar */
+    .search-bar {
+      display: flex;
+      margin-bottom: 1.5rem;
+    }
+    .search-bar input {
+      flex: 1;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+    }
+    .search-bar button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border: none;
+      background-color: #000000;
+      color: #ffffff;
+      cursor: pointer;
+    }
+    .search-bar button:hover {
+      background-color: #333333;
+    }
+
+    /* Acronym list */
+    .acronym-list {
+      margin-bottom: 2rem;
+    }
+    .acronym-item {
+      padding: 0.5rem;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .acronym-item:last-child {
+      border-bottom: none;
+    }
+    .acronym-item h3 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+    .acronym-item p {
+      margin: 0.2rem 0 0;
+      font-size: 0.9rem;
+      color: #555;
+    }
+    .category-tag {
+      display: inline-block;
+      margin-top: 0.5rem;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.8rem;
+      color: #ffffff;
+      background-color: #000000;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .action-buttons button {
+      padding: 0.3rem 0.5rem;
+      font-size: 0.8rem;
+      border: 1px solid #ccc;
+      background-color: #ffffff;
+      cursor: pointer;
+    }
+    .action-buttons button:hover {
+      background-color: #f0f0f0;
+    }
+
+    /* Add/Edit form */
+    .form-container {
+      margin-bottom: 2rem;
+      border: 1px solid #ccc;
+      padding: 1rem;
+      background-color: #f9f9f9;
+    }
+    .form-container h2 {
+      margin: 0 0 1rem;
+      font-size: 1.2rem;
+    }
+    .form-container form {
+      display: grid;
+      gap: 1rem;
+    }
+    .form-container form input, .form-container form select, .form-container form button {
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+    .form-container form button {
+      background-color: #000000;
+      color: #ffffff;
+      border: none;
+      cursor: pointer;
+    }
+    .form-container form button:hover {
+      background-color: #333333;
+    }
+
+    /* Quiz mode */
+    .quiz-mode {
+      margin-top: 2rem;
+    }
+    .quiz-question {
+      margin-bottom: 1rem;
+    }
+    .quiz-options button {
+      display: block;
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      background-color: #f0f0f0;
+      cursor: pointer;
+    }
+    .quiz-options button:hover {
+      background-color: #e0e0e0;
+    }
+    .quiz-result {
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+
+    /* Responsive design */
+    @media (max-width: 600px) {
+      .search-bar button {
+        font-size: 0.9rem;
+      }
+      .acronym-item h3 {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Company Acronym List - Improved</h1>
+  </header>
+  <div class="container">
+    <!-- Add/Edit Form -->
+    <div class="form-container" id="formContainer">
+      <h2 id="formTitle">Add New Acronym</h2>
+      <form id="acronymForm">
+        <input type="text" id="acronymInput" placeholder="Acronym (e.g., HR)" required>
+        <input type="text" id="definitionInput" placeholder="Definition (e.g., Human Resources)" required>
+        <select id="categoryInput">
+          <option value="Team">Team</option>
+          <option value="Process">Process</option>
+          <option value="Technology">Technology</option>
+          <option value="Design">Design</option>
+        </select>
+        <button type="submit" id="saveButton">Save</button>
+      </form>
+    </div>
+
+    <!-- Search bar -->
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search for an acronym...">
+      <button id="searchButton">Search</button>
+    </div>
+
+    <!-- Acronym list -->
+    <div class="acronym-list" id="acronymList">
+      <!-- Acronyms will be dynamically added here -->
+    </div>
+
+    <!-- Quiz mode -->
+    <div class="quiz-mode" id="quizMode">
+      <h2>Quiz Mode</h2>
+      <div class="quiz-question" id="quizQuestion"></div>
+      <div class="quiz-options" id="quizOptions"></div>
+      <div class="quiz-result" id="quizResult"></div>
+    </div>
+  </div>
+
+  <script>
+    // Persistent data storage
+    let acronyms = JSON.parse(localStorage.getItem('acronyms')) || [];
+
+    // DOM elements
+    const searchInput = document.getElementById("searchInput");
+    const searchButton = document.getElementById("searchButton");
+    const acronymList = document.getElementById("acronymList");
+    const acronymForm = document.getElementById("acronymForm");
+    const acronymInput = document.getElementById("acronymInput");
+    const definitionInput = document.getElementById("definitionInput");
+    const categoryInput = document.getElementById("categoryInput");
+    const formTitle = document.getElementById("formTitle");
+    const saveButton = document.getElementById("saveButton");
+    const quizQuestion = document.getElementById("quizQuestion");
+    const quizOptions = document.getElementById("quizOptions");
+    const quizResult = document.getElementById("quizResult");
+
+    let editIndex = null;
+
+    // Save to localStorage
+    function saveToStorage() {
+      localStorage.setItem('acronyms', JSON.stringify(acronyms));
+    }
+
+    // Render acronym list
+    function renderAcronymList(filter = "") {
+      acronymList.innerHTML = "";
+      const filteredAcronyms = acronyms.filter(acronym =>
+        acronym.acronym.toLowerCase().includes(filter.toLowerCase()) ||
+        acronym.definition.toLowerCase().includes(filter.toLowerCase())
+      );
+      if (filteredAcronyms.length === 0) {
+        acronymList.innerHTML = "<p>No results found.</p>";
+        return;
+      }
+      filteredAcronyms.forEach((acronym, index) => {
+        const item = document.createElement("div");
+        item.className = "acronym-item";
+        item.innerHTML = `
+          <div>
+            <h3>${acronym.acronym}</h3>
+            <p>${acronym.definition}</p>
+            <span class="category-tag">${acronym.category}</span>
+          </div>
+          <div class="action-buttons">
+            <button onclick="editAcronym(${index})">Edit</button>
+            <button onclick="deleteAcronym(${index})">Delete</button>
+          </div>
+        `;
+        acronymList.appendChild(item);
+      });
+    }
+
+    // Add or edit acronym
+    acronymForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const acronym = acronymInput.value.trim();
+      const definition = definitionInput.value.trim();
+      const category = categoryInput.value;
+
+      if (editIndex !== null) {
+        acronyms[editIndex] = { acronym, definition, category };
+        editIndex = null;
+        formTitle.textContent = "Add New Acronym";
+        saveButton.textContent = "Save";
+      } else {
+        acronyms.push({ acronym, definition, category });
+      }
+      saveToStorage();
+      renderAcronymList();
+      acronymForm.reset();
+    });
+
+    // Edit acronym
+    window.editAcronym = function (index) {
+      const acronym = acronyms[index];
+      acronymInput.value = acronym.acronym;
+      definitionInput.value = acronym.definition;
+      categoryInput.value = acronym.category;
+      formTitle.textContent = "Edit Acronym";
+      saveButton.textContent = "Update";
+      editIndex = index;
+    };
+
+    // Delete acronym
+    window.deleteAcronym = function (index) {
+      acronyms.splice(index, 1);
+      saveToStorage();
+      renderAcronymList();
+    };
+
+    // Quiz mode logic
+    let currentQuizIndex = 0;
+    function startQuiz() {
+      quizResult.textContent = "";
+      if (currentQuizIndex >= acronyms.length) {
+        quizQuestion.textContent = "Quiz completed!";
+        quizOptions.innerHTML = "";
+        return;
+      }
+      const currentAcronym = acronyms[currentQuizIndex];
+      quizQuestion.textContent = `What does "${currentAcronym.acronym}" stand for?`;
+      quizOptions.innerHTML = "";
+      const options = [...acronyms.map(a => a.definition)];
+      options.sort(() => Math.random() - 0.5); // Shuffle options
+      options.forEach(option => {
+        const button = document.createElement("button");
+        button.textContent = option;
+        button.addEventListener("click", () => {
+          if (option === currentAcronym.definition) {
+            quizResult.textContent = "Correct!";
+          } else {
+            quizResult.textContent = "Incorrect!";
+          }
+          currentQuizIndex++;
+          setTimeout(startQuiz, 1000);
+        });
+        quizOptions.appendChild(button);
+      });
+    }
+
+    // Event listeners
+    searchButton.addEventListener("click", () => {
+      renderAcronymList(searchInput.value);
+    });
+
+    // Initialize app
+    renderAcronymList();
+    startQuiz();
+  </script>
+</body>
+</html>

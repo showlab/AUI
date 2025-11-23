@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8" />
+  <title>Data Visualization Playground</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root{
+      --bg:#0f1220;
+      --card:#151a2e;
+      --muted:#8c93b3;
+      --text:#e9ecff;
+      --accent:#5b8cff;
+      --accent2:#7cf8d8;
+      --danger:#ff6b6b;
+      --shadow: 0 10px 30px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,0.05) inset;
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background:
+        radial-gradient(1200px 600px at 20% -10%, rgba(123,146,255,0.18), transparent 50%),
+        radial-gradient(1000px 500px at 110% 0%, rgba(124,248,216,0.20), transparent 40%),
+        var(--bg);
+      color:var(--text);
+    }
+    header{
+      position:sticky; top:0; z-index:5;
+      background: linear-gradient(180deg, rgba(21,26,46,.85), rgba(21,26,46,.65));
+      backdrop-filter: blur(8px);
+      border-bottom:1px solid rgba(255,255,255,0.06);
+    }
+    .header-inner{
+      max-width:1400px; margin:0 auto; padding:16px 24px;
+      display:flex; align-items:center; gap:16px; justify-content:space-between;
+    }
+    #appTitle{
+      margin:0; font-size:22px; letter-spacing:.4px; font-weight:700;
+      display:flex; align-items:center; gap:12px;
+    }
+    .badge{
+      font-size:12px; color:#0a1335; background:linear-gradient(90deg, var(--accent), var(--accent2));
+      padding:4px 8px; border-radius:999px; font-weight:700;
+    }
+
+    main{
+      max-width:1400px; margin:0 auto; padding:20px 24px; display:grid; gap:20px;
+      grid-template-columns: 340px 1fr;
+    }
+    aside{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00));
+      border:1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:16px;
+      display:flex; flex-direction:column; gap:14px;
+      min-height: 640px;
+    }
+    .group{
+      background: rgba(255,255,255,0.02);
+      border:1px solid rgba(255,255,255,0.06);
+      border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px;
+    }
+    .group h3{
+      margin:0; font-size:14px; color:var(--muted); font-weight:700; letter-spacing:.3px;
+    }
+    label{font-size:12px; color:var(--muted); display:block; margin-bottom:6px;}
+    select, input[type="color"], input[type="file"]{
+      width:100%; background:#0e1428; color:var(--text);
+      border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:10px 12px;
+      outline:none; transition:.2s border;
+    }
+    select:focus, input[type="color"]:focus, input[type="file"]:focus{ border-color: var(--accent); }
+    input[type="color"]{ padding:6px; height:38px; }
+    .row{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .controls-inline{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .muted{color:var(--muted); font-size:12px;}
+    .btn{
+      appearance:none; border:none; border-radius:12px; padding:10px 14px;
+      font-weight:700; letter-spacing:.3px; cursor:pointer; color:#06102a;
+      background:linear-gradient(90deg, var(--accent), var(--accent2));
+      box-shadow: 0 8px 20px rgba(91,140,255,.35);
+      transition:transform .08s ease, box-shadow .2s ease;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn-outline{
+      background:transparent; color:var(--text);
+      border:1px solid rgba(255,255,255,0.14); box-shadow:none;
+    }
+    .btn-danger{
+      background: linear-gradient(90deg, #ff6b6b, #ff9770);
+      color:#2a1010; box-shadow: 0 8px 20px rgba(255,107,107,.35);
+    }
+    #dropZone{
+      border:2px dashed rgba(255,255,255,0.18);
+      border-radius:12px; padding:14px; text-align:center; color:var(--muted);
+      transition:.2s border-color, .2s background;
+      background: rgba(255,255,255,0.02);
+      cursor:pointer;
+    }
+    #dropZone.dragover{ border-color: var(--accent); background: rgba(91,140,255,0.08); color:var(--text);}
+    #previewTable{
+      width:100%; max-height:140px; overflow:auto; border-radius:10px; border:1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02);
+    }
+    #previewTable table{ width:100%; border-collapse:collapse; font-size:12px; }
+    #previewTable th, #previewTable td{ padding:6px 8px; border-bottom:1px solid rgba(255,255,255,0.06); white-space:nowrap; text-overflow:ellipsis; overflow:hidden; }
+    #statusMessage{ font-size:12px; min-height:16px; color:var(--muted); }
+    section#chartArea{
+      position:relative;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00));
+      border:1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:12px;
+      display:flex; flex-direction:column; gap:10px;
+      min-height: 640px;
+    }
+    .chart-header{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding:6px 8px;
+    }
+    #chartCanvas{
+      width:100%; height:100%;
+      background:#0a0f22;
+      border-radius:12px;
+    }
+    #tooltip{
+      position:absolute; pointer-events:none; z-index:3; display:none;
+      background:#0c1227; color:var(--text); border:1px solid rgba(255,255,255,0.14);
+      padding:8px 10px; border-radius:10px; font-size:12px; white-space:nowrap;
+      box-shadow:0 10px 30px rgba(0,0,0,.4);
+    }
+    .switch{
+      display:inline-flex; align-items:center; gap:8px; font-size:12px; color:var(--muted);
+    }
+    .switch input{ accent-color: var(--accent); transform: scale(1.1); }
+    #colorInputs{ display:flex; flex-direction:column; gap:8px; }
+    .color-row{ display:grid; grid-template-columns: 1fr auto; gap:8px; align-items:center; }
+    .legend-preview{ display:flex; gap:8px; flex-wrap:wrap; font-size:12px; color:var(--muted); }
+    .dot{ width:10px; height:10px; border-radius:2px; display:inline-block; }
+
+    @media (max-width: 1100px){
+      main{ grid-template-columns: 1fr; }
+      aside{ order:2 }
+      #chartArea{ order:1; min-height: 480px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <h1 id="appTitle">Data Visualization Playground <span class="badge">CSV → Charts</span></h1>
+      <div class="controls-inline">
+        <button id="loadSampleBtn" class="btn-outline" title="Load a sample dataset">Load sample data</button>
+        <button id="saveImageBtn" class="btn" title="Save chart as PNG">Save as image</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <aside>
+      <div class="group">
+        <h3>Data</h3>
+        <div id="dropZone" tabindex="0" aria-label="Drop CSV here or click to select">
+          Drop CSV here or click to select
+          <div class="muted">Headers in first row are required</div>
+        </div>
+        <input id="fileInput" type="file" accept=".csv,text/csv" />
+        <div id="statusMessage" aria-live="polite"></div>
+        <div id="previewTable" aria-label="Data preview"></div>
+      </div>
+
+      <div class="group">
+        <h3>Chart</h3>
+        <div class="row">
+          <div>
+            <label for="chartType">Chart type</label>
+            <select id="chartType">
+              <option value="bar">Bar</option>
+              <option value="line">Line</option>
+              <option value="scatter">Scatter</option>
+              <option value="pie">Pie</option>
+            </select>
+          </div>
+          <div>
+            <label for="paletteSelect">Palette</label>
+            <select id="paletteSelect" title="Color palette">
+              <option value="vibrant">Vibrant</option>
+              <option value="classic">Classic</option>
+              <option value="pastel">Pastel</option>
+              <option value="cool">Cool</option>
+              <option value="warm">Warm</option>
+              <option value="mono">Monochrome</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="axisControls">
+          <div>
+            <label for="xSelect">X column</label>
+            <select id="xSelect"></select>
+          </div>
+          <div>
+            <label for="ySelect">Y columns (multi)</label>
+            <select id="ySelect" multiple size="6"></select>
+          </div>
+        </div>
+
+        <div id="pieControls" style="display:none;">
+          <div class="row">
+            <div>
+              <label for="labelSelect">Label column</label>
+              <select id="labelSelect"></select>
+            </div>
+            <div>
+              <label for="valueSelect">Value column</label>
+              <select id="valueSelect"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="group">
+          <h3>Appearance</h3>
+          <div class="row">
+            <div class="switch">
+              <input id="gridToggle" type="checkbox" checked />
+              <label for="gridToggle">Gridlines</label>
+            </div>
+            <div class="switch">
+              <input id="pointsToggle" type="checkbox" checked />
+              <label for="pointsToggle">Show points</label>
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label for="bgColorInput">Chart background</label>
+              <input id="bgColorInput" type="color" value="#0a0f22" />
+            </div>
+            <div>
+              <label for="accentColorInput">Accent (axes)</label>
+              <input id="accentColorInput" type="color" value="#8c93b3" />
+            </div>
+          </div>
+          <div>
+            <label>Series colors</label>
+            <div id="colorInputs" class="muted">Select Y columns to customize series colors</div>
+          </div>
+          <div class="legend-preview" id="legendPreview"></div>
+        </div>
+
+        <div class="controls-inline">
+          <button id="renderBtn" class="btn">Render chart</button>
+          <button id="clearBtn" class="btn btn-danger">Clear</button>
+        </div>
+      </div>
+    </aside>
+
+    <section id="chartArea" aria-label="Chart area">
+      <div class="chart-header">
+        <div class="muted" id="chartMeta">No data loaded</div>
+        <div class="muted">Tip: hover the chart for values</div>
+      </div>
+      <canvas id="chartCanvas"></canvas>
+      <div id="tooltip" role="tooltip"></div>
+    </section>
+  </main>
+
+  <script>
+    // Utilities
+    const palettes = {
+      vibrant: ['#5B8CFF','#FF7875','#36CFC9','#FFD666','#9254DE','#73D13D','#F759AB','#40A9FF','#FF9C6E','#69C0FF'],
+      classic: ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f','#bcbd22','#17becf'],
+      pastel: ['#a3bffa','#feb2b2','#b2f5ea','#fefcbf','#d6bcfa','#c6f6d5','#fbb6ce','#90cdf4','#fbd38d','#81e6d9'],
+      cool: ['#00C2FF','#2ED3BA','#77E0A3','#A3E5F1','#6E8EF1','#9A7EFE','#5F9AE0','#3DD9EB','#7EC8E3','#A0B5F8'],
+      warm: ['#FF6B6B','#FF8E72','#FFC75F','#F9F871','#F28F3B','#F94144','#F9844A','#F8961E','#FDC500','#FFD166'],
+      mono: ['#a3bffa','#89a7f5','#6e92f1','#557eec','#3b6ae8','#2156e3','#0b44df','#0438bf','#022f9e','#02257c']
+    };
+    function isNumeric(val){
+      if(val === null || val === undefined) return false;
+      if(typeof val === 'number') return Number.isFinite(val);
+      const s = String(val).trim();
+      if(s === '') return false;
+      const n = Number(s);
+      return Number.isFinite(n);
+    }
+    function toNumber(v){
+      const n = Number(String(v).trim());
+      return Number.isFinite(n) ? n : NaN;
+    }
+    function dedupe(arr){
+      const seen = new Set(); const out=[];
+      for(const v of arr){ if(!seen.has(v)){ seen.add(v); out.push(v); } }
+      return out;
+    }
+    function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+
+    // CSV Parser (handles quotes and newlines within quotes)
+    function parseCSV(text){
+      const rows=[]; let row=[]; let val='';
+      let i=0; let inQuotes=false;
+      while(i<text.length){
+        const c = text[i];
+        if(inQuotes){
+          if(c === '"'){
+            if(text[i+1] === '"'){ val += '"'; i+=2; continue; }
+            inQuotes = false; i++; continue;
+          }else{
+            val += c; i++; continue;
+          }
+        }else{
+          if(c === '"'){ inQuotes = true; i++; continue; }
+          if(c === ',' ){ row.push(val); val=''; i++; continue; }
+          if(c === '\r'){
+            // ignore, check if next is \n
+            i++; continue;
+          }
+          if(c === '\n'){
+            row.push(val); rows.push(row); row=[]; val=''; i++; continue;
+          }
+          val += c; i++; continue;
+        }
+      }
+      // last value
+      if(val !== '' || inQuotes || row.length){ row.push(val); rows.push(row); }
+      // trim trailing empty lines
+      while(rows.length && rows[rows.length-1].every(c=>String(c).trim()==='')) rows.pop();
+      if(rows.length === 0) return {headers:[], rows:[]};
+      const headers = rows[0].map(h => String(h).trim());
+      const dataRows = rows.slice(1).map(arr => {
+        const obj={};
+        for(let j=0;j<headers.length;j++){
+          obj[headers[j]] = arr[j] !== undefined ? arr[j] : '';
+        }
+        return obj;
+      });
+      return {headers, rows:dataRows};
+    }
+
+    // Nice ticks for axis
+    function niceTicks(min, max, count=5){
+      // Adapted simple nice ticks
+      if(min === max){ min -= 1; max += 1;}
+      const span = max - min;
+      const step0 = Math.pow(10, Math.floor(Math.log10(span / count)));
+      const err = (count * step0) / span;
+      let step = step0;
+      if (err <= 0.15) step = step0 * 10;
+      else if (err <= 0.35) step = step0 * 5;
+      else if (err <= 0.75) step = step0 * 2;
+      const niceMin = Math.floor(min / step) * step;
+      const niceMax = Math.ceil(max / step) * step;
+      const ticks = [];
+      for(let v=niceMin; v<=niceMax + 1e-9; v+=step) ticks.push(v);
+      return {ticks, niceMin, niceMax, step};
+    }
+
+    // Chart Renderer
+    class ChartRenderer{
+      constructor(canvas){
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.dpr = window.devicePixelRatio || 1;
+        this.hitRegions = [];
+        this.legendItems = [];
+        this.meta = '';
+        this._bgColor = '#0a0f22';
+        this._axisColor = '#8c93b3';
+        this._showGrid = true;
+        this._showPoints = true;
+        this._type = 'bar';
+        this._mouse = {x:0,y:0};
+        this._onHover = null;
+        this._data = null;
+        this._sizeToContainer();
+      }
+      setOptions(opts){
+        this._bgColor = opts.bgColor || this._bgColor;
+        this._axisColor = opts.axisColor || this._axisColor;
+        this._showGrid = opts.showGrid !== undefined ? opts.showGrid : this._showGrid;
+        this._showPoints = opts.showPoints !== undefined ? opts.showPoints : this._showPoints;
+      }
+      onHover(cb){ this._onHover = cb; }
+      setData(d){ this._data = d; }
+      setType(t){ this._type = t; }
+      _sizeToContainer(){
+        const rect = this.canvas.getBoundingClientRect();
+        const w = Math.max(320, Math.floor(rect.width));
+        const h = Math.max(280, Math.floor(rect.height));
+        this.canvas.width = Math.floor(w * this.dpr);
+        this.canvas.height = Math.floor(h * this.dpr);
+        this.ctx.setTransform(this.dpr,0,0,this.dpr,0,0);
+      }
+      resize(){ this._sizeToContainer(); this.render(); }
+      clear(){
+        const {ctx, canvas} = this;
+        ctx.save();
+        ctx.setTransform(this.dpr,0,0,this.dpr,0,0);
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.restore();
+        this.hitRegions = [];
+      }
+
+      render(){
+        const {ctx, canvas} = this;
+        this.clear();
+        const W = canvas.clientWidth, H = canvas.clientHeight;
+        // background
+        ctx.save();
+        ctx.fillStyle = this._bgColor;
+        ctx.fillRect(0,0,W,H);
+        ctx.restore();
+
+        if(!this._data || !this._data.type){ return; }
+
+        // plot area and legend
+        const padding = {top: 24, right: 20, bottom: 56, left: 64};
+        const legendHeight = this._drawLegend(W, 0); // measurement
+        padding.top += legendHeight;
+
+        const plot = {x: padding.left, y: padding.top, w: W - padding.left - padding.right, h: H - padding.top - padding.bottom};
+        plot.w = Math.max(10, plot.w);
+        plot.h = Math.max(10, plot.h);
+
+        // axes and grid based on type
+        this.hitRegions = [];
+        ctx.save();
+        ctx.strokeStyle = this._axisColor;
+        ctx.fillStyle = this._axisColor;
+        ctx.lineWidth = 1;
+
+        if(this._data.type === 'pie'){
+          this._drawPie(plot, this._data);
+          ctx.restore();
+          return;
+        }
+
+        // For cartesian charts
+        const {xInfo, yInfo} = this._computeScales(plot, this._data);
+        this._drawGridAndAxes(plot, xInfo, yInfo);
+
+        if(this._data.type === 'bar') this._drawBars(plot, xInfo, yInfo, this._data);
+        if(this._data.type === 'line') this._drawLines(plot, xInfo, yInfo, this._data);
+        if(this._data.type === 'scatter') this._drawScatter(plot, xInfo, yInfo, this._data);
+
+        ctx.restore();
+      }
+
+      // Legend
+      _drawLegend(W, yStart){
+        const ctx = this.ctx;
+        const items = this._data.legend || [];
+        this.legendItems = items;
+        if(items.length === 0) return 0;
+
+        const paddingX = 14, paddingY = 8, gap = 16, swatch = 12;
+        let x = paddingX, y = paddingY + yStart, lineH = 18;
+        ctx.save();
+        ctx.font = '12px system-ui, sans-serif';
+        for(const it of items){
+          const label = it.label ?? '';
+          const textWidth = ctx.measureText(label).width;
+          const itemW = swatch + 8 + textWidth + gap;
+          if(x + itemW > W - paddingX){ // wrap
+            x = paddingX; y += lineH + 6;
+          }
+          // swatch
+          ctx.fillStyle = it.color;
+          ctx.fillRect(x, y, swatch, swatch);
+          // label
+          ctx.fillStyle = this._axisColor;
+          ctx.fillText(label, x + swatch + 8, y + swatch - 2);
+          x += itemW;
+        }
+        ctx.restore();
+        return (y - yStart) + 24;
+      }
+
+      _computeScales(plot, data){
+        const ctx = this.ctx;
+        ctx.save();
+        ctx.font = '12px system-ui, sans-serif';
+
+        const xInfo = {type:data.xType, toX:null, ticks:[], labels:[], categories: data.categories||[], min:0, max:1};
+        const yMin = data.yMin, yMax = data.yMax;
+        const nice = niceTicks(yMin, yMax, 5);
+        const yInfo = {min:nice.niceMin, max:nice.niceMax, ticks:nice.ticks, toY: null};
+
+        // x
+        if(data.xType === 'numeric'){
+          const minX = data.xMin, maxX = data.xMax;
+          xInfo.min = minX; xInfo.max = maxX;
+          const t = niceTicks(minX, maxX, 6);
+          xInfo.ticks = t.ticks;
+          xInfo.toX = (vx)=> plot.x + ( (vx - minX) / (maxX - minX) ) * plot.w;
+        }else{
+          const cats = data.categories;
+          const step = plot.w / Math.max(1, cats.length);
+          xInfo.toX = (idx)=> plot.x + step * idx + step/2;
+          xInfo.ticks = cats.map((c, i)=>({label:c, i}));
+          xInfo.step = step;
+        }
+        // y
+        yInfo.toY = (vy)=> plot.y + plot.h - ( (vy - yInfo.min) / (yInfo.max - yInfo.min) ) * plot.h;
+
+        ctx.restore();
+        return {xInfo, yInfo};
+      }
+
+      _drawGridAndAxes(plot, xInfo, yInfo){
+        const ctx = this.ctx;
+
+        // Gridlines
+        if(this._showGrid){
+          ctx.save();
+          ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+          ctx.lineWidth = 1;
+          // horizontal
+          for(const t of yInfo.ticks){
+            const y = yInfo.toY(t);
+            ctx.beginPath(); ctx.moveTo(plot.x, y); ctx.lineTo(plot.x + plot.w, y); ctx.stroke();
+          }
+          // vertical for numeric X a few ticks, categorical skip grid
+          if(xInfo.type === 'numeric'){
+            const t = niceTicks(xInfo.min, xInfo.max, 6);
+            for(const v of t.ticks){
+              const x = xInfo.toX(v);
+              ctx.beginPath(); ctx.moveTo(x, plot.y); ctx.lineTo(x, plot.y + plot.h); ctx.stroke();
+            }
+          }
+          ctx.restore();
+        }
+
+        // Axes lines
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+        ctx.lineWidth = 1.2;
+        // Y axis
+        ctx.beginPath(); ctx.moveTo(plot.x, plot.y); ctx.lineTo(plot.x, plot.y + plot.h); ctx.stroke();
+        // X axis
+        ctx.beginPath(); ctx.moveTo(plot.x, plot.y + plot.h); ctx.lineTo(plot.x + plot.w, plot.y + plot.h); ctx.stroke();
+        ctx.restore();
+
+        // Tick labels
+        ctx.save();
+        ctx.fillStyle = this._axisColor;
+        ctx.font = '12px system-ui, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        for(const t of yInfo.ticks){
+          const y = yInfo.toY(t);
+          ctx.fillText(this._formatNumber(t), plot.x - 8, y);
+        }
+        // x labels
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        if(xInfo.type === 'numeric'){
+          const xt = niceTicks(xInfo.min, xInfo.max, 6).ticks;
+          for(const v of xt){
+            const x = xInfo.toX(v);
+            ctx.fillText(this._formatNumber(v), x, plot.y + plot.h + 8);
+          }
+        }else{
+          const cats = this._data.categories;
+          const step = xInfo.step;
+          const rotate = cats.length > 12;
+          for(let i=0;i<cats.length;i++){
+            const x = xInfo.toX(i);
+            if(rotate){
+              ctx.save();
+              ctx.translate(x, plot.y + plot.h + 8);
+              ctx.rotate(-Math.PI/4);
+              ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+              ctx.fillText(String(cats[i]), 0, 0);
+              ctx.restore();
+            }else{
+              ctx.fillText(String(cats[i]), x, plot.y + plot.h + 8);
+            }
+          }
+        }
+        ctx.restore();
+      }
+
+      _drawBars(plot, xInfo, yInfo, data){
+        const ctx = this.ctx;
+        const cats = data.categories;
+        const nSeries = data.series.length;
+        const groupWidth = xInfo.step * 0.8;
+        const barW = nSeries > 0 ? (groupWidth / nSeries) : groupWidth;
+        const x0 = plot.x + (xInfo.step - groupWidth)/2;
+        const zeroY = yInfo.toY(0);
+
+        for(let si=0; si<data.series.length; si++){
+          const s = data.series[si];
+          ctx.fillStyle = s.color;
+          for(let i=0; i<cats.length; i++){
+            const v = s.values[i] ?? 0;
+            const cx = x0 + i * xInfo.step + si * barW;
+            const yVal = yInfo.toY(v);
+            const yTop = Math.min(yVal, zeroY);
+            const h = Math.abs(yVal - zeroY);
+            ctx.beginPath();
+            ctx.roundRect(cx, yTop, barW*0.92, h, 3);
+            ctx.fill();
+
+            this.hitRegions.push({
+              type:'bar', x:cx, y:yTop, w:barW*0.92, h:h,
+              info: {series:s.name, category: cats[i], value: v, color: s.color}
+            });
+          }
+        }
+      }
+
+      _drawLines(plot, xInfo, yInfo, data){
+        const ctx = this.ctx;
+        for(const s of data.series){
+          ctx.strokeStyle = s.color;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          let first=true;
+          for(const p of s.points){
+            const x = xInfo.type==='numeric' ? xInfo.toX(p.x) : xInfo.toX(p.i);
+            const y = yInfo.toY(p.y);
+            if(first){ ctx.moveTo(x,y); first=false; } else { ctx.lineTo(x,y); }
+          }
+          ctx.stroke();
+
+          // points
+          if(this._showPoints){
+            for(const p of s.points){
+              const x = xInfo.type==='numeric' ? xInfo.toX(p.x) : xInfo.toX(p.i);
+              const y = yInfo.toY(p.y);
+              ctx.fillStyle = s.color;
+              ctx.beginPath(); ctx.arc(x,y,3.5,0,Math.PI*2); ctx.fill();
+              this.hitRegions.push({
+                type:'point', x, y, r:6,
+                info: {series:s.name, xLabel: p.label, x: p.x, value: p.y, color: s.color}
+              });
+            }
+          }
+        }
+      }
+
+      _drawScatter(plot, xInfo, yInfo, data){
+        const ctx = this.ctx;
+        for(const s of data.series){
+          for(const p of s.points){
+            const x = xInfo.type==='numeric' ? xInfo.toX(p.x) : xInfo.toX(p.i);
+            const y = yInfo.toY(p.y);
+            ctx.fillStyle = s.color;
+            ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill();
+            this.hitRegions.push({
+              type:'point', x, y, r:7,
+              info: {series:s.name, xLabel: p.label, x: p.x, value: p.y, color: s.color}
+            });
+          }
+        }
+      }
+
+      _drawPie(plot, data){
+        const ctx = this.ctx;
+        const cx = plot.x + plot.w/2;
+        const cy = plot.y + plot.h/2;
+        const r = Math.min(plot.w, plot.h) * 0.38;
+        const total = data.items.reduce((a,b)=>a + Math.max(0, b.value), 0) || 1;
+        let a0 = -Math.PI/2; // start at top
+        ctx.save();
+        ctx.lineWidth = 1;
+
+        for(const it of data.items){
+          const value = Math.max(0, it.value);
+          const ang = (value/total) * Math.PI*2;
+          const a1 = a0 + ang;
+          ctx.beginPath();
+          ctx.moveTo(cx,cy);
+          ctx.fillStyle = it.color;
+          ctx.arc(cx, cy, r, a0, a1);
+          ctx.closePath();
+          ctx.fill();
+          // mid angle for label guide
+          const am = (a0 + a1)/2;
+          const lx = cx + Math.cos(am) * r * 0.72;
+          const ly = cy + Math.sin(am) * r * 0.72;
+
+          // optional label lines for big slices
+          if(value/total > 0.06){
+            ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+            ctx.beginPath();
+            ctx.moveTo(lx, ly);
+            ctx.lineTo(cx + Math.cos(am) * (r + 10), cy + Math.sin(am) * (r + 10));
+            ctx.stroke();
+            ctx.fillStyle = this._axisColor;
+            ctx.font = '12px system-ui, sans-serif';
+            ctx.textAlign = 'center'; ctx.textBaseline='middle';
+            ctx.fillText(`${it.label}`, lx, ly);
+          }
+
+          this.hitRegions.push({
+            type:'arc',
+            cx, cy, r,
+            a0, a1,
+            info: {label: it.label, value: it.value, pct: value/total, color: it.color}
+          });
+
+          a0 = a1;
+        }
+        ctx.restore();
+      }
+
+      _formatNumber(n){
+        const abs = Math.abs(n);
+        if(abs >= 1e9) return (n/1e9).toFixed(2).replace(/\.00$/,'')+'B';
+        if(abs >= 1e6) return (n/1e6).toFixed(2).replace(/\.00$/,'')+'M';
+        if(abs >= 1e3) return (n/1e3).toFixed(2).replace(/\.00$/,'')+'k';
+        if(abs >= 100) return String(Math.round(n));
+        if(abs >= 1) return n.toFixed(2).replace(/\.00$/,'');
+        return n.toFixed(3).replace(/0+$/,'').replace(/\.$/,'');
+      }
+
+      // Interaction
+      handleMouseMove(x,y){
+        this._mouse = {x,y};
+        const tip = this._findTooltip(x,y);
+        if(this._onHover) this._onHover(tip, x, y);
+      }
+      _findTooltip(x,y){
+        // Search hit regions
+        for(const h of this.hitRegions){
+          if(h.type === 'bar'){
+            if(x>=h.x && x<=h.x+h.w && y>=h.y && y<=h.y+h.h) return h.info;
+          }else if(h.type === 'point'){
+            const dx = x - h.x, dy = y - h.y;
+            if(dx*dx + dy*dy <= h.r*h.r) return h.info;
+          }else if(h.type === 'arc'){
+            const dx = x - h.cx, dy = y - h.cy;
+            const d = Math.sqrt(dx*dx + dy*dy);
+            if(d <= h.r && d >= 0){
+              let ang = Math.atan2(dy, dx);
+              if(ang < -Math.PI/2) ang += Math.PI*2; // normalize to our start
+              // our arcs are from -PI/2 forward; match modulo 2pi
+              let a = ang;
+              // check within a0..a1 with tolerance
+              const a0 = h.a0, a1 = h.a1;
+              // adjust angle into same domain
+              while(a < a0) a += Math.PI*2;
+              while(a > a1) a -= Math.PI*2;
+              if(a >= a0-1e-6 && a <= a1+1e-6) return h.info;
+            }
+          }
+        }
+        return null;
+      }
+    }
+
+    // Global state
+    const state = {
+      csv: {headers:[], rows:[]},
+      numericCols: [],
+      palette: palettes.vibrant,
+      seriesColors: {}, // name -> color
+      chartType: 'bar',
+      xCol: null, yCols: [],
+      labelCol: null, valueCol: null,
+      showGrid: true,
+      showPoints: true,
+      bgColor: '#0a0f22',
+      axisColor: '#8c93b3'
+    };
+
+    const els = {
+      fileInput: document.getElementById('fileInput'),
+      dropZone: document.getElementById('dropZone'),
+      statusMessage: document.getElementById('statusMessage'),
+      previewTable: document.getElementById('previewTable'),
+      chartType: document.getElementById('chartType'),
+      xSelect: document.getElementById('xSelect'),
+      ySelect: document.getElementById('ySelect'),
+      labelSelect: document.getElementById('labelSelect'),
+      valueSelect: document.getElementById('valueSelect'),
+      paletteSelect: document.getElementById('paletteSelect'),
+      gridToggle: document.getElementById('gridToggle'),
+      pointsToggle: document.getElementById('pointsToggle'),
+      bgColorInput: document.getElementById('bgColorInput'),
+      accentColorInput: document.getElementById('accentColorInput'),
+      colorInputs: document.getElementById('colorInputs'),
+      legendPreview: document.getElementById('legendPreview'),
+      renderBtn: document.getElementById('renderBtn'),
+      clearBtn: document.getElementById('clearBtn'),
+      saveImageBtn: document.getElementById('saveImageBtn'),
+      chartCanvas: document.getElementById('chartCanvas'),
+      chartMeta: document.getElementById('chartMeta'),
+      tooltip: document.getElementById('tooltip'),
+      pieControls: document.getElementById('pieControls'),
+      axisControls: document.getElementById('axisControls'),
+      loadSampleBtn: document.getElementById('loadSampleBtn')
+    };
+
+    const chart = new ChartRenderer(els.chartCanvas);
+    chart.onHover((info, x, y)=>{
+      if(info){
+        els.tooltip.style.display = 'block';
+        const tipHtml = buildTooltip(info);
+        els.tooltip.innerHTML = tipHtml;
+        const rect = els.chartCanvas.getBoundingClientRect();
+        const tx = x + rect.left + 16;
+        const ty = y + rect.top + 16;
+        els.tooltip.style.left = tx + 'px';
+        els.tooltip.style.top = ty + 'px';
+      }else{
+        els.tooltip.style.display = 'none';
+      }
+    });
+
+    function buildTooltip(info){
+      if('category' in info){ // bar
+        return `<span style="color:${info.color}">■</span> <b>${escapeHtml(info.series)}</b><br>${escapeHtml(String(info.category))}: <b>${info.value}</b>`;
+      }
+      if('series' in info && 'x' in info && 'value' in info){
+        const xLabel = info.xLabel !== undefined ? info.xLabel : info.x;
+        return `<span style="color:${info.color}">●</span> <b>${escapeHtml(info.series)}</b><br>${escapeHtml(String(xLabel))}: <b>${info.value}</b>`;
+      }
+      if('label' in info && 'pct' in info){
+        const pct = (info.pct*100).toFixed(1).replace(/\.0$/,'');
+        return `<span style="color:${info.color}">◆</span> <b>${escapeHtml(info.label)}</b><br>Value: <b>${info.value}</b> (${pct}%)`;
+      }
+      return '';
+    }
+
+    function escapeHtml(s){
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    // Event bindings
+    els.fileInput.addEventListener('change', (e)=>{
+      const f = e.target.files[0];
+      if(!f) return;
+      if(!f.name.toLowerCase().endsWith('.csv')) { setStatus('Please select a CSV file.', true); return; }
+      readFile(f).then(text=>{
+        loadCSVText(text, f.name);
+      }).catch(err=>{
+        setStatus('Failed to read file: ' + err.message, true);
+      });
+    });
+
+    function readFile(file){
+      return new Promise((resolve,reject)=>{
+        const r = new FileReader();
+        r.onload = ()=> resolve(r.result);
+        r.onerror = ()=> reject(r.error || new Error('Read error'));
+        r.readAsText(file);
+      });
+    }
+
+    // Drag and drop
+    ;['dragenter','dragover'].forEach(ev=>{
+      els.dropZone.addEventListener(ev, e=>{
+        e.preventDefault(); e.stopPropagation();
+        els.dropZone.classList.add('dragover');
+      });
+    });
+    ;['dragleave','drop'].forEach(ev=>{
+      els.dropZone.addEventListener(ev, e=>{
+        e.preventDefault(); e.stopPropagation();
+        if(ev==='drop'){
+          const dt = e.dataTransfer;
+          if(dt && dt.files && dt.files[0]){
+            els.fileInput.files = dt.files;
+            const f = dt.files[0];
+            if(!f.name.toLowerCase().endsWith('.csv')) { setStatus('Please drop a CSV file.', true); els.dropZone.classList.remove('dragover'); return; }
+            readFile(f).then(text=> loadCSVText(text, f.name));
+          }
+        }
+        els.dropZone.classList.remove('dragover');
+      });
+    });
+    els.dropZone.addEventListener('click', ()=> els.fileInput.click());
+    els.dropZone.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); els.fileInput.click(); } });
+
+    // Chart controls
+    els.chartType.addEventListener('change', ()=>{
+      state.chartType = els.chartType.value;
+      toggleChartControls();
+      updateLegendPreview();
+    });
+
+    els.paletteSelect.addEventListener('change', ()=>{
+      state.palette = palettes[els.paletteSelect.value] || palettes.vibrant;
+      applyPaletteToSeries();
+      updateColorInputs();
+      updateLegendPreview();
+      renderChart();
+    });
+
+    els.xSelect.addEventListener('change', ()=>{
+      state.xCol = els.xSelect.value;
+      renderChart();
+    });
+    els.ySelect.addEventListener('change', ()=>{
+      state.yCols = Array.from(els.ySelect.selectedOptions).map(o=>o.value);
+      ensureSeriesColors();
+      updateColorInputs();
+      updateLegendPreview();
+      renderChart();
+    });
+
+    els.labelSelect.addEventListener('change', ()=>{ state.labelCol = els.labelSelect.value; renderChart(); });
+    els.valueSelect.addEventListener('change', ()=>{ state.valueCol = els.valueSelect.value; renderChart(); });
+
+    els.gridToggle.addEventListener('change', ()=>{ state.showGrid = els.gridToggle.checked; renderChart(); });
+    els.pointsToggle.addEventListener('change', ()=>{ state.showPoints = els.pointsToggle.checked; renderChart(); });
+    els.bgColorInput.addEventListener('input', ()=>{ state.bgColor = els.bgColorInput.value; renderChart(); });
+    els.accentColorInput.addEventListener('input', ()=>{ state.axisColor = els.accentColorInput.value; renderChart(); });
+
+    els.renderBtn.addEventListener('click', ()=> renderChart());
+    els.clearBtn.addEventListener('click', ()=> clearAll());
+
+    els.saveImageBtn.addEventListener('click', ()=> saveCanvasAsImage(els.chartCanvas, 'chart-' + state.chartType + '.png'));
+    els.loadSampleBtn.addEventListener('click', ()=> loadSample());
+
+    // Mouse move for tooltip
+    els.chartCanvas.addEventListener('mousemove', (e)=>{
+      const rect = els.chartCanvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      chart.handleMouseMove(x,y);
+    });
+    els.chartCanvas.addEventListener('mouseleave', ()=>{ els.tooltip.style.display='none'; });
+
+    // Resize
+    let resizeTimer = null;
+    window.addEventListener('resize', ()=>{
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(()=> chart.resize(), 80);
+    });
+
+    // App functions
+    function loadCSVText(text, name=''){
+      const parsed = parseCSV(text);
+      if(parsed.headers.length === 0 || parsed.rows.length === 0){
+        setStatus('No data found in CSV.', true);
+        return;
+      }
+      state.csv = parsed;
+      setStatus(`Loaded ${parsed.rows.length} rows from ${name || 'CSV'}.`);
+      populateControlsFromCSV();
+      renderPreviewTable(parsed);
+      renderChart();
+    }
+
+    function setStatus(msg, isError=false){
+      els.statusMessage.textContent = msg || '';
+      els.statusMessage.style.color = isError ? 'var(--danger)' : 'var(--muted)';
+    }
+
+    function renderPreviewTable(parsed){
+      const {headers, rows} = parsed;
+      const sample = rows.slice(0, 8);
+      let html = '<table><thead><tr>';
+      for(const h of headers){ html += `<th>${escapeHtml(h)}</th>`; }
+      html += '</tr></thead><tbody>';
+      for(const r of sample){
+        html += '<tr>';
+        for(const h of headers){ html += `<td title="${escapeHtml(r[h])}">${escapeHtml(r[h])}</td>`; }
+        html += '</tr>';
+      }
+      if(rows.length > sample.length){
+        html += `<tr><td colspan="${headers.length}" class="muted">... ${rows.length - sample.length} more rows</td></tr>`;
+      }
+      html += '</tbody></table>';
+      els.previewTable.innerHTML = html;
+    }
+
+    function populateControlsFromCSV(){
+      const {headers, rows} = state.csv;
+      // numeric columns detection
+      const numeric = headers.filter(h=>{
+        let count=0, parsed=0, i=0;
+        while(i<rows.length && count<20){
+          const v = rows[i][h];
+          if(String(v).trim() !== ''){ count++; if(isNumeric(v)) parsed++; }
+          i++;
+        }
+        return parsed >= Math.max(1, Math.floor(count*0.8)); // at least 80% numeric among sampled non-empty
+      });
+      state.numericCols = numeric;
+
+      fillSelect(els.xSelect, headers, headers[0] || null);
+      fillSelect(els.ySelect, numeric, numeric[0] || null, true);
+      fillSelect(els.labelSelect, headers, headers[0] || null);
+      fillSelect(els.valueSelect, numeric, numeric[0] || null);
+
+      state.xCol = els.xSelect.value;
+      state.yCols = Array.from(els.ySelect.selectedOptions).map(o=>o.value);
+      state.labelCol = els.labelSelect.value;
+      state.valueCol = els.valueSelect.value;
+
+      ensureSeriesColors();
+      updateColorInputs();
+      updateLegendPreview();
+
+      els.chartMeta.textContent = `${rows.length} rows • ${headers.length} columns`;
+    }
+
+    function fillSelect(sel, values, selected=null, isMulti=false){
+      sel.innerHTML = '';
+      for(const v of values){
+        const opt = document.createElement('option');
+        opt.value = v; opt.textContent = v;
+        if(selected && v === selected) opt.selected = true;
+        sel.appendChild(opt);
+      }
+      if(isMulti && selected){
+        // multi-select: keep only the first selected
+        for(const o of Array.from(sel.options)){
+          o.selected = (o.value === selected);
+        }
+      }
+    }
+
+    function ensureSeriesColors(){
+      // assign colors to current yCols from palette
+      state.seriesColors = state.seriesColors || {};
+      const y = state.yCols || [];
+      const pal = state.palette;
+      for(let i=0;i<y.length;i++){
+        const name = y[i];
+        if(!state.seriesColors[name]){
+          state.seriesColors[name] = pal[i % pal.length];
+        }
+      }
+      // prune removed
+      Object.keys(state.seriesColors).forEach(k=>{
+        if(!y.includes(k)) delete state.seriesColors[k];
+      });
+    }
+
+    function applyPaletteToSeries(){
+      const y = state.yCols || [];
+      const pal = state.palette;
+      y.forEach((name, i)=> state.seriesColors[name] = pal[i % pal.length]);
+    }
+
+    function updateColorInputs(){
+      const container = els.colorInputs;
+      const y = state.yCols || [];
+      if(state.chartType === 'pie'){
+        container.innerHTML = '<div class="muted">Pie uses palette colors for slices</div>';
+        return;
+      }
+      if(y.length === 0){
+        container.innerHTML = '<div class="muted">Select Y columns to customize series colors</div>';
+        return;
+      }
+      container.innerHTML = '';
+      y.forEach(name=>{
+        const row = document.createElement('div');
+        row.className = 'color-row';
+        const label = document.createElement('div');
+        label.textContent = name;
+        const input = document.createElement('input');
+        input.type = 'color';
+        input.id = 'colorInput-' + name.replace(/\W+/g,'_');
+        input.value = rgbToHex(state.seriesColors[name] || '#5B8CFF');
+        input.addEventListener('input', ()=>{
+          state.seriesColors[name] = input.value;
+          updateLegendPreview();
+          renderChart();
+        });
+        row.appendChild(label); row.appendChild(input);
+        container.appendChild(row);
+      });
+    }
+
+    function updateLegendPreview(){
+      const box = els.legendPreview;
+      box.innerHTML = '';
+      if(state.chartType === 'pie'){
+        const span = document.createElement('span');
+        span.className='muted';
+        span.textContent = 'Legend will show slice labels';
+        box.appendChild(span);
+        return;
+      }
+      (state.yCols || []).forEach(name=>{
+        const sw = document.createElement('span');
+        sw.className = 'dot';
+        sw.style.background = state.seriesColors[name] || '#5B8CFF';
+        const label = document.createElement('span');
+        label.textContent = ' ' + name;
+        label.style.marginRight = '10px';
+        box.appendChild(sw); box.appendChild(label);
+      });
+    }
+
+    function toggleChartControls(){
+      const type = state.chartType;
+      els.axisControls.style.display = (type === 'pie') ? 'none' : 'block';
+      els.pieControls.style.display = (type === 'pie') ? 'block' : 'none';
+      els.pointsToggle.closest('.switch').style.visibility = (type === 'line' || type === 'scatter') ? 'visible' : 'hidden';
+      updateColorInputs();
+    }
+
+    function renderChart(){
+      if(!state.csv || state.csv.headers.length === 0 || state.csv.rows.length === 0){
+        chart.setData(null);
+        chart.render();
+        return;
+      }
+      const type = state.chartType;
+      chart.setType(type);
+      chart.setOptions({bgColor: state.bgColor, axisColor: state.axisColor, showGrid: state.showGrid, showPoints: state.showPoints});
+
+      if(type === 'pie'){
+        const data = buildPieData();
+        chart.setData(data);
+        chart.render();
+        return;
+      }
+
+      const data = buildCartesianData();
+      chart.setData(data);
+      chart.render();
+    }
+
+    function buildCartesianData(){
+      const rows = state.csv.rows;
+      const xCol = state.xCol;
+      const yCols = state.yCols.slice();
+      // Filter empty yCols
+      const filteredY = yCols.filter(col => state.numericCols.includes(col));
+      const xVals = rows.map(r => r[xCol]);
+
+      let xType = 'categorical';
+      let allNum = true;
+      for(const v of xVals){
+        if(String(v).trim() === '') continue;
+        if(!isNumeric(v)){ allNum = false; break; }
+      }
+      if(allNum && (state.chartType === 'line' || state.chartType === 'scatter')) xType = 'numeric';
+      if(state.chartType === 'bar') xType = 'categorical';
+
+      let categories = [];
+      let xMin=0, xMax=1;
+
+      const series = [];
+      if(xType === 'categorical'){
+        categories = dedupe(xVals.map(v=> String(v)));
+        filteredY.forEach((col, idx)=>{
+          const vals = new Array(categories.length).fill(0);
+          const counts = new Array(categories.length).fill(0);
+          rows.forEach(r=>{
+            const cat = String(r[xCol]);
+            const i = categories.indexOf(cat);
+            if(i >= 0){
+              const nv = toNumber(r[col]);
+              if(Number.isFinite(nv)){
+                // for bar/line we may overwrite last or average duplicates
+                vals[i] += nv; counts[i] += 1;
+              }
+            }
+          });
+          // For bar: sum; for line/scatter: average duplicates
+          if(state.chartType !== 'bar'){
+            for(let i=0;i<vals.length;i++){
+              if(counts[i] > 0) vals[i] = vals[i]/counts[i];
+            }
+          }
+          series.push({name: col, color: state.seriesColors[col] || state.palette[idx % state.palette.length], values: vals});
+        });
+        // y bounds
+        let yMin=Infinity, yMax=-Infinity;
+        for(const s of series){
+          for(const v of s.values){
+            if(Number.isFinite(v)){
+              if(v<yMin) yMin=v;
+              if(v>yMax) yMax=v;
+            }
+          }
+        }
+        if(yMin===Infinity){ yMin=0; yMax=1; }
+        return {
+          type: state.chartType,
+          xType,
+          categories,
+          series: xType==='categorical' && state.chartType !== 'scatter'
+            ? series
+            : series.map(s=>{
+                // convert to points
+                return {name:s.name, color:s.color, points: s.values.map((y,i)=>({i, x:i, y, label: categories[i]}))};
+              }),
+          yMin: yMin, yMax: yMax,
+          legend: filteredY.map((c, i)=>({label:c, color: state.seriesColors[c] || state.palette[i % state.palette.length]}))
+        };
+      }else{
+        // numeric X
+        const pointsBySeries = filteredY.map((col, idx)=>{
+          const pts = rows.map(r=>{
+            const xn = toNumber(r[xCol]);
+            const yn = toNumber(r[col]);
+            return {x:xn, y:yn, label: r[xCol]};
+          }).filter(p=> Number.isFinite(p.x) && Number.isFinite(p.y));
+          pts.sort((a,b)=> a.x - b.x);
+          return {name: col, color: state.seriesColors[col] || state.palette[idx % state.palette.length], points: pts};
+        });
+        const allX = pointsBySeries.flatMap(s => s.points.map(p=>p.x));
+        xMin = Math.min(...allX); xMax = Math.max(...allX);
+        let yMin=Infinity, yMax=-Infinity;
+        for(const s of pointsBySeries){
+          for(const p of s.points){
+            if(p.y<yMin) yMin=p.y;
+            if(p.y>yMax) yMax=p.y;
+          }
+        }
+        if(yMin===Infinity){ yMin=0; yMax=1; }
+        return {
+          type: state.chartType,
+          xType,
+          xMin, xMax,
+          series: pointsBySeries,
+          yMin, yMax,
+          legend: filteredY.map((c, i)=>({label:c, color: state.seriesColors[c] || state.palette[i % state.palette.length]}))
+        };
+      }
+    }
+
+    function buildPieData(){
+      const rows = state.csv.rows;
+      const labelCol = state.labelCol || state.csv.headers[0];
+      const valueCol = state.valueCol || state.numericCols[0];
+      const map = new Map();
+      rows.forEach(r=>{
+        const label = String(r[labelCol]);
+        const val = toNumber(r[valueCol]);
+        if(Number.isFinite(val)){
+          map.set(label, (map.get(label) || 0) + val);
+        }
+      });
+      const items = Array.from(map.entries()).map(([label, value], i)=>({
+        label, value, color: state.palette[i % state.palette.length]
+      }));
+      const legend = items.map(it=>({label: it.label, color: it.color}));
+      return {type:'pie', items, legend};
+    }
+
+    // Save as image
+    function saveCanvasAsImage(canvas, filename){
+      // ensure background is captured - canvas already painted
+      const link = document.createElement('a');
+      link.download = filename || 'chart.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    // Clear
+    function clearAll(){
+      state.csv = {headers:[], rows:[]};
+      els.previewTable.innerHTML = '';
+      setStatus('Cleared.');
+      els.chartMeta.textContent = 'No data loaded';
+      els.xSelect.innerHTML = '';
+      els.ySelect.innerHTML = '';
+      els.labelSelect.innerHTML = '';
+      els.valueSelect.innerHTML = '';
+      state.yCols = [];
+      state.seriesColors = {};
+      updateColorInputs();
+      updateLegendPreview();
+      chart.setData(null);
+      chart.render();
+    }
+
+    // Sample data
+    function loadSample(){
+      const csv = `Month,Product A,Product B,Product C
+Jan,12,20,8
+Feb,18,24,12
+Mar,25,22,16
+Apr,28,26,20
+May,32,30,24
+Jun,31,34,29
+Jul,35,33,31
+Aug,38,36,35
+Sep,36,34,33
+Oct,30,28,27
+Nov,26,24,22
+Dec,20,18,16`;
+      loadCSVText(csv, 'Sample: Monthly sales');
+    }
+
+    // Helpers
+    function rgbToHex(c){
+      const s = String(c);
+      if(s.startsWith('#')) return s;
+      const m = s.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+      if(!m) return '#5B8CFF';
+      const r = (+m[1]).toString(16).padStart(2,'0');
+      const g = (+m[2]).toString(16).padStart(2,'0');
+      const b = (+m[3]).toString(16).padStart(2,'0');
+      return '#' + r + g + b;
+    }
+
+    // Polyfill for roundRect
+    if(!CanvasRenderingContext2D.prototype.roundRect){
+      CanvasRenderingContext2D.prototype.roundRect = function(x,y,w,h,r){
+        r = Math.min(r, w/2, h/2);
+        this.beginPath();
+        this.moveTo(x+r,y);
+        this.arcTo(x+w,y,x+w,y+h,r);
+        this.arcTo(x+w,y+h,x,y+h,r);
+        this.arcTo(x,y+h,x,y,r);
+        this.arcTo(x,y,x+w,y,r);
+        this.closePath();
+        return this;
+      }
+    }
+
+    // Initialize defaults
+    (function init(){
+      toggleChartControls();
+      setStatus('Load a CSV to begin, or use sample data.');
+      // Ensure canvas sizing is correct on first render
+      chart.resize();
+    })();
+  </script>
+</body>
+</html>

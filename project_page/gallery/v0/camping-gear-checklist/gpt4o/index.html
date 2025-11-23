@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Camping Gear Checklist - Track your camping gear and calculate total weight.">
+  <title>Camping Gear Checklist</title>
+  <style>
+    /* General Styles */
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    header {
+      background: #4CAF50;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+
+    main {
+      padding: 1rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* Outdoor Theme */
+    body {
+      background: url('https://source.unsplash.com/1280x720/?camping') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .app-container {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Form Styles */
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    form input[type="text"],
+    form input[type="number"] {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    form button {
+      padding: 0.5rem 1rem;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    form button:hover {
+      background: #45a049;
+    }
+
+    /* Checklist Styles */
+    .checklist {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .checklist-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .checklist-item:last-child {
+      border-bottom: none;
+    }
+
+    .checklist-item span {
+      flex: 1;
+    }
+
+    .checklist-item button {
+      background: #f44336;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.3rem 0.6rem;
+      cursor: pointer;
+    }
+
+    .checklist-item button:hover {
+      background: #d32f2f;
+    }
+
+    /* Footer Styles */
+    footer {
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      form {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Camping Gear Checklist</h1>
+  </header>
+  <main>
+    <div class="app-container">
+      <form id="gear-form">
+        <input type="text" id="gear-name" placeholder="Gear Name" required>
+        <input type="number" id="gear-weight" placeholder="Weight (kg)" step="0.01" required>
+        <button type="submit" id="add-gear-btn">Add Gear</button>
+      </form>
+      <ul class="checklist" id="gear-list"></ul>
+      <p><strong>Total Weight:</strong> <span id="total-weight">0</span> kg</p>
+      <button id="save-list-btn" style="width: 100%; background: #2196F3; color: white; padding: 0.5rem; border: none; border-radius: 4px; cursor: pointer;">Save List</button>
+    </div>
+  </main>
+  <footer>
+    <p>Happy Camping! &copy; 2023</p>
+  </footer>
+  <script>
+    // DOM Elements
+    const gearForm = document.getElementById('gear-form');
+    const gearNameInput = document.getElementById('gear-name');
+    const gearWeightInput = document.getElementById('gear-weight');
+    const gearList = document.getElementById('gear-list');
+    const totalWeightDisplay = document.getElementById('total-weight');
+    const saveListBtn = document.getElementById('save-list-btn');
+
+    // State
+    let gearItems = [];
+    let totalWeight = 0;
+
+    // Add Gear Item
+    gearForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = gearNameInput.value.trim();
+      const weight = parseFloat(gearWeightInput.value);
+
+      if (name && !isNaN(weight)) {
+        const gear = { id: Date.now(), name, weight };
+        gearItems.push(gear);
+        totalWeight += weight;
+        updateUI();
+        gearForm.reset();
+      }
+    });
+
+    // Remove Gear Item
+    gearList.addEventListener('click', (e) => {
+      if (e.target.tagName === 'BUTTON') {
+        const id = parseInt(e.target.dataset.id, 10);
+        const gear = gearItems.find(item => item.id === id);
+        if (gear) {
+          totalWeight -= gear.weight;
+          gearItems = gearItems.filter(item => item.id !== id);
+          updateUI();
+        }
+      }
+    });
+
+    // Save List
+    saveListBtn.addEventListener('click', () => {
+      const savedList = JSON.stringify(gearItems);
+      localStorage.setItem('campingGearList', savedList);
+      alert('Gear list saved!');
+    });
+
+    // Update UI
+    function updateUI() {
+      gearList.innerHTML = '';
+      gearItems.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'checklist-item';
+        li.innerHTML = `
+          <span>${item.name} - ${item.weight} kg</span>
+          <button data-id="${item.id}">Remove</button>
+        `;
+        gearList.appendChild(li);
+      });
+      totalWeightDisplay.textContent = totalWeight.toFixed(2);
+    }
+  </script>
+</body>
+</html>

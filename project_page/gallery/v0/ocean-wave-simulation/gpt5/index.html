@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <title>Ocean Wave Simulation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="A calming, realistic ocean wave simulation with adjustable wind, wave height, and lighting. Built with HTML5, CSS3, and vanilla JavaScript (WebGL)." />
+  <style>
+    :root {
+      --ui-bg: rgba(255, 255, 255, 0.12);
+      --ui-border: rgba(255, 255, 255, 0.18);
+      --ui-text: #e9f3ff;
+      --ui-muted: #bcd3e8;
+      --accent: #9ad0ff;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      --focus: 0 0 0 3px rgba(154, 208, 255, 0.6);
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: radial-gradient(1200px 600px at 50% -10%, #c9e6ff 0%, #9fd1ff 25%, #6bb6f0 55%, #4d88c8 100%);
+      color: var(--ui-text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      overflow: hidden;
+    }
+
+    header {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 16px;
+      background: var(--ui-bg);
+      border: 1px solid var(--ui-border);
+      border-radius: 14px;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      z-index: 10;
+    }
+
+    header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: 0.3px;
+      color: #f0f7ff;
+    }
+
+    header p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--ui-muted);
+    }
+
+    main {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    #oceanCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      outline: none;
+      background: transparent;
+    }
+
+    /* Control panel */
+    #controlPanel {
+      position: fixed;
+      bottom: 16px;
+      left: 16px;
+      width: min(360px, calc(100% - 32px));
+      padding: 14px 16px;
+      background: var(--ui-bg);
+      border: 1px solid var(--ui-border);
+      border-radius: 14px;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      z-index: 10;
+    }
+
+    #controlPanel h2 {
+      margin: 0 0 8px 0;
+      font-size: 15px;
+      font-weight: 700;
+      color: #eef6ff;
+      letter-spacing: 0.2px;
+    }
+
+    .control {
+      display: grid;
+      grid-template-columns: auto 60px;
+      grid-template-rows: auto auto;
+      column-gap: 10px;
+      row-gap: 6px;
+      align-items: center;
+      margin: 10px 0;
+    }
+
+    .control label {
+      grid-column: 1 / span 1;
+      font-size: 13px;
+      color: var(--ui-muted);
+    }
+
+    .control output {
+      grid-column: 2 / span 1;
+      justify-self: end;
+      font-variant-numeric: tabular-nums;
+      font-size: 13px;
+      color: #f5fbff;
+    }
+
+    .control input[type="range"] {
+      grid-column: 1 / span 2;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.25);
+      outline: none;
+    }
+
+    .control input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid rgba(255,255,255,0.9);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      cursor: pointer;
+    }
+
+    .control input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid rgba(255,255,255,0.9);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      cursor: pointer;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .actions button {
+      appearance: none;
+      border: 1px solid var(--ui-border);
+      background: rgba(255,255,255,0.14);
+      color: #eef6ff;
+      padding: 8px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: transform 0.06s ease, background 0.2s ease;
+    }
+
+    .actions button:hover {
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.2);
+    }
+
+    .actions button:active {
+      transform: translateY(0);
+    }
+
+    .actions button:focus-visible,
+    .control input[type="range"]:focus-visible {
+      outline: none;
+      box-shadow: var(--focus);
+    }
+
+    footer {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: var(--ui-muted);
+      background: var(--ui-bg);
+      border: 1px solid var(--ui-border);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      z-index: 10;
+    }
+
+    /* Accessibility: larger hit targets on small heights */
+    @media (max-height: 740px) {
+      #controlPanel { padding: 12px; }
+      .control { margin: 8px 0; }
+      .actions button { padding: 7px 10px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Ocean Wave Simulation</h1>
+      <p>Adjust wind, wave height, and lighting for a calming, realistic sea.</p>
+    </div>
+  </header>
+
+  <main>
+    <canvas id="oceanCanvas" role="img" aria-label="Animated ocean waves rendered in WebGL"></canvas>
+
+    <section id="controlPanel" aria-label="Wave controls">
+      <h2>Controls</h2>
+
+      <div class="control">
+        <label for="windSpeedSlider">Wind speed (m/s)</label>
+        <output id="windSpeedValue" for="windSpeedSlider" aria-live="polite">8.0</output>
+        <input id="windSpeedSlider" type="range" min="0" max="20" step="0.1" value="8.0" aria-label="Wind speed">
+      </div>
+
+      <div class="control">
+        <label for="waveHeightSlider">Wave height (m)</label>
+        <output id="waveHeightValue" for="waveHeightSlider" aria-live="polite">1.0</output>
+        <input id="waveHeightSlider" type="range" min="0" max="3" step="0.05" value="1.0" aria-label="Wave height">
+      </div>
+
+      <div class="control">
+        <label for="sunElevationSlider">Sun elevation (°)</label>
+        <output id="sunElevationValue" for="sunElevationSlider" aria-live="polite">35</output>
+        <input id="sunElevationSlider" type="range" min="5" max="85" step="1" value="35" aria-label="Sun elevation">
+      </div>
+
+      <div class="control">
+        <label for="sunIntensitySlider">Sun intensity</label>
+        <output id="sunIntensityValue" for="sunIntensitySlider" aria-live="polite">0.8</output>
+        <input id="sunIntensitySlider" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="Sun intensity">
+      </div>
+
+      <div class="actions">
+        <button id="resetButton" type="button" aria-label="Reset all settings">Reset</button>
+        <button id="pauseButton" type="button" aria-label="Pause or resume animation">Pause</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Built with HTML5, CSS3, and WebGL (no external libraries)
+  </footer>
+
+  <script>
+    (function() {
+      const canvas = document.getElementById('oceanCanvas');
+      const gl = canvas.getContext('webgl', { antialias: true, alpha: true });
+
+      if (!gl) {
+        const msg = document.createElement('div');
+        msg.textContent = 'WebGL not supported: this simulation requires a modern browser.';
+        msg.style.position = 'fixed';
+        msg.style.inset = '0';
+        msg.style.display = 'grid';
+        msg.style.placeItems = 'center';
+        msg.style.background = 'rgba(0,0,0,0.5)';
+        msg.style.color = 'white';
+        msg.style.fontSize = '18px';
+        msg.style.zIndex = '100';
+        document.body.appendChild(msg);
+        return;
+      }
+
+      // Shaders
+      const vertexSrc = `
+attribute vec2 a_position;
+
+uniform mat4 u_viewProj;
+uniform vec3 u_cameraPos;
+uniform float u_time;
+uniform float u_ampScale;
+uniform float u_steepness;
+uniform float u_windSpeed;
+uniform float u_gridScale;
+
+const int WAVE_COUNT = 4;
+uniform vec2 u_dir[WAVE_COUNT];
+uniform float u_lambda[WAVE_COUNT];
+uniform float u_ampMult[WAVE_COUNT];
+
+varying vec3 v_worldPos;
+varying vec3 v_normal;
+varying float v_dist;
+
+const float PI = 3.14159265359;
+const float TAU = 6.28318530718;
+const float G = 9.81;
+
+void main() {
+  vec2 xz0 = a_position * u_gridScale;
+
+  vec3 pos = vec3(xz0.x, 0.0, xz0.y);
+
+  float dXdx = 1.0; float dXdz = 0.0;
+  float dYdx = 0.0; float dYdz = 0.0;
+  float dZdx = 0.0; float dZdz = 1.0;
+
+  for (int i = 0; i < WAVE_COUNT; i++) {
+    vec2 D = normalize(u_dir[i]);
+    float lambda = u_lambda[i];
+    float k = TAU / lambda;             // wave number
+    float A = u_ampScale * u_ampMult[i];
+    float w = sqrt(G * k) * (0.35 + u_windSpeed * 0.05); // angular speed scaled by wind
+    float phi = k * dot(D, xz0) - w * u_time;
+
+    float s = sin(phi);
+    float c = cos(phi);
+
+    // safe steepness to avoid self-intersection
+    float maxQ = 1.0 / max(k * A * float(WAVE_COUNT), 1e-3);
+    float Q = min(u_steepness, maxQ);
+
+    // Gerstner displacement
+    pos.x += D.x * (Q * A) * c;
+    pos.z += D.y * (Q * A) * c;
+    pos.y += A * s;
+
+    // Partials for normal
+    float kA = k * A;
+    float dx = D.x;
+    float dz = D.y;
+
+    dXdx += -Q * kA * dx * dx * s;
+    dXdz += -Q * kA * dx * dz * s;
+
+    dYdx += kA * dx * c;
+    dYdz += kA * dz * c;
+
+    dZdx += -Q * kA * dz * dx * s;
+    dZdz += -Q * kA * dz * dz * s;
+  }
+
+  vec3 tangentX = vec3(dXdx, dYdx, dZdx);
+  vec3 tangentZ = vec3(dXdz, dYdz, dZdz);
+  vec3 normal = normalize(cross(tangentZ, tangentX));
+
+  v_worldPos = pos;
+  v_normal = normal;
+  v_dist = length(pos - u_cameraPos);
+
+  gl_Position = u_viewProj * vec4(pos, 1.0);
+}
+      `;
+
+      const fragmentSrc = `
+precision mediump float;
+
+varying vec3 v_worldPos;
+varying vec3 v_normal;
+varying float v_dist;
+
+uniform vec3 u_cameraPos;
+
+uniform vec3 u_sunDir;
+uniform vec3 u_sunColor;
+uniform vec3 u_skyColorTop;
+uniform vec3 u_skyColorHorizon;
+uniform vec3 u_deepColor;
+uniform float u_sunIntensity;
+uniform float u_fogDensity;
+
+void main() {
+  vec3 N = normalize(v_normal);
+  vec3 V = normalize(u_cameraPos - v_worldPos);
+  vec3 L = normalize(u_sunDir);
+
+  float NdotL = max(dot(N, L), 0.0);
+  float diffuse = 0.12 * NdotL;
+
+  // Specular highlight (Blinn-Phong)
+  vec3 H = normalize(L + V);
+  float spec = pow(max(dot(N, H), 0.0), 120.0) * u_sunIntensity;
+
+  // Fresnel term (Schlick approximation)
+  float cosTheta = max(dot(N, V), 0.0);
+  float Fresnel = pow(1.0 - cosTheta, 3.0);
+
+  // Sky gradient color based on view upness
+  float skyT = clamp(V.y * 0.5 + 0.5, 0.0, 1.0);
+  vec3 skyColor = mix(u_skyColorHorizon, u_skyColorTop, skyT);
+
+  // Base water color + subtle diffuse + specular
+  vec3 color = u_deepColor * (0.55 + diffuse) + u_sunColor * spec;
+
+  // Reflection blend (Fresnel)
+  color = mix(color, skyColor, 0.08 + 0.92 * Fresnel);
+
+  // Distance fog toward horizon
+  float fog = 1.0 - exp(-v_dist * u_fogDensity);
+  vec3 fogColor = u_skyColorHorizon;
+  color = mix(color, fogColor, fog);
+
+  gl_FragColor = vec4(color, 1.0);
+}
+      `;
+
+      // Compile shaders and link program
+      function compileShader(src, type) {
+        const sh = gl.createShader(type);
+        gl.shaderSource(sh, src);
+        gl.compileShader(sh);
+        if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+          console.error(gl.getShaderInfoLog(sh));
+          gl.deleteShader(sh);
+          return null;
+        }
+        return sh;
+      }
+
+      function createProgram(vsSrc, fsSrc) {
+        const vs = compileShader(vsSrc, gl.VERTEX_SHADER);
+        const fs = compileShader(fsSrc, gl.FRAGMENT_SHADER);
+        const prog = gl.createProgram();
+        gl.attachShader(prog, vs);
+        gl.attachShader(prog, fs);
+        gl.linkProgram(prog);
+        if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+          console.error(gl.getProgramInfoLog(prog));
+          return null;
+        }
+        return prog;
+      }
+
+      const program = createProgram(vertexSrc, fragmentSrc);
+      gl.useProgram(program);
+
+      // Look up attribute/uniform locations
+      const attribs = {
+        position: gl.getAttribLocation(program, 'a_position'),
+      };
+
+      const uniforms = {
+        viewProj: gl.getUniformLocation(program, 'u_viewProj'),
+        cameraPos: gl.getUniformLocation(program, 'u_cameraPos'),
+        time: gl.getUniformLocation(program, 'u_time'),
+        ampScale: gl.getUniformLocation(program, 'u_ampScale'),
+        steepness: gl.getUniformLocation(program, 'u_steepness'),
+        windSpeed: gl.getUniformLocation(program, 'u_windSpeed'),
+        gridScale: gl.getUniformLocation(program, 'u_gridScale'),
+        dir: gl.getUniformLocation(program, 'u_dir[0]'),
+        lambda: gl.getUniformLocation(program, 'u_lambda[0]'),
+        ampMult: gl.getUniformLocation(program, 'u_ampMult[0]'),
+        sunDir: gl.getUniformLocation(program, 'u_sunDir'),
+        sunColor: gl.getUniformLocation(program, 'u_sunColor'),
+        skyTop: gl.getUniformLocation(program, 'u_skyColorTop'),
+        skyHorizon: gl.getUniformLocation(program, 'u_skyColorHorizon'),
+        deepColor: gl.getUniformLocation(program, 'u_deepColor'),
+        sunIntensity: gl.getUniformLocation(program, 'u_sunIntensity'),
+        fogDensity: gl.getUniformLocation(program, 'u_fogDensity'),
+      };
+
+      // Create ocean grid
+      function createGrid(resolution) {
+        const N = resolution;
+        const verts = new Float32Array(N * N * 2); // x,z
+        const idxCount = (N - 1) * (N - 1) * 6;
+        const indices = new Uint16Array(idxCount);
+
+        let v = 0;
+        for (let i = 0; i < N; i++) {
+          const t = i / (N - 1);
+          const z = (t - 0.5) * 2.0;
+          for (let j = 0; j < N; j++) {
+            const s = j / (N - 1);
+            const x = (s - 0.5) * 2.0;
+            verts[v++] = x;
+            verts[v++] = z;
+          }
+        }
+
+        let k = 0;
+        for (let i = 0; i < N - 1; i++) {
+          for (let j = 0; j < N - 1; j++) {
+            const a = i * N + j;
+            const b = a + 1;
+            const c = a + N;
+            const d = c + 1;
+            indices[k++] = a; indices[k++] = c; indices[k++] = b;
+            indices[k++] = b; indices[k++] = c; indices[k++] = d;
+          }
+        }
+        return { verts, indices, count: idxCount };
+      }
+
+      const GRID_RES = 150;
+      const GRID_SCALE = 60.0; // world units extent
+      const ocean = createGrid(GRID_RES);
+
+      // Buffers
+      const vbo = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+      gl.bufferData(gl.ARRAY_BUFFER, ocean.verts, gl.STATIC_DRAW);
+
+      const ebo = gl.createBuffer();
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, ocean.indices, gl.STATIC_DRAW);
+
+      gl.enableVertexAttribArray(attribs.position);
+      gl.vertexAttribPointer(attribs.position, 2, gl.FLOAT, false, 2 * 4, 0);
+
+      // Wave parameters
+      const WAVE_COUNT = 4;
+      // Base directions around an azimuth (-45 degrees) with slight offsets
+      function degToRad(d) { return d * Math.PI / 180; }
+      const baseAzimuthDeg = -45;
+      const dirs = new Float32Array(WAVE_COUNT * 2);
+      const dirAzimuths = [
+        baseAzimuthDeg - 15,
+        baseAzimuthDeg + 8,
+        baseAzimuthDeg + 24,
+        baseAzimuthDeg - 32
+      ];
+      for (let i = 0; i < WAVE_COUNT; i++) {
+        const a = degToRad(dirAzimuths[i]);
+        dirs[i * 2 + 0] = Math.cos(a);
+        dirs[i * 2 + 1] = Math.sin(a);
+      }
+      const lambdas = new Float32Array([25.0, 15.0, 9.0, 5.0]); // wavelengths (world units)
+      const ampMult = new Float32Array([0.60, 0.40, 0.25, 0.15]); // relative amplitudes
+
+      // Colors
+      const sunColor = new Float32Array([1.0, 0.98, 0.92]);
+      const skyTop = new Float32Array([0.73, 0.87, 0.98]);
+      const skyHorizon = new Float32Array([0.70, 0.84, 0.95]);
+      const deepColor = new Float32Array([0.02, 0.28, 0.48]);
+
+      // Camera
+      const camera = {
+        eye: new Float32Array([0, 2.2, -6.0]),
+        target: new Float32Array([0, 0.4, 3.0]),
+        up: new Float32Array([0, 1, 0]),
+        fov: 60 * Math.PI / 180,
+        near: 0.1,
+        far: 300.0
+      };
+
+      // Minimal mat4 utilities
+      function mat4Multiply(out, a, b) {
+        const a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3];
+        const a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7];
+        const a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11];
+        const a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15];
+
+        const b00 = b[0], b01 = b[1], b02 = b[2], b03 = b[3];
+        const b10 = b[4], b11 = b[5], b12 = b[6], b13 = b[7];
+        const b20 = b[8], b21 = b[9], b22 = b[10], b23 = b[11];
+        const b30 = b[12], b31 = b[13], b32 = b[14], b33 = b[15];
+
+        out[0]  = a00*b00 + a01*b10 + a02*b20 + a03*b30;
+        out[1]  = a00*b01 + a01*b11 + a02*b21 + a03*b31;
+        out[2]  = a00*b02 + a01*b12 + a02*b22 + a03*b32;
+        out[3]  = a00*b03 + a01*b13 + a02*b23 + a03*b33;
+        out[4]  = a10*b00 + a11*b10 + a12*b20 + a13*b30;
+        out[5]  = a10*b01 + a11*b11 + a12*b21 + a13*b31;
+        out[6]  = a10*b02 + a11*b12 + a12*b22 + a13*b32;
+        out[7]  = a10*b03 + a11*b13 + a12*b23 + a13*b33;
+        out[8]  = a20*b00 + a21*b10 + a22*b20 + a23*b30;
+        out[9]  = a20*b01 + a21*b11 + a22*b21 + a23*b31;
+        out[10] = a20*b02 + a21*b12 + a22*b22 + a23*b32;
+        out[11] = a20*b03 + a21*b13 + a22*b23 + a23*b33;
+        out[12] = a30*b00 + a31*b10 + a32*b20 + a33*b30;
+        out[13] = a30*b01 + a31*b11 + a32*b21 + a33*b31;
+        out[14] = a30*b02 + a31*b12 + a32*b22 + a33*b32;
+        out[15] = a30*b03 + a31*b13 + a32*b23 + a33*b33;
+        return out;
+      }
+
+      function mat4Perspective(out, fovy, aspect, near, far) {
+        const f = 1.0 / Math.tan(fovy / 2);
+        out[0] = f / aspect;
+        out[1] = 0;
+        out[2] = 0;
+        out[3] = 0;
+
+        out[4] = 0;
+        out[5] = f;
+        out[6] = 0;
+        out[7] = 0;
+
+        out[8] = 0;
+        out[9] = 0;
+        out[10] = (far + near) / (near - far);
+        out[11] = -1;
+
+        out[12] = 0;
+        out[13] = 0;
+        out[14] = (2 * far * near) / (near - far);
+        out[15] = 0;
+        return out;
+      }
+
+      function mat4LookAt(out, eye, target, up) {
+        const ex = eye[0], ey = eye[1], ez = eye[2];
+        const tx = target[0], ty = target[1], tz = target[2];
+        const upx = up[0], upy = up[1], upz = up[2];
+
+        let zx = ex - tx, zy = ey - ty, zz = ez - tz;
+        let len = Math.hypot(zx, zy, zz);
+        if (len === 0) { zx = 0; zy = 0; zz = 1; } else { zx /= len; zy /= len; zz /= len; }
+
+        let xx = upy * zz - upz * zy;
+        let xy = upz * zx - upx * zz;
+        let xz = upx * zy - upy * zx;
+        len = Math.hypot(xx, xy, xz);
+        if (len === 0) { xx = 1; xy = 0; xz = 0; } else { xx /= len; xy /= len; xz /= len; }
+
+        let yx = zy * xz - zz * xy;
+        let yy = zz * xx - zx * xz;
+        let yz = zx * xy - zy * xx;
+
+        out[0] = xx; out[1] = yx; out[2] = zx; out[3] = 0;
+        out[4] = xy; out[5] = yy; out[6] = zy; out[7] = 0;
+        out[8] = xz; out[9] = yz; out[10] = zz; out[11] = 0;
+        out[12] = -(xx * ex + xy * ey + xz * ez);
+        out[13] = -(yx * ex + yy * ey + yz * ez);
+        out[14] = -(zx * ex + zy * ey + zz * ez);
+        out[15] = 1;
+        return out;
+      }
+
+      function computeViewProj() {
+        const aspect = gl.drawingBufferWidth / gl.drawingBufferHeight;
+        const proj = new Float32Array(16);
+        const view = new Float32Array(16);
+        const viewProj = new Float32Array(16);
+        mat4Perspective(proj, camera.fov, aspect, camera.near, camera.far);
+        mat4LookAt(view, camera.eye, camera.target, camera.up);
+        mat4Multiply(viewProj, proj, view);
+        return viewProj;
+      }
+
+      // Set static uniforms
+      gl.uniform1f(uniforms.gridScale, GRID_SCALE);
+      gl.uniform2fv(uniforms.dir, dirs);
+      gl.uniform1fv(uniforms.lambda, lambdas);
+      gl.uniform1fv(uniforms.ampMult, ampMult);
+      gl.uniform3fv(uniforms.sunColor, sunColor);
+      gl.uniform3fv(uniforms.skyTop, skyTop);
+      gl.uniform3fv(uniforms.skyHorizon, skyHorizon);
+      gl.uniform3fv(uniforms.deepColor, deepColor);
+
+      // State
+      gl.enable(gl.DEPTH_TEST);
+      gl.depthFunc(gl.LEQUAL);
+      gl.disable(gl.CULL_FACE);
+
+      // Clear to sky top color (shows above horizon)
+      gl.clearColor(skyTop[0], skyTop[1], skyTop[2], 1.0);
+
+      // Controls
+      const windSpeedSlider = document.getElementById('windSpeedSlider');
+      const waveHeightSlider = document.getElementById('waveHeightSlider');
+      const sunElevationSlider = document.getElementById('sunElevationSlider');
+      const sunIntensitySlider = document.getElementById('sunIntensitySlider');
+      const windSpeedValue = document.getElementById('windSpeedValue');
+      const waveHeightValue = document.getElementById('waveHeightValue');
+      const sunElevationValue = document.getElementById('sunElevationValue');
+      const sunIntensityValue = document.getElementById('sunIntensityValue');
+      const resetButton = document.getElementById('resetButton');
+      const pauseButton = document.getElementById('pauseButton');
+
+      const defaults = {
+        windSpeed: 8.0,
+        waveHeight: 1.0,
+        sunElevation: 35,
+        sunIntensity: 0.8
+      };
+
+      let params = {
+        windSpeed: defaults.windSpeed,
+        waveHeight: defaults.waveHeight,
+        sunElevation: defaults.sunElevation,
+        sunIntensity: defaults.sunIntensity,
+        paused: false,
+      };
+
+      function updateOutputs() {
+        windSpeedValue.textContent = Number(params.windSpeed).toFixed(1);
+        waveHeightValue.textContent = Number(params.waveHeight).toFixed(2);
+        sunElevationValue.textContent = Math.round(params.sunElevation).toString();
+        sunIntensityValue.textContent = Number(params.sunIntensity).toFixed(2);
+        pauseButton.textContent = params.paused ? 'Resume' : 'Pause';
+      }
+
+      function syncUniforms() {
+        // Wave amplitude scale in world units
+        gl.uniform1f(uniforms.ampScale, params.waveHeight * 0.5); // tuned factor
+        // Steepness grows with wind, but safely clamped in shader
+        const steepness = Math.min(0.1 + 0.03 * params.windSpeed, 1.0);
+        gl.uniform1f(uniforms.steepness, steepness);
+        gl.uniform1f(uniforms.windSpeed, params.windSpeed);
+        gl.uniform1f(uniforms.sunIntensity, params.sunIntensity);
+
+        // Sun direction from elevation and fixed azimuth
+        const elev = degToRad(params.sunElevation);
+        const az = degToRad(-35); // gentle left azimuth
+        const sx = Math.cos(elev) * Math.cos(az);
+        const sy = Math.sin(elev);
+        const sz = Math.cos(elev) * Math.sin(az);
+        const sunDir = new Float32Array([sx, sy, sz]);
+        gl.uniform3fv(uniforms.sunDir, sunDir);
+
+        // Fog density scales with wind (more mist with higher wind)
+        const fogDensity = 0.010 + params.windSpeed * 0.0006;
+        gl.uniform1f(uniforms.fogDensity, fogDensity);
+      }
+
+      function setControlValuesToParams() {
+        windSpeedSlider.value = String(params.windSpeed);
+        waveHeightSlider.value = String(params.waveHeight);
+        sunElevationSlider.value = String(params.sunElevation);
+        sunIntensitySlider.value = String(params.sunIntensity);
+      }
+
+      function updateFromControls() {
+        params.windSpeed = parseFloat(windSpeedSlider.value);
+        params.waveHeight = parseFloat(waveHeightSlider.value);
+        params.sunElevation = parseFloat(sunElevationSlider.value);
+        params.sunIntensity = parseFloat(sunIntensitySlider.value);
+        updateOutputs();
+        syncUniforms();
+      }
+
+      windSpeedSlider.addEventListener('input', updateFromControls);
+      waveHeightSlider.addEventListener('input', updateFromControls);
+      sunElevationSlider.addEventListener('input', updateFromControls);
+      sunIntensitySlider.addEventListener('input', updateFromControls);
+      resetButton.addEventListener('click', () => {
+        params = { ...params, ...defaults };
+        setControlValuesToParams();
+        updateOutputs();
+        syncUniforms();
+      });
+      pauseButton.addEventListener('click', () => {
+        params.paused = !params.paused;
+        updateOutputs();
+      });
+
+      // Initialize control states
+      setControlValuesToParams();
+      updateOutputs();
+      syncUniforms();
+
+      // Resize handling
+      function resize() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const width = Math.floor(canvas.clientWidth * dpr);
+        const height = Math.floor(canvas.clientHeight * dpr);
+        if (canvas.width !== width || canvas.height !== height) {
+          canvas.width = width;
+          canvas.height = height;
+        }
+        gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+      }
+      const ro = new ResizeObserver(resize);
+      ro.observe(canvas);
+      window.addEventListener('resize', resize);
+      resize();
+
+      // Animation loop
+      let startTime = performance.now();
+      let lastTime = startTime;
+
+      function render(now) {
+        requestAnimationFrame(render);
+        const dt = (now - lastTime) / 1000;
+        lastTime = now;
+
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        // Slight breathing in camera height for calmness if not paused
+        if (!params.paused) {
+          const t = (now - startTime) / 1000;
+          camera.eye[1] = 2.2 + Math.sin(t * 0.5) * 0.05;
+          camera.target[1] = 0.4 + Math.cos(t * 0.6) * 0.02;
+          gl.uniform1f(uniforms.time, t);
+        }
+
+        // Update camera uniforms
+        const viewProj = computeViewProj();
+        gl.uniformMatrix4fv(uniforms.viewProj, false, viewProj);
+        gl.uniform3fv(uniforms.cameraPos, camera.eye);
+
+        // Draw ocean
+        gl.drawElements(gl.TRIANGLES, ocean.count, gl.UNSIGNED_SHORT, 0);
+      }
+
+      requestAnimationFrame(render);
+    })();
+  </script>
+</body>
+</html>

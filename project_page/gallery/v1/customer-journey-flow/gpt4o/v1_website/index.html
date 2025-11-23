@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Journey Flow</title>
+  <style>
+    /* General Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
+      color: #000000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #app {
+      width: 90%;
+      max-width: 1200px;
+      height: 90%;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      border: 2px solid #000; /* Simplified visual style */
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      color: #000;
+    }
+
+    #canvas-container {
+      flex: 1;
+      overflow: auto;
+      border: 1px solid #000;
+      position: relative;
+      background-color: #f9f9f9;
+    }
+
+    #canvas {
+      position: relative;
+      width: 2000px;
+      height: 2000px;
+      background: repeating-linear-gradient(0deg, #f1f1f1, #f1f1f1 19px, #e0e0e0 20px);
+    }
+
+    .stage {
+      position: absolute;
+      padding: 8px 16px;
+      background: #000;
+      color: #fff;
+      border: 1px solid #000;
+      cursor: grab;
+      user-select: none;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .stage:active {
+      cursor: grabbing;
+    }
+
+    .connection {
+      position: absolute;
+      pointer-events: none;
+      stroke: #000;
+      stroke-width: 2;
+    }
+
+    #controls {
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    #controls button {
+      padding: 8px 16px;
+      background: #000;
+      color: #fff;
+      border: 1px solid #000;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    #controls button:hover {
+      background: #444;
+    }
+
+    #controls button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    #feedback {
+      margin-top: 8px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #000;
+    }
+
+    #modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      border: 2px solid #000;
+      padding: 16px;
+      display: none;
+      z-index: 1000;
+    }
+
+    #modal h2 {
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+    }
+
+    #modal p {
+      margin-bottom: 12px;
+    }
+
+    #modal button {
+      padding: 8px 16px;
+      margin-right: 8px;
+      background: #000;
+      color: #fff;
+      border: 1px solid #000;
+      cursor: pointer;
+    }
+
+    #modal button:hover {
+      background: #444;
+    }
+
+    #modal button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    #toast {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      background: #000;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 4px;
+      display: none;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>Customer Journey Flow</h1>
+    </header>
+    <div id="canvas-container">
+      <svg id="canvas"></svg>
+    </div>
+    <div id="controls">
+      <button id="addStageBtn">Add Stage</button>
+      <button id="saveBtn">Save</button>
+      <button id="loadBtn">Load</button>
+      <button id="clearBtn">Clear All</button>
+    </div>
+    <div id="feedback"></div>
+  </div>
+
+  <div id="modal">
+    <h2>Confirm Action</h2>
+    <p>Are you sure you want to clear the canvas? This action cannot be undone.</p>
+    <button id="confirmClearBtn">Yes</button>
+    <button id="cancelClearBtn">No</button>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const addStageBtn = document.getElementById('addStageBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const loadBtn = document.getElementById('loadBtn');
+    const modal = document.getElementById('modal');
+    const confirmClearBtn = document.getElementById('confirmClearBtn');
+    const cancelClearBtn = document.getElementById('cancelClearBtn');
+    const toast = document.getElementById('toast');
+
+    let stages = [];
+    let connections = [];
+    let isDragging = false;
+    let dragOffset = { x: 0, y: 0 };
+    let selectedStage = null;
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 3000);
+    }
+
+    function createStage(x = 50, y = 50, text = `Stage ${stages.length + 1}`) {
+      const stage = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      stage.setAttribute('x', x);
+      stage.setAttribute('y', y);
+      stage.setAttribute('width', 100);
+      stage.setAttribute('height', 30);
+      stage.setAttribute('fill', '#000');
+      stage.setAttribute('stroke', '#fff');
+      stage.setAttribute('data-id', stages.length);
+      stage.textContent = text;
+      canvas.appendChild(stage);
+    }
+
+  
+  </script>
+</body>
+</html>

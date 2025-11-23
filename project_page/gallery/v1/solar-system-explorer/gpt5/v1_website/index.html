@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solar System Explorer</title>
+<style>
+  /* Destylized, high-contrast UI per requirements:
+     - White background, black text
+     - No decorative gradients, shadows, rounded corners on UI
+     - Clear, readable controls with large hit areas
+     - Scene visuals keep circles for planets for recognizability
+  */
+
+  :root{
+    /* Logical variables for measurements */
+    --ui-gap: 12px;
+    --ui-pad: 12px;
+    --ui-font: 14px;
+    --control-min: 44px;
+    --ring-color: #888888;
+    --orbit-dash: 3px;
+    --accent: #005bbb;  /* restrained accent color */
+    --accent-2: #0077cc;
+    --muted: #444444;
+
+    --speed: 6; /* JS updates this live */
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height:100%; }
+  body {
+    margin:0;
+    background:#ffffff;
+    color:#000000;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    line-height:1.45;
+    overflow:hidden; /* keep a single fixed viewport for scene + side panels */
+  }
+
+  a { color:#0000ee; text-decoration:underline; }
+  a:focus { outline:2px solid #000; outline-offset:2px; }
+
+  header{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    padding:12px 16px;
+    border-bottom:1px solid #000;
+    background:#fff;
+  }
+  header h1{
+    margin:0; font-size:18px; font-weight:700;
+  }
+  header .badge{
+    font-size:12px; color:#000; border:1px solid #000; padding:2px 6px;
+  }
+
+  main{
+    height:calc(100% - 48px);
+    display:grid;
+    grid-template-columns: 1fr auto; /* scene left, info panel right */
+    grid-template-rows: 1fr;
+  }
+
+  /* Scene container */
+  #viewportSection{
+    position:relative;
+    background:#ffffff;
+    overflow:hidden;
+  }
+
+  #viewport{
+    position:absolute; inset:0;
+    perspective: 900px;
+    perspective-origin: 50% 50%;
+    cursor: grab;
+    outline:none;
+  }
+  #viewport.dragging{ cursor: grabbing; }
+
+  /* Starfield background - canvas on white with black speckles */
+  #starfield{
+    position:absolute; inset:0; width:100%; height:100%;
+    display:block; z-index:0;
+    background:#ffffff;
+  }
+
+  /* Universe container and transforms */
+  #universe{
+    position:absolute; left:50%; top:50%;
+    transform: translate(-50%, -50%) rotateX(-20deg) rotateY(25deg) scale(1);
+    transform-style: preserve-3d;
+    z-index:1;
+    will-change:transform;
+  }
+
+  /* Sun (keep circle visuals for recognizability; minimal styling) */
+  #sun{
+    position:absolute; left:50%; top:50%;
+    width:120px; height:120px;
+    margin-left:-60px; margin-top:-60px;
+    border-radius:50%; /* exception for scene elements */
+    background:#ffcc00;
+    border:1px solid #000; /* simple outline for clarity */
+    z-index:2;
+  }
+  #sun:hover, #sun:focus {
+    outline:2px solid #000;
+  }
+
+  /* Orbit rings */
+  .orbit-ring{
+    position:absolute; left:50%; top:50%;
+    border:1px dashed var(--ring-color);
+    border-radius:50%;
+    transform: translate(-50%, -50%);
+    pointer-events:none;
+    z-index:0;
+  }
+  .orbit-ring.selected{
+    border:2px solid #000;
+  }
+
+  /* Planets: buttons for accessibility.
+     Keep circles (visual exception), but avoid decorative effects. */
+  .planet{
+    position:absolute;
+    left:50%; top:50%;
+    transform: translate(-50%, -50%);
+    border:none;
+    border-radius:50%; /* visual exception */
+    cursor:pointer;
+    z-index:3;
+    background:#ddd; /* default fallback */
+    padding:0;
+    outline:none;
+  }
+  .planet:focus { outline: 2px solid #000; }
+  .planet:hover { filter: none; } /* no decorative hover */
+  .planet.selected { outline:3px solid var(--accent); }
+
+  /* Increase clickable target via invisible hitbox child */
+  .planet .hitbox{
+    position:absolute; left:50%; top:50%;
+    width:44px; height:44px; transform: translate(-50%,-50%);
+    pointer-events:auto; /* receives clicks */
+    background: transparent;
+  }
+
+  /* Labels - simple box without decoration */
+  .planet .label{
+    position:absolute;
+    left:50%;
+    top: calc(100% + 6px);
+    transform: translateX(-50%);
+    background:#fff;
+    border:1px solid #000;
+    padding:2px 4px;
+    color:#000;
+    font-size:12px;
+    white-space:nowrap;
+    z-index:4;
+  }
+  .planet .label.selected{
+    font-weight:700;
+    border-width:2px;
+  }
+
+  /* Simple colors per planet (no gradients) */
+  .mercury{ background:#bdbdbd; }
+  .venus  { background:#d1a664; }
+  .earth  { background:#3fa7ff; }
+  .mars   { background:#c95e2b; }
+  .jupiter{ background:#c79f6f; }
+  .saturn { background:#cfb885; }
+  .uranus { background:#8de6e0; }
+  .neptune{ background:#6f91ff; }
+
+  /* Controls - simplified bar placed top-left inside scene */
+  #controlsBar{
+    position:absolute; left:12px; top:12px;
+    z-index:4;
+    display:flex; flex-wrap:wrap; align-items:flex-start;
+    gap:12px;
+    pointer-events:auto; /* controls are interactive */
+    background:#fff;
+  }
+
+  .controls-group{
+    display:flex; flex-wrap:wrap; align-items:center; gap:8px;
+    background:#fff;
+    border:1px solid #000;
+    padding:8px;
+    min-height: var(--control-min);
+  }
+  .controls-group label{ font-size:14px; color:#000; }
+  .controls-group output{
+    font-variant-numeric: tabular-nums;
+    color:#000;
+    font-weight:700;
+    min-width:3ch; text-align:right;
+  }
+
+  input[type="range"]{
+    appearance:none; width:240px; height: var(--control-min);
+    background: transparent;
+  }
+  input[type="range"]::-webkit-slider-runnable-track{
+    height:6px; background:#ccc; border:1px solid #000;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    appearance:none; width:18px; height:18px; background:#000; border:1px solid #000;
+    margin-top:-6px; /* center thumb on track */
+  }
+  input[type="range"]::-moz-range-track{
+    height:6px; background:#ccc; border:1px solid #000;
+  }
+  input[type="range"]::-moz-range-thumb{
+    width:18px; height:18px; background:#000; border:1px solid #000;
+  }
+
+  /* Visual boundary feedback for sliders */
+  .controls-group.at-min input[type="range"]::-webkit-slider-runnable-track{ background:#eaeaea; }
+  .controls-group.at-max input[type="range"]::-webkit-slider-runnable-track{ background:#999999; }
+  .controls-group .tick-labels{
+    display:flex; width:240px; justify-content:space-between; font-size:12px; color:#000;
+  }
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width: var(--control-min); height: var(--control-min);
+    padding:0 12px;
+    background:#fff; color:#000;
+    border:1px solid #000;
+    cursor:pointer;
+    user-select:none;
+  }
+  .btn[aria-pressed="true"]{
+    background:#f0f0f0;
+  }
+  .btn:focus{ outline:2px solid #000; outline-offset:2px; }
+
+  /* Info panel - right column */
+  aside#info-panel{
+    width:380px; max-width:42vw;
+    background:#fff;
+    border-left:1px solid #000;
+    padding:12px;
+    display:flex; flex-direction:column; gap:8px;
+    overflow:auto;
+    z-index:6;
+  }
+  #info-panel.closed{ display:block; } /* kept visible for layout consistency; we track status via #panelStatus proxy */
+  #info-header{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  #info-title{ margin:0; font-size:18px; font-weight:700; }
+  #close-info{ width: var(--control-min); height: var(--control-min); border:1px solid #000; background:#fff; color:#000; cursor:pointer; }
+  #close-info:focus{ outline:2px solid #000; }
+
+  #info-summary{ font-size:14px; color:#000; }
+  #info-list{ margin:0; padding-left:16px; color:#000; }
+  #info-list code{ background:#fff; border:1px solid #000; padding:1px 4px; }
+
+  /* Instructions and footer */
+  #instructions{
+    position:absolute; left:12px; top:72px;
+    background:#fff; border:1px solid #000; color:#000;
+    padding:8px;
+    font-size:12px;
+    z-index:4;
+  }
+  #instructions b{ color:#000; font-weight:700; }
+
+  footer{
+    position:absolute; right:12px; top:12px;
+    color:#000; font-size:12px;
+    background:#fff; border:1px solid #000;
+    padding:6px 8px;
+    z-index:4;
+  }
+
+  /* Status bar (proxies) */
+  #statusBar{
+    position:absolute; left:12px; bottom:12px;
+    background:#fff; border:1px solid #000; color:#000;
+    padding:8px;
+    z-index:4;
+    display:grid;
+    grid-template-columns: auto auto;
+    gap:6px 16px;
+    max-width:56%;
+  }
+  #statusBar .k{ font-weight:700; }
+  #statusBar .v{ min-width:80px; }
+
+  /* Message/toast area - visible text, no auto-dismiss */
+  #message{
+    position:absolute; left:50%; transform:translateX(-50%);
+    bottom:80px;
+    background:#fff; border:1px solid #000; color:#000;
+    padding:8px 12px;
+    z-index:4;
+    font-size:14px;
+    display:none; /* shown via JS */
+  }
+  #message[aria-hidden="false"]{ display:block; }
+
+  /* Responsive adjustments */
+  @media (max-width: 1100px){
+    main{ grid-template-columns: 1fr 360px; }
+  }
+  @media (max-width: 900px){
+    main{ grid-template-columns: 1fr; }
+    aside#info-panel{
+      position:absolute; right:0; top:48px; bottom:0;
+      width:320px; max-width:70vw;
+    }
+    #statusBar{ max-width:70%; }
+  }
+
+  /* Accessibility helpers */
+  .sr-only{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+
+  /* Occlusion and visibility */
+  .planet.occluded{
+    opacity:0.6;
+  }
+
+  /* Simple orbit rings visibility toggle */
+  #toggleOrbits[aria-pressed="true"] + .sr-note{ font-weight:700; }
+
+  /* Simple pressed/hint area */
+  .hint{ font-size:12px; color:#000; }
+
+  /* Keep explicit focus outlines across all interactive elements */
+  button:focus, input:focus { outline:2px solid #000; outline-offset:2px; }
+
+</style>
+</head>
+<body>
+  <header>
+    <h1>Solar System Explorer</h1>
+    <span class="badge">Interactive • 3D View • No Libraries</span>
+  </header>
+  <main>
+    <section id="viewportSection" aria-label="Solar System Scene">
+      <div id="instructions" aria-hidden="false">
+        Drag to rotate view • Scroll or use controls to zoom • Click a planet for details
+      </div>
+      <footer>Tip: Double-click the scene or use Reset View to re-center.</footer>
+
+      <!-- Message area for feedback -->
+      <div id="message" role="status" aria-live="polite" aria-hidden="true"></div>
+
+      <!-- Proxies / Status indicators -->
+      <div id="statusBar" aria-live="polite">
+        <div class="k">Selection</div><div class="v" id="selectionStatus">none</div>
+        <div class="k">Info Panel</div><div class="v" id="panelStatus">closed</div>
+        <div class="k">Speed</div><div class="v" id="speedStatus">running 6x</div>
+        <div class="k">Zoom</div><div class="v" id="zoomBoundaryStatus">ok</div>
+        <div class="k">Preview</div><div class="v" id="previewStatus">initializing</div>
+        <div class="k">Active Section</div><div class="v" id="activeSection">scene</div>
+        <div class="k">Apply</div><div class="v" id="applyStatus">idle</div>
+        <div class="k">Occlusion</div><div class="v" id="occlusionStatus">clear</div>
+        <div class="k">Sun</div><div class="v" id="sunActionStatus">idle</div>
+      </div>
+
+      <div id="viewport" role="application" aria-label="3D solar system viewport" tabindex="0" data-zoom="1">
+        <canvas id="starfield" aria-hidden="true" data-ready="false"></canvas>
+        <div id="universe" aria-hidden="true">
+          <div id="sun" aria-label="The Sun" title="Sun" tabindex="0"></div>
+          <!-- Rings and planets will be injected via JavaScript -->
+        </div>
+      </div>
+
+      <div id="controlsBar" aria-label="Controls">
+        <div class="controls-group" id="speed-controls" aria-label="Orbit speed controls">
+          <label for="speed-slider">Orbit speed</label>
+          <input id="speed-slider" type="range" min="0" max="40" step="0.5" value="6" aria-valuemin="0" aria-valuemax="40" aria-valuenow="6" list="speed-ticks" />
+          <datalist id="speed-ticks">
+            <option value="0" label="0x"></option>
+            <option value="5" label="5x"></option>
+            <option value="10" label="10x"></option>
+            <option value="15" label="15x"></option>
+            <option value="20" label="20x"></option>
+            <option value="25" label="25x"></option>
+            <option value="30" label="30x"></option>
+            <option value="35" label="35x"></option>
+            <option value="40" label="40x"></option>
+          </datalist>
+          <output id="speed-value" for="speed-slider">6x</output>
+          <button class="btn" id="speed-dec" aria-label="Decrease orbit speed">−</button>
+          <button class="btn" id="speed-inc" aria-label="Increase orbit speed">+</button>
+          <button class="btn" id="toggle-rotation" aria-pressed="false" aria-label="Pause or resume orbital motion">Pause</button>
+          <span class="tick-labels" aria-hidden="true">
+            <span>0</span><span>10</span><span>20</span><span>30</span><span>40</span>
+          </span>
+        </div>
+
+        <div class="controls-group" id="zoom-controls" aria-label="Camera controls">
+          <label for="zoom-slider">Zoom</label>
+          <input id="zoom-slider" type="range" min="0.2" max="3.5" step="0.05" value="1" aria-valuemin="0.2" aria-valuemax="3.5" aria-valuenow="1" />
+          <output id="zoom-value" for="zoom-slider">1.00×</output>
+          <button class="btn" id="zoom-out" aria-label="Zoom out">−</button>
+          <button class="btn" id="zoom-in" aria-label="Zoom in">+</button>
+          <button class="btn" id="reset-view" aria-label="Reset camera">Reset View</button>
+          <button class="btn" id="fit-system" aria-label="Fit entire solar system">Fit System</button>
+        </div>
+
+        <div class="controls-group" id="utility-controls" aria-label="Utility controls">
+          <button class="btn" id="toggleOrbits" aria-pressed="true" aria-label="Toggle orbit rings">Toggle Orbits</button>
+          <span class="sr-note sr-only">Toggle orbit rings visibility</span>
+          <button class="btn" id="anchor-panel-toggle" aria-pressed="false" aria-label="Anchor info panel near selected">Anchor Panel</button>
+          <button class="btn" id="apply-controls" aria-label="Apply current controls">Apply Controls</button>
+          <span class="hint">Press Enter to Apply</span>
+        </div>
+      </div>
+    </section>
+
+    <aside id="info-panel" class="closed" aria-live="polite" aria-label="Planet information panel" data-open="false">
+      <div id="info-header">
+        <h2 id="info-title">Welcome</h2>
+        <button id="close-info" aria-label="Close info panel">Close</button>
+      </div>
+      <p id="info-summary">
+        Click a planet in the scene to see facts and stats. Use the speed and zoom controls at the top to explore the Solar System.
+      </p>
+      <ul id="info-list">
+        <li>Drag in the scene to rotate the view.</li>
+        <li>Scroll or use <code>+</code>/<code>−</code> to zoom.</li>
+        <li>Use Reset View to return to default orientation.</li>
+      </ul>
+      <div id="panelUpdating" aria-live="polite" class="hint">idle</div>
+    </aside>
+  </main>
+
+<script>
+/* Global immediate-invocation to avoid leaks */
+(function(){
+  // Core configuration preserved from V0 with necessary extensions
+  const AU = 1; // base
+  const distanceScalePxPerAU = 12; // orbit radii in pixels
+  const earthPeriodSeconds = 12; // Earth completes an orbit in N seconds at speed=1
+  const minPitch = -75, maxPitch = 75;
+
+  // Data model for planets, keeping similar structure
+  const planetsData = [
+    {
+      name: 'Mercury', id: 'Mercury', className:'mercury',
+      color:'#bdbdbd', size: 8, // diameter px
+      orbitRadiusAU: 0.39, periodYears: 0.240846,
+      description: 'Smallest and innermost planet. Heavily cratered surface and a very thin exosphere.',
+      radiusKm: 2440, distanceAU: 0.39, orbitalDays: 88
+    },
+    {
+      name: 'Venus', id:'Venus', className:'venus',
+      color:'#d1a664', size: 12,
+      orbitRadiusAU: 0.723, periodYears: 0.615,
+      description: 'Similar size to Earth but wrapped in a dense, hot atmosphere with global clouds of sulfuric acid.',
+      radiusKm: 6052, distanceAU: 0.72, orbitalDays: 225
+    },
+    {
+      name: 'Earth', id:'Earth', className:'earth',
+      color:'#3fa7ff', size: 12,
+      orbitRadiusAU: 1.0, periodYears: 1.0,
+      description: 'Our home world with abundant liquid water, life, and a single Moon.',
+      radiusKm: 6371, distanceAU: 1.00, orbitalDays: 365
+    },
+    {
+      name: 'Mars', id:'Mars', className:'mars',
+      color:'#d77440', size: 10,
+      orbitRadiusAU: 1.524, periodYears: 1.881,
+      description: 'The Red Planet, home to the largest volcano and canyon in the Solar System.',
+      radiusKm: 3389, distanceAU: 1.52, orbitalDays: 687
+    },
+    {
+      name: 'Jupiter', id:'Jupiter', className:'jupiter',
+      color:'#c79f6f', size: 26,
+      orbitRadiusAU: 5.203, periodYears: 11.86,
+      description: 'The largest planet, a gas giant with a famous Great Red Spot storm.',
+      radiusKm: 69911, distanceAU: 5.20, orbitalDays: 4333
+    },
+    {
+      name: 'Saturn', id:'Saturn', className:'saturn',
+      color:'#cfb885', size: 22,
+      orbitRadiusAU: 9.537, periodYears: 29.45,
+      description: 'Gas giant known for its stunning ring system.',
+      radiusKm: 58232, distanceAU: 9.58, orbitalDays: 10759
+    },
+    {
+      name: 'Uranus', id:'Uranus', className:'uranus',
+      color:'#8de6e0', size: 18,
+      orbitRadiusAU: 19.191, periodYears: 84.01,
+      description: 'An ice giant with a tilted rotation axis causing extreme seasons.',
+      radiusKm: 25362, distanceAU: 19.20, orbitalDays: 30687
+    },
+    {
+      name: 'Neptune', id:'Neptune', className:'neptune',
+      color:'#6f91ff', size: 18,
+      orbitRadiusAU: 30.07, periodYears: 164.8,
+      description: 'Distant ice giant with supersonic winds and a deep blue hue.',
+      radiusKm: 24622, distanceAU: 30.05, orbitalDays: 60190
+    }
+  ];
+
+  // DOM references (maintain selectors)
+  const viewportSection = document.getElementById('viewportSection');
+  const viewport = document.getElementById('viewport');
+  const universe = document.getElementById('universe');
+  const starfield = document.getElementById('starfield');
+  const infoPanel = document.getElementById('info-panel');
+  const infoTitle = document.getElementById('info-title');
+  const infoSummary = document.getElementById('info-summary');
+  const infoList = document.getElementById('info-list');
+  const closeInfoBtn = document.getElementById('close-info');
+  const panelUpdating = document.getElementById('panelUpdating');
+
+  const speedSlider = document.getElementById('speed-slider');
+  const speedValue = document.getElementById('speed-value');
+  const speedDecBtn = document.getElementById('speed-dec');
+  const speedIncBtn = document.getElementById('speed-inc');
+  const toggleRotationBtn = document.getElementById('toggle-rotation');
+
+  const zoomSlider = document.getElementById('zoom-slider');
+  const zoomValue = document.getElementById('zoom-value');
+  const zoomInBtn = document.getElementById('zoom-in');
+  const zoomOutBtn = document.getElementById('zoom-out');
+  const resetViewBtn = document.getElementById('reset-view');
+  const fitSystemBtn = document.getElementById('fit-system');
+
+  const message = document.getElementById('message');
+
+  const selectionStatus = document.getElementById('selectionStatus');
+  const panelStatus = document.getElementById('panelStatus');
+  const speedStatus = document.getElementById('speedStatus');
+  const zoomBoundaryStatus = document.getElementById('zoomBoundaryStatus');
+  const previewStatus = document.getElementById('previewStatus');
+  const activeSection = document.getElementById('activeSection');
+  const applyStatus = document.getElementById('applyStatus');
+  const occlusionStatus = document.getElementById('occlusionStatus');
+  const sunActionStatus = document.getElementById('sunActionStatus');
+
+  const toggleOrbitsBtn = document.getElementById('toggleOrbits');
+  const anchorPanelToggle = document.getElementById('anchor-panel-toggle');
+  const applyControlsBtn = document.getElementById('apply-controls');
+
+  const sunEl = document.getElementById('sun');
+
+  // State
+  let yaw = 25;   // degrees
+  let pitch = -20; // degrees
+  let zoom = 1;
+  let speedMultiplier = Number(speedSlider.value);
+  let isPaused = false;
+  let showOrbits = true;
+  let anchoredPanel = false;
+
+  const planetState = new Map(); // name -> { angle, el, ringEl, orbitRadiusPx, periodSec, labelEl }
+  const selected = { name: null };
+
+  // Helpers: show message
+  function showMessage(text){
+    message.textContent = text;
+    message.setAttribute('aria-hidden', 'false');
+  }
+  function hideMessage(){
+    message.textContent = '';
+    message.setAttribute('aria-hidden', 'true');
+  }
+
+  // Build orbit rings and planets
+  function initScene(){
+    planetsData.forEach(p=>{
+      const radiusPx = p.orbitRadiusAU * distanceScalePxPerAU;
+      // Orbit ring
+      const ring = document.createElement('div');
+      ring.className = 'orbit-ring';
+      ring.id = `orbit-${p.id}`;
+      ring.style.width = (radiusPx*2) + 'px';
+      ring.style.height = (radiusPx*2) + 'px';
+      ring.title = `${p.name} orbit`;
+      universe.appendChild(ring);
+
+      // Planet button
+      const btn = document.createElement('button');
+      btn.className = `planet ${p.className.toLowerCase()}`;
+      btn.id = `planet-${p.id}`;
+      btn.type = 'button';
+      btn.setAttribute('aria-label', p.name);
+      btn.style.width = p.size + 'px';
+      btn.style.height = p.size + 'px';
+
+      const hitbox = document.createElement('span');
+      hitbox.className = 'hitbox';
+      btn.appendChild(hitbox);
+
+      const label = document.createElement('span');
+      label.className = 'label';
+      label.textContent = p.name;
+      btn.appendChild(label);
+
+      function trySelect(){
+        // Occlusion block check
+        const st = planetState.get(p.name);
+        if(st && st.el.classList.contains('occluded')){
+          showMessage(`${p.name} is behind the Sun and cannot be selected now.`);
+          occlusionStatus.textContent = `blocked: ${p.name}`;
+          return;
+        }
+        selectPlanet(p.name);
+      }
+
+      // Add click on both hitbox and button (hitbox improves target area)
+      btn.addEventListener('click', (e)=>{ e.stopPropagation(); trySelect(); });
+      hitbox.addEventListener('click', (e)=>{ e.stopPropagation(); trySelect(); });
+
+      btn.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter' || e.key === ' '){
+          e.preventDefault();
+          trySelect();
+        }
+      });
+
+      universe.appendChild(btn);
+
+      planetState.set(p.name, {
+        data: p,
+        angle: Math.random()*Math.PI*2, // random start
+        el: btn,
+        ringEl: ring,
+        labelEl: label,
+        orbitRadiusPx: radiusPx,
+        periodSec: p.periodYears * earthPeriodSeconds,
+        rotated: {x:0,y:0,z:0}, // cached rotated coords for occlusion/label
+      });
+    });
+
+    applyCameraTransform();
+  }
+
+  // Selection and info
+  function setSelectionStatus(name){
+    selectionStatus.textContent = name ? name : 'none';
+  }
+
+  function selectPlanet(name){
+    hideMessage();
+    if(selected.name === name){
+      // keep panel open and do nothing else
+    }else{
+      // remove previous selection
+      if(selected.name){
+        const prev = planetState.get(selected.name);
+        if(prev){
+          prev.el.classList.remove('selected');
+          prev.ringEl.classList.remove('selected');
+          prev.labelEl.classList.remove('selected');
+        }
+      }
+      selected.name = name;
+      const state = planetState.get(name);
+      if(state){
+        state.el.classList.add('selected');
+        state.ringEl.classList.add('selected');
+        state.labelEl.classList.add('selected');
+        openInfo(state.data);
+      }
+    }
+    setSelectionStatus(selected.name);
+  }
+
+  function openInfo(p){
+    panelUpdating.textContent = 'updating';
+    infoTitle.textContent = p.name;
+    infoSummary.textContent = p.description;
+    infoList.innerHTML = '';
+    const listItems = [
+      `Mean distance from Sun: ${p.distanceAU.toFixed(2)} AU`,
+      `Equatorial radius: ${p.radiusKm.toLocaleString()} km`,
+      `Orbital period: ${p.orbitalDays.toLocaleString()} days (${p.periodYears.toFixed(2)} Earth years)`
+    ];
+    listItems.forEach(text=>{
+      const li = document.createElement('li');
+      li.textContent = text;
+      infoList.appendChild(li);
+    });
+    // Panel is kept visible until explicit close
+    infoPanel.dataset.open = 'true';
+    panelStatus.textContent = 'open';
+    panelUpdating.textContent = 'updated';
+  }
+
+  function closeInfo(){
+    if(selected.name){
+      const prev = planetState.get(selected.name);
+      if(prev){
+        prev.el.classList.remove('selected');
+        prev.ringEl.classList.remove('selected');
+        prev.labelEl.classList.remove('selected');
+      }
+    }
+    selected.name = null;
+    setSelectionStatus(null);
+    // keep info panel visible by default per requirements; we will mark status as closed for proxy
+    infoPanel.dataset.open = 'false';
+    panelStatus.textContent = 'closed';
+    // Do not hide panel UI entirely to avoid layout shift
+  }
+  closeInfoBtn.addEventListener('click', closeInfo);
+
+  // Camera controls
+  function applyCameraTransform(){
+    universe.style.transform = `translate(-50%, -50%) rotateX(${pitch}deg) rotateY(${yaw}deg) scale(${zoom})`;
+    zoomValue.textContent = `${zoom.toFixed(2)}×`;
+    zoomSlider.value = String(zoom);
+    zoomSlider.setAttribute('aria-valuenow', String(zoom));
+    viewport.dataset.zoom = String(zoom);
+    updateZoomBoundaryClasses();
+  }
+  function setZoom(z){
+    const min = Number(zoomSlider.min);
+    const max = Number(zoomSlider.max);
+    const prevZoom = zoom;
+    zoom = Math.min(Math.max(z, min), max);
+    applyCameraTransform();
+    // Feedback at boundary
+    if(zoom === min){
+      zoomBoundaryStatus.textContent = 'min';
+      showMessage('Zoom limit reached (min).');
+    }else if(zoom === max){
+      zoomBoundaryStatus.textContent = 'max';
+      showMessage('Zoom limit reached (max).');
+    }else{
+      zoomBoundaryStatus.textContent = 'ok';
+      if(message.textContent.includes('Zoom limit')){
+        hideMessage();
+      }
+    }
+  }
+  function resetView(){
+    yaw = 25;
+    pitch = -20;
+    setZoom(1);
+    applyCameraTransform();
+  }
+  resetViewBtn.addEventListener('click', resetView);
+
+  // Fit entire solar system in viewport
+  function fitSystem(){
+    const rect = viewport.getBoundingClientRect();
+    let maxRadius = 0;
+    for(const [name, st] of planetState){
+      if(st.orbitRadiusPx > maxRadius) maxRadius = st.orbitRadiusPx;
+    }
+    // Fit rings within screen with some margin
+    const margin = 120;
+    const fitScaleX = (rect.width - margin) / (maxRadius*2);
+    const fitScaleY = (rect.height - margin) / (maxRadius*2);
+    const fit = Math.min(fitScaleX, fitScaleY);
+    setZoom(Math.max(Math.min(fit, Number(zoomSlider.max)), Number(zoomSlider.min)));
+  }
+  fitSystemBtn.addEventListener('click', fitSystem);
+
+  // Toggle orbits visibility
+  toggleOrbitsBtn.addEventListener('click', ()=>{
+    showOrbits = !showOrbits;
+    toggleOrbitsBtn.setAttribute('aria-pressed', String(showOrbits));
+    for(const [name, st] of planetState){
+      st.ringEl.style.display = showOrbits ? 'block':'none';
+    }
+  });
+
+  // Anchor info panel near selected planet
+  anchorPanelToggle.addEventListener('click', ()=>{
+    anchoredPanel = !anchoredPanel;
+    anchorPanelToggle.setAttribute('aria-pressed', String(anchoredPanel));
+    if(!anchoredPanel){
+      // restore right-side layout
+      infoPanel.style.position = '';
+      infoPanel.style.left = '';
+      infoPanel.style.top = '';
+      infoPanel.style.maxWidth = '42vw';
+    }
+  });
+
+  // Drag to rotate
+  let dragging = false;
+  let lastX=0, lastY=0;
+  viewport.addEventListener('pointerdown', (e)=>{
+    // Ignore drags that start on interactive elements (planets or buttons or controls)
+    if(e.target.closest('.planet') || e.target.closest('.controls-group') || e.target.closest('.btn') || e.target.id === 'sun') return;
+    dragging = true;
+    viewport.classList.add('dragging');
+    lastX = e.clientX; lastY = e.clientY;
+    viewport.setPointerCapture(e.pointerId);
+  });
+  viewport.addEventListener('pointermove', (e)=>{
+    if(!dragging) return;
+    const dx = e.clientX - lastX;
+    const dy = e.clientY - lastY;
+    yaw += dx * 0.2;
+    pitch -= dy * 0.2;
+    if(pitch < minPitch) pitch = minPitch;
+    if(pitch > maxPitch) pitch = maxPitch;
+    lastX = e.clientX; lastY = e.clientY;
+    applyCameraTransform();
+  });
+  function endDrag(e){
+    if(!dragging) return;
+    dragging = false;
+    viewport.classList.remove('dragging');
+    if(e && e.pointerId!=null){
+      try{ viewport.releasePointerCapture(e.pointerId); }catch(_){}
+    }
+  }
+  viewport.addEventListener('pointerup', endDrag);
+  viewport.addEventListener('pointercancel', endDrag);
+  viewport.addEventListener('pointerleave', endDrag);
+
+  // Double-click to reset view
+  viewport.addEventListener('dblclick', (e)=>{
+    if(e.target.closest('.planet')) return;
+    resetView();
+  });
+
+  // Wheel to zoom (throttled)
+  let wheelRaf = false;
+  viewport.addEventListener('wheel', (e)=>{
+    e.preventDefault();
+    const delta = Math.sign(e.deltaY);
+    if(wheelRaf) return;
+    wheelRaf = true;
+    requestAnimationFrame(()=>{
+      if(delta > 0) setZoom(zoom - 0.1);
+      else setZoom(zoom + 0.1);
+      wheelRaf = false;
+    });
+  }, { passive:false });
+
+  // Simple multi-touch pinch zoom using Pointer Events
+  const activePointers = new Map(); // id -> {x,y}
+  let pinchStartDist = null;
+  function distance(p1, p2){
+    const dx = p2.x - p1.x; const dy = p2.y - p1.y;
+    return Math.sqrt(dx*dx + dy*dy);
+  }
+  viewport.addEventListener('pointerdown', (e)=>{
+    // Track pointers for pinch
+    if(e.pointerType === 'touch'){
+      activePointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      if(activePointers.size === 2){
+        const pts = Array.from(activePointers.values());
+        pinchStartDist = distance(pts[0], pts[1]);
+      }
+    }
+  });
+  viewport.addEventListener('pointermove', (e)=>{
+    if(e.pointerType === 'touch' && activePointers.has(e.pointerId)){
+      activePointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      if(activePointers.size === 2 && pinchStartDist){
+        const pts = Array.from(activePointers.values());
+        const distNow = distance(pts[0], pts[1]);
+        const ratio = distNow / pinchStartDist;
+        // Apply a mild factor and clamp
+        const newZoom = zoom * ratio;
+        setZoom(newZoom);
+        pinchStartDist = distNow; // progressive pinch
+      }
+    }
+  });
+  function endPointer(e){
+    if(activePointers.has(e.pointerId)){
+      activePointers.delete(e.pointerId);
+      if(activePointers.size < 2){
+        pinchStartDist = null;
+      }
+    }
+  }
+  viewport.addEventListener('pointerup', endPointer);
+  viewport.addEventListener('pointercancel', endPointer);
+  viewport.addEventListener('pointerleave', endPointer);
+
+  // Zoom controls
+  zoomSlider.addEventListener('input', ()=>{
+    setZoom(Number(zoomSlider.value));
+  });
+  zoomInBtn.addEventListener('click', ()=> setZoom(zoom + 0.1));
+  zoomOutBtn.addEventListener('click', ()=> setZoom(zoom - 0.1));
+
+  // Speed controls
+  function setSpeed(mult){
+    speedMultiplier = Math.max(0, Number(mult));
+    document.documentElement.style.setProperty('--speed', speedMultiplier);
+    speedValue.textContent = `${Math.round(speedMultiplier*100)/100}x`;
+    speedSlider.setAttribute('aria-valuenow', String(speedMultiplier));
+    updateSpeedStatus();
+  }
+  function updateSpeedStatus(){
+    const state = isPaused || speedMultiplier === 0 ? 'paused' : 'running';
+    speedStatus.textContent = `${state} ${speedMultiplier}x`;
+  }
+  speedSlider.addEventListener('input', ()=>{
+    setSpeed(speedSlider.value);
+  });
+  speedDecBtn.addEventListener('click', ()=>{
+    setSpeed(speedMultiplier - Number(speedSlider.step || 1));
+  });
+  speedIncBtn.addEventListener('click', ()=>{
+    setSpeed(speedMultiplier + Number(speedSlider.step || 1));
+  });
+  toggleRotationBtn.addEventListener('click', ()=>{
+    isPaused = !isPaused;
+    toggleRotationBtn.setAttribute('aria-pressed', String(isPaused));
+    toggleRotationBtn.textContent = isPaused ? 'Resume' : 'Pause';
+    updateSpeedStatus();
+  });
+
+  // Apply controls explicit action + keyboard hint (Enter)
+  function applyControls(){
+    // In this simple app, applying controls just acknowledges current values
+    applyStatus.textContent = 'done';
+    // Update all proxies to ensure sync
+    updateSpeedStatus();
+    updateZoomBoundaryClasses();
+    showMessage('Controls applied.');
+  }
+  applyControlsBtn.addEventListener('click', applyControls);
+
+  // Keyboard accessibility: arrow keys adjust view, +/- zoom, Enter applies
+  viewport.addEventListener('keydown', (e)=>{
+    if(e.key === 'ArrowLeft'){ yaw -= 5; applyCameraTransform(); }
+    else if(e.key === 'ArrowRight'){ yaw += 5; applyCameraTransform(); }
+    else if(e.key === 'ArrowUp'){ pitch -= 5; if(pitch<minPitch)pitch=minPitch; applyCameraTransform(); }
+    else if(e.key === 'ArrowDown'){ pitch += 5; if(pitch>maxPitch)pitch=maxPitch; applyCameraTransform(); }
+    else if(e.key === '+'){ setZoom(zoom+0.1); }
+    else if(e.key === '-'){ setZoom(zoom-0.1); }
+    else if(e.key === 'Enter'){ applyControls(); }
+    else return;
+    e.preventDefault();
+  });
+
+  // Background stars (white canvas with black dots; twinkle simplified for clarity)
+  let starCtx, starDeviceRatio=1;
+  function drawStarfield(){
+    const w = viewport.clientWidth;
+    const h = viewport.clientHeight;
+    starDeviceRatio = window.devicePixelRatio || 1;
+    starfield.width = Math.floor(w * starDeviceRatio);
+    starfield.height = Math.floor(h * starDeviceRatio);
+    starfield.style.width = w + 'px';
+    starfield.style.height = h + 'px';
+    starCtx = starfield.getContext('2d');
+    starCtx.scale(starDeviceRatio, starDeviceRatio);
+    starCtx.clearRect(0,0,w,h);
+    // Stars
+    const stars = [];
+    const count = Math.max(60, Math.floor((w*h) / 12000));
+    for(let i=0;i<count;i++){
+      stars.push({
+        x: Math.random()*w,
+        y: Math.random()*h,
+        r: Math.random()*1.4 + 0.3,
+        a: Math.random()*0.7 + 0.2,
+        tw: (Math.random()*0.4+0.1) * (Math.random()<0.5? 1:-1)
+      });
+    }
+    starfield._stars = stars;
+    starfield.setAttribute('data-ready','true');
+    previewStatus.textContent = 'ready';
+    twinkleStars();
+  }
+  function twinkleStars(){
+    if(!starCtx) return;
+    const w = viewport.clientWidth, h = viewport.clientHeight;
+    starCtx.clearRect(0,0,w,h);
+    const stars = starfield._stars || [];
+    starCtx.fillStyle = '#000000';
+    for(const s of stars){
+      s.a += s.tw * 0.02;
+      if(s.a < 0.15 || s.a > 0.9) s.tw *= -1;
+      starCtx.globalAlpha = s.a;
+      starCtx.beginPath();
+      starCtx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      starCtx.fill();
+    }
+    starCtx.globalAlpha = 1;
+  }
+
+  // Compute 3D rotation (camera yaw, pitch) and occlusion
+  function rotatePoint(x, y, z){
+    // Rotate Y (yaw), then X (pitch)
+    const ry = yaw * Math.PI/180;
+    const rx = pitch * Math.PI/180;
+
+    // Rotate around Y: affects x and z
+    let x1 = x*Math.cos(ry) + z*Math.sin(ry);
+    let z1 = -x*Math.sin(ry) + z*Math.cos(ry);
+
+    // Rotate around X: affects y and z1
+    let y2 = y*Math.cos(rx) - z1*Math.sin(rx);
+    let z2 = y*Math.sin(rx) + z1*Math.cos(rx);
+
+    return { x:x1, y:y2, z:z2 };
+  }
+
+  // Occlusion and label updates
+  function updateOcclusionAndLabels(){
+    const sunRadius = 60; // px at scale 1 (sun is 120 px)
+    let anyBlocked = false;
+
+    // Compute scaling factor used by CSS transform on #universe scale(zoom)
+    const scale = zoom;
+
+    for(const [name, st] of planetState){
+      // Original unrotated coordinates in scene units (px)
+      const x = st.orbitRadiusPx * Math.cos(st.angle);
+      const y = st.orbitRadiusPx * Math.sin(st.angle);
+      const z = 0; // orbits in XY plane by construction
+      const r = rotatePoint(x, y, z);
+      st.rotated = r;
+
+      // Occlusion heuristic: behind origin (z<0) and close to center after scaling -> blocked by Sun
+      const dist2D = Math.sqrt((r.x*scale)**2 + (r.y*scale)**2);
+      const blocked = (r.z < 0 && dist2D < sunRadius*scale);
+      if(blocked){
+        st.el.classList.add('occluded');
+        st.el.style.pointerEvents = 'none';
+        anyBlocked = true;
+      }else{
+        st.el.classList.remove('occluded');
+        st.el.style.pointerEvents = 'auto';
+      }
+
+      // Label side positioning to reduce overlaps:
+      // if on right side (rotated x positive) put label to the right; else to the left
+      const label = st.labelEl;
+      if(r.x >= 0){
+        label.style.left = 'calc(100% + 6px)';
+        label.style.right = 'auto';
+        label.style.top = '50%';
+        label.style.transform = 'translateY(-50%)';
+      }else{
+        label.style.left = 'auto';
+        label.style.right = 'calc(100% + 6px)';
+        label.style.top = '50%';
+        label.style.transform = 'translateY(-50%)';
+      }
+    }
+
+    occlusionStatus.textContent = anyBlocked ? 'some blocked' : 'clear';
+  }
+
+  // Anchor info panel near selected planet
+  function updateAnchoredPanel(){
+    if(!anchoredPanel || !selected.name) return;
+    const st = planetState.get(selected.name);
+    if(!st) return;
+
+    // Get planet screen position by reading its bounding rect
+    const rect = st.el.getBoundingClientRect();
+    const vpRect = viewport.getBoundingClientRect();
+    // Place panel near planet but within viewport bounds
+    let left = rect.right + 8; // right side default
+    let top = rect.top;
+
+    // If panel would overflow right, place to left
+    const panelWidth = infoPanel.offsetWidth || 320;
+    if(left + panelWidth > vpRect.right){
+      left = rect.left - panelWidth - 8;
+    }
+    // Clamp within viewport
+    left = Math.max(vpRect.left + 8, Math.min(left, vpRect.right - panelWidth - 8));
+    top = Math.max(vpRect.top + 8, Math.min(top, vpRect.bottom - infoPanel.offsetHeight - 8));
+
+    // Apply absolute positioning within document
+    infoPanel.style.position = 'absolute';
+    infoPanel.style.left = `${left}px`;
+    infoPanel.style.top = `${top}px`;
+    infoPanel.style.maxWidth = '320px';
+  }
+
+  // Animation loop for orbits
+  let lastT = performance.now();
+  function animate(now){
+    const dt = Math.min(0.05, (now - lastT)/1000); // clamp dt to avoid jumps
+    lastT = now;
+
+    if(!isPaused && speedMultiplier > 0){
+      for(const [name, st] of planetState){
+        const angSpeed = (Math.PI*2) / (st.periodSec); // radians per second at speed 1
+        st.angle += dt * angSpeed * speedMultiplier;
+        // position in XY plane (becomes tilted via camera rotateX)
+        const x = st.orbitRadiusPx * Math.cos(st.angle);
+        const y = st.orbitRadiusPx * Math.sin(st.angle);
+        st.el.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+      }
+    }
+
+    // Update occlusion markers and label positions
+    updateOcclusionAndLabels();
+    // Star twinkle
+    twinkleStars();
+    // If panel anchored, follow
+    updateAnchoredPanel();
+
+    requestAnimationFrame(animate);
+  }
+
+  // Slider min/max boundary classes
+  function updateZoomBoundaryClasses(){
+    const group = document.getElementById('zoom-controls');
+    group.classList.toggle('at-min', zoom <= Number(zoomSlider.min));
+    group.classList.toggle('at-max', zoom >= Number(zoomSlider.max));
+  }
+  function updateSpeedBoundaryClasses(){
+    const group = document.getElementById('speed-controls');
+    const val = Number(speedSlider.value);
+    group.classList.toggle('at-min', val <= Number(speedSlider.min));
+    group.classList.toggle('at-max', val >= Number(speedSlider.max));
+  }
+
+  // Initialize
+  initScene();
+  drawStarfield();
+  window.addEventListener('resize', drawStarfield);
+  requestAnimationFrame(animate);
+
+  // Click outside planets should NOT close info (persist until user closes)
+  viewport.addEventListener('click', (e)=>{
+    const clickedPlanet = e.target.closest('.planet');
+    const clickedControl = e.target.closest('#controlsBar');
+    if(!clickedPlanet && !clickedControl){
+      // Provide clear feedback but do not close info
+      showMessage('No planet selected.');
+    }
+  });
+
+  // Keep controls responsive during drag by ignoring viewport events started on controls (handled in pointerdown)
+  // Already handled above.
+
+  // Sun interactions: open info panel with Sun details
+  function openSunInfo(){
+    panelUpdating.textContent = 'updating';
+    infoTitle.textContent = 'Sun';
+    infoSummary.textContent = 'The Sun is the star at the center of our solar system. It is a nearly perfect sphere of hot plasma that provides the energy driving Earth’s climate and weather.';
+    infoList.innerHTML = '';
+    const listItems = [
+      'Composition: ~74% hydrogen, ~24% helium',
+      'Approximate radius: 696,340 km',
+      'Surface temperature: ~5,500 °C'
+    ];
+    listItems.forEach(text=>{
+      const li = document.createElement('li');
+      li.textContent = text;
+      infoList.appendChild(li);
+    });
+    infoPanel.dataset.open = 'true';
+    panelStatus.textContent = 'open';
+    sunActionStatus.textContent = 'opened';
+    panelUpdating.textContent = 'updated';
+    setSelectionStatus('Sun');
+  }
+  sunEl.addEventListener('click', (e)=>{ e.stopPropagation(); openSunInfo(); });
+  sunEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); openSunInfo(); } });
+
+  // Ensure labels readability and click area increases at low zoom
+  function adjustHitboxesByZoom(){
+    const small = zoom < 1.2;
+    for(const [_, st] of planetState){
+      const hb = st.el.querySelector('.hitbox');
+      if(hb){
+        if(small){
+          hb.style.width = '60px';
+          hb.style.height = '60px';
+        }else{
+          hb.style.width = '44px';
+          hb.style.height = '44px';
+        }
+      }
+    }
+  }
+  // Observe zoom changes by intercepting setZoom and other actions
+  const _setZoom = setZoom;
+  setZoom = function(z){
+    _setZoom(z);
+    adjustHitboxesByZoom();
+  };
+
+  // Initialize proxies and statuses
+  panelStatus.textContent = infoPanel.dataset.open === 'true' ? 'open' : 'closed';
+  updateSpeedStatus();
+  updateSpeedBoundaryClasses();
+  updateZoomBoundaryClasses();
+
+  speedSlider.addEventListener('input', updateSpeedBoundaryClasses);
+  zoomSlider.addEventListener('input', updateZoomBoundaryClasses);
+
+  // Anchor panel update per frame if enabled
+  // Already called in animate().
+
+  // Focus management: Keep top-level active section proxy
+  activeSection.textContent = 'scene';
+
+  // Keyboard hint near Apply: Enter also triggers Apply when focus within controls or viewportSection
+  viewportSection.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){
+      // Restrict to safe action
+      applyControls();
+    }
+  });
+
+  // Ensure all primary buttons are at least 44x44 (handled via CSS), and remain visible in 1280x720.
+
+  // Additional: Provide toggling orbits immediate feedback for automation visibility
+  toggleOrbitsBtn.addEventListener('click', ()=>{
+    // update message
+    showMessage(showOrbits ? 'Orbits visible' : 'Orbits hidden');
+  });
+
+  // Prevent text selection on drag in

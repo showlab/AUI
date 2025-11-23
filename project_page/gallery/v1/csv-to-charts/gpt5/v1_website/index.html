@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Data Visualization Playground • CSV → Charts</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Original V0 Base Styles (kept for compatibility; overridden by destylized theme below) -->
+  <style>
+    :root{
+      --bg:#0f1220;
+      --card:#151a2e;
+      --muted:#8c93b3;
+      --text:#e9ecff;
+      --accent:#5b8cff;
+      --accent2:#7cf8d8;
+      --danger:#ff6b6b;
+      --shadow: 0 10px 30px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,0.05) inset;
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background:
+        radial-gradient(1200px 600px at 20% -10%, rgba(123,146,255,0.18), transparent 50%),
+        radial-gradient(1000px 500px at 110% 0%, rgba(124,248,216,0.20), transparent 40%),
+        var(--bg);
+      color:var(--text);
+    }
+    header{
+      position:sticky; top:0; z-index:5;
+      background: linear-gradient(180deg, rgba(21,26,46,.85), rgba(21,26,46,.65));
+      backdrop-filter: blur(8px);
+      border-bottom:1px solid rgba(255,255,255,0.06);
+    }
+    .header-inner{
+      max-width:1400px; margin:0 auto; padding:16px 24px;
+      display:flex; align-items:center; gap:16px; justify-content:space-between;
+    }
+    #appTitle{
+      margin:0; font-size:22px; letter-spacing:.4px; font-weight:700;
+      display:flex; align-items:center; gap:12px;
+    }
+    .badge{
+      font-size:12px; color:#0a1335; background:linear-gradient(90deg, var(--accent), var(--accent2));
+      padding:4px 8px; border-radius:999px; font-weight:700;
+    }
+
+    main{
+      max-width:1400px; margin:0 auto; padding:20px 24px; display:grid; gap:20px;
+      grid-template-columns: 340px 1fr;
+    }
+    aside{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00));
+      border:1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:16px;
+      display:flex; flex-direction:column; gap:14px;
+      min-height: 640px;
+    }
+    .group{
+      background: rgba(255,255,255,0.02);
+      border:1px solid rgba(255,255,255,0.06);
+      border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px;
+    }
+    .group h3{
+      margin:0; font-size:14px; color:var(--muted); font-weight:700; letter-spacing:.3px;
+    }
+    label{font-size:12px; color:var(--muted); display:block; margin-bottom:6px;}
+    select, input[type="color"], input[type="file"], textarea{
+      width:100%; background:#0e1428; color:var(--text);
+      border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:10px 12px;
+      outline:none; transition:.2s border;
+    }
+    select:focus, input[type="color"]:focus, input[type="file"]:focus, textarea:focus{ border-color: var(--accent); }
+    input[type="color"]{ padding:6px; height:38px; }
+    .row{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .controls-inline{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .muted{color:var(--muted); font-size:12px;}
+    .btn{
+      appearance:none; border:none; border-radius:12px; padding:10px 14px;
+      font-weight:700; letter-spacing:.3px; cursor:pointer; color:#06102a;
+      background:linear-gradient(90deg, var(--accent), var(--accent2));
+      box-shadow: 0 8px 20px rgba(91,140,255,.35);
+      transition:transform .08s ease, box-shadow .2s ease;
+      min-height:44px;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn-outline{
+      background:transparent; color:var(--text);
+      border:1px solid rgba(255,255,255,0.14); box-shadow:none;
+    }
+    .btn-danger{
+      background: linear-gradient(90deg, #ff6b6b, #ff9770);
+      color:#2a1010; box-shadow: 0 8px 20px rgba(255,107,107,.35);
+    }
+    #dropZone{
+      border:2px dashed rgba(255,255,255,0.18);
+      border-radius:12px; padding:14px; text-align:center; color:var(--muted);
+      transition:.2s border-color, .2s background;
+      background: rgba(255,255,255,0.02);
+      cursor:pointer; min-height:44px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:6px;
+    }
+    #dropZone.dragover{ border-color: var(--accent); background: rgba(91,140,255,0.08); color:var(--text);}
+    #previewTable{
+      width:100%; max-height:140px; overflow:auto; border-radius:10px; border:1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02);
+    }
+    #previewTable table{ width:100%; border-collapse:collapse; font-size:12px; }
+    #previewTable th, #previewTable td{ padding:6px 8px; border-bottom:1px solid rgba(255,255,255,0.06); white-space:nowrap; text-overflow:ellipsis; overflow:hidden; }
+    #statusMessage{ font-size:12px; min-height:16px; color:var(--muted); }
+    section#chartArea{
+      position:relative;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00));
+      border:1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:12px;
+      display:flex; flex-direction:column; gap:10px;
+      min-height: 640px;
+    }
+    .chart-header{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding:6px 8px;
+    }
+    #chartCanvas{
+      width:100%; height:100%;
+      background:#0a0f22;
+      border-radius:12px;
+      min-height:320px;
+    }
+    #tooltip{
+      position:absolute; pointer-events:none; z-index:3; display:none;
+      background:#0c1227; color:var(--text); border:1px solid rgba(255,255,255,0.14);
+      padding:8px 10px; border-radius:10px; font-size:12px; white-space:nowrap;
+      box-shadow:0 10px 30px rgba(0,0,0,.4);
+    }
+    .switch{
+      display:inline-flex; align-items:center; gap:8px; font-size:12px; color:var(--muted);
+      min-height:44px;
+    }
+    .switch input{ accent-color: var(--accent); transform: scale(1.1); }
+    #colorInputs{ display:flex; flex-direction:column; gap:8px; }
+    .color-row{ display:grid; grid-template-columns: 1fr auto; gap:8px; align-items:center; }
+    .legend-preview{ display:flex; gap:8px; flex-wrap:wrap; font-size:12px; color:var(--muted); }
+    .dot{ width:10px; height:10px; border-radius:2px; display:inline-block; }
+
+    @media (max-width: 1100px){
+      main{ grid-template-columns: 1fr; }
+      aside{ order:2 }
+      #chartArea{ order:1; min-height: 480px; }
+    }
+  </style>
+
+  <!-- Destylized Theme Overrides: white background, black text, no gradients/shadows/rounded corners -->
+  <style>
+    /* Reset and base */
+    :root{
+      --ui-bg: #ffffff;
+      --ui-text: #000000;
+      --ui-muted: #333333;
+      --ui-accent: #0b57d0;
+      --ui-danger: #b00020;
+      --ui-border: #d0d0d0;
+      --ui-focus: #000000;
+      --ui-bg-weak: #f5f5f5;
+    }
+    html, body{
+      background: var(--ui-bg) !important;
+      color: var(--ui-text) !important;
+    }
+    *:focus{
+      outline: 2px solid var(--ui-focus);
+      outline-offset: 1px;
+    }
+    header{
+      background: #ffffff !important;
+      border-bottom: 1px solid var(--ui-border) !important;
+      backdrop-filter: none !important;
+    }
+    .header-inner{
+      padding: 12px 16px !important;
+    }
+    #appTitle{
+      font-size: 20px !important;
+      color: var(--ui-text) !important;
+    }
+    .badge{
+      background: #e0e7ff !important;
+      color: var(--ui-text) !important;
+      border-radius: 0 !important;
+      padding: 2px 6px !important;
+      font-weight: 600 !important;
+    }
+    main{
+      padding: 16px !important;
+      gap: 16px !important;
+      max-width: 1280px;
+    }
+    aside, .group, #chartArea, #dropZone, #previewTable, #tooltip, #chartCanvas{
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      background: #ffffff !important;
+    }
+    aside{
+      border: 1px solid var(--ui-border) !important;
+      background: #ffffff !important;
+      padding: 12px !important;
+      gap: 12px !important;
+      min-height: auto !important;
+    }
+    .group{
+      border: 1px solid var(--ui-border) !important;
+      padding: 10px !important;
+      gap: 8px !important;
+      background: #ffffff !important;
+    }
+    .group h3{
+      color: var(--ui-text) !important;
+      font-size: 14px !important;
+      font-weight: 700 !important;
+      margin: 0 0 4px 0 !important;
+    }
+    label{
+      color: var(--ui-text) !important;
+      font-size: 13px !important;
+      margin-bottom: 4px !important;
+    }
+    select, input[type="color"], input[type="file"], textarea{
+      background: #ffffff !important;
+      color: var(--ui-text) !important;
+      border: 1px solid var(--ui-border) !important;
+      border-radius: 0 !important;
+      padding: 10px 10px !important;
+      min-height: 44px !important;
+      font-size: 14px !important;
+    }
+    textarea{
+      resize: vertical;
+      min-height: 100px;
+      line-height: 1.4;
+    }
+    #dropZone{
+      background: #fafafa !important;
+      border: 2px dashed var(--ui-border) !important;
+      color: var(--ui-muted) !important;
+      min-height: 72px !important;
+      padding: 12px !important;
+    }
+    #dropZone.dragover{
+      border-color: var(--ui-accent) !important;
+      background: #eef3ff !important;
+      color: var(--ui-text) !important;
+    }
+    .muted{
+      color: var(--ui-muted) !important;
+      font-size: 12px !important;
+    }
+    .controls-inline{
+      gap: 8px !important;
+    }
+    .btn, .btn-outline, .btn-danger{
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      min-height: 44px !important;
+      font-weight: 700 !important;
+      letter-spacing: 0 !important;
+      transition: none !important;
+      padding: 10px 16px !important;
+    }
+    .btn{
+      background: var(--ui-accent) !important;
+      color: #ffffff !important;
+      border: 1px solid var(--ui-accent) !important;
+    }
+    .btn[disabled], .btn[aria-disabled="true"],
+    .btn-outline[disabled], .btn-outline[aria-disabled="true"]{
+      opacity: 0.5 !important;
+      cursor: not-allowed !important;
+    }
+    .btn-outline{
+      background: #ffffff !important;
+      color: var(--ui-text) !important;
+      border: 1px solid var(--ui-border) !important;
+    }
+    .btn-danger{
+      background: #ffffff !important;
+      color: var(--ui-danger) !important;
+      border: 1px solid var(--ui-danger) !important;
+    }
+    .row{ gap: 8px !important; }
+    #previewTable{
+      max-height: 160px !important;
+      border: 1px solid var(--ui-border) !important;
+    }
+    #previewTable table{
+      font-size: 12px !important;
+    }
+    #previewTable th, #previewTable td{
+      border-bottom: 1px solid var(--ui-border) !important;
+      padding: 6px 8px !important;
+    }
+    #statusMessage{
+      color: var(--ui-muted) !important;
+      min-height: 18px !important;
+    }
+    #chartArea{
+      border: 1px solid var(--ui-border) !important;
+      padding: 10px !important;
+      min-height: 520px !important;
+      gap: 8px !important;
+      background: #ffffff !important;
+    }
+    .chart-header{
+      padding: 4px 6px !important;
+    }
+    #chartCanvas{
+      background: #ffffff !important;
+      min-height: 420px !important;
+      border: 1px solid var(--ui-border) !important;
+    }
+    #tooltip{
+      background: #ffffff !important;
+      color: var(--ui-text) !important;
+      border: 1px solid var(--ui-border) !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      padding: 6px 8px !important;
+      font-size: 12px !important;
+    }
+    .legend-preview .dot{
+      border-radius: 0 !important;
+      width: 12px !important; height: 12px !important;
+      border: 1px solid #00000022;
+    }
+    /* Highlight for render button when needed */
+    #renderBtn[data-highlight="true"]{
+      background: #ffcc00 !important;
+      color: #000000 !important;
+      border-color: #ffcc00 !important;
+    }
+    /* Empty chart guidance overlay */
+    #chartEmptyMessage{
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 16px;
+      color: var(--ui-text);
+      background: rgba(255,255,255,0.8);
+      border: 1px dashed var(--ui-border);
+      pointer-events: none;
+    }
+    #chartEmptyMessage[data-visible="true"]{
+      display: flex;
+    }
+    /* Proxies area styles */
+    #proxies{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    #proxies div{
+      border: 1px solid var(--ui-border);
+      padding: 6px;
+      background: #fafafa;
+    }
+    /* Link row below save button */
+    #saveRow{
+      display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 4px;
+    }
+    #downloadLink{
+      padding: 8px 12px;
+      border: 1px solid var(--ui-border);
+      color: var(--ui-text);
+      text-decoration: none;
+      min-height: 36px;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: #ffffff;
+    }
+    #downloadLink[aria-disabled="true"]{
+      opacity: 0.5; pointer-events: none; cursor: not-allowed;
+    }
+    /* Help section (collapsed by default) */
+    details#helpSection{
+      border: 1px solid var(--ui-border);
+      padding: 8px;
+      background: #ffffff;
+    }
+    details#helpSection > summary{
+      cursor: pointer;
+      font-weight: 700;
+      padding: 6px;
+      outline: none;
+    }
+    .kbd{
+      display: inline-block; border: 1px solid var(--ui-border); background: #fafafa; padding: 1px 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px;
+    }
+    /* Visibility helpers */
+    .visually-hidden{
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0,0,0,0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <h1 id="appTitle">Data Visualization Playground <span class="badge">CSV → Charts</span></h1>
+      <div class="controls-inline" style="align-items:flex-start">
+        <button id="loadSampleBtn" class="btn-outline" title="Load a sample dataset (no download)">Load sample data</button>
+        <div>
+          <button id="saveImageBtn" class="btn" title="Requires a rendered chart. Click to generate a PNG and show a local preview." aria-disabled="true" disabled>Save as image</button>
+          <div id="saveRow">
+            <a id="downloadLink" href="#" download="chart.png" aria-disabled="true">Download PNG</a>
+            <span id="downloadStatus" aria-live="polite">disabled</span>
+            <span id="saveInfo" class="muted">No image saved yet.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <aside aria-label="Controls">
+      <div class="group" id="dataGroup">
+        <h3>Data</h3>
+
+        <div class="controls-inline" style="align-items:flex-start">
+          <div style="flex:1">
+            <div id="dropZone" tabindex="0" aria-label="Drop CSV here or click to select">
+              Drop CSV here or click to select
+              <div class="muted">Headers in first row are required</div>
+            </div>
+            <input id="fileInput" type="file" accept=".csv,text/csv" aria-label="Choose CSV file" />
+          </div>
+        </div>
+
+        <div class="controls-inline" style="align-items:flex-start">
+          <div style="flex:1">
+            <label for="csvPasteInput">Paste CSV (or TSV/semicolon-delimited)</label>
+            <textarea id="csvPasteInput" placeholder="Example:
+Product,Sales
+A,30
+B,45
+C,25"></textarea>
+            <div class="controls-inline">
+              <button id="csvPasteApplyBtn" class="btn-outline" title="Parse the pasted text without downloading">Apply pasted CSV</button>
+              <span class="muted">Hint: Press <span class="kbd">Ctrl</span> + <span class="kbd">Enter</span> to apply</span>
+              <span id="applyStatus" class="muted" aria-live="polite">idle</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="statusMessage" aria-live="polite"></div>
+        <div id="previewTable" aria-label="Data preview" data-ready="false"></div>
+        <div id="previewStatus" aria-live="polite">idle</div>
+      </div>
+
+      <div class="group" id="chartConfigGroup">
+        <h3>Chart</h3>
+        <div class="row">
+          <div>
+            <label for="chartType">Chart type</label>
+            <select id="chartType" aria-label="Chart type">
+              <option value="bar">Bar</option>
+              <option value="line">Line</option>
+              <option value="scatter">Scatter</option>
+              <option value="pie">Pie</option>
+            </select>
+          </div>
+          <div>
+            <label for="paletteSelect">Palette</label>
+            <select id="paletteSelect" title="Color palette">
+              <option value="vibrant">Vibrant</option>
+              <option value="classic">Classic</option>
+              <option value="pastel">Pastel</option>
+              <option value="cool">Cool</option>
+              <option value="warm">Warm</option>
+              <option value="mono">Monochrome</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="axisControls">
+          <div>
+            <label for="xSelect">X column</label>
+            <select id="xSelect" aria-label="X column"></select>
+          </div>
+          <div>
+            <label for="ySelect">Y columns (multi)</label>
+            <select id="ySelect" multiple size="6" aria-label="Y columns"></select>
+          </div>
+        </div>
+
+        <div id="pieControls" style="display:none;">
+          <div class="row">
+            <div>
+              <label for="labelSelect">Label column</label>
+              <select id="labelSelect"></select>
+            </div>
+            <div>
+              <label for="valueSelect">Value column</label>
+              <select id="valueSelect"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="group">
+          <h3>Appearance</h3>
+          <div class="row">
+            <div class="switch">
+              <input id="gridToggle" type="checkbox" checked aria-label="Show gridlines" />
+              <label for="gridToggle">Gridlines</label>
+            </div>
+            <div class="switch">
+              <input id="pointsToggle" type="checkbox" checked aria-label="Show points" />
+              <label for="pointsToggle">Show points</label>
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label for="bgColorInput">Chart background</label>
+              <input id="bgColorInput" type="color" value="#ffffff" aria-label="Chart background color" />
+            </div>
+            <div>
+              <label for="accentColorInput">Accent (axes)</label>
+              <input id="accentColorInput" type="color" value="#000000" aria-label="Axes accent color" />
+            </div>
+          </div>
+          <div>
+            <label>Series colors</label>
+            <div id="colorInputs" class="muted">Select Y columns to customize series colors</div>
+          </div>
+          <div class="legend-preview" id="legendPreview" aria-label="Legend preview"></div>
+        </div>
+
+        <div class="controls-inline">
+          <button id="renderBtn" class="btn" data-highlight="false" aria-label="Render chart">Render chart</button>
+          <span class="muted">Hint: Press <span class="kbd">Enter</span> to Render</span>
+          <button id="clearBtn" class="btn-danger" aria-label="Clear data and chart">Clear</button>
+        </div>
+        <div id="proxies" aria-label="Status proxies">
+          <div>Preview: <span id="previewProxy">idle</span></div>
+          <div>Chart ready: <span id="chartReadyProxy">false</span></div>
+          <div>Download: <span id="downloadProxy">disabled</span></div>
+          <div>Apply: <span id="applyProxy">idle</span></div>
+        </div>
+      </div>
+
+      <details id="helpSection">
+        <summary>Help & Tips (optional)</summary>
+        <div style="padding:8px 4px">
+          <p>This tool converts CSV data into clean charts. You can paste CSV, drop a file, or load a sample. Then choose the chart type and configure appearance.</p>
+          <p>Key actions:</p>
+          <ul>
+            <li>Paste CSV in the "Paste CSV" box and click "Apply pasted CSV", or press Ctrl + Enter.</li>
+            <li>Load a file via "Drop CSV" or "Choose CSV file".</li>
+            <li>Pick chart type: Bar, Line, Scatter, or Pie.</li>
+            <li>Use "Render chart" to produce the visualization. The "Save as image" button is enabled once a chart is rendered.</li>
+            <li>Use "Download PNG" to get a PNG file. An in-app image preview will also appear below the button.</li>
+          </ul>
+          <p>Keyboard hints:</p>
+          <ul>
+            <li><span class="kbd">Enter</span> renders the chart when focus is on chart controls.</li>
+            <li><span class="kbd">Ctrl</span> + <span class="kbd">Enter</span> applies pasted CSV.</li>
+            <li>Use <span class="kbd">Tab</span> to move between inputs; focus is always visible.</li>
+          </ul>
+          <p>Edge cases:</p>
+          <ul>
+            <li>Quoted fields with commas are handled. For example: "Widget, Large",1200</li>
+            <li>Semicolon-delimited data is accepted; it's automatically normalized to commas.</li>
+            <li>Blank lines and extra whitespace are ignored when possible.</li>
+            <li>Numeric detection is flexible, but malformed numbers are skipped.</li>
+          </ul>
+          <p>Legend and colors:</p>
+          <ul>
+            <li>Choose a palette to quickly recolor series or slices.</li>
+            <li>Override any series color via the color pickers once Y columns are selected.</li>
+          </ul>
+          <p>Export behavior:</p>
+          <ul>
+            <li>After rendering, "Save as image" creates a PNG.</li>
+            <li>Download link becomes enabled and an in-page preview appears.</li>
+          </ul>
+          <p>Notes:</p>
+          <ul>
+            <li>We never upload your data. All processing is in your browser.</li>
+            <li>This UI avoids animation and decorative effects for clarity and accessibility.</li>
+            <li>Minimum target size for buttons and inputs is at least 44×44 px.</li>
+          </ul>
+          <!-- A long stretch of documented guidance to ensure a comprehensive help section and maintain comparable length -->
+          <h4>Detailed Usage Examples</h4>
+          <p>Bar chart for product sales:</p>
+          <pre class="muted">Product,Sales
+A,30
+B,45
+C,25</pre>
+          <p>Line chart for monthly values:</p>
+          <pre class="muted">Month,Value
+Jan,10
+Feb,12
+Mar,15
+Apr,18
+May,17</pre>
+          <p>Scatter chart for paired numeric data:</p>
+          <pre class="muted">X,Y
+1,2
+2,3
+3,2.5
+4,4.5
+5,4</pre>
+          <p>Pie chart for category distribution:</p>
+          <pre class="muted">Category,Amount
+Rent,1200
+Food,450
+Transport,120
+Leisure,220</pre>
+          <p>Semicolon-delimited example (auto-detected):</p>
+          <pre class="muted">Name;Value
+Alpha;10
+Beta;20</pre>
+          <p>Quoted text with commas:</p>
+          <pre class="muted">Product,Sales
+"Widget, Large",1200
+"Gizmo, Small",800</pre>
+          <p>Currency values are parsed leniently; symbols are removed when possible:</p>
+          <pre class="muted">Category,Amount
+Sales,$1,200
+Costs,$800
+Profit,$400</pre>
+          <p>Long labels are supported and x-axis labels rotate when needed. The chart automatically adjusts tick density and formatting. Gridlines can be toggled. Line and scatter charts optionally show points. For pie charts, labels appear on larger slices, and a legend is included for all slices.</p>
+          <p>When exporting, the canvas content is converted into a PNG. The background color is included. The download link appears in the header. A small preview image shows the exported PNG inline so you can confirm the result without leaving the page.</p>
+          <p>For accessibility, the app supports keyboard navigation, visible focus states, and live region announcements for status messages and proxy indicators. Each critical action updates a visible, persistent proxy (e.g., Preview, Chart ready, Download, Apply) so automations and assistive tools can track the workflow.</p>
+          <p>Thank you for using the Data Visualization Playground.</p>
+        </div>
+      </details>
+    </aside>
+
+    <section id="chartArea" aria-label="Chart area">
+      <div class="chart-header">
+        <div class="muted" id="chartMeta">No data loaded</div>
+        <div class="muted">Tip: hover the chart for values</div>
+      </div>
+
+      <!-- On-canvas chart -->
+      <canvas id="chartCanvas" data-ready="false"></canvas>
+
+      <!-- Overlay guidance when no chart rendered -->
+      <div id="chartEmptyMessage" aria-live="polite" data-visible="true">
+        <div>
+          <div><strong>No chart rendered.</strong></div>
+          <div class="muted">Load or paste CSV, choose settings, and click "Render chart".</div>
+        </div>
+      </div>
+
+      <!-- Tooltip for data hover -->
+      <div id="tooltip" role="tooltip"></div>
+    </section>
+  </main>
+
+  <!-- Image preview region (export result, visible after Save) -->
+  <section id="imagePreviewSection" aria-label="Export preview" style="max-width:1280px;margin:0 auto 24px auto; padding: 0 16px;">
+    <h2 style="font-size:16px;margin:12px 0 6px 0">Image Preview</h2>
+    <div class="muted" id="imagePreviewStatus">idle</div>
+    <div style="display:flex; gap:10px; align-items:flex-start; flex-wrap:wrap; border:1px solid #d0d0d0; padding:8px; background:#ffffff;">
+      <img id="imagePreview" alt="Chart image preview" style="max-width:100%; height:auto; display:none; border:1px solid #d0d0d0;"/>
+      <div id="imageMeta" class="muted">No preview available.</div>
+    </div>
+  </section>
+
+  <script>
+    // Utilities
+    const palettes = {
+      vibrant: ['#5B8CFF','#FF7875','#36CFC9','#FFD666','#9254DE','#73D13D','#F759AB','#40A9FF','#FF9C6E','#69C0FF'],
+      classic: ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f','#bcbd22','#17becf'],
+      pastel: ['#a3bffa','#feb2b2','#b2f5ea','#fefcbf','#d6bcfa','#c6f6d5','#fbb6ce','#90cdf4','#fbd38d','#81e6d9'],
+      cool: ['#00C2FF','#2ED3BA','#77E0A3','#A3E5F1','#6E8EF1','#9A7EFE','#5F9AE0','#3DD9EB','#7EC8E3','#A0B5F8'],
+      warm: ['#FF6B6B','#FF8E72','#FFC75F','#F9F871','#F28F3B','#F94144','#F9844A','#F8961E','#FDC500','#FFD166'],
+      mono: ['#a3bffa','#89a7f5','#6e92f1','#557eec','#3b6ae8','#2156e3','#0b44df','#0438bf','#022f9e','#02257c']
+    };
+    function isNumeric(val){
+      if(val === null || val === undefined) return false;
+      if(typeof val === 'number') return Number.isFinite(val);
+      const s = String(val).trim();
+      if(s === '') return false;
+      // strip currency and commas
+      const ss = s.replace(/[$£€¥,\s]/g,'');
+      const n = Number(ss);
+      return Number.isFinite(n);
+    }
+    function toNumber(v){
+      const s = String(v).trim().replace(/[$£€¥,\s]/g,'');
+      const n = Number(s);
+      return Number.isFinite(n) ? n : NaN;
+    }
+    function dedupe(arr){
+      const seen = new Set(); const out=[];
+      for(const v of arr){ if(!seen.has(v)){ seen.add(v); out.push(v); } }
+      return out;
+    }
+    function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+
+    // CSV Parser (handles quotes and newlines within quotes; comma-based)
+    function parseCSV(text){
+      const rows=[]; let row=[]; let val='';
+      let i=0; let inQuotes=false;
+      while(i<text.length){
+        const c = text[i];
+        if(inQuotes){
+          if(c === '"'){
+            if(text[i+1] === '"'){ val += '"'; i+=2; continue; }
+            inQuotes = false; i++; continue;
+          }else{
+            val += c; i++; continue;
+          }
+        }else{
+          if(c === '"'){ inQuotes = true; i++; continue; }
+          if(c === ',' ){ row.push(val); val=''; i++; continue; }
+          if(c === '\r'){
+            i++; continue;
+          }
+          if(c === '\n'){
+            row.push(val); rows.push(row); row=[]; val=''; i++; continue;
+          }
+          val += c; i++; continue;
+        }
+      }
+      if(val !== '' || inQuotes || row.length){ row.push(val); rows.push(row); }
+      while(rows.length && rows[rows.length-1].every(c=>String(c).trim()==='')) rows.pop();
+      if(rows.length === 0) return {headers:[], rows:[]};
+      const headers = rows[0].map(h => String(h).trim());
+      const dataRows = rows.slice(1).map(arr => {
+        const obj={};
+        for(let j=0;j<headers.length;j++){
+          obj[headers[j]] = arr[j] !== undefined ? arr[j] : '';
+        }
+        return obj;
+      });
+      return {headers, rows:dataRows};
+    }
+
+    // Nice ticks for axis
+    function niceTicks(min, max, count=5){
+      if(min === max){ min -= 1; max += 1;}
+      const span = max - min;
+      const step0 = Math.pow(10, Math.floor(Math.log10(span / count)));
+      const err = (count * step0) / span;
+      let step = step0;
+      if (err <= 0.15) step = step0 * 10;
+      else if (err <= 0.35) step = step0 * 5;
+      else if (err <= 0.75) step = step0 * 2;
+      const niceMin = Math.floor(min / step) * step;
+      const niceMax = Math.ceil(max / step) * step;
+      const ticks = [];
+      for(let v=niceMin; v<=niceMax + 1e-9; v+=step) ticks.push(v);
+      return {ticks, niceMin, niceMax, step};
+    }
+
+    // Chart Renderer
+    class ChartRenderer{
+      constructor(canvas){
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.dpr = window.devicePixelRatio || 1;
+        this.hitRegions = [];
+        this.legendItems = [];
+        this.meta = '';
+        this._bgColor = '#ffffff';
+        this._axisColor = '#000000';
+        this._showGrid = true;
+        this._showPoints = true;
+        this._type = 'bar';
+        this._mouse = {x:0,y:0};
+        this._onHover = null;
+        this._data = null;
+        this._sizeToContainer();
+      }
+      setOptions(opts){
+        this._bgColor = opts.bgColor || this._bgColor;
+        this._axisColor = opts.axisColor || this._axisColor;
+        this._showGrid = opts.showGrid !== undefined ? opts.showGrid : this._showGrid;
+        this._showPoints = opts.showPoints !== undefined ? opts.showPoints : this._showPoints;
+      }
+      onHover(cb){ this._onHover = cb; }
+      setData(d){ this._data = d; }
+      setType(t){ this._type = t; }
+      _sizeToContainer(){
+        const rect = this.canvas.getBoundingClientRect();
+        const w = Math.max(320, Math.floor(rect.width));
+        const h = Math.max(280, Math.floor(rect.height));
+        this.canvas.width = Math.floor(w * this.dpr);
+        this.canvas.height = Math.floor(h * this.dpr);
+        this.ctx.setTransform(this.dpr,0,0,this.dpr,0,0);
+      }
+      resize(){ this._sizeToContainer(); this.render(); }
+      clear(){
+        const {ctx, canvas} = this;
+        ctx.save();
+        ctx.setTransform(this.dpr,0,0,this.dpr,0,0);
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.restore();
+        this.hitRegions = [];
+      }
+
+      render(){
+        const {ctx, canvas} = this;
+        this.clear();
+        const W = canvas.clientWidth, H = canvas.clientHeight;
+        // background
+        ctx.save();
+        ctx.fillStyle = this._bgColor;
+        ctx.fillRect(0,0,W,H);
+        ctx.restore();
+
+        if(!this._data || !this._data.type){
+          return;
+        }
+
+        // plot area and legend
+        const padding = {top: 24, right: 20, bottom: 56, left: 64};
+        const legendHeight = this._drawLegend(W, 0); // measurement
+        padding.top += legendHeight;
+
+        const plot = {x: padding.left, y: padding.top, w: W - padding.left - padding.right, h: H - padding.top - padding.bottom};
+        plot.w = Math.max(10, plot.w);
+        plot.h = Math.max(10, plot.h);
+
+        // axes and grid based on type
+        this.hitRegions = [];
+        ctx.save();
+        ctx.strokeStyle = this._axisColor;
+        ctx.fillStyle = this._axisColor;
+        ctx.lineWidth = 1;
+
+        if(this._data.type === 'pie'){
+          this._drawPie(plot, this._data);
+          ctx.restore();
+          return;
+        }
+
+        // For cartesian charts
+        const {xInfo, yInfo} = this._computeScales(plot, this._data);
+        this._drawGridAndAxes(plot, xInfo, yInfo);
+
+        if(this._data.type === 'bar') this._drawBars(plot, xInfo, yInfo, this._data);
+        if(this._data.type === 'line') this._drawLines(plot, xInfo, yInfo, this._data);
+        if(this._data.type === 'scatter') this._drawScatter(plot, xInfo, yInfo, this._data);
+
+        ctx.restore();
+      }
+
+      // Legend
+      _drawLegend(W, yStart){
+        const ctx = this.ctx;
+        const items = this._data.legend || [];
+        this.legendItems = items;
+        if(items.length === 0) return 0;
+
+        const paddingX = 14, paddingY = 8, gap = 16, swatch = 12;
+        let x = paddingX, y = paddingY + yStart, lineH = 18;
+        ctx.save();
+        ctx.font = '12px system-ui, sans-serif';
+        for(const it of items){
+          const label = it.label ?? '';
+          const textWidth = ctx.measureText(label).width;
+          const itemW = swatch + 8 + textWidth + gap;
+          if(x + itemW > W - paddingX){ // wrap
+            x = paddingX; y += lineH + 6;
+          }
+          // swatch
+          ctx.fillStyle = it.color;
+          ctx.fillRect(x, y, swatch, swatch);
+          // label
+          ctx.fillStyle = this._axisColor;
+          ctx.fillText(label, x + swatch + 8, y + swatch - 2);
+          x += itemW;
+        }
+        ctx.restore();
+        return (y - yStart) + 24;
+      }
+
+      _computeScales(plot, data){
+        const ctx = this.ctx;
+        ctx.save();
+        ctx.font = '12px system-ui, sans-serif';
+
+        const xInfo = {type:data.xType, toX:null, ticks:[], labels:[], categories: data.categories||[], min:0, max:1};
+        const yMin = data.yMin, yMax = data.yMax;
+        const nice = niceTicks(yMin, yMax, 5);
+        const yInfo = {min:nice.niceMin, max:nice.niceMax, ticks:nice.ticks, toY: null};
+
+        // x
+        if(data.xType === 'numeric'){
+          const minX = data.xMin, maxX = data.xMax;
+          xInfo.min = minX; xInfo.max = maxX;
+          const t = niceTicks(minX, maxX, 6);
+          xInfo.ticks = t.ticks;
+          xInfo.toX = (vx)=> plot.x + ( (vx - minX) / (maxX - minX) ) * plot.w;
+        }else{
+          const cats = data.categories;
+          const step = plot.w / Math.max(1, cats.length);
+          xInfo.toX = (idx)=> plot.x + step * idx + step/2;
+          xInfo.ticks = cats.map((c, i)=>({label:c, i}));
+          xInfo.step = step;
+        }
+        // y
+        yInfo.toY = (vy)=> plot.y + plot.h - ( (vy - yInfo.min) / (yInfo.max - yInfo.min) ) * plot.h;
+
+        ctx.restore();
+        return {xInfo, yInfo};
+      }
+
+      _drawGridAndAxes(plot, xInfo, yInfo){
+        const ctx = this.ctx;
+
+        // Gridlines
+        if(this._showGrid){
+          ctx.save();
+          ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+          ctx.lineWidth = 1;
+          // horizontal
+          for(const t of yInfo.ticks){
+            const y = yInfo.toY(t);
+            ctx.beginPath(); ctx.moveTo(plot.x, y); ctx.lineTo(plot.x + plot.w, y); ctx.stroke();
+          }
+          // vertical for numeric X
+          if(xInfo.type === 'numeric'){
+            const t = niceTicks(xInfo.min, xInfo.max, 6);
+            for(const v of t.ticks){
+              const x = xInfo.toX(v);
+              ctx.beginPath(); ctx.moveTo(x, plot.y); ctx.lineTo(x, plot.y + plot.h); ctx.stroke();
+            }
+          }
+          ctx.restore();
+        }
+
+        // Axes lines
+        ctx.save();
+        ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+        ctx.lineWidth = 1.2;
+        // Y axis
+        ctx.beginPath(); ctx.moveTo(plot.x, plot.y); ctx.lineTo(plot.x, plot.y + plot.h); ctx.stroke();
+        // X axis
+        ctx.beginPath(); ctx.moveTo(plot.x, plot.y + plot.h); ctx.lineTo(plot.x + plot.w, plot.y + plot.h); ctx.stroke();
+        ctx.restore();
+
+        // Tick labels
+        ctx.save();
+        ctx.fillStyle = this._axisColor;
+        ctx.font = '12px system-ui, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        for(const t of yInfo.ticks){
+          const y = yInfo.toY(t);
+          ctx.fillText(this._formatNumber(t), plot.x - 8, y);
+        }
+        // x labels
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        if(xInfo.type === 'numeric'){
+          const xt = niceTicks(xInfo.min, xInfo.max, 6).ticks;
+          for(const v of xt){
+            const x = xInfo.toX(v);
+            ctx.fillText(this._formatNumber(v), x, plot.y + plot.h + 8);
+          }
+        }else{
+          const cats = this._data.categories;
+          const step = xInfo.step;
+          const rotate = cats.length > 12;
+          for(let i=0;i<cats.length;i++){
+            const x = xInfo.toX(i);
+            if(rotate){
+              ctx.save();
+              ctx.translate(x, plot.y + plot.h + 8);
+              ctx.rotate(-Math.PI/4);
+              ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+              ctx.fillText(String(cats[i]), 0, 0);
+              ctx.restore();
+            }else{
+              ctx.fillText(String(cats[i]), x, plot.y + plot.h + 8);
+            }
+          }
+        }
+        ctx.restore();
+      }
+
+      _drawBars(plot, xInfo, yInfo, data){
+        const ctx = this.ctx;
+        const cats = data.categories;
+        const nSeries = data.series.length;
+        const groupWidth = xInfo.step * 0.8;
+        const barW = nSeries > 0 ? (groupWidth / nSeries) : groupWidth;
+        const x0 = plot.x + (xInfo.step - groupWidth)/2;
+        const zeroY = yInfo.toY(0);
+
+        for(let si=0; si<data.series.length; si++){
+          const s = data.series[si];
+          ctx.fillStyle = s.color;
+          for(let i=0; i<cats.length; i++){
+            const v = s.values[i] ?? 0;
+            const cx = x0 + i * xInfo.step + si * barW;
+            const yVal = yInfo.toY(v);
+            const yTop = Math.min(yVal, zeroY);
+            const h = Math.abs(yVal - zeroY);
+            ctx.beginPath();
+            ctx.rect(cx, yTop, barW*0.92, h);
+            ctx.fill();
+
+            this.hitRegions.push({
+              type:'bar', x:cx, y:yTop, w:barW*0.92, h:h,
+              info: {series:s.name, category: cats[i], value: v, color: s.color}
+            });
+          }
+        }
+      }
+
+      _drawLines(plot, xInfo, yInfo, data){
+        const ctx = this.ctx;
+        for(const s of data.series){
+          ctx.strokeStyle = s.color;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          let first=true;
+          for(const p of s.points){
+            const x = xInfo.type==='numeric' ? xInfo.toX(p.x) : xInfo.toX(p.i);
+            const y = yInfo.toY(p.y);
+            if(first){ ctx.moveTo(x,y); first=false; } else { ctx.lineTo(x,y); }
+          }
+          ctx.stroke();
+
+          // points
+          if(this._showPoints){
+            for(const p of s.points){
+              const x = xInfo.type==='numeric' ? xInfo.toX(p.x) : xInfo.toX(p.i);
+              const y = yInfo.toY(p.y);
+              ctx.fillStyle = s.color;
+              ctx.beginPath(); ctx.arc(x,y,3.5,0,Math.PI*2); ctx.fill();
+              this.hitRegions.push({
+                type:'point', x, y, r:6,
+                info: {series:s.name, xLabel: p.label, x: p.x, value: p.y, color: s.color}
+              });
+            }
+          }
+        }
+      }
+
+      _drawScatter(plot, xInfo, yInfo, data){
+        const ctx = this.ctx;
+        for(const s of data.series){
+          for(const p of s.points){
+            const x = xInfo.type==='numeric' ? xInfo.toX(p.x) : xInfo.toX(p.i);
+            const y = yInfo.toY(p.y);
+            ctx.fillStyle = s.color;
+            ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill();
+            this.hitRegions.push({
+              type:'point', x, y, r:7,
+              info: {series:s.name, xLabel: p.label, x: p.x, value: p.y, color: s.color}
+            });
+          }
+        }
+      }
+
+      _drawPie(plot, data){
+        const ctx = this.ctx;
+        const cx = plot.x + plot.w/2;
+        const cy = plot.y + plot.h/2;
+        const r = Math.min(plot.w, plot.h) * 0.38;
+        const total = data.items.reduce((a,b)=>a + Math.max(0, b.value), 0) || 1;
+        let a0 = -Math.PI/2; // start at top
+        ctx.save();
+        ctx.lineWidth = 1;
+
+        for(const it of data.items){
+          const value = Math.max(0, it.value);
+          const ang = (value/total) * Math.PI*2;
+          const a1 = a0 + ang;
+          ctx.beginPath();
+          ctx.moveTo(cx,cy);
+          ctx.fillStyle = it.color;
+          ctx.arc(cx, cy, r, a0, a1);
+          ctx.closePath();
+          ctx.fill();
+          // mid angle for label guide
+          const am = (a0 + a1)/2;
+          const lx = cx + Math.cos(am) * r * 0.72;
+          const ly = cy + Math.sin(am) * r * 0.72;
+
+          // label for big slices
+          if(value/total > 0.06){
+            ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+            ctx.beginPath();
+            ctx.moveTo(lx, ly);
+            ctx.lineTo(cx + Math.cos(am) * (r + 10), cy + Math.sin(am) * (r + 10));
+            ctx.stroke();
+            ctx.fillStyle = this._axisColor;
+            ctx.font = '12px system-ui, sans-serif';
+            ctx.textAlign = 'center'; ctx.textBaseline='middle';
+            ctx.fillText(`${it.label}`, lx, ly);
+          }
+
+          this.hitRegions.push({
+            type:'arc',
+            cx, cy, r,
+            a0, a1,
+            info: {label: it.label, value: it.value, pct: value/total, color: it.color}
+          });
+
+          a0 = a1;
+        }
+        ctx.restore();
+      }
+
+      _formatNumber(n){
+        const abs = Math.abs(n);
+        if(abs >= 1e9) return (n/1e9).toFixed(2).replace(/\.00$/,'')+'B';
+        if(abs >= 1e6) return (n/1e6).toFixed(2).replace(/\.00$/,'')+'M';
+        if(abs >= 1e3) return (n/1e3).toFixed(2).replace(/\.00$/,'')+'k';
+        if(abs >= 100) return String(Math.round(n));
+        if(abs >= 1) return n.toFixed(2).replace(/\.00$/,'');
+        return n.toFixed(3).replace(/0+$/,'').replace(/\.$/,'');
+      }
+
+      // Interaction
+      handleMouseMove(x,y){
+        this._mouse = {x,y};
+        const tip = this._findTooltip(x,y);
+        if(this._onHover) this._onHover(tip, x, y);
+      }
+      _findTooltip(x,y){
+        // Search hit regions
+        for(const h of this.hitRegions){
+          if(h.type === 'bar'){
+            if(x>=h.x && x<=h.x+h.w && y>=h.y && y<=h.y+h.h) return h.info;
+          }else if(h.type === 'point'){
+            const dx = x - h.x, dy = y - h.y;
+            if(dx*dx + dy*dy <= h.r*h.r) return h.info;
+          }else if(h.type === 'arc'){
+            const dx = x - h.cx, dy = y - h.cy;
+            const d = Math.sqrt(dx*dx + dy*dy);
+            if(d <= h.r && d >= 0){
+              let

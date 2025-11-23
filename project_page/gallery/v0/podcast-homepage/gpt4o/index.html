@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Podcast Home Page</title>
+  <style>
+    /* General Reset */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+
+    header {
+      background-color: #6200ea;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+
+    main {
+      padding: 1rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .search-bar {
+      display: flex;
+      margin-bottom: 1rem;
+    }
+
+    .search-bar input {
+      flex: 1;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px 0 0 4px;
+    }
+
+    .search-bar button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border: none;
+      background-color: #6200ea;
+      color: white;
+      cursor: pointer;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .search-bar button:hover {
+      background-color: #4500b5;
+    }
+
+    .episode-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .episode-item {
+      background-color: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .episode-item h2 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.25rem;
+    }
+
+    .episode-item audio {
+      margin-top: 0.5rem;
+      width: 100%;
+    }
+
+    .subscribe-button {
+      display: block;
+      text-align: center;
+      margin: 2rem 0;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      background-color: #6200ea;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .subscribe-button:hover {
+      background-color: #4500b5;
+    }
+
+    @media (max-width: 768px) {
+      .episode-item h2 {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Podcast Home Page</h1>
+  </header>
+  <main>
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Search episodes..." aria-label="Search episodes">
+      <button id="search-button">Search</button>
+    </div>
+    <ul class="episode-list" id="episode-list">
+      <!-- Episodes will be dynamically inserted here -->
+    </ul>
+    <button class="subscribe-button" id="subscribe-button">Subscribe</button>
+  </main>
+  <script>
+    // Sample podcast episodes
+    const episodes = [
+      { id: 1, title: "Episode 1: Introduction to Podcasts", audio: "episode1.mp3" },
+      { id: 2, title: "Episode 2: The Art of Storytelling", audio: "episode2.mp3" },
+      { id: 3, title: "Episode 3: Building a Podcast Audience", audio: "episode3.mp3" },
+      { id: 4, title: "Episode 4: Monetizing Your Podcast", audio: "episode4.mp3" },
+    ];
+
+    const episodeList = document.getElementById('episode-list');
+    const searchInput = document.getElementById('search-input');
+    const searchButton = document.getElementById('search-button');
+    const subscribeButton = document.getElementById('subscribe-button');
+
+    // Function to render episodes
+    function renderEpisodes(filteredEpisodes) {
+      episodeList.innerHTML = ''; // Clear the list
+      filteredEpisodes.forEach(episode => {
+        const li = document.createElement('li');
+        li.className = 'episode-item';
+        li.innerHTML = `
+          <h2>${episode.title}</h2>
+          <audio controls>
+            <source src="${episode.audio}" type="audio/mpeg">
+            Your browser does not support the audio element.
+          </audio>
+        `;
+        episodeList.appendChild(li);
+      });
+    }
+
+    // Initial render of all episodes
+    renderEpisodes(episodes);
+
+    // Search functionality
+    searchButton.addEventListener('click', () => {
+      const query = searchInput.value.toLowerCase();
+      const filteredEpisodes = episodes.filter(episode =>
+        episode.title.toLowerCase().includes(query)
+      );
+      renderEpisodes(filteredEpisodes);
+    });
+
+    // Subscribe button functionality
+    subscribeButton.addEventListener('click', () => {
+      alert('Thank you for subscribing!');
+    });
+  </script>
+</body>
+</html>

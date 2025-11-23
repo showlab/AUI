@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV to Charts - Data Visualization Tool</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #ffffff;
+            color: #000000;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #000000;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .controls-panel {
+            background: #ffffff;
+            border: 1px solid #000000;
+            padding: 20px;
+            height: fit-content;
+        }
+
+        .chart-container {
+            background: #ffffff;
+            border: 1px solid #000000;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 500px;
+        }
+
+        .panel-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #000000;
+            font-size: 1rem;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .color-preview {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #000000;
+            background-color: #4361ee;
+        }
+
+        button {
+            background: #4361ee;
+            color: #ffffff;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+            border: 1px solid #000000;
+        }
+
+        button:hover {
+            background: #3a0ca3;
+        }
+
+        #save-btn {
+            background: #f72585;
+        }
+
+        #save-btn:hover {
+            background: #d1186a;
+        }
+
+        #upload-btn {
+            background: #4cc9f0;
+        }
+
+        #upload-btn:hover {
+            background: #3ab0d9;
+        }
+
+        .file-upload {
+            border: 2px dashed #000000;
+            border-radius: 0;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .file-name {
+            margin-top: 5px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        canvas {
+            max-width: 100%;
+            max-height: 400px;
+            background: #ffffff;
+            border: 1px solid #000000;
+        }
+
+        .instructions {
+            background: #f0f0f0;
+            border-left: 3px solid #4361ee;
+            padding: 10px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        .instructions h3 {
+            margin-bottom: 5px;
+        }
+
+        .instructions ul {
+            padding-left: 15px;
+        }
+
+        .instructions li {
+            margin-bottom: 3px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            border-top: 1px solid #000000;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 15px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4361ee;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .chart-placeholder {
+            text-align: center;
+            padding: 30px 10px;
+            color: #666;
+        }
+
+        .chart-placeholder i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #ccc;
+        }
+
+        .status-indicator {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 0;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        #status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        #status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .series-controls {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 0;
+        }
+
+        .series-control-group {
+            margin-bottom: 10px;
+        }
+
+        .series-color-picker {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .series-color-preview {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #000000;
+        }
+
+        .series-label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .series-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .series-actions button {
+            flex: 1;
+            padding: 5px;
+            font-size: 0.8rem;
+        }
+
+        .multi-series-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e8f4f8;
+            border-radius: 0;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>CSV to Charts</h1>
+            <p class="subtitle">Visualize your data with customizable charts from CSV input</p>
+        </header>
+
+        <div class="app-container">
+            <div class="controls-panel">
+                <h2 class="panel-title">Chart Controls</h2>
+                
+                <div class="control-group">
+                    <label for="chart-type">Chart Type</label>
+                    <select id="chart-type">
+                        <option value="bar">Bar Chart</option>
+                        <option value="line">Line Chart</option>
+                        <option value="pie">Pie Chart</option>
+                        <option value="scatter">Scatter Plot</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="chart-color">Chart Color</label>
+                    <div class="color-picker">
+                        <input type="color" id="chart-color" value="#4361ee">
+                        <div class="color-preview" id="color-preview"></div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="csv-input">Paste CSV Data</label>
+                    <textarea id="csv-input" placeholder="Paste your CSV data here (e.g. Product,Sales&#10;A,30&#10;B,45&#10;C,25)"></textarea>
+                </div>
+
+                <div class="control-group">
+                    <label for="delimiter">Delimiter</label>
+                    <select id="delimiter">
+                        <option value=",">Comma (,)</option>
+                        <option value=";">Semicolon (;)</option>
+                        <option value="\t">Tab (\t)</option>
+                    </select>
+                </div>
+
+                <div class="series-controls" id="series-controls" style="display:none;">
+                    <h3>Series Colors</h3>
+                    <div id="series-color-controls"></div>
+                    <div class="series-actions">
+                        <button id="reset-series-colors">Reset Colors</button>
+                        <button id="apply-series-colors">Apply Colors</button>
+                    </div>
+                </div>
+
+                <button id="generate-btn">Generate Chart</button>
+                <button id="save-btn">Save as Image</button>
+                <button id="clear-btn">Clear All</button>
+                
+                <div class="status-indicator hidden" id="status-message"></div>
+                
+                <div class="instructions">
+                    <h3>How to use:</h3>
+                    <ul>
+                        <li>Paste CSV data in the text area</li>
+                        <li>Select a chart type</li>
+                        <li>Choose a color for your chart</li>
+                        <li>Click "Generate Chart" to visualize</li>
+                        <li>Download your chart as an image</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h2 class="panel-title">Visualization</h2>
+                <div class="chart-placeholder" id="chart-placeholder">
+                    <i>📊</i>
+                    <p>Your chart will appear here after generating</p>
+                </div>
+                <canvas id="chart-canvas" class="hidden"></canvas>
+                <div class="multi-series-info hidden" id="multi-series-info">
+                    Multi-series chart detected. Each series has its own color.
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>CSV to Charts &copy; 2023 | Data Visualization Tool</p>
+        </footer>
+    </div>
+
+    <script>
+        // DOM Elements
+        const chartTypeSelect = document.getElementById('chart-type');
+        const chartColorInput = document.getElementById('chart-color');
+        const colorPreview = document.getElementById('color-preview');
+        const csvInput = document.getElementById('csv-input');
+        const delimiterSelect = document.getElementById('delimiter');
+        const generateBtn = document.getElementById('generate-btn');
+        const saveBtn = document.getElementById('save-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const chartCanvas = document.getElementById('chart-canvas');
+        const chartCtx = chartCanvas.getContext('2d');
+        const chartPlaceholder = document.getElementById('chart-placeholder');
+        const statusMessage = document.getElementById('status-message');
+        const seriesControls = document.getElementById('series-controls');
+        const seriesColorControls = document.getElementById('series-color-controls');
+        const resetSeriesColorsBtn = document.getElementById('reset-series-colors');
+        const applySeriesColorsBtn = document.getElementById('apply-series-colors');
+        const multiSeriesInfo = document.getElementById('multi-series-info');
+
+        // State variables
+        let currentData = null;
+        let currentChartType = 'bar';
+        let currentColor = '#4361ee';
+        let currentSeriesColors = [];
+        let originalSeriesColors = [];
+        let currentDelimiter = ',';
+        let hasMultipleSeries = false;
+
+        // Initialize
+        function init() {
+            updateColorPreview();
+            setupEventListeners();
+            generateSampleData();
+            showStatusMessage("Ready to visualize your data", "success");
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Chart type change
+            chartTypeSelect.addEventListener('change', () => {
+                currentChartType = chartTypeSelect.value;
+                updateStatus();
+            });
+
+            // Color picker
+            chartColorInput.addEventListener('input', () => {
+                currentColor = chartColorInput.value;
+                updateColorPreview();
+                updateStatus();
+            });
+
+            // CSV input
+            csvInput.addEventListener('input', () => {
+                updateStatus();
+            });
+
+            // Delimiter change
+            delimiterSelect.addEventListener('change', () => {
+                currentDelimiter = delimiterSelect.value;
+                updateStatus();
+            });
+
+            // Buttons
+            generateBtn.addEventListener('click', generateChart);
+            saveBtn.addEventListener('click', saveChartAsImage);
+            clearBtn.addEventListener('click', clearAll);
+            resetSeriesColorsBtn.addEventListener('click', resetSeriesColors);
+            applySeriesColorsBtn.addEventListener('click', applySeriesColors);
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    generateChart();
+                }
+            });
+        }
+
+        // Update color preview
+        function updateColorPreview() {
+            colorPreview.style.backgroundColor = currentColor;
+        }
+
+        // Generate sample data for demonstration
+        function generateSampleData() {
+            // Sample data for visualization
+            currentData = [
+                { label: 'Jan', value: 65 },
+                { label: 'Feb', value: 59 },
+                { label: 'Mar', value: 80 },
+                { label: 'Apr', value: 81 },
+                { label: 'May', value: 56 },
+                { label: 'Jun', value: 55 }
+            ];
+        }
+
+        // Parse CSV data
+        function parseCSV(csvText, delimiter) {
+            if (!csvText.trim()) return null;
+            
+            try {
+                // Split by lines
+                const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== '');
+                if (lines.length < 2) {
+                    throw new Error("CSV must have at least a header row and one data row");
+                }
+                
+                // Parse header
+                const headers = lines[0].split(delimiter).map(header => header.trim().replace(/^["'](.*)["']$/, '$1'));
+                
+                // Parse data rows
+                const data = [];
+                for (let i = 1; i < lines.length; i++) {
+                    const values = lines[i].split(delimiter);
+                    if (values.length !== headers.length) {
+                        throw new Error(`Row ${i+1} has ${values.length} values but header has ${headers.length}`);
+                    }
+                    
+                    const row = {};
+                    for (let j = 0; j < headers.length; j++) {
+                        row[headers[j]] = values[j].trim().replace(/^["'](.*)["']$/, '$1');
+                    }
+                    data.push(row);
+                }
+                
+                return { headers, data };
+            } catch (error) {
+                showStatusMessage(`Error parsing CSV: ${error.message}`, "error");
+                return null;
+            }
+        }
+
+        // Process data for charting
+        function processData(csvData) {
+            if (!csvData) return null;
+            
+            const { headers, data } = csvData;
+            
+            // Check if we have multiple series
+            hasMultipleSeries = headers.length > 2;
+            
+            if (hasMultipleSeries) {
+                // Multiple series case - convert to array of objects
+                const seriesNames = headers.slice(1);
+                const processedData = [];
+                
+                // For each row, create a data point with multiple values
+                data.forEach((row, rowIndex) => {
+                    const point = { label: row[headers[0]] };
+                    seriesNames.forEach(seriesName => {
+                        point[seriesName] = parseFloat(row[seriesName]) || 0;
+                    });
+                    processedData.push(point);
+                });
+                
+                return processedData;
+            } else {
+                // Single series case - convert to simple label-value pairs
+                const processedData = data.map(row => ({
+                    label: row[headers[0]],
+                    value: parseFloat(row[headers[1]]) || 0
+                }));
+                
+                return processedData;
+            }
+        }
+
+        // Show status message
+        function showStatusMessage(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = "status-indicator " + (type === "error" ? "error" : "success");
+            statusMessage.classList.remove("hidden");
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                statusMessage.classList.add("hidden");
+            }, 5000);
+        }
+
+        // Update UI status
+        function updateStatus() {
+            if (csvInput.value.trim() && !currentData) {
+                showStatusMessage("CSV data entered. Click 'Generate Chart' to visualize.", "success");
+            } else if (!csvInput.value.trim() && !currentData) {
+                showStatusMessage("Ready to visualize your data", "success");
+            }
+        }
+
+        // Clear all data and UI
+        function clearAll() {
+            csvInput.value = "";
+            currentData = null;
+            chartCanvas.classList.add('hidden');
+            chartPlaceholder.classList.remove('hidden');
+            seriesControls.style.display = "none";
+            multiSeriesInfo.classList.add("hidden");
+            showStatusMessage("All cleared", "success");
+        }
+
+        // Show loading state
+        function showLoadingState() {
+            chartPlaceholder.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Processing your data...</p>
+                </div>
+            `;
+            chartPlaceholder.classList.remove('hidden');
+            chartCanvas.classList.add('hidden');
+            multiSeriesInfo.classList.add("hidden");
+        }
+
+        // Hide loading state
+        function hideLoadingState() {
+            chartPlaceholder.classList.add('hidden');
+            chartCanvas.classList.remove('hidden');
+        }
+
+        // Generate chart based on current settings
+        function generateChart() {
+            // Get CSV data
+            const csvText = csvInput.value;
+            const delimiter = currentDelimiter;
+            
+            if (!csvText.trim()) {
+                showStatusMessage("Please enter CSV data first", "error");
+                return;
+            }
+            
+            // Parse CSV
+            const parsedData = parseCSV(csvText, delimiter);
+            if (!parsedData) return;
+            
+            // Process data for charting
+            const processedData = processData(parsedData);
+            if (!processedData) return;
+            
+            currentData = processedData;
+            
+            // Update series controls if needed
+            updateSeriesControls(processedData);
+            
+            // Clear canvas
+            chartCtx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
+            
+            // Set canvas dimensions
+            chartCanvas.width = 600;
+            chartCanvas.height = 400;
+            
+            // Draw chart based on type
+            switch(currentChartType) {
+                case 'bar':
+                    drawBarChart();
+                    break;
+                case 'line':
+                    drawLineChart();
+                    break;
+                case 'pie':
+                    drawPieChart();
+                    break;
+                case 'scatter':
+                    drawScatterPlot();
+                    break;
+            }
+            
+            // Show multi-series info if applicable
+            if (hasMultipleSeries) {
+                multiSeriesInfo.classList.remove("hidden");
+            }
+            
+            showStatusMessage("Chart generated successfully", "success");
+        }
+
+        // Update series controls for multi-series charts
+        function updateSeriesControls(data) {
+            if (!data || data.length === 0) return;
+            
+            // Get headers from first data point to determine series names
+            const firstPoint = data[0];
+            const seriesNames = Object.keys(firstPoint).filter(key => key !== 'label');
+            
+            if (seriesNames.length <= 1) {
+                seriesControls.style.display = "none";
+                return;
+            }
+            
+            seriesControls.style.display = "block";
+            seriesColorControls.innerHTML = "";
+            
+            // Create color pickers for each series
+            seriesNames.forEach((seriesName, index) => {
+                const color = getSeriesColor(index);
+                const seriesControl = document.createElement('div');
+                seriesControl.className = "series-control-group";
+                seriesControl.innerHTML = `
+                    <div class="series-color-picker">
+                        <span class="series-label">${seriesName}:</span>
+                        <input type="color" class="series-color-input" data-series="${seriesName}" value="${color}">
+                        <div class="series-color-preview" style="background-color: ${color};" data-series="${seriesName}"></div>
+                    </div>
+                `;
+                seriesColorControls.appendChild(seriesControl);
+            });
+            
+            // Store original colors for reset
+            originalSeriesColors = seriesNames.map((_, i) => getSeriesColor(i));
+        }
+
+        // Get color for a series
+        function getSeriesColor(index) {
+            // Simple color assignment - alternate between blue, red, green, orange, purple
+            const colors = ['#4361ee', '#f72585', '#4cc9f0', '#f72585', '#7209b7'];
+            return colors[index % colors.length];
+        }
+
+        // Reset series colors to defaults
+        function resetSeriesColors() {
+            const colorInputs = document.querySelectorAll('.series-color-input');
+            colorInputs.forEach((input, index) => {
+                const color = originalSeriesColors[index];
+                input.value = color;
+                const preview = document.querySelector(`.series-color-preview[data-series="${input.dataset.series}"]`);
+                if (preview) preview.style.backgroundColor = color;
+            });
+            showStatusMessage("Series colors reset to defaults", "success");
+        }
+
+        // Apply series colors
+        function applySeriesColors() {
+            const colorInputs = document.querySelectorAll('.series-color-input');
+            currentSeriesColors = Array.from(colorInputs).map(input => input.value);
+            showStatusMessage("Series colors applied", "success");
+        }
+
+        // Draw bar chart
+        function drawBarChart() {
+            const { width, height } = chartCanvas;
+            const padding = 60;
+            const maxValue = Math.max(...currentData.map(d => d.value));
+            
+            // Draw axes
+            chartCtx.strokeStyle = '#000000';
+            chartCtx.lineWidth = 1;
+            chartCtx.beginPath();
+            chartCtx.moveTo(padding, padding);
+            chartCtx.lineTo(padding, height - padding);
+            chartCtx.lineTo(width - padding, height - padding);
+            chartCtx.stroke();
+            
+            // Draw bars
+            const barWidth = (width - 2 * padding) / currentData.length;
+            
+            currentData.forEach((dataPoint, index) => {
+                const x = padding + index * barWidth + barWidth/2;
+                const barHeight = (dataPoint.value / maxValue) * (height - 2 * padding);
+                const y = height - padding - barHeight;
+                
+                // For multi-series, use different colors
+                if (hasMultipleSeries) {
+                    // Use series-specific colors
+                    const seriesNames = Object.keys(dataPoint).filter(key => key !== 'label');
+                    seriesNames.forEach((seriesName, seriesIndex) => {
+                        const seriesValue = dataPoint[seriesName];
+                        const seriesBarHeight = (seriesValue / maxValue) * (height - 2 * padding);
+                        const seriesY = height - padding - seriesBarHeight;
+                        
+                        chartCtx.fillStyle = currentSeriesColors[seriesIndex] || getSeriesColor(seriesIndex);
+                        chartCtx.fillRect(x - barWidth/2 + (seriesIndex * barWidth/seriesNames.length), seriesY, barWidth/seriesNames.length, seriesBarHeight);
+                    });
+                } else {
+                    chartCtx.fillStyle = currentColor;
+                    chartCtx.fillRect(x - barWidth/2, y, barWidth, barHeight);
+                }
+                
+                // Add labels
+                chartCtx.fillStyle = '#000000';
+                chartCtx.font = '10px Arial';
+                chartCtx.textAlign = 'center';
+                chartCtx.fillText(dataPoint.label, x, height - padding + 15);
+                
+                if (!hasMultipleSeries) {
+                    chartCtx.fillText(dataPoint.value, x, y - 5);
+                }
+            });
+        }
+
+        // Draw line chart
+        function drawLineChart() {
+            const { width, height } = chartCanvas;
+            const padding = 60;
+            const maxValue = Math.max(...currentData.map(d => d.value));
+            
+            // Draw axes
+            chartCtx.strokeStyle = '#000000';
+            chartCtx.lineWidth = 1;
+            chartCtx.beginPath();
+            chartCtx.moveTo(padding, padding);
+            chartCtx.lineTo(padding, height - padding);
+            chartCtx.lineTo(width - padding, height - padding);
+            chartCtx.stroke();
+            
+            if (hasMultipleSeries) {
+                // Draw multiple lines for each series
+                const seriesNames = Object.keys(currentData[0]).filter(key => key !== 'label');
+                const stepX = (width - 2 * padding) / (currentData.length - 1);
+                
+                seriesNames.forEach((seriesName, seriesIndex) => {
+                    chartCtx.beginPath();
+                    chartCtx.strokeStyle = currentSeriesColors[seriesIndex] || getSeriesColor(seriesIndex);
+                    chartCtx.lineWidth = 2;
+                    
+                    currentData.forEach((dataPoint, index) => {
+                        const x = padding + index * stepX;
+                        const y = height - padding - (dataPoint[seriesName] / maxValue) * (height - 2 * padding);
+                        
+                        if (index === 0) {
+                            chartCtx.moveTo(x, y);
+                        } else {
+                            chartCtx.lineTo(x, y);
+                        }
+                        
+                        // Draw points
+                        chartCtx.fillStyle = chartCtx.strokeStyle;
+                        chartCtx.beginPath();
+                        chartCtx.arc(x, y, 3, 0, Math.PI * 2);
+                        chartCtx.fill();
+                    });
+                    
+                    chartCtx.stroke();
+                });
+            } else {
+                // Draw single line
+                chartCtx.beginPath();
+                chartCtx.strokeStyle = currentColor;
+                chartCtx.lineWidth = 2;
+                
+                const stepX = (width - 2 * padding) / (currentData.length - 1);
+                
+                currentData.forEach((dataPoint, index) => {
+                    const x = padding + index * stepX;
+                    const y = height - padding - (dataPoint.value / maxValue) * (height - 2 * padding);
+                    
+                    if (index === 0) {
+                        chartCtx.moveTo(x, y);
+                    } else {
+                        chartCtx.lineTo(x, y);
+                    }
+                    
+                    // Draw points
+                    chartCtx.fillStyle = currentColor;
+                    chartCtx.beginPath();
+                    chartCtx.arc(x, y, 3, 0, Math.PI * 2);
+                    chartCtx.fill();
+                });
+                
+                chartCtx.stroke();
+            }
+            
+            // Add labels
+            chartCtx.fillStyle = '#000000';
+            chartCtx.font = '10px Arial';
+            chartCtx.textAlign = 'center';
+            
+            if (hasMultipleSeries) {
+                const seriesNames = Object.keys(currentData[0]).filter(key => key !== 'label');
+                seriesNames.forEach((seriesName, seriesIndex) => {
+                    currentData.forEach((dataPoint, index) => {
+                        const x = padding + index * ((width - 2 * padding) / (currentData.length - 1));
+                        chartCtx.fillText(dataPoint.label, x, height - padding + 15);
+                        chartCtx.fillText(dataPoint[seriesName], x, height - padding - 5);
+                    });
+                });
+            } else {
+                currentData.forEach((dataPoint, index) => {
+                    const x = padding + index * ((width - 2 * padding) / (currentData.length - 1));
+                    chartCtx.fillText(dataPoint.label, x, height - padding + 15);
+                    chartCtx.fillText(dataPoint.value, x, height - padding - 5);
+                });
+            }
+        }
+
+        // Draw pie chart
+        function drawPieChart() {
+            const { width, height } = chartCanvas;
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const radius = Math.min(width, height) * 0.3;
+            
+            // Calculate total value for percentages
+            let total = 0;
+            if (hasMultipleSeries) {
+                // For multi-series, use the first series values
+                const seriesNames = Object.keys(currentData[0]).filter(key => key !== 'label');
+                if (seriesNames.length > 0) {
+                    total = currentData.reduce((sum, point) => sum + point[seriesNames[0]], 0);
+                }
+            } else {
+                total = currentData.reduce((sum, point) => sum + point.value, 0);
+            }
+            
+            let startAngle = 0;
+            
+            if (hasMultipleSeries) {
+                // Draw pie slices for each series
+                const seriesNames = Object.keys(currentData[0]).filter(key => key !== 'label');
+                const sliceCount = seriesNames.length;
+                
+                currentData.forEach((dataPoint, dataPointIndex) => {
+                    const sliceAngle = (dataPoint[seriesNames[0]] / total) * Math.PI * 2;
+                    const endAngle = startAngle + sliceAngle;
+                    
+                    chartCtx.beginPath();
+                    chartCtx.moveTo(centerX, centerY);
+                    chartCtx.arc(centerX, centerY, radius, startAngle, endAngle);
+                    chartCtx.closePath();
+                    
+                    // Use series-specific color
+                    const seriesColor = currentSeriesColors[0] || getSeriesColor(0);
+                    chartCtx.fillStyle = seriesColor;
+                    chartCtx.fill();
+                    
+                    startAngle = endAngle;
+                });
+            } else {
+                // Draw pie chart for single series
+                currentData.forEach((dataPoint, index) => {
+                    const sliceAngle = (dataPoint.value / total) * Math.PI * 2;
+                    const endAngle = startAngle + sliceAngle;
+                    
+                    chartCtx.beginPath();
+                    chartCtx.moveTo(centerX, centerY);
+                    chartCtx.arc(centerX, centerY, radius, startAngle, endAngle);
+                    chartCtx.closePath();
+                    
+                    // Alternate colors for better visibility
+                    const hue = (index * 60) % 360;
+                    chartCtx.fillStyle = `hsl(${hue}, 70%, 60%)`;
+                    chartCtx.fill();
+                    
+                    startAngle = endAngle;
+                });
+            }
+        }
+
+        // Draw scatter plot
+        function drawScatterPlot() {
+            const { width, height } = chartCanvas;
+            const padding = 60;
+            const maxValue = Math.max(...currentData.map(d => d.value));
+            
+            // Draw axes
+            chartCtx.strokeStyle = '#000000';
+            chartCtx.lineWidth = 1;
+            chartCtx.beginPath();
+            chartCtx.moveTo(padding, padding);
+            chartCtx.lineTo(padding, height - padding);
+            chartCtx.lineTo(width - padding, height - padding);
+            chartCtx.stroke();
+            
+            if (hasMultipleSeries) {
+                // For multi-series scatter plots, we'll use the first series for X and second for Y
+                const seriesNames = Object.keys(currentData[0]).filter(key => key !== 'label');
+                if (seriesNames.length >= 2) {
+                    const xSeries = seriesNames[0];
+                    const ySeries = seriesNames[1];
+                    
+                    currentData.forEach((dataPoint, index) => {
+                        const x = padding + (index / (currentData.length - 1)) * (width - 2 * padding);
+                        const y = height - padding - (dataPoint[ySeries] / maxValue) * (height - 2 * padding);
+                        
+                        chartCtx.fillStyle = currentSeriesColors[0] || getSeriesColor(0);
+                        chartCtx.beginPath();
+                        chartCtx.arc(x, y, 5, 0, Math.PI * 2);
+                        chartCtx.fill();
+                        
+                        // Add labels
+                        chartCtx.fillStyle = '#000000';
+                        chartCtx.font = '10px Arial';
+                        chartCtx.textAlign = 'center';
+                        chartCtx.fillText(dataPoint.label, x, height - padding + 15);
+                    });
+                }
+            } else {
+                // Draw scatter plot for single series
+                const stepX = (width - 2 * padding) / (currentData.length - 1);
+                
+                currentData.forEach((dataPoint, index) => {
+                    const x = padding + index * stepX;
+                    const y = height - padding - (dataPoint.value / maxValue) * (height - 2 * padding);
+                    
+                    chartCtx.fillStyle = currentColor;
+                    chartCtx.beginPath();
+                    chartCtx.arc(x, y, 5, 0, Math.PI * 2);
+                    chartCtx.fill();
+                    
+                    // Add labels
+                    chartCtx.fillStyle = '#000000';
+                    chartCtx.font = '10px Arial';
+                    chartCtx.textAlign = 'center';
+                    chartCtx.fillText(dataPoint.label, x, height - padding + 15);
+                });
+            }
+        }
+
+        // Save chart as image
+        function saveChartAsImage() {
+            if (chartCanvas.classList.contains('hidden')) {
+                showStatusMessage("Please generate a chart first", "error");
+                return;
+            }
+            
+            const link = document.createElement('a');
+            link.download = 'data-visualization.png';
+            link.href = chartCanvas.toDataURL('image/png');
+            link.click();
+            showStatusMessage("Chart saved as image", "success");
+        }
+
+        // Initialize the app
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

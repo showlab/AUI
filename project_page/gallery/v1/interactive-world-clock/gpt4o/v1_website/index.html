@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive World Clock</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #ffffff;
+      color: #000000;
+    }
+
+    header {
+      background-color: #333333;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      width: 100%;
+    }
+
+    main {
+      max-width: 800px;
+      width: 100%;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .controls {
+      margin-bottom: 1rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .controls input {
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    .controls input:focus {
+      border-color: #007BFF;
+    }
+
+    .controls button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 0;
+    }
+
+    .controls button:hover {
+      background-color: #0056b3;
+    }
+
+    .feedback-message {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #ff0000;
+      visibility: hidden;
+    }
+
+    .visible {
+      visibility: visible;
+    }
+
+    .city-list-container {
+      width: 100%;
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 1rem;
+      box-sizing: border-box;
+    }
+
+    .city-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      width: 100%;
+    }
+
+    .city-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #f9f9f9;
+      margin-bottom: 0.5rem;
+      padding: 1rem;
+      border: 1px solid #ccc;
+    }
+
+    .city-item .time {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .city-item .remove-btn {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 0.5rem;
+      cursor: pointer;
+    }
+
+    .city-item .remove-btn:hover {
+      background-color: #c82333;
+    }
+
+    .placeholder {
+      text-align: center;
+      color: #777;
+    }
+
+    .time-format-toggle {
+      margin-top: 1rem;
+      cursor: pointer;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+    }
+
+    .time-format-toggle:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 600px) {
+      .city-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .city-item .time {
+        margin-bottom: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Interactive World Clock</h1>
+  </header>
+  <main>
+    <div class="controls">
+      <input type="text" id="city-input" placeholder="Enter city name (e.g., New York)">
+      <button id="add-city-btn">Add City</button>
+      <div id="feedback-message" class="feedback-message">Invalid input</div>
+    </div>
+    <div class="city-list-container" id="city-list-container">
+      <ul class="city-list" id="city-list">
+        <p class="placeholder" id="city-placeholder">No cities added yet</p>
+      </ul>
+    </div>
+    <button class="time-format-toggle" id="time-format-toggle" disabled>Switch to 24-hour format</button>
+  </main>
+  <script>
+    const cityList = document.getElementById('city-list');
+    const cityInput = document.getElementById('city-input');
+    const addCityBtn = document.getElementById('add-city-btn');
+    const feedbackMessage = document.getElementById('feedback-message');
+    const timeFormatToggle = document.getElementById('time-format-toggle');
+    const cityPlaceholder = document.getElementById('city-placeholder');
+
+    let is24HourFormat = false;
+
+    const timeZones = {
+      "New York": "America/New_York",
+      "London": "Europe/London",
+      "Tokyo": "Asia/Tokyo",
+      "Sydney": "Australia/Sydney",
+      "Dubai": "Asia/Dubai",
+    };
+
+    function getTimePeriod(hour) {
+      if (hour >= 5 && hour < 12) return 'morning';
+      if (hour >= 12 && hour < 17) return 'afternoon';
+      if (hour >= 17 && hour < 21) return 'evening';
+      return 'night';
+    }
+
+    function updateCityTimes() {
+      const cityItems = document.querySelectorAll('.city-item');
+      cityItems.forEach(item => {
+        const cityName = item.dataset.city;
+        const timeZone = timeZones[cityName];
+        const now = new Date().toLocaleString('en-US', { timeZone });
+        const date = new Date(now);
+        const hours = date.getHours();
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const time = is24HourFormat
+          ? `${hours.toString().padStart(2, '0')}:${minutes}`
+          : `${((hours + 11) % 12 + 1)}:${minutes} ${hours >= 12 ? 'PM' : 'AM'}`;
+        item.querySelector('.time').textContent = time;
+
+        const timePeriod = getTimePeriod(hours);
+        item.className = `city-item ${timePeriod}`;
+      });
+    }
+
+    function addCity(cityName) {
+      if (!timeZones[cityName]) {
+        feedbackMessage.textContent = 'City not found or unsupported.';
+        feedbackMessage.classList.add('visible');
+        setTimeout(() => feedbackMessage.classList.remove('visible'), 3000);
+        return;
+      }
+
+      if ([...cityList.children].some(item => item.dataset.city === cityName)) {
+        feedbackMessage.textContent = 'City already added.';
+        feedbackMessage.classList.add('visible');
+        setTimeout(() => feedbackMessage.classList.remove('visible'), 3000);
+        return;
+      }
+
+      const li = document.createElement('li');
+      li.className = 'city-item';
+      li.dataset.city = cityName;
+
+      const timeSpan = document.createElement('span');
+      timeSpan.className = 'time';
+      li.appendChild(timeSpan);
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove-btn';
+      removeBtn.textContent = 'Remove';
+      removeBtn.addEventListener('click', () => {
+        li.remove();
+        if (cityList.children.length === 0) {
+          cityPlaceholder.style.display = 'block';
+          timeFormatToggle.disabled = true;
+        }
+      });
+      li.appendChild(removeBtn);
+
+      cityList.appendChild(li);
+      cityPlaceholder.style.display = 'none';
+      updateCityTimes();
+      timeFormatToggle.disabled = false;
+    }
+
+    addCityBtn.addEventListener('click', () => {
+      const cityName = cityInput.value.trim();
+      if (cityName) {
+        addCity(cityName);
+        cityInput.value = '';
+      }
+    });
+
+    timeFormatToggle.addEventListener('click', () => {
+      is24HourFormat = !is24HourFormat;
+      timeFormatToggle.textContent = is24HourFormat
+        ? 'Switch to 12-hour format'
+        : 'Switch to 24-hour format';
+      updateCityTimes();
+    });
+
+    setInterval(updateCityTimes, 1000);
+  </script>
+</body>
+</html>

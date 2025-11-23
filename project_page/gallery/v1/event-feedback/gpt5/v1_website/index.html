@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Event Feedback Viewer</title>
+  <style>
+    /* Destylized minimal design: white background, black text, no gradients, no shadows, no rounded corners */
+    :root{
+      --bg: #ffffff;
+      --surface: #ffffff;
+      --text: #000000;
+      --muted: #333333;
+      --accent: #0057ff;
+      --accent-600:#0047d6;
+      --line: #d0d0d0;
+      --highlight:#e8f0ff;
+      --good:#168f38;
+      --bad:#c92020;
+    }
+    *{box-sizing:border-box}
+    html, body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      color:var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    a{color: var(--accent)}
+    a:focus, button:focus, input:focus{outline: 2px solid var(--accent); outline-offset: 2px}
+    header{
+      padding: 16px 16px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .container{
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 8px;
+    }
+    h1{
+      margin:0 0 8px 0;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* AI Summary panel - flat and dismissible */
+    #aiSummary{
+      background: var(--surface);
+      border: 1px solid var(--line);
+      padding: 12px;
+      position: relative;
+      margin: 0 0 12px 0;
+    }
+    #aiSummary h2{
+      font-size:16px;
+      margin:0 0 8px 0;
+      color: var(--muted);
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-weight:600;
+    }
+    #aiSummary p{margin:0; line-height:1.5}
+    #aiSummaryClose{
+      position: absolute;
+      right: 8px; top: 8px;
+      min-width: 44px; min-height: 44px;
+      border: 1px solid var(--line);
+      background: #f5f5f5;
+      color: var(--text);
+      cursor: pointer;
+      padding: 6px 10px;
+    }
+    #aiSummaryClose:hover{background:#eeeeee}
+    #summaryChips{
+      margin-top: 8px;
+      display:flex; flex-wrap: wrap; gap:8px;
+    }
+    .chip{
+      min-width: 44px; min-height: 44px;
+      border: 1px solid var(--accent);
+      background: #eaf1ff;
+      color: var(--accent-600);
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    .chip:hover{background:#dfe7ff}
+
+    /* Toolbar */
+    main{padding: 12px 16px 24px}
+    .toolbar{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .search{
+      flex: 1 1 460px;
+      display:flex;
+      align-items:center;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      padding: 8px;
+      gap:8px;
+    }
+    .search label{
+      font-weight:600;
+      color: var(--text);
+      margin-right: 4px;
+    }
+    #clearSearchBtn{
+      border: 2px solid var(--accent);
+      background: #eaf1ff;
+      color: var(--accent-600);
+      padding: 8px 12px;
+      min-width: 44px; min-height: 44px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    #clearSearchBtn:hover{background:#dfe7ff}
+    #searchInput{
+      border: 1px solid var(--line);
+      outline: none;
+      width: 100%;
+      font-size: 16px;
+      background: #ffffff;
+      color: var(--text);
+      padding: 10px 12px;
+      min-height: 44px;
+    }
+    #searchInput::placeholder{color:#777777}
+    #searchHelp{
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    #searchStatus, #filterStatus, #sortStatus, #updateStatus, #aiSummaryStatus, #layoutStatus{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    #searchBadge{
+      border: 1px solid var(--accent);
+      color: var(--accent-600);
+      padding: 4px 8px;
+      font-size: 12px;
+      display: none;
+    }
+    #searchBadgesWrap{
+      display:flex; align-items:center; gap:8px;
+    }
+
+    .meta{
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 14px;
+      align-self: center;
+    }
+
+    /* Status bar above table */
+    #statusBar{
+      display:flex; flex-wrap:wrap; gap:8px;
+      align-items:center;
+      border: 1px solid var(--line);
+      padding: 8px;
+      background:#f7f7f7;
+      margin-bottom: 8px;
+    }
+    .statusItem{
+      padding: 4px 8px;
+      border: 1px solid #cccccc;
+      background: #ffffff;
+      font-size: 13px;
+    }
+
+    /* Table */
+    .table-card{
+      background: var(--surface);
+      border: 1px solid var(--line);
+      overflow: hidden;
+      display:flex;
+      flex-direction: column;
+      min-height: 420px;
+    }
+    .table-wrap{
+      overflow: auto;
+      max-height: calc(720px - 240px);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    table{
+      width:100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    caption{
+      text-align:left;
+      padding: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      border-bottom: 1px solid var(--line);
+      background:#f5f5f5;
+    }
+    thead th{
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: #f5f5f5;
+      border-bottom: 1px solid var(--line);
+      font-weight: 700;
+      text-align: left;
+      color: #000000;
+      font-size: 14px;
+    }
+    th, td{
+      padding: 8px 10px;
+      vertical-align: top;
+      border-bottom: 1px solid var(--line);
+    }
+    tbody tr:nth-child(even) td{background:#fbfbfb}
+    tbody tr:hover td{background:#f0f6ff}
+    .col-date{width: 140px; white-space: nowrap}
+    .col-event{width: 220px}
+    .col-name{width: 200px}
+    .col-rating{width: 140px; white-space: nowrap}
+    .col-feedback{min-width: 360px}
+    .muted{color: var(--muted)}
+
+    .sort-btn{
+      all: unset;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 8px;
+      border: 1px solid transparent;
+    }
+    .sort-btn:hover{background:#e8f0ff; border-color:#c6d7ff}
+    .sort-indicator{
+      width: 16px; height: 16px; display:inline-flex; align-items:center; justify-content:center;
+      color: #888888;
+    }
+    .sort-indicator::before{content:"↕"}
+    th[aria-sort="ascending"] .sort-indicator{color: var(--accent-600)}
+    th[aria-sort="descending"] .sort-indicator{color: var(--accent-600)}
+    th[aria-sort="ascending"] .sort-indicator::before{content:"▲"}
+    th[aria-sort="descending"] .sort-indicator::before{content:"▼"}
+    th[aria-sort="ascending"], th[aria-sort="descending"]{
+      border-bottom: 2px solid var(--accent);
+      background:#eef4ff;
+    }
+
+    /* Rating */
+    .rating{
+      display:inline-flex; align-items:center; gap:8px; white-space: nowrap;
+    }
+    .stars{letter-spacing: 1px; color: #f59e0b; font-size: 14px}
+    .score{color: var(--muted); font-variant-numeric: tabular-nums}
+
+    /* Feedback cell wrapping and clamping */
+    .feedback{line-height: 1.5; color: #000000; word-break: break-word; white-space: normal}
+    .feedback .clamp{
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .feedback .clamped{position: relative}
+    .no-results{padding: 24px; text-align: center; color: var(--muted)}
+
+    /* Footer slim bar for info */
+    .card-footer{
+      display:flex; justify-content: space-between; align-items:center; gap: 12px;
+      padding: 8px 10px;
+      font-size: 13px;
+      color: var(--muted);
+      background: #f5f5f5;
+      border-top: 1px solid var(--line);
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 900px){
+      .toolbar{flex-direction: column; align-items: stretch}
+      .meta{margin-left: 0}
+      .table-wrap{overflow-x:auto}
+      th, td{padding: 6px 8px; font-size: 13px}
+      .col-event{width: 180px}
+      .col-name{width: 160px}
+      .col-feedback{min-width: 320px}
+      #aiSummaryClose{top: 6px; right: 6px}
+    }
+    @media (max-width: 640px){
+      .col-date{width:120px}
+      .col-rating{width:120px}
+      #summaryChips .chip{min-width: 44px}
+    }
+
+    /* Active filter highlight for input */
+    #searchInput[data-filter-active="true"]{
+      border-color: var(--accent);
+      background: #f8fbff;
+    }
+
+    /* Accessibility helper: always visible focus styles already added above */
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Event Feedback Viewer</h1>
+      <section id="aiSummary" aria-label="AI summary" role="region">
+        <button id="aiSummaryClose" aria-label="Close AI summary">Close</button>
+        <h2>AI summary</h2>
+        <p id="aiSummaryText">Analyzing submissions...</p>
+        <div id="summaryChips" aria-label="AI theme filters">
+          <button class="chip" id="chipSpeakers" data-query="strong speakers">strong speakers</button>
+          <button class="chip" id="chipContent" data-query="useful content">useful content</button>
+          <button class="chip" id="chipHandsOn" data-query="hands‑on practice">hands‑on practice</button>
+        </div>
+        <div id="aiSummaryStatus" class="statusItem" aria-live="polite">ai-summary: open</div>
+      </section>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="toolbar" role="search">
+        <form id="searchForm" class="search" aria-label="Search feedback" action="#" method="get">
+          <button id="clearSearchBtn" type="button" title="Clear search">Clear</button>
+          <label for="searchInput">Search</label>
+          <input id="searchInput" type="search" placeholder="Search (case-insensitive): event, name, feedback, rating. Try 'strong speakers'." autocomplete="off" />
+        </form>
+        <div id="searchBadgesWrap">
+          <span id="searchBadge" aria-live="polite">Active filter</span>
+        </div>
+        <div class="meta" id="resultMeta" aria-live="polite">Showing 0 of 0</div>
+      </div>
+
+      <div id="statusBar" aria-label="status bar">
+        <div id="searchStatus" class="statusItem">search: idle</div>
+        <div id="filterStatus" class="statusItem">filter: none</div>
+        <div id="sortStatus" class="statusItem">sort: none</div>
+        <div id="updateStatus" class="statusItem">table: not updated</div>
+        <div id="layoutStatus" class="statusItem">layout: ready</div>
+      </div>
+
+      <div id="searchHelp">Press Enter to apply filter. Special characters are accepted. Filtering happens live as you type.</div>
+
+      <article class="table-card" aria-label="Feedback table">
+        <div class="table-wrap" id="tableContainer">
+          <table id="feedbackTable">
+            <caption>Participant feedback submissions</caption>
+            <colgroup>
+              <col class="col-date">
+              <col class="col-event">
+              <col class="col-name">
+              <col class="col-rating">
+              <col class="col-feedback">
+            </colgroup>
+            <thead>
+              <tr>
+                <th id="th-date" scope="col" aria-sort="none">
+                  <button id="sort-date" class="sort-btn" data-key="date" aria-label="Sort by date">Date <span class="sort-indicator" aria-hidden="true"></span></button>
+                </th>
+                <th id="th-event" scope="col" aria-sort="none">
+                  <button id="sort-event" class="sort-btn" data-key="event" aria-label="Sort by event">Event <span class="sort-indicator" aria-hidden="true"></span></button>
+                </th>
+                <th id="th-name" scope="col" aria-sort="none">
+                  <button id="sort-name" class="sort-btn" data-key="name" aria-label="Sort by participant">Participant <span class="sort-indicator" aria-hidden="true"></span></button>
+                </th>
+                <th id="th-rating" scope="col" aria-sort="none">
+                  <button id="sort-rating" class="sort-btn" data-key="rating" aria-label="Sort by rating">Rating <span class="sort-indicator" aria-hidden="true"></span></button>
+                </th>
+                <th id="th-feedback" scope="col" aria-sort="none">
+                  <button id="sort-feedback" class="sort-btn" data-key="feedback" aria-label="Sort by feedback">Feedback <span class="sort-indicator" aria-hidden="true"></span></button>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <!-- rows injected -->
+            </tbody>
+          </table>
+        </div>
+        <div class="card-footer">
+          <div id="selectionInfo">Tip: Click a column header to sort ascending/descending.</div>
+          <div id="timeInfo"></div>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <script>
+    // Utilities
+    const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const choice = arr => arr[rand(0, arr.length - 1)];
+    const pad2 = n => String(n).padStart(2, '0');
+    function formatDate(ts){
+      const d = new Date(ts);
+      return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+    }
+
+    // Data generation
+    const EVENT_NAMES = [
+      "Quarterly Town Hall",
+      "Sales Kickoff",
+      "Leadership Workshop",
+      "Product Launch Webinar",
+      "Customer Success Summit",
+      "IT Security Briefing",
+      "All-Hands Meeting",
+      "Innovation Lab Demo",
+      "Finance Strategy Update",
+      "HR Policy Refresh",
+      "Marketing Analytics Deep-Dive",
+      "Operational Excellence Forum"
+    ];
+    const FIRST_NAMES = ["Alex","Jordan","Taylor","Morgan","Casey","Riley","Quinn","Avery","Jamie","Drew","Reese","Cameron","Logan","Rowan","Parker","Sage","Elliot","Skyler","Kendall","Harper"];
+    const LAST_NAMES = ["Nguyen","Patel","Garcia","Martin","Thompson","Lee","Walker","Hernandez","Clark","Young","Allen","King","Wright","Lopez","Hill","Scott","Adams","Baker","Campbell","Mitchell"];
+
+    const POSITIVE_SNIPPETS = [
+      "The session was well-structured and engaging throughout.",
+      "Speakers were knowledgeable and kept the content practical.",
+      "I appreciated the clarity of the examples and live demonstrations.",
+      "Materials were concise, and the pacing felt thoughtfully planned.",
+      "Breakout discussions added real value and encouraged collaboration.",
+      "Strong speakers delivered clear insights relevant to daily work."
+    ];
+    const NEUTRAL_SNIPPETS = [
+      "Some segments ran a bit long, but overall it stayed on track.",
+      "Venue was comfortable and the logistics were well organized.",
+      "Q&A addressed most questions though a few topics remained open.",
+      "Slides were informative, and the follow-up resources helped.",
+      "Networking time was adequate, albeit slightly rushed."
+    ];
+    const IMPROVE_SNIPPETS = [
+      "The pace could be a touch faster for advanced attendees.",
+      "More hands-on exercises would enhance retention.",
+      "Audio in the back rows was occasionally hard to hear.",
+      "Providing case studies from different industries would broaden relevance.",
+      "A dedicated segment on next steps would improve outcomes."
+    ];
+
+    function generateFeedbackText(){
+      const sentences = [
+        choice(POSITIVE_SNIPPETS),
+        choice(NEUTRAL_SNIPPETS),
+        choice(IMPROVE_SNIPPETS)
+      ];
+      const take = rand(2,3);
+      return sentences.slice(0, take).join(" ");
+    }
+
+    function generateDataset(n=30){
+      const today = Date.now();
+      const oneYear = 365 * 24 * 60 * 60 * 1000;
+      const rows = [];
+      for (let i=0;i<n;i++){
+        const event = choice(EVENT_NAMES);
+        const name = `${choice(FIRST_NAMES)} ${choice(LAST_NAMES)}`;
+        const rating = rand(2,5);
+        const date = today - rand(0, Math.floor(oneYear*0.9)); // within last ~11 months
+        const feedback = generateFeedbackText();
+        rows.push({
+          id: i+1,
+          event,
+          name,
+          rating,
+          date,
+          feedback,
+          _index: i // stable sort helper
+        });
+      }
+      return rows;
+    }
+
+    const state = {
+      data: [],
+      filtered: [],
+      sortBy: 'date',
+      sortDir: 'desc',
+      query: ''
+    };
+
+    function setProxyText(id, text){
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    }
+
+    function escapeHtml(str){
+      return String(str).replace(/[&<>"']/g, m => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      })[m]);
+    }
+
+    function updateSortIndicators(){
+      const map = {
+        date: 'th-date',
+        event: 'th-event',
+        name: 'th-name',
+        rating: 'th-rating',
+        feedback: 'th-feedback'
+      };
+      Object.values(map).forEach(id => {
+        const th = document.getElementById(id);
+        th.setAttribute('aria-sort', 'none');
+      });
+      const activeTh = document.getElementById(map[state.sortBy]);
+      activeTh.setAttribute('aria-sort', state.sortDir === 'asc' ? 'ascending' : 'descending');
+
+      // Sort status proxy update
+      setProxyText('sortStatus', `sort: ${state.sortBy} ${state.sortDir}`);
+    }
+
+    // AI Summary generator: simple, data-driven
+    function updateSummary(){
+      const n = state.data.length;
+      if (!n) return;
+      const all = state.data;
+      const minDate = new Date(Math.min(...all.map(r => r.date)));
+      const maxDate = new Date(Math.max(...all.map(r => r.date)));
+      const avg = (all.reduce((s,r) => s + r.rating, 0) / n).toFixed(1);
+      const positivePct = Math.round(all.filter(r => r.rating >= 4).length / n * 100);
+
+      const counts = {};
+      all.forEach(r => counts[r.event] = (counts[r.event]||0)+1);
+      const topEvents = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([k])=>k);
+      const distinctEvents = Object.keys(counts).length;
+
+      const fmt = (d)=>d.toLocaleDateString(undefined,{year:'numeric', month:'short'});
+      const summaryText = `30 submissions analyzed across ${distinctEvents} events (${fmt(minDate)}–${fmt(maxDate)}). Average rating is ${avg}/5 and ${positivePct}% are 4–5 stars. Top events by volume: ${topEvents.join(', ')}. Common themes: strong speakers, useful content, and requests for more hands‑on practice.`;
+      document.getElementById('aiSummaryText').textContent = summaryText;
+    }
+
+    function applyFilterIndicator(q){
+      const badge = document.getElementById('searchBadge');
+      const input = document.getElementById('searchInput');
+      if (q){
+        badge.style.display = 'inline-block';
+        badge.textContent = `Active filter: "${q}"`;
+        input.setAttribute('data-filter-active','true');
+        setProxyText('filterStatus', 'filter: active');
+      } else {
+        badge.style.display = 'none';
+        input.setAttribute('data-filter-active','false');
+        setProxyText('filterStatus', 'filter: none');
+      }
+    }
+
+    function stableSort(rows, key, dir){
+      const factor = dir === 'asc' ? 1 : -1;
+      const decorated = rows.map((r, i) => ({r, i}));
+      decorated.sort((a,b) => {
+        let va = a.r[key], vb = b.r[key];
+        // Normalize for text keys
+        if (key === 'event' || key === 'name' || key === 'feedback'){
+          va = String(va).toLowerCase();
+          vb = String(vb).toLowerCase();
+          if (va < vb) return -1*factor;
+          if (va > vb) return 1*factor;
+          return a.i - b.i; // stable tie-breaker by original index
+        } else if (key === 'rating'){
+          // Group identical ratings together; maintain original relative order
+          const diff = (va - vb) * factor;
+          if (diff !== 0) return diff;
+          return a.i - b.i;
+        } else if (key === 'date'){
+          const diff = (va - vb) * factor;
+          if (diff !== 0) return diff;
+          return a.i - b.i;
+        }
+        return 0;
+      });
+      return decorated.map(d => d.r);
+    }
+
+    function render(){
+      setProxyText('searchStatus', state.query ? 'search: filtering' : 'search: idle');
+
+      const tbody = document.getElementById('tableBody');
+      let rows = [...state.data];
+
+      // Filter
+      const q = state.query.trim().toLowerCase();
+      if (q){
+        rows = rows.filter(r => {
+          return (
+            r.event.toLowerCase().includes(q) ||
+            r.name.toLowerCase().includes(q) ||
+            r.feedback.toLowerCase().includes(q) ||
+            formatDate(r.date).includes(q) ||
+            String(r.rating).includes(q)
+          );
+        });
+      }
+
+      // Sort with stability
+      rows = stableSort(rows, state.sortBy, state.sortDir);
+
+      state.filtered = rows;
+
+      // Build rows
+      if (rows.length === 0){
+        tbody.innerHTML = `<tr><td colspan="5" class="no-results">No results found. Try adjusting your search.</td></tr>`;
+      } else {
+        const html = rows.map(r => {
+          const dateStr = formatDate(r.date);
+          const stars = '★★★★★'.slice(0, r.rating) + '☆☆☆☆☆'.slice(0, 5 - r.rating);
+          const feedbackEsc = escapeHtml(r.feedback);
+          return `
+            <tr data-row-id="${r.id}">
+              <td class="col-date" data-label="Date"><span class="muted">${dateStr}</span></td>
+              <td class="col-event" data-label="Event">${escapeHtml(r.event)}</td>
+              <td class="col-name" data-label="Participant">${escapeHtml(r.name)}</td>
+              <td class="col-rating" data-label="Rating">
+                <div class="rating">
+                  <span class="stars" aria-hidden="true">${stars}</span>
+                  <span class="score" aria-label="${r.rating} out of 5">${r.rating}/5</span>
+                </div>
+              </td>
+              <td class="col-feedback" data-label="Feedback">
+                <div class="feedback" title="${feedbackEsc}">
+                  <div class="clamp clamped">${feedbackEsc}</div>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+        tbody.innerHTML = html;
+      }
+
+      // Meta and proxies
+      document.getElementById('resultMeta').textContent = `Showing ${rows.length} of ${state.data.length}`;
+      updateSortIndicators();
+      updateSummary();
+      document.getElementById('timeInfo').textContent = `Updated ${new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}`;
+      setProxyText('updateStatus', 'table: updated');
+
+      // Active filter UI
+      applyFilterIndicator(state.query.trim());
+
+      // Reflow trigger (edge-case: ensure row heights recalculated)
+      void document.getElementById('feedbackTable').offsetHeight;
+
+      // Persist state
+      persistState();
+    }
+
+    function initSortHandlers(){
+      document.querySelectorAll('.sort-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const key = btn.dataset.key;
+          if (state.sortBy === key){
+            state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+          } else {
+            state.sortBy = key;
+            state.sortDir = (key === 'date' || key === 'rating') ? 'desc' : 'asc';
+          }
+          render();
+        });
+      });
+    }
+
+    function initSearch(){
+      const form = document.getElementById('searchForm');
+      const input = document.getElementById('searchInput');
+      const clearBtn = document.getElementById('clearSearchBtn');
+      let debounceId;
+
+      input.addEventListener('input', () => {
+        clearTimeout(debounceId);
+        debounceId = setTimeout(() => {
+          state.query = input.value; // accept special characters
+          setProxyText('searchStatus', 'search: filtering');
+          render();
+        }, 80);
+      });
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        state.query = input.value;
+        setProxyText('searchStatus', 'search: filtering (enter)');
+        render();
+      });
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter'){
+          e.preventDefault();
+          state.query = input.value;
+          setProxyText('searchStatus', 'search: filtering (enter)');
+          render();
+        }
+      });
+
+      clearBtn.addEventListener('click', () => {
+        input.value = '';
+        state.query = '';
+        setProxyText('searchStatus', 'search: cleared');
+        render();
+        input.focus();
+      });
+    }
+
+    function initSummaryClose(){
+      const closeBtn = document.getElementById('aiSummaryClose');
+      const box = document.getElementById('aiSummary');
+      closeBtn.addEventListener('click', () => {
+        // Remove only the summary; do not affect search or table
+        box.parentNode.removeChild(box);
+        setProxyText('aiSummaryStatus', 'ai-summary: closed');
+        // Reflow so space collapses
+        void document.body.offsetHeight;
+      });
+    }
+
+    function initChips(){
+      function applyChip(query){
+        const input = document.getElementById('searchInput');
+        input.value = query;
+        state.query = query;
+        setProxyText('searchStatus', 'search: chip applied');
+        render();
+        input.focus();
+      }
+      const chips = [
+        document.getElementById('chipSpeakers'),
+        document.getElementById('chipContent'),
+        document.getElementById('chipHandsOn')
+      ];
+      chips.forEach(chip => {
+        if (chip){
+          chip.addEventListener('click', () => applyChip(chip.dataset.query));
+        }
+      });
+    }
+
+    function persistState(){
+      try{
+        localStorage.setItem('efv_sortBy', state.sortBy);
+        localStorage.setItem('efv_sortDir', state.sortDir);
+        localStorage.setItem('efv_query', state.query);
+      }catch(e){}
+    }
+    function restoreState(){
+      try{
+        const sortBy = localStorage.getItem('efv_sortBy');
+        const sortDir = localStorage.getItem('efv_sortDir');
+        const query = localStorage.getItem('efv_query');
+        if (sortBy){ state.sortBy = sortBy; }
+        if (sortDir){ state.sortDir = sortDir; }
+        if (typeof query === 'string'){
+          state.query = query;
+          const input = document.getElementById('searchInput');
+          if (input) input.value = query;
+        }
+      }catch(e){}
+    }
+
+    function initResizePersistence(){
+      window.addEventListener('resize', () => {
+        // Ensure state is preserved and UI remains aligned
+        restoreState();
+        render();
+        setProxyText('layoutStatus', 'layout: resized');
+      });
+    }
+
+    // Boot
+    (function(){
+      state.data = generateDataset(30);
+      restoreState();
+      initSortHandlers();
+      initSearch();
+      initSummaryClose();
+      initChips();
+      initResizePersistence();
+      render();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Visualization Playground</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background-color: #f4f4f9;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      color: #333;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 1280px;
+      background: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    input[type="file"],
+    select,
+    input[type="color"],
+    button {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    canvas {
+      display: block;
+      margin: 20px auto;
+      max-width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Data Visualization Playground</h1>
+  </header>
+  <div class="container">
+    <div class="form-group">
+      <label for="csvUpload">Upload CSV File:</label>
+      <input type="file" id="csvUpload" accept=".csv">
+    </div>
+    <div class="form-group">
+      <label for="chartType">Select Chart Type:</label>
+      <select id="chartType">
+        <option value="bar">Bar Chart</option>
+        <option value="line">Line Chart</option>
+        <option value="pie">Pie Chart</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="chartColor">Select Chart Color:</label>
+      <input type="color" id="chartColor" value="#007bff">
+    </div>
+    <button id="generateChart">Generate Chart</button>
+    <button id="saveImage">Save as Image</button>
+    <canvas id="chartCanvas" width="800" height="400"></canvas>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const csvUpload = document.getElementById('csvUpload');
+      const chartType = document.getElementById('chartType');
+      const chartColor = document.getElementById('chartColor');
+      const generateChartButton = document.getElementById('generateChart');
+      const saveImageButton = document.getElementById('saveImage');
+      const chartCanvas = document.getElementById('chartCanvas');
+      const ctx = chartCanvas.getContext('2d');
+      let chartData = [];
+      let chartLabels = [];
+      let chartInstance = null;
+
+      function parseCSV(file, callback) {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          const text = event.target.result;
+          const rows = text.split('\n').map(row => row.split(','));
+          callback(rows);
+        };
+        reader.readAsText(file);
+      }
+
+      function generateChart() {
+        if (chartInstance) {
+          chartInstance = null;
+          ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
+        }
+
+        const type = chartType.value;
+        const color = chartColor.value;
+
+        if (chartData.length === 0 || chartLabels.length === 0) {
+          alert('Please upload a valid CSV file.');
+          return;
+        }
+
+        chartInstance = new Chart(ctx, {
+          type: type,
+          data: {
+            labels: chartLabels,
+            datasets: [{
+              label: 'Dataset',
+              data: chartData,
+              backgroundColor: type === 'pie' ? chartLabels.map(() => color) : color,
+              borderColor: '#333',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false
+          }
+        });
+      }
+
+      function saveChartAsImage() {
+        const link = document.createElement('a');
+        link.download = 'chart.png';
+        link.href = chartCanvas.toDataURL('image/png');
+        link.click();
+      }
+
+      csvUpload.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          parseCSV(file, (rows) => {
+            chartLabels = rows[0];
+            chartData = rows[1].map(Number);
+          });
+        }
+      });
+
+      generateChartButton.addEventListener('click', generateChart);
+      saveImageButton.addEventListener('click', saveChartAsImage);
+    });
+  </script>
+</body>
+</html>

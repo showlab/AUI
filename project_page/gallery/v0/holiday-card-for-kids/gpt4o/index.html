@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Holiday Card</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background-color: #87CEEB;
+      overflow: hidden;
+    }
+
+    #card {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      background: linear-gradient(to bottom, #87CEEB, #FFFFFF);
+      overflow: hidden;
+    }
+
+    .snowflake {
+      position: absolute;
+      top: -50px;
+      color: white;
+      font-size: 1.5em;
+      animation: fall linear infinite;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(0);
+      }
+      100% {
+        transform: translateY(100vh);
+      }
+    }
+
+    #greeting {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2em;
+      color: white;
+      text-shadow: 2px 2px 4px #000;
+    }
+
+    .draggable {
+      position: absolute;
+      cursor: grab;
+      transition: transform 0.2s;
+    }
+
+    .draggable:active {
+      cursor: grabbing;
+      transform: scale(1.1);
+    }
+
+    #tree {
+      width: 150px;
+      height: 200px;
+      background: green;
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+      left: 50%;
+      bottom: 50px;
+      transform: translateX(-50%);
+    }
+
+    #gift {
+      width: 60px;
+      height: 60px;
+      background: red;
+      border: 5px solid gold;
+      left: 30%;
+      bottom: 20px;
+    }
+
+    #snowman {
+      width: 80px;
+      height: 120px;
+      background: white;
+      border-radius: 50%;
+      left: 70%;
+      bottom: 20px;
+    }
+
+    #snowman::before {
+      content: '';
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      background: white;
+      border-radius: 50%;
+      top: -40px;
+      left: 10px;
+    }
+
+    #snowman::after {
+      content: '';
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: black;
+      border-radius: 50%;
+      top: -30px;
+      left: 35px;
+    }
+
+    #sound-btn {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      background: gold;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+  </style>
+</head>
+<body>
+  <div id="card">
+    <div id="greeting">Happy Holidays!</div>
+    <div id="tree" class="draggable"></div>
+    <div id="gift" class="draggable"></div>
+    <div id="snowman" class="draggable"></div>
+    <button id="sound-btn">Play Music</button>
+  </div>
+
+  <audio id="holiday-music" loop>
+    <source src="https://www.soundjay.com/button/beep-07.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    // Snowflake animation
+    function createSnowflake() {
+      const snowflake = document.createElement('div');
+      snowflake.classList.add('snowflake');
+      snowflake.textContent = '❄';
+      snowflake.style.left = Math.random() * 100 + 'vw';
+      snowflake.style.animationDuration = Math.random() * 3 + 2 + 's';
+      document.body.appendChild(snowflake);
+
+      snowflake.addEventListener('animationend', () => {
+        snowflake.remove();
+      });
+    }
+    setInterval(createSnowflake, 200);
+
+    // Drag and drop functionality
+    const draggables = document.querySelectorAll('.draggable');
+    draggables.forEach(draggable => {
+      draggable.addEventListener('mousedown', (e) => {
+        const offsetX = e.clientX - draggable.getBoundingClientRect().left;
+        const offsetY = e.clientY - draggable.getBoundingClientRect().top;
+
+        function onMouseMove(e) {
+          draggable.style.left = e.clientX - offsetX + 'px';
+          draggable.style.top = e.clientY - offsetY + 'px';
+        }
+
+        function onMouseUp() {
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+        }
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      });
+    });
+
+    // Sound interaction
+    const soundBtn = document.getElementById('sound-btn');
+    const holidayMusic = document.getElementById('holiday-music');
+    soundBtn.addEventListener('click', () => {
+      if (holidayMusic.paused) {
+        holidayMusic.play();
+        soundBtn.textContent = 'Pause Music';
+      } else {
+        holidayMusic.pause();
+        soundBtn.textContent = 'Play Music';
+      }
+    });
+  </script>
+</body>
+</html>

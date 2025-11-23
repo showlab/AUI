@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Themed Trivia Quiz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    #app {
+      width: 90%;
+      max-width: 600px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    #progress-bar {
+      height: 10px;
+      background: #e0e0e0;
+      position: relative;
+    }
+
+    #progress {
+      height: 100%;
+      width: 0;
+      background: #4caf50;
+      transition: width 0.3s ease;
+    }
+
+    #quiz-card {
+      padding: 20px;
+      text-align: center;
+    }
+
+    #question {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+    }
+
+    .answers {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .answer {
+      background: #f4f4f9;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      padding: 10px;
+      cursor: pointer;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .answer:hover {
+      background: #e0f7fa;
+      border-color: #00acc1;
+    }
+
+    .answer.correct {
+      background: #c8e6c9;
+      border-color: #4caf50;
+    }
+
+    .answer.incorrect {
+      background: #ffcdd2;
+      border-color: #f44336;
+    }
+
+    #feedback {
+      font-size: 2rem;
+      margin: 20px 0;
+      display: none;
+    }
+
+    #score-screen {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+
+    #score {
+      font-size: 2rem;
+      margin: 20px 0;
+    }
+
+    #restart-btn {
+      background: #4caf50;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    #restart-btn:hover {
+      background: #45a049;
+    }
+
+    @media (max-width: 768px) {
+      #question {
+        font-size: 1rem;
+      }
+
+      .answer {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="progress-bar">
+      <div id="progress"></div>
+    </div>
+    <div id="quiz-card">
+      <div id="question"></div>
+      <div class="answers"></div>
+      <div id="feedback"></div>
+    </div>
+    <div id="score-screen">
+      <h2>Quiz Completed!</h2>
+      <div id="score"></div>
+      <button id="restart-btn">Restart Quiz</button>
+    </div>
+  </div>
+
+  <script>
+    const quizData = [
+      { question: "What is the capital of the United States?", answers: ["New York", "Washington, D.C.", "Los Angeles", "Chicago"], correct: 1 },
+      { question: "Who was the first President of the United States?", answers: ["Abraham Lincoln", "George Washington", "Thomas Jefferson", "John Adams"], correct: 1 },
+      { question: "What year did the United States declare independence?", answers: ["1776", "1783", "1804", "1812"], correct: 0 },
+      { question: "What is the national bird of the United States?", answers: ["Bald Eagle", "Golden Eagle", "Pigeon", "Hawk"], correct: 0 },
+      { question: "What is the largest state in the United States by area?", answers: ["California", "Texas", "Alaska", "Montana"], correct: 2 },
+      { question: "How many stripes are on the American flag?", answers: ["10", "13", "15", "50"], correct: 1 },
+      { question: "What is the currency of the United States?", answers: ["Dollar", "Euro", "Pound", "Yen"], correct: 0 },
+      { question: "What is the national anthem of the United States?", answers: ["America the Beautiful", "The Star-Spangled Banner", "God Bless America", "My Country, 'Tis of Thee"], correct: 1 },
+      { question: "How many states are in the United States?", answers: ["48", "49", "50", "51"], correct: 2 },
+      { question: "What is the tallest mountain in the United States?", answers: ["Mount Whitney", "Mount McKinley (Denali)", "Mount Rainier", "Mount Elbert"], correct: 1 }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    const app = document.getElementById('app');
+    const progressBar = document.getElementById('progress');
+    const quizCard = document.getElementById('quiz-card');
+    const questionEl = document.getElementById('question');
+    const answersEl = document.querySelector('.answers');
+    const feedbackEl = document.getElementById('feedback');
+    const scoreScreen = document.getElementById('score-screen');
+    const scoreEl = document.getElementById('score');
+    const restartBtn = document.getElementById('restart-btn');
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function startQuiz() {
+      shuffle(quizData);
+      currentQuestionIndex = 0;
+      score = 0;
+      progressBar.style.width = '0%';
+      quizCard.style.display = 'block';
+      scoreScreen.style.display = 'none';
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const currentQuestion = quizData[currentQuestionIndex];
+      questionEl.textContent = currentQuestion.question;
+      answersEl.innerHTML = '';
+      feedbackEl.style.display = 'none';
+
+      currentQuestion.answers.forEach((answer, index) => {
+        const button = document.createElement('button');
+        button.classList.add('answer');
+        button.textContent = answer;
+        button.dataset.index = index;
+        button.addEventListener('click', () => checkAnswer(index));
+        answersEl.appendChild(button);
+      });
+    }
+
+    function checkAnswer(selectedIndex) {
+      const currentQuestion = quizData[currentQuestionIndex];
+      const correctIndex = currentQuestion.correct;
+      const buttons = answersEl.querySelectorAll('.answer');
+
+      buttons.forEach((button, index) => {
+        if (index === correctIndex) {
+          button.classList.add('correct');
+        } else if (index === selectedIndex) {
+          button.classList.add('incorrect');
+        }
+        button.disabled = true;
+      });
+
+      feedbackEl.style.display = 'block';
+      if (selectedIndex === correctIndex) {
+        feedbackEl.textContent = '✔';
+        feedbackEl.style.color = '#4caf50';
+        score++;
+      } else {
+        feedbackEl.textContent = '✘';
+        feedbackEl.style.color = '#f44336';
+      }
+
+      currentQuestionIndex++;
+      progressBar.style.width = `${(currentQuestionIndex / quizData.length) * 100}%`;
+
+      setTimeout(() => {
+        if (currentQuestionIndex < quizData.length) {
+          showQuestion();
+        } else {
+          showScore();
+        }
+      }, 1000);
+    }
+
+    function showScore() {
+      quizCard.style.display = 'none';
+      scoreScreen.style.display = 'block';
+      scoreEl.textContent = `You scored ${score} out of ${quizData.length}`;
+    }
+
+    restartBtn.addEventListener('click', startQuiz);
+
+    startQuiz();
+  </script>
+</body>
+</html>

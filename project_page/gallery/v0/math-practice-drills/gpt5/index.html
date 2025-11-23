@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Math Practice Drills</title>
+  <style>
+    :root{
+      --bg:#0f172a;
+      --panel:#111827;
+      --panel-2:#0b1223;
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --accent:#3b82f6;
+      --accent-2:#60a5fa;
+      --ok:#22c55e;
+      --bad:#ef4444;
+      --warn:#f59e0b;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius:16px;
+      --gap:16px;
+      --font: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    }
+    html, body {
+      height: 100%;
+      background: radial-gradient(1000px 700px at 20% -10%, #1f2937 0%, #0b1020 50%, var(--bg) 100%);
+      color: var(--text);
+      font-family: var(--font);
+    }
+    body {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container{
+      width: min(1100px, 94vw);
+      min-height: min(92vh, 700px);
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: calc(var(--gap) * 1.25);
+      padding: clamp(14px, 2vw, 24px);
+    }
+    header{
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    #appTitle{
+      font-size: clamp(28px, 4vw, 44px);
+      letter-spacing: .5px;
+      margin: 0;
+      font-weight: 800;
+    }
+    #tagline{
+      color: var(--muted);
+      margin: .2rem 0 0;
+      font-size: clamp(14px, 2vw, 18px);
+    }
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0)) , var(--panel);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .controls{
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr auto auto;
+      gap: var(--gap);
+      padding: 16px;
+      align-items: end;
+    }
+    .control-group{
+      display: grid;
+      gap: 8px;
+    }
+    .control-group label{
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing:.2px;
+    }
+    select, button, input[type="text"]{
+      font-size: clamp(18px, 2.2vw, 22px);
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: var(--panel-2);
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s ease, transform .06s ease;
+    }
+    select:focus, input[type="text"]:focus{
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(59,130,246,.2);
+    }
+    .ops{
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+    .ops label{
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 6px;
+      align-items: center;
+      font-size: 18px;
+      padding: 8px 10px;
+      background: var(--panel-2);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .ops input{
+      width: 18px; height: 18px;
+      accent-color: var(--accent);
+    }
+    .actions{
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    button{
+      cursor: pointer;
+      background: var(--accent);
+      color: white;
+      border: none;
+    }
+    button:hover{ transform: translateY(-1px); }
+    button:active{ transform: translateY(0); }
+    button.secondary{
+      background: transparent;
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,.14);
+    }
+    button.warn{
+      background: var(--warn);
+    }
+    button:disabled{
+      opacity: .55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .quiz{
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--gap);
+      padding: 16px;
+    }
+
+    .row{
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: var(--gap);
+      align-items: center;
+    }
+    .timer{
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    #timerDisplay{
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 700;
+      letter-spacing: .5px;
+    }
+    .progress{
+      flex: 1 1 auto;
+      height: 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .progress > .bar{
+      position: absolute;
+      inset: 0;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      transition: width .2s linear;
+    }
+
+    .question-wrap{
+      display: grid;
+      gap: 8px;
+      padding: 18px;
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0)) , var(--panel-2);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    #questionText{
+      font-size: clamp(40px, 8vw, 64px);
+      font-weight: 800;
+      text-align: center;
+      letter-spacing: .5px;
+      padding: 6px 0 0;
+    }
+    .flash-correct{
+      box-shadow: 0 0 0 3px rgba(34,197,94,.35) inset;
+      animation: flashOk .35s ease;
+    }
+    .flash-incorrect{
+      box-shadow: 0 0 0 3px rgba(239,68,68,.35) inset;
+      animation: flashBad .35s ease;
+    }
+    @keyframes flashOk {
+      from { background-color: rgba(34,197,94,.08); }
+      to { background-color: transparent; }
+    }
+    @keyframes flashBad {
+      from { background-color: rgba(239,68,68,.08); }
+      to { background-color: transparent; }
+    }
+
+    .answer-row{
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: var(--gap);
+      align-items: center;
+    }
+    #answerInput{
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: .5px;
+    }
+    #btnSubmit{
+      background: var(--ok);
+    }
+    #btnSkip{
+      background: transparent;
+      border: 1px solid rgba(255,255,255,.14);
+    }
+
+    .stats{
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--gap);
+      padding: 16px;
+    }
+    .stat{
+      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0)) , var(--panel-2);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: grid;
+      align-items: center;
+      gap: 6px;
+    }
+    .stat .label{
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .stat .value{
+      font-size: clamp(24px, 3vw, 32px);
+      font-weight: 800;
+      letter-spacing: .5px;
+    }
+
+    .summary{
+      padding: 14px 16px;
+      display: grid;
+      gap: 8px;
+      font-size: 16px;
+      color: var(--muted);
+    }
+    .summary strong{
+      color: var(--text);
+    }
+
+    footer{
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      padding: 4px;
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 900px){
+      .controls{ grid-template-columns: 1fr; }
+      .actions{ justify-content: stretch; }
+      .stats{ grid-template-columns: repeat(2, 1fr); }
+      .answer-row{ grid-template-columns: 1fr auto; grid-auto-flow: row; }
+      #btnSkip{ grid-column: 1 / -1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="application" aria-label="Math Practice Drills">
+    <header>
+      <div>
+        <h1 id="appTitle">Math Practice Drills</h1>
+        <p id="tagline">Improve speed and accuracy with timed math quizzes.</p>
+      </div>
+    </header>
+
+    <section class="panel controls" aria-labelledby="settingsHeading">
+      <h2 id="settingsHeading" class="visually-hidden" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">Settings</h2>
+
+      <div class="control-group">
+        <label for="difficultySelect">Difficulty</label>
+        <select id="difficultySelect" aria-label="Select difficulty">
+          <option value="easy">Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="durationSelect">Duration</label>
+        <select id="durationSelect" aria-label="Select quiz duration">
+          <option value="30">30 seconds</option>
+          <option value="60" selected>60 seconds</option>
+          <option value="120">120 seconds</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label>Operations</label>
+        <div class="ops" role="group" aria-label="Choose operations">
+          <label for="opsAdd"><input id="opsAdd" type="checkbox" checked> <span>+</span></label>
+          <label for="opsSub"><input id="opsSub" type="checkbox"> <span>−</span></label>
+          <label for="opsMul"><input id="opsMul" type="checkbox"> <span>×</span></label>
+          <label for="opsDiv"><input id="opsDiv" type="checkbox"> <span>÷</span></label>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="btnStart" aria-label="Start quiz">Start</button>
+        <button id="btnPause" class="secondary" aria-label="Pause quiz" disabled>Pause</button>
+        <button id="btnReset" class="warn" aria-label="Reset quiz" disabled>Reset</button>
+      </div>
+    </section>
+
+    <main class="panel quiz" aria-labelledby="quizHeading">
+      <h2 id="quizHeading" class="visually-hidden" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">Quiz</h2>
+
+      <div class="row">
+        <div class="timer" aria-live="polite" aria-atomic="true">
+          <div id="timerDisplay">01:00</div>
+          <div class="progress" aria-hidden="true"><div id="progressBar" class="bar"></div></div>
+        </div>
+        <div class="timer" style="justify-content:flex-end;">
+          <div class="stat" style="min-width: 160px;">
+            <div class="label">Streak</div>
+            <div id="scoreStreak" class="value">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="questionWrap" class="question-wrap" aria-live="polite" aria-atomic="true">
+        <div id="questionText" aria-label="Current question">Press Start to begin</div>
+      </div>
+
+      <form id="answerForm" class="answer-row" autocomplete="off" novalidate>
+        <label for="answerInput" class="visually-hidden" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">Your answer</label>
+        <input id="answerInput" type="text" inputmode="numeric" pattern="^-?[0-9]*$" placeholder="Type answer…" aria-label="Answer input" disabled>
+        <button id="btnSubmit" type="submit" aria-label="Submit answer" disabled>Submit</button>
+        <button id="btnSkip" type="button" class="secondary" aria-label="Skip question" disabled>Skip</button>
+      </form>
+    </main>
+
+    <section class="panel stats" aria-labelledby="statsHeading">
+      <h2 id="statsHeading" class="visually-hidden" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">Score Tracker</h2>
+
+      <div class="stat">
+        <div class="label">Correct</div>
+        <div id="scoreCorrect" class="value">0</div>
+      </div>
+      <div class="stat">
+        <div class="label">Attempted</div>
+        <div id="scoreAttempted" class="value">0</div>
+      </div>
+      <div class="stat">
+        <div class="label">Accuracy</div>
+        <div id="scoreAccuracy" class="value">0%</div>
+      </div>
+      <div class="stat">
+        <div class="label">Best (lifetime)</div>
+        <div id="lifetimeBest" class="value">0</div>
+      </div>
+    </section>
+
+    <section class="summary" id="sessionSummaryArea" aria-live="polite" aria-atomic="true">
+      Tip: Use Enter to submit your answer. You can adjust difficulty, duration, and operations before starting. Results update in the scoreboard and your best score is saved locally.
+    </section>
+
+    <footer>
+      © <span id="year"></span> Math Practice Drills
+    </footer>
+
+    <div id="announce" aria-live="assertive" aria-atomic="true" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;"></div>
+  </div>
+
+  <script>
+    // Elements
+    const el = {
+      difficulty: document.getElementById('difficultySelect'),
+      duration: document.getElementById('durationSelect'),
+      opsAdd: document.getElementById('opsAdd'),
+      opsSub: document.getElementById('opsSub'),
+      opsMul: document.getElementById('opsMul'),
+      opsDiv: document.getElementById('opsDiv'),
+      btnStart: document.getElementById('btnStart'),
+      btnPause: document.getElementById('btnPause'),
+      btnReset: document.getElementById('btnReset'),
+      questionWrap: document.getElementById('questionWrap'),
+      questionText: document.getElementById('questionText'),
+      answerForm: document.getElementById('answerForm'),
+      answerInput: document.getElementById('answerInput'),
+      btnSubmit: document.getElementById('btnSubmit'),
+      btnSkip: document.getElementById('btnSkip'),
+      timerDisplay: document.getElementById('timerDisplay'),
+      progressBar: document.getElementById('progressBar'),
+      scoreCorrect: document.getElementById('scoreCorrect'),
+      scoreAttempted: document.getElementById('scoreAttempted'),
+      scoreAccuracy: document.getElementById('scoreAccuracy'),
+      scoreStreak: document.getElementById('scoreStreak'),
+      lifetimeBest: document.getElementById('lifetimeBest'),
+      sessionSummary: document.getElementById('sessionSummaryArea'),
+      announce: document.getElementById('announce'),
+      year: document.getElementById('year'),
+    };
+
+    // State
+    const STORAGE_LIFE = 'mathDrills_lifetime_v1';
+    const STORAGE_SETTINGS = 'mathDrills_settings_v1';
+    let state = {
+      active: false,
+      paused: false,
+      timer: {
+        totalMs: 60000,
+        remainingMs: 60000,
+        id: null,
+        tickRate: 200
+      },
+      current: null, // {a,b,op,answer,text}
+      stats: {
+        correct: 0,
+        attempted: 0,
+        streak: 0,
+        maxStreak: 0,
+      },
+      lifetime: {
+        totalSessions: 0,
+        totalCorrect: 0,
+        totalAttempted: 0,
+        bestCorrect: 0,
+        bestAccuracy: 0, // percentage integer
+      },
+      settings: {
+        difficulty: 'easy',
+        duration: 60,
+        ops: { add: true, sub: false, mul: false, div: false }
+      }
+    };
+
+    // Utilities
+    const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+    const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+    const fmtTime = ms => {
+      const s = Math.max(0, Math.ceil(ms / 1000));
+      const mPart = String(Math.floor(s / 60)).padStart(2,'0');
+      const sPart = String(s % 60).padStart(2,'0');
+      return `${mPart}:${sPart}`;
+    };
+    const percent = (num, den) => den ? Math.round((num / den) * 100) : 0;
+
+    function saveLifetime(){
+      localStorage.setItem(STORAGE_LIFE, JSON.stringify(state.lifetime));
+    }
+    function loadLifetime(){
+      try{
+        const raw = localStorage.getItem(STORAGE_LIFE);
+        if(raw){
+          const parsed = JSON.parse(raw);
+          Object.assign(state.lifetime, parsed);
+        }
+      }catch{}
+      el.lifetimeBest.textContent = state.lifetime.bestCorrect;
+    }
+    function saveSettings(){
+      const s = {
+        difficulty: el.difficulty.value,
+        duration: Number(el.duration.value),
+        ops: {
+          add: el.opsAdd.checked,
+          sub: el.opsSub.checked,
+          mul: el.opsMul.checked,
+          div: el.opsDiv.checked,
+        }
+      };
+      localStorage.setItem(STORAGE_SETTINGS, JSON.stringify(s));
+    }
+    function loadSettings(){
+      try{
+        const raw = localStorage.getItem(STORAGE_SETTINGS);
+        if(raw){
+          const s = JSON.parse(raw);
+          el.difficulty.value = s.difficulty ?? 'easy';
+          el.duration.value = String(s.duration ?? 60);
+          el.opsAdd.checked = !!s.ops?.add;
+          el.opsSub.checked = !!s.ops?.sub;
+          el.opsMul.checked = !!s.ops?.mul;
+          el.opsDiv.checked = !!s.ops?.div;
+        }
+      }catch{}
+    }
+
+    // Question generation based on difficulty and selected operations
+    function getRanges(difficulty){
+      switch(difficulty){
+        case 'easy':
+          return { addsub: [0, 20], mul: [0, 12], divDivisor: [1,12], divQuotient: [0,12] };
+        case 'medium':
+          return { addsub: [0, 100], mul: [0, 20], divDivisor: [1,20], divQuotient: [0,20] };
+        case 'hard':
+          return { addsub: [0, 999], mul: [0, 50], divDivisor: [1,50], divQuotient: [0,50] };
+        default:
+          return { addsub: [0, 20], mul: [0, 12], divDivisor: [1,12], divQuotient: [0,12] };
+      }
+    }
+
+    function generateQuestion(){
+      const difficulty = el.difficulty.value;
+      const ops = [];
+      if(el.opsAdd.checked) ops.push('+');
+      if(el.opsSub.checked) ops.push('-');
+      if(el.opsMul.checked) ops.push('×');
+      if(el.opsDiv.checked) ops.push('÷');
+      if(ops.length === 0) return null;
+
+      const op = pick(ops);
+      const r = getRanges(difficulty);
+      let a, b, ans, text;
+
+      if(op === '+'){
+        a = randInt(r.addsub[0], r.addsub[1]);
+        b = randInt(r.addsub[0], r.addsub[1]);
+        ans = a + b;
+        text = `${a} + ${b} = ?`;
+      }
+      else if(op === '-'){
+        // avoid negative results
+        const x = randInt(r.addsub[0], r.addsub[1]);
+        const y = randInt(r.addsub[0], r.addsub[1]);
+        a = Math.max(x, y);
+        b = Math.min(x, y);
+        ans = a - b;
+        text = `${a} − ${b} = ?`;
+      }
+      else if(op === '×'){
+        a = randInt(r.mul[0], r.mul[1]);
+        b = randInt(r.mul[0], r.mul[1]);
+        ans = a * b;
+        text = `${a} × ${b} = ?`;
+      }
+      else if(op === '÷'){
+        // ensure integer division
+        const divisor = randInt(r.divDivisor[0], r.divDivisor[1]);
+        const quotient = randInt(r.divQuotient[0], r.divQuotient[1]);
+        a = divisor * quotient;
+        b = divisor === 0 ? 1 : divisor;
+        ans = b === 0 ? 0 : (a / b);
+        text = `${a} ÷ ${b} = ?`;
+      }
+      return { a, b, op, answer: ans, text };
+    }
+
+    // Session logic
+    function resetStats(){
+      state.stats.correct = 0;
+      state.stats.attempted = 0;
+      state.stats.streak = 0;
+      state.stats.maxStreak = 0;
+      updateStatsUI();
+    }
+    function updateStatsUI(){
+      el.scoreCorrect.textContent = state.stats.correct;
+      el.scoreAttempted.textContent = state.stats.attempted;
+      const acc = percent(state.stats.correct, state.stats.attempted);
+      el.scoreAccuracy.textContent = `${acc}%`;
+      el.scoreStreak.textContent = state.stats.streak;
+    }
+    function updateTimerUI(){
+      el.timerDisplay.textContent = fmtTime(state.timer.remainingMs);
+      const pct = clamp(100 - (state.timer.remainingMs / state.timer.totalMs) * 100, 0, 100);
+      el.progressBar.style.width = `${pct}%`;
+    }
+    function setActiveUI(active){
+      state.active = active;
+      const running = active && !state.paused;
+
+      el.btnStart.disabled = active || !hasAnyOperation();
+      el.btnPause.disabled = !active;
+      el.btnReset.disabled = !active;
+
+      el.difficulty.disabled = active;
+      el.duration.disabled = active;
+      el.opsAdd.disabled = active;
+      el.opsSub.disabled = active;
+      el.opsMul.disabled = active;
+      el.opsDiv.disabled = active;
+
+      el.answerInput.disabled = !active || state.paused;
+      el.btnSubmit.disabled = !active || state.paused;
+      el.btnSkip.disabled = !active || state.paused;
+
+      el.btnPause.textContent = state.paused ? 'Resume' : 'Pause';
+      if(active && !state.paused){
+        el.answerInput.focus();
+        el.answerInput.select();
+      }
+    }
+
+    function hasAnyOperation(){
+      return el.opsAdd.checked || el.opsSub.checked || el.opsMul.checked || el.opsDiv.checked;
+    }
+
+    function nextQuestion(){
+      const q = generateQuestion();
+      if(!q){
+        el.questionText.textContent = 'Select at least one operation';
+        return;
+      }
+      state.current = q;
+      el.questionText.textContent = q.text;
+    }
+
+    function startTimer(){
+      clearInterval(state.timer.id);
+      state.timer.id = setInterval(()=>{
+        if(state.paused || !state.active) return;
+        state.timer.remainingMs -= state.timer.tickRate;
+        if(state.timer.remainingMs <= 0){
+          state.timer.remainingMs = 0;
+          updateTimerUI();
+          endQuiz('time');
+          return;
+        }
+        updateTimerUI();
+      }, state.timer.tickRate);
+    }
+
+    function stopTimer(){
+      clearInterval(state.timer.id);
+      state.timer.id = null;
+    }
+
+    function startQuiz(){
+      if(!hasAnyOperation()) return;
+      // Save current settings
+      saveSettings();
+
+      resetStats();
+      state.paused = false;
+      const totalMs = Number(el.duration.value) * 1000;
+      state.timer.totalMs = totalMs;
+      state.timer.remainingMs = totalMs;
+      updateTimerUI();
+      nextQuestion();
+      setActiveUI(true);
+      el.sessionSummary.textContent = 'Good luck! Keep an eye on the timer.';
+      startTimer();
+      announce('Quiz started');
+    }
+
+    function endQuiz(reason = 'stopped'){
+      if(!state.active) return;
+      setActiveUI(false);
+      stopTimer();
+
+      // Lifetime updates
+      state.lifetime.totalSessions += 1;
+      state.lifetime.totalCorrect += state.stats.correct;
+      state.lifetime.totalAttempted += state.stats.attempted;
+      if(state.stats.correct > state.lifetime.bestCorrect){
+        state.lifetime.bestCorrect = state.stats.correct;
+      }
+      const acc = percent(state.stats.correct, state.stats.attempted);
+      if(acc > state.lifetime.bestAccuracy){
+        state.lifetime.bestAccuracy = acc;
+      }
+      saveLifetime();
+      el.lifetimeBest.textContent = state.lifetime.bestCorrect;
+
+      // Summary
+      const msg =
+        `Session ${reason === 'time' ? 'complete (time up)' : 'ended'} — ` +
+        `Correct: ${state.stats.correct} / ${state.stats.attempted} ` +
+        `(${acc}%). Max streak: ${state.stats.maxStreak}.`;
+      el.sessionSummary.innerHTML = `<strong>${msg}</strong>`;
+      el.questionText.textContent = 'Press Start to try another round';
+      updateTimerUI();
+      announce('Quiz ended');
+    }
+
+    function handleAnswerSubmission(){
+      if(!state.active || state.paused || !state.current) return;
+      const raw = el.answerInput.value.trim();
+      if(raw === '') return;
+      // Accept only integer answers
+      if(!/^-?\d+$/.test(raw)){
+        flash(el.questionWrap, 'incorrect');
+        announce('Invalid number');
+        return;
+      }
+      const user = Number(raw);
+      const correct = (user === state.current.answer);
+      state.stats.attempted += 1;
+      if(correct){
+        state.stats.correct += 1;
+        state.stats.streak += 1;
+        if(state.stats.streak > state.stats.maxStreak){
+          state.stats.maxStreak = state.stats.streak;
+        }
+        flash(el.questionWrap, 'correct');
+        announce('Correct');
+      }else{
+        state.stats.streak = 0;
+        flash(el.questionWrap, 'incorrect');
+        announce('Incorrect');
+      }
+      updateStatsUI();
+      el.answerInput.value = '';
+      nextQuestion();
+    }
+
+    function skipQuestion(){
+      if(!state.active || state.paused) return;
+      state.stats.attempted += 1;
+      state.stats.streak = 0;
+      updateStatsUI();
+      flash(el.questionWrap, 'incorrect');
+      nextQuestion();
+      announce('Skipped');
+      el.answerInput.value = '';
+    }
+
+    function flash(node, kind){
+      node.classList.remove('flash-correct', 'flash-incorrect');
+      // Force reflow to restart animation
+      void node.offsetWidth;
+      node.classList.add(kind === 'correct' ? 'flash-correct' : 'flash-incorrect');
+      setTimeout(()=>node.classList.remove('flash-correct', 'flash-incorrect'), 220);
+    }
+
+    function togglePause(){
+      if(!state.active) return;
+      state.paused = !state.paused;
+      if(state.paused){
+        stopTimer();
+        el.sessionSummary.textContent = 'Paused — Resume when ready.';
+        announce('Paused');
+      }else{
+        el.sessionSummary.textContent = 'Go!';
+        startTimer();
+        announce('Resumed');
+      }
+      setActiveUI(true);
+    }
+
+    // Announce for screen readers
+    function announce(text){
+      el.announce.textContent = '';
+      setTimeout(()=>{ el.announce.textContent = text; }, 10);
+    }
+
+    // Event bindings
+    el.btnStart.addEventListener('click', startQuiz);
+    el.btnPause.addEventListener('click', togglePause);
+    el.btnReset.addEventListener('click', ()=> endQuiz('stopped'));
+
+    el.answerForm.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      handleAnswerSubmission();
+    });
+    el.btnSkip.addEventListener('click', skipQuestion);
+
+    el.answerInput.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter'){
+        // handled by form submit
+      }else if(e.key === 'Escape'){
+        e.preventDefault();
+        skipQuestion();
+      }
+    });
+
+    // Settings changes
+    [el.difficulty, el.duration, el.opsAdd, el.opsSub, el.opsMul, el.opsDiv].forEach(control=>{
+      control.addEventListener('change', ()=>{
+        saveSettings();
+        el.btnStart.disabled = !hasAnyOperation() || state.active;
+      });
+    });
+
+    // Init
+    (function init(){
+      el.year.textContent = new Date().getFullYear();
+      loadSettings();
+      loadLifetime();
+      el.btnStart.disabled = !hasAnyOperation();
+      el.timerDisplay.textContent = fmtTime(Number(el.duration.value) * 1000);
+      updateStatsUI();
+    })();
+  </script>
+</body>
+</html>

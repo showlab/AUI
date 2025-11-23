@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artisan CSA — Hand-Drawn Farm Landing</title>
+  <style>
+    /* General Styles */
+    body {
+      margin: 0;
+      font-family: 'Georgia', serif;
+      background: #fdf6e3 url('https://www.transparenttextures.com/patterns/white-linen.png') repeat;
+      color: #4a4a4a;
+      line-height: 1.6;
+    }
+    h1, h2, h3 {
+      color: #6b4226;
+    }
+    a {
+      color: #6b4226;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    button {
+      background: #6b4226;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 1rem;
+      border-radius: 5px;
+    }
+    button:hover {
+      background: #8a5a3b;
+    }
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .section {
+      margin-bottom: 40px;
+    }
+    .hidden {
+      display: none;
+    }
+    .tooltip {
+      position: absolute;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 5px;
+      border-radius: 3px;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Hero Section */
+    #hero {
+      text-align: center;
+      padding: 50px 20px;
+      background: #f5e8d0;
+      border-radius: 10px;
+      position: relative;
+    }
+    #hero img {
+      width: 150px;
+      margin-bottom: 20px;
+    }
+    #zip-checker {
+      margin-top: 20px;
+    }
+    #zip-checker input {
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin-right: 10px;
+    }
+
+    /* Seasonal Boxes */
+    #share {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+    .season-box {
+      position: relative;
+      text-align: center;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background: #fff;
+    }
+    .season-box:hover .tooltip {
+      display: block;
+    }
+
+    /* Plans Section */
+    #plans {
+      text-align: center;
+    }
+    #plans-slider {
+      margin: 20px 0;
+    }
+    #add-ons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    .add-on {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Map Section */
+    #map {
+      text-align: center;
+    }
+    #pickup-locations {
+      margin-top: 20px;
+    }
+    .location {
+      margin-bottom: 10px;
+    }
+
+    /* Testimonials Section */
+    #testimonials {
+      text-align: center;
+    }
+    .testimonial-card {
+      display: inline-block;
+      margin: 0 10px;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    /* FAQ + Contact Section */
+    #faq {
+      margin-bottom: 20px;
+    }
+    .faq-item {
+      margin-bottom: 10px;
+    }
+    .faq-item button {
+      width: 100%;
+      text-align: left;
+      background: #f5e8d0;
+      border: 1px solid #ccc;
+      padding: 10px;
+      font-size: 1rem;
+    }
+    .faq-item-content {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-top: none;
+      display: none;
+    }
+    #contact-form {
+      text-align: center;
+    }
+    #contact-form input, #contact-form textarea {
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 10px;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Hero Section -->
+    <section id="hero" class="section">
+      <img src="seasonal-basket.svg" alt="Seasonal Basket Illustration">
+      <h1>Artisan CSA</h1>
+      <p>Join our community-supported agriculture program and enjoy fresh, seasonal produce delivered to your doorstep.</p>
+      <div id="zip-checker">
+        <input type="text" id="zip-input" placeholder="Enter your ZIP code">
+        <button id="zip-submit">Check Availability</button>
+      </div>
+      <button id="cta-join">Join the Harvest</button>
+    </section>
+
+    <!-- Share Section -->
+    <section id="share" class="section">
+      <h2>Seasonal Boxes</h2>
+      <div class="season-box">
+        <h3>Spring</h3>
+        <div class="tooltip hidden">Typical Produce: Asparagus, Strawberries, Spinach</div>
+      </div>
+      <div class="season-box">
+        <h3>Summer</h3>
+        <div class="tooltip hidden">Typical Produce: Tomatoes, Peaches, Zucchini</div>
+      </div>
+      <div class="season-box">
+        <h3>Fall</h3>
+        <div class="tooltip hidden">Typical Produce: Apples, Pumpkins, Kale</div>
+      </div>
+      <div class="season-box">
+        <h3>Winter</h3>
+        <div class="tooltip hidden">Typical Produce: Potatoes, Carrots, Cabbage</div>
+      </div>
+    </section>
+
+    <!-- Plans Section -->
+    <section id="plans" class="section">
+      <h2>Plans</h2>
+      <div id="plans-slider">
+        <button id="weekly-btn">Weekly</button>
+        <button id="biweekly-btn">Bi-Weekly</button>
+      </div>
+      <p>Price: <span id="price">$25</span>/box</p>
+      <div id="add-ons">
+        <div class="add-on">
+          <input type="checkbox" id="eggs">
+          <label for="eggs">Eggs</label>
+        </div>
+        <div class="add-on">
+          <input type="checkbox" id="flowers">
+          <label for="flowers">Flowers</label>
+        </div>
+        <div class="add-on">
+          <input type="checkbox" id="bread">
+          <label for="bread">Bread</label>
+        </div>
+      </div>
+    </section>
+
+    <!-- Map Section -->
+    <section id="map" class="section">
+      <h2>Delivery Area</h2>
+      <img src="map-placeholder.png" alt="Delivery Map">
+      <div id="pickup-locations">
+        <div class="location">Farm Stand (5 miles)</div>
+        <div class="location">Downtown Market (10 miles)</div>
+        <div class="location">Community Center (15 miles)</div>
+      </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="section">
+      <h2>What Our Members Say</h2>
+      <div class="testimonial-card">
+        <p>"The produce is always fresh and delicious!"</p>
+        <p>- Farmer John</p>
+      </div>
+      <div class="testimonial-card">
+        <p>"I love supporting local farmers."</p>
+        <p>- Farmer Jane</p>
+      </div>
+    </section>
+
+    <!-- FAQ + Contact Section -->
+    <section id="faq-contact" class="section">
+      <div id="faq">
+        <h2>FAQ</h2>
+        <div class="faq-item">
+          <button>What is a CSA?</button>
+          <div class="faq-item-content hidden">A CSA is a community-supported agriculture program...</div>
+        </div>
+        <div class="faq-item">
+          <button>How do I sign up?</button>
+          <div class="faq-item-content hidden">You can sign up by clicking "Join the Harvest" above...</div>
+        </div>
+      </div>
+      <div id="contact-form">
+        <h2>Contact Us</h2>
+        <input type="text" id="name" placeholder="Your Name">
+        <input type="email" id="email" placeholder="Your Email">
+        <textarea id="message" placeholder="Your Message"></textarea>
+        <button id="contact-submit">Send</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // ZIP Checker
+    document.getElementById('zip-submit').addEventListener('click', () => {
+      const zip = document.getElementById('zip-input').value;
+      alert(`Checking delivery availability for ZIP: ${zip}`);
+    });
+
+    // Plans Slider
+    let price = 25;
+    document.getElementById('weekly-btn').addEventListener('click', () => {
+      price = 25;
+      document.getElementById('price').textContent = `$${price}`;
+    });
+    document.getElementById('biweekly-btn').addEventListener('click', () => {
+      price = 45;
+      document.getElementById('price').textContent = `$${price}`;
+    });
+
+    // FAQ Accordion
+    document.querySelectorAll('.faq-item button').forEach(button => {
+      button.addEventListener('click', () => {
+        const content = button.nextElementSibling;
+        content.classList.toggle('hidden');
+      });
+    });
+  </script>
+</body>
+</html>
