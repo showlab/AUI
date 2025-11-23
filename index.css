@@ -481,7 +481,7 @@ body.mode-agent .aui-gallery-thumb-wrapper {
   left: 3px;
   top: 3px;
   background-color: #ffffff;
-  border-radius: 6px;
+  border-radius: 50%;
   border: 2px solid #0f172a;
   box-shadow: 0 4px 8px rgba(15, 23, 42, 0.25);
   transition: transform 0.2s ease;
