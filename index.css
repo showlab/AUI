@@ -325,6 +325,10 @@ body.mode-agent .aui-gallery-card {
   border-radius: 0;
 }
 
+body.mode-agent .aui-gallery-card-title {
+  color: #0f172a;
+}
+
 .aui-gallery-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.9);
@@ -546,11 +550,13 @@ body.mode-agent .table {
   color: #0f172a;
   box-shadow: none;
   border: 1px solid #0f172a;
+  border-radius: 0;
 }
 
 body.mode-agent .table thead th {
-  background: #0f172a;
-  color: #ffffff;
+  background: #ffffff;
+  color: #0f172a;
+  border-bottom: 1px solid #0f172a !important;
 }
 
 body.mode-agent .aui-gallery-thumb-wrapper {

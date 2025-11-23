@@ -550,7 +550,29 @@
       var chart = echarts.init(chartRoot);
       var currentMetric = "sr";
 
-      function buildOption(metric) {
+      function paletteFor(mode) {
+        if (mode === "agent") {
+          return {
+            baseline: "#4b5563",
+            ours: "#0f172a",
+            axis: "#0f172a",
+            split: "#e5e7eb",
+            label: "#0f172a",
+            bg: "#ffffff"
+          };
+        }
+        return {
+          baseline: "#cbd5f5",
+          ours: "#2563eb",
+          axis: "#111827",
+          split: "#e9e9e9",
+          label: "#111827",
+          bg: "#ffffff"
+        };
+      }
+
+      function buildOption(metric, mode) {
+        var pal = paletteFor(mode);
         var coderNames = leaderboardData.map(function (row) {
           return row.coder;
         });
@@ -566,6 +588,7 @@
             : "CUA Success Rate (%)";
 
         return {
+          backgroundColor: pal.bg,
           title: {
             text: titleText,
             left: "center",
@@ -608,15 +631,17 @@
               rotate: 0,
               align: "center",
               fontSize: 10,
+              color: pal.axis,
             },
+            axisLine: { lineStyle: { color: pal.axis } },
           },
           yAxis: {
             type: "value",
             name: "Score (%)",
             nameTextStyle: { fontSize: 12 },
-            axisLabel: { fontSize: 10 },
+            axisLabel: { fontSize: 10, color: pal.axis },
             splitLine: {
-              lineStyle: { color: "#e9e9e9", type: "dashed" },
+              lineStyle: { color: pal.split, type: "dashed" },
             },
             max: 100,
           },
@@ -626,14 +651,14 @@
               type: "bar",
               barWidth: "30%",
               data: baselineVals,
-              itemStyle: { color: "#cbd5f5" },
+              itemStyle: { color: pal.baseline },
             },
             {
               name: "+ Ours",
               type: "bar",
               barWidth: "30%",
               data: oursVals,
-              itemStyle: { color: "#2563eb" },
+              itemStyle: { color: pal.ours },
               label: {
                 show: true,
                 position: "top",
@@ -648,8 +673,9 @@
         };
       }
 
-      function renderLeaderboard(metric) {
-        chart.setOption(buildOption(metric), true);
+      function renderLeaderboard(metric, mode) {
+        var m = mode || (bodyEl.classList.contains("mode-agent") ? "agent" : "human");
+        chart.setOption(buildOption(metric, m), true);
       }
 
       window.addEventListener("resize", function () {
