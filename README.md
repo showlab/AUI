@@ -21,17 +21,8 @@
 Can Computer-Use Agents offer feedback to assist Coders to Generate UI?
 
 <div align="center">
-  <img src="assets/teaser" width="100%" alt=""/>
+  <img src="assets/teaser.png" width="100%" alt=""/>
 </div>
-
-**Pipeline:**
-- **Stage 0 (Preparation)**: Generate initial websites and tasks per app.
-- **Stage 1 (Task Solvability Check)**: Judge extracts task-state rules on initial websites to determine task validity.
-- **Stage 2 (CUA Navigation Test)**: CUA executes supported tasks; oracle evaluation is rule-based.
-- **Stage 3 (Iterative Refinement)**:
-    - **3.0 Revise**: Update websites based on unsupported tasks (Task Solvability Feedback) and CUA failures (Navigation Feedback via Dashboard).
-    - **3.1 Re-Judge**: Re-evaluate task solvability on revised websites.
-    - **3.2 Re-Test**: CUA executes tasks on revised websites.
 
 ---
 
@@ -64,7 +55,14 @@ Run the following commands from the project root directory.
   ```
 
 ### 3. Run Pipeline
-
+**Pipeline:**
+- **Stage 0 (Preparation)**: Generate initial websites and tasks per app.
+- **Stage 1 (Task Solvability Check)**: Judge extracts task-state rules on initial websites to determine task validity.
+- **Stage 2 (CUA Navigation Test)**: CUA executes supported tasks; oracle evaluation is rule-based.
+- **Stage 3 (Iterative Refinement)**:
+    - **3.0 Revise**: Update websites based on unsupported tasks (Task Solvability Feedback) and CUA failures (Navigation Feedback via Dashboard).
+    - **3.1 Re-Judge**: Re-evaluate task solvability on revised websites.
+    - **3.2 Re-Test**: CUA executes tasks on revised websites.
 For normal usage, you only need the single entrypoint `run.py` from the repo root:
 
 ```bash
