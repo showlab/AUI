@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Festival Lights Show</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --panel-bg: #f0f0f0;
+            --text-color: #000000;
+            --accent-color: #000000; /* High contrast */
+            --highlight-color: #00d4ff;
+            --border-color: #333333;
+            --grid-gap: 10px;
+            --control-height: 44px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--panel-bg);
+            border-bottom: 2px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        .status-indicator {
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+        }
+
+        .dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: #ccc;
+            border: 2px solid #000;
+        }
+
+        .dot.active {
+            background-color: #0f0;
+            box-shadow: 0 0 5px #0f0;
+        }
+
+        /* Main Stage */
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            background: #111; /* Keep stage dark for lights contrast */
+            overflow: hidden;
+            position: relative;
+        }
+
+        #stage-container {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+            gap: var(--grid-gap);
+            width: 100%;
+            max-width: 1000px;
+            aspect-ratio: 2 / 1;
+            padding: 20px;
+            background: #000;
+            border: 2px solid #555;
+        }
+
+        .light-bulb {
+            background-color: #222;
+            border-radius: 50%;
+            transition: background-color 0.05s ease, transform 0.1s;
+            border: 1px solid #333;
+        }
+
+        /* Controls Section */
+        #controls-section {
+            background-color: var(--panel-bg);
+            padding: 15px;
+            border-top: 2px solid var(--border-color);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            min-width: 140px;
+        }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--text-color);
+            text-transform: uppercase;
+        }
+
+        /* Custom UI Elements - 44px min height */
+        button {
+            height: var(--control-height);
+            padding: 0 20px;
+            background: #fff;
+            border: 2px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button:hover {
+            background: #eee;
+        }
+
+        button:focus-visible {
+            outline: 3px solid #000;
+            outline-offset: 2px;
+        }
+
+        button.active {
+            background: var(--text-color);
+            color: #fff;
+            border-color: var(--text-color);
+        }
+
+        select, input[type="color"] {
+            height: var(--control-height);
+            padding: 5px 10px;
+            background: #fff;
+            border: 2px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 4px;
+            width: 100%;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        /* Slider Group with Step Buttons */
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            flex: 1;
+            height: var(--control-height);
+            background: transparent;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            background: #ddd;
+            border: 1px solid #999;
+            border-radius: 4px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 28px;
+            width: 28px;
+            border-radius: 50%;
+            background: #000;
+            border: 2px solid #fff;
+            margin-top: -11px; /* Centers thumb */
+            cursor: pointer;
+        }
+
+        input[type="range"]:focus::-webkit-slider-thumb {
+            box-shadow: 0 0 0 3px #00d4ff;
+        }
+
+        .step-btn {
+            width: var(--control-height);
+            padding: 0;
+            font-size: 1.2rem;
+        }
+
+        .value-display {
+            font-size: 1rem;
+            font-weight: bold;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        /* Helper Text */
+        .helper-text {
+            font-size: 0.8rem;
+            color: #555;
+            margin-top: 2px;
+        }
+
+        /* Proxies for Automation */
+        .proxy-data {
+            display: none;
+        }
+
+        /* Responsive adjustments for 1280x720 fit */
+        @media (max-height: 720px) {
+            header { padding: 5px 20px; }
+            h1 { font-size: 1rem; }
+            #controls-section { padding: 10px; gap: 15px; }
+            .control-group { gap: 2px; }
+            label { font-size: 0.8rem; }
+            #stage-container { max-height: 400px; }
+        }
+        
+        @media (max-width: 800px) {
+            #controls-section {
+                justify-content: flex-start;
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Festival Lights Show</h1>
+        <div class="status-indicator" id="header-status-area">
+            <span id="status-text">Standby</span>
+            <div id="status-dot" class="dot"></div>
+            <!-- Proxy for automation -->
+            <span id="show-state-proxy" class="proxy-data">stopped</span>
+        </div>
+    </header>
+
+    <main>
+        <div id="stage-container" role="grid" aria-label="Lights Display Grid">
+            <!-- Lights generated via JS -->
+        </div>
+    </main>
+
+    <section id="controls-section" aria-label="Control Panel">
+        
+        <!-- Power Controls -->
+        <div class="control-group">
+            <label id="lbl-power">Power</label>
+            <button id="btn-toggle" onclick="toggleShow()" aria-labelledby="lbl-power">Start Show</button>
+            <div class="helper-text" id="power-hint">Click to run animation</div>
+        </div>
+
+        <!-- Pattern Selector -->
+        <div class="control-group">
+            <label for="select-pattern">Pattern</label>
+            <select id="select-pattern" onchange="updatePatternProxy()">
+                <option value="random">Sparkle Random</option>
+                <option value="chase">Snake Chase</option>
+                <option value="wave">Sine Wave</option>
+                <option value="pulse">Global Pulse</option>
+                <option value="scan">Scanner</option>
+            </select>
+            <span id="current-pattern-label" class="proxy-data">random</span>
+        </div>
+
+        <!-- Color Picker -->
+        <div class="control-group">
+            <label for="input-color">Primary Color</label>
+            <input type="color" id="input-color" value="#00d4ff" oninput="updateColorProxy()">
+            <span id="current-color-hex" class="proxy-data">#00d4ff</span>
+        </div>
+
+        <!-- Speed Control -->
+        <div class="control-group" style="flex: 1; max-width: 300px;">
+            <label for="slider-speed">Tempo (BPM)</label>
+            <div class="slider-container">
+                <button class="step-btn" onclick="adjustSpeed(-1)" aria-label="Decrease Speed">-</button>
+                <input type="range" id="slider-speed" min="1" max="200" value="60" oninput="updateSpeedDisplay()">
+                <button class="step-btn" onclick="adjustSpeed(1)" aria-label="Increase Speed">+</button>
+                <span id="bpm-value-label" class="value-display">60</span>
+            </div>
+            <!-- Proxy for automation -->
+            <span id="current-bpm-proxy" class="proxy-data">60</span>
+        </div>
+
+        <!-- Auto Play -->
+        <div class="control-group">
+            <label>Auto-Play</label>
+            <button id="autoplay-toggle" onclick="toggleAutoPlay()">OFF</button>
+            <span id="autoplay-status-proxy" class="proxy-data">off</span>
+        </div>
+
+        <!-- Music Sync -->
+        <div class="control-group">
+            <label>Music Sync</label>
+            <button id="btn-music-sync" onclick="toggleMusicSync()">OFF</button>
+            <span id="music-sync-proxy" class="proxy-data">off</span>
+        </div>
+
+    </section>
+
+    <script>
+        /**
+         * Festival Lights Show - Improved Implementation
+         */
+
+        // DOM Elements
+        const stage = document.getElementById('stage-container');
+        const btnToggle = document.getElementById('btn-toggle');
+        const btnSync = document.getElementById('btn-music-sync');
+        const btnAutoPlay = document.getElementById('autoplay-toggle');
+        const inputColor = document.getElementById('input-color');
+        const inputSpeed = document.getElementById('slider-speed');
+        const bpmLabel = document.getElementById('bpm-value-label');
+        const selectPattern = document.getElementById('select-pattern');
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+        
+        // Proxies
+        const showStateProxy = document.getElementById('show-state-proxy');
+        const patternProxy = document.getElementById('current-pattern-label');
+        const colorProxy = document.getElementById('current-color-hex');
+        const bpmProxy = document.getElementById('current-bpm-proxy');
+        const autoPlayProxy = document.getElementById('autoplay-status-proxy');
+        const musicSyncProxy = document.getElementById('music-sync-proxy');
+
+        // State
+        let isRunning = false;
+        let isMusicSync = false;
+        let isAutoPlay = false;
+        let frameId = null;
+        let lastFrameTime = 0;
+        let tickCount = 0;
+        let autoPlayTimer = 0;
+        
+        // Grid Config
+        const ROWS = 6;
+        const COLS = 12;
+        const TOTAL_LIGHTS = ROWS * COLS;
+        let lights = [];
+
+        // Initialization
+        function init() {
+            createGrid();
+            setupEventListeners();
+            updateSpeedDisplay(); // Set initial label
+            runPattern(selectPattern.value, true); // Initial static preview
+        }
+
+        // Create Light Grid
+        function createGrid() {
+            stage.innerHTML = '';
+            lights = [];
+            for (let i = 0; i < TOTAL_LIGHTS; i++) {
+                const bulb = document.createElement('div');
+                bulb.classList.add('light-bulb');
+                bulb.id = `light-${i}`;
+                bulb.dataset.index = i;
+                bulb.dataset.row = Math.floor(i / COLS);
+                bulb.dataset.col = i % COLS;
+                
+                stage.appendChild(bulb);
+                lights.push(bulb);
+            }
+        }
+
+        // Event Listeners
+        function setupEventListeners() {
+            inputColor.addEventListener('input', () => {
+                updateColorProxy();
+                if (!isRunning) runPattern(selectPattern.value, true);
+            });
+            
+            selectPattern.addEventListener('change', () => {
+                updatePatternProxy();
+                if (!isRunning) runPattern(selectPattern.value, true);
+            });
+
+            inputSpeed.addEventListener('input', updateSpeedDisplay);
+        }
+
+        // Proxies Updates
+        function updatePatternProxy() {
+            patternProxy.textContent = selectPattern.value;
+        }
+
+        function updateColorProxy() {
+            colorProxy.textContent = inputColor.value;
+        }
+
+        function updateSpeedDisplay() {
+            const val = inputSpeed.value;
+            bpmLabel.textContent = val;
+            bpmProxy.textContent = val;
+        }
+
+        function adjustSpeed(delta) {
+            let val = parseInt(inputSpeed.value) + delta;
+            if (val < parseInt(inputSpeed.min)) val = parseInt(inputSpeed.min);
+            if (val > parseInt(inputSpeed.max)) val = parseInt(inputSpeed.max);
+            inputSpeed.value = val;
+            updateSpeedDisplay();
+        }
+
+        // Toggle Play/Pause
+        function toggleShow() {
+            isRunning = !isRunning;
+            if (isRunning) {
+                btnToggle.textContent = "Stop Show";
+                btnToggle.classList.add('active');
+                statusDot.classList.add('active');
+                statusText.textContent = "Live";
+                showStateProxy.textContent = "running";
+                document.getElementById('power-hint').textContent = "Show is running";
+                gameLoop();
+            } else {
+                btnToggle.textContent = "Start Show";
+                btnToggle.classList.remove('active');
+                statusDot.classList.remove('active');
+                statusText.textContent = "Standby";
+                showStateProxy.textContent = "stopped";
+                document.getElementById('power-hint').textContent = "Click to run animation";
+                cancelAnimationFrame(frameId);
+                // Optional: keep last state or reset. Resetting for clarity.
+                // resetLights(); 
+                // Alternatively, keep preview static
+                runPattern(selectPattern.value, true);
+            }
+        }
+
+        // Toggle Music Sync
+        function toggleMusicSync() {
+            isMusicSync = !isMusicSync;
+            if (isMusicSync) {
+                btnSync.textContent = "ON";
+                btnSync.classList.add('active');
+                musicSyncProxy.textContent = "on";
+            } else {
+                btnSync.textContent = "OFF";
+                btnSync.classList.remove('active');
+                musicSyncProxy.textContent = "off";
+            }
+        }
+
+        // Toggle Auto Play
+        function toggleAutoPlay() {
+            isAutoPlay = !isAutoPlay;
+            if (isAutoPlay) {
+                btnAutoPlay.textContent = "ON";
+                btnAutoPlay.classList.add('active');
+                autoPlayProxy.textContent = "on";
+            } else {
+                btnAutoPlay.textContent = "OFF";
+                btnAutoPlay.classList.remove('active');
+                autoPlayProxy.textContent = "off";
+            }
+        }
+
+        function updateActiveColors() {
+            // No-op for compatibility with preserved API list if needed
+        }
+
+        // Turn off all lights
+        function resetLights() {
+            lights.forEach(l => {
+                l.style.backgroundColor = '#222';
+                l.style.boxShadow = 'none';
+                l.style.transform = 'scale(1)';
+                l.style.opacity = '1';
+            });
+        }
+
+        // Main Animation Loop
+        function gameLoop(timestamp) {
+            if (!isRunning) return;
+
+            if (!lastFrameTime) lastFrameTime = timestamp;
+            const deltaTime = timestamp - lastFrameTime;
+
+            // Speed calculation
+            // Map 1-200 BPM to interval
+            // 60 BPM = 1 beat per second = 1000ms
+            // Interval = 60000 / BPM / Multiplier
+            const bpm = parseInt(inputSpeed.value);
+            const speedMultiplier = isMusicSync ? 2 : 4; // Higher multiplier for smoother animation steps
+            const interval = (60000 / bpm) / speedMultiplier; 
+            
+            if (deltaTime > interval) {
+                lastFrameTime = timestamp;
+                tickCount++;
+                
+                // Auto Play Logic: Cycle patterns every ~10 seconds (assuming ~60 ticks per sec if not regulated, but here regulated by BPM)
+                // Let's allow cycle every 100 ticks
+                if (isAutoPlay && tickCount % 100 === 0) {
+                    const options = selectPattern.options;
+                    const nextIndex = (selectPattern.selectedIndex + 1) % options.length;
+                    selectPattern.selectedIndex = nextIndex;
+                    updatePatternProxy();
+                }
+
+                // Simulate Music Visualizer
+                if (isMusicSync) updateVisualizer();
+                
+                // Execute Pattern
+                runPattern(selectPattern.value);
+            }
+
+            frameId = requestAnimationFrame(gameLoop);
+        }
+
+        // Simulated Audio Visualizer Logic (Stub)
+        function updateVisualizer() {
+            // Since visualizer UI was removed for simplification, this just returns a beat state
+            return Math.random() > 0.7;
+        }
+
+        // Pattern Logic
+        // isPreview: if true, render a static frame based on tick 0 or current
+        function runPattern(type, isPreview = false) {
+            const color = inputColor.value;
+            // Parse RGB for RGBA
+            let r=0, g=0, b=0;
+            if(color.length === 7) {
+                r = parseInt(color.substr(1,2), 16);
+                g = parseInt(color.substr(3,2), 16);
+                b = parseInt(color.substr(5,2), 16);
+            }
+            const glow = `0 0 15px rgba(${r},${g},${b}, 0.8)`;
+            
+            // For static preview, force specific tick
+            const tick = isPreview ? 1 : tickCount;
+
+            // Clear previous state for patterns that don't self-clean
+            if (type !== 'chase' || isPreview) resetLights();
+
+            switch (type) {
+                case 'random':
+                    // Sparkle effect
+                    lights.forEach(light => {
+                        // If preview, show more lights
+                        const threshold = isPreview ? 0.5 : 0.8;
+                        if (Math.random() > threshold) {
+                            light.style.backgroundColor = color;
+                            light.style.boxShadow = glow;
+                        } else {
+                            // Don't reset if not preview to allow fade? No, random needs clear
+                            light.style.backgroundColor = '#222';
+                            light.style.boxShadow = 'none';
+                        }
+                    });
+                    break;
+
+                case 'chase':
+                    // Snake effect
+                    if (isPreview) resetLights(); 
+                    // If running, we rely on fade or clear. Let's clear for simplicity in this refactor
+                    resetLights();
+
+                    const snakeLength = 5;
+                    const leadIndex = tick % TOTAL_LIGHTS;
+                    
+                    for (let i = 0; i < snakeLength; i++) {
+                        let idx = leadIndex - i;
+                        if (idx < 0) idx += TOTAL_LIGHTS;
+                        
+                        const opacity = 1 - (i / snakeLength);
+                        lights[idx].style.backgroundColor = color;
+                        lights[idx].style.boxShadow = glow;
+                        lights[idx].style.opacity = opacity;
+                    }
+                    break;
+
+                case 'wave':
+                    // Sine wave moving across columns
+                    lights.forEach(light => {
+                        const col = parseInt(light.dataset.col);
+                        const row = parseInt(light.dataset.row);
+                        
+                        const offset = Math.sin((col * 0.5) + (tick * 0.2)) * 2.5 + 2.5;
+                        const rowDist = Math.abs(row - offset);
+                        
+                        if (rowDist < 1.5) {
+                            light.style.backgroundColor = color;
+                            light.style.boxShadow = glow;
+                            light.style.transform = `scale(${1.2 - (rowDist * 0.2)})`;
+                        } else {
+                            light.style.backgroundColor = '#222';
+                            light.style.boxShadow = 'none';
+                            light.style.transform = 'scale(1)';
+                        }
+                    });
+                    break;
+
+                case 'pulse':
+                    // Whole grid pulses
+                    const intensity = (Math.sin(tick * 0.2) + 1) / 2; // 0 to 1
+                    lights.forEach(light => {
+                        light.style.backgroundColor = color;
+                        light.style.opacity = intensity;
+                        if (intensity > 0.5) {
+                            light.style.boxShadow = glow;
+                        } else {
+                            light.style.boxShadow = 'none';
+                        }
+                    });
+                    break;
+
+                case 'scan':
+                    // Scanner
+                    const cycle = (COLS * 2) - 2; 
+                    let activeCol = tick % cycle;
+                    if (activeCol >= COLS) activeCol = cycle - activeCol;
+
+                    lights.forEach(light => {
+                        if (parseInt(light.dataset.col) === activeCol) {
+                            light.style.backgroundColor = color;
+                            light.style.boxShadow = glow;
+                            light.style.transform = 'scale(1.1)';
+                        } else {
+                            light.style.backgroundColor = '#222';
+                            light.style.boxShadow = 'none';
+                            light.style.transform = 'scale(1)';
+                        }
+                    });
+                    break;
+            }
+
+            // Music Sync Override (only if running)
+            if (isMusicSync && !isPreview) {
+                if (Math.random() > 0.85) {
+                    const flashIndex = Math.floor(Math.random() * TOTAL_LIGHTS);
+                    lights[flashIndex].style.backgroundColor = '#fff';
+                    lights[flashIndex].style.boxShadow = '0 0 30px #fff';
+                    lights[flashIndex].style.transform = 'scale(1.3)';
+                }
+            }
+        }
+
+        // Start
+        init();
+
+    </script>
+</body>
+</html>

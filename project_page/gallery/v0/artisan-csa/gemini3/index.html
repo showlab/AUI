@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artisan CSA — Hand-Drawn Farm Landing</title>
+    <style>
+        /* --- CSS Variables & Reset --- */
+        :root {
+            --paper: #fdfbf7;
+            --ink: #2c2c2c;
+            --wash-green: rgba(107, 140, 66, 0.2);
+            --wash-orange: rgba(212, 140, 66, 0.2);
+            --wash-blue: rgba(124, 165, 184, 0.2);
+            --wash-red: rgba(200, 80, 80, 0.2);
+            --accent-green: #556b2f;
+            --accent-rust: #a0522d;
+            --font-serif: 'Georgia', 'Times New Roman', serif;
+            --font-sans: 'Segoe UI', 'Verdana', sans-serif;
+            --shadow-drawn: 3px 4px 0px rgba(0,0,0,0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--paper);
+            color: var(--ink);
+            font-family: var(--font-sans);
+            line-height: 1.6;
+            overflow-x: hidden;
+            /* Paper Texture Effect */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        }
+
+        /* --- Typography --- */
+        h1, h2, h3, h4 {
+            font-family: var(--font-serif);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 1rem;
+        }
+
+        h1 { font-size: 3.5rem; color: var(--accent-green); }
+        h2 { font-size: 2.5rem; text-align: center; margin-top: 3rem; position: relative; display: inline-block; left: 50%; transform: translateX(-50%); }
+        
+        /* Underline effect for H2 */
+        h2::after {
+            content: '';
+            display: block;
+            width: 100%;
+            height: 8px;
+            background: var(--wash-orange);
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+            z-index: -1;
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+        }
+
+        /* --- Layout Utilities --- */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        section { margin-bottom: 5rem; }
+
+        /* --- Hand-Drawn Components --- */
+        .drawn-box {
+            background: white;
+            border: 2px solid var(--ink);
+            /* The "Wobbly" border trick */
+            border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+            padding: 2rem;
+            box-shadow: var(--shadow-drawn);
+            transition: transform 0.2s ease;
+        }
+
+        .btn {
+            display: inline-block;
+            background: var(--accent-rust);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-family: var(--font-serif);
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+            box-shadow: 2px 3px 0px var(--ink);
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            transform: scale(1.02) rotate(-1deg);
+            box-shadow: 3px 5px 0px var(--ink);
+        }
+
+        .btn:active { transform: translateY(2px); box-shadow: 1px 1px 0px var(--ink); }
+
+        /* --- HERO SECTION --- */
+        #hero {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            padding-top: 4rem;
+        }
+
+        .hero-text {
+            flex: 1 1 400px;
+            padding-right: 2rem;
+        }
+
+        .hero-visual {
+            flex: 1 1 400px;
+            position: relative;
+            height: 400px;
+        }
+
+        /* Parallax SVG */
+        #hero-svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(5px 5px 0px rgba(0,0,0,0.1));
+        }
+
+        .zip-checker {
+            margin-top: 2rem;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .input-drawn {
+            padding: 1rem;
+            border: 2px solid var(--ink);
+            background: transparent;
+            font-family: var(--font-sans);
+            font-size: 1rem;
+            border-radius: 5px 255px 5px 255px / 255px 5px 255px 5px;
+            outline: none;
+            flex: 1;
+        }
+
+        #zip-message {
+            margin-top: 0.5rem;
+            font-weight: bold;
+            min-height: 1.5rem;
+        }
+        .success { color: var(--accent-green); }
+        .error { color: var(--accent-rust); }
+
+        /* --- SEASONS GRID --- */
+        .seasons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .season-card {
+            position: relative;
+            text-align: center;
+        }
+
+        .season-card:hover { transform: translateY(-5px); }
+
+        .season-card h3 { margin-top: 1rem; }
+
+        .watercolor-blob {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: -1;
+            border-radius: 50%;
+            opacity: 0.6;
+            mix-blend-mode: multiply;
+            filter: blur(10px);
+        }
+
+        /* Tooltip */
+        .tooltip-text {
+            visibility: hidden;
+            width: 100%;
+            background-color: var(--ink);
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 110%;
+            left: 50%;
+            margin-left: -50%;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .season-card:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .allergen-icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            margin: 5px;
+            fill: #fff;
+        }
+
+        /* --- PLANS & PRICING --- */
+        #plans { background-color: rgba(255,255,255,0.5); padding: 4rem 0; }
+        
+        .pricing-interface {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3rem;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .controls {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .receipt {
+            flex: 0 0 300px;
+            background: #fff;
+            padding: 2rem;
+            border: 1px solid #ddd;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            position: relative;
+            font-family: 'Courier New', monospace;
+        }
+        
+        /* Torn paper edge effect via CSS radial gradient */
+        .receipt::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background: radial-gradient(circle, transparent 50%, #fff 50%) 0 -10px;
+            background-size: 20px 20px;
+            transform: rotate(180deg);
+        }
+
+        .slider-container { margin-bottom: 2rem; }
+        
+        input[type=range] {
+            width: 100%;
+            accent-color: var(--accent-green);
+        }
+
+        .toggle-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .toggle-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            border-bottom: 1px dashed #ccc;
+        }
+
+        /* --- MAP SECTION --- */
+        .map-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: #e6e0d4;
+            overflow: hidden;
+            border: 2px solid var(--ink);
+            border-radius: 10px;
+        }
+
+        .pickup-list {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: var(--accent-green);
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+
+        /* --- TESTIMONIALS --- */
+        .carousel-container {
+            position: relative;
+            overflow: hidden;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .testimonial-card {
+            min-width: 100%;
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .portrait-svg {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 1rem;
+            border-radius: 50%;
+            border: 2px solid var(--ink);
+        }
+
+        .carousel-nav {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ccc;
+            cursor: pointer;
+        }
+        .nav-dot.active { background: var(--accent-rust); }
+
+        /* --- FAQ & CONTACT --- */
+        .accordion details {
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--ink);
+            padding-bottom: 0.5rem;
+        }
+
+        .accordion summary {
+            cursor: pointer;
+            font-weight: bold;
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .accordion summary::after { content: '+'; }
+        .accordion details[open] summary::after { content: '-'; }
+
+        .accordion p {
+            padding-top: 0.5rem;
+            color: #555;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .hero-visual { display: none; } /* Simplify mobile hero */
+            .receipt { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header class="container" style="padding-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <div style="font-family: var(--font-serif); font-weight: 700; font-size: 1.5rem;">Artisan CSA</div>
+        <nav>
+            <a href="#share" style="margin-left: 1rem; color: var(--ink); text-decoration: none;">Shares</a>
+            <a href="#plans" style="margin-left: 1rem; color: var(--ink); text-decoration: none;">Plans</a>
+            <a href="#contact" style="margin-left: 1rem; color: var(--ink); text-decoration: none;">Contact</a>
+        </nav>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section id="hero" class="container">
+        <div class="hero-text">
+            <h1>Rooted in the Soil. <br>Raised for You.</h1>
+            <p style="font-size: 1.2rem; margin-bottom: 2rem;">Hand-picked, organic produce delivered from our family farm to your table. Experience the rhythm of the seasons.</p>
+            
+            <div class="zip-checker">
+                <input type="text" id="zip-input" class="input-drawn" placeholder="Enter ZIP code" aria-label="Check delivery area ZIP code">
+                <button id="check-zip-btn" class="btn">Check Availability</button>
+            </div>
+            <div id="zip-message"></div>
+            <br>
+            <a href="#plans" class="btn" style="background: var(--accent-green);">Join the Harvest</a>
+        </div>
+        
+        <div class="hero-visual">
+            <!-- Inline SVG: Basket of Veggies -->
+            <svg id="hero-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                <!-- Watercolor washes -->
+                <circle cx="200" cy="220" r="120" fill="var(--wash-orange)" />
+                <ellipse cx="180" cy="180" rx="100" ry="140" fill="var(--wash-green)" transform="rotate(-10 180 180)"/>
+                
+                <!-- Ink Lines: Basket -->
+                <path d="M100,250 Q110,350 200,360 Q290,350 300,250 L280,250 L120,250 Z" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
+                <path d="M120,250 Q110,150 200,140 Q290,150 280,250" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round" stroke-dasharray="10,5"/>
+                
+                <!-- Ink Lines: Veggies -->
+                <!-- Carrot -->
+                <path d="M160,260 L140,180 Q150,170 160,180 L180,260" fill="#ff9966" stroke="var(--ink)" stroke-width="2"/>
+                <!-- Greens -->
+                <path d="M200,260 Q180,100 220,120 Q240,150 220,260" fill="#88aa00" stroke="var(--ink)" stroke-width="2"/>
+                <path d="M220,260 Q260,140 280,160 Q300,200 240,260" fill="#88aa00" stroke="var(--ink)" stroke-width="2"/>
+            </svg>
+        </div>
+    </section>
+
+    <!-- SHARE SECTION -->
+    <section id="share" class="container">
+        <h2>Seasonal Shares</h2>
+        <p style="text-align: center; max-width: 600px; margin: 1rem auto;">Our boxes evolve with the weather. Hover over a season to see what's inside.</p>
+        
+        <div class="seasons-grid">
+            <!-- Spring -->
+            <div class="season-card drawn-box" id="card-spring">
+                <div class="watercolor-blob" style="background: var(--wash-green);"></div>
+                <svg width="60" height="60" viewBox="0 0 100 100">
+                    <path d="M50,20 Q20,20 20,60 Q20,90 50,90 Q80,90 80,60 Q80,20 50,20 M50,20 L50,10" stroke="var(--ink)" stroke-width="2" fill="none"/>
+                </svg>
+                <h3>Spring</h3>
+                <p>Apr - Jun</p>
+                <span class="tooltip-text">
+                    <strong>Includes:</strong><br>Asparagus, Peas, Radish, Spinach, Strawberries
+                    <br><br>
+                    <svg class="allergen-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#556b2f"/><text x="6" y="16" fill="white" font-size="10">GF</text></svg>
+                </span>
+            </div>
+
+            <!-- Summer -->
+            <div class="season-card drawn-box" id="card-summer">
+                <div class="watercolor-blob" style="background: var(--wash-orange);"></div>
+                <svg width="60" height="60" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="30" stroke="var(--ink)" stroke-width="2" fill="none"/>
+                    <path d="M50,20 L50,10 M50,80 L50,90 M20,50 L10,50 M80,50 L90,50" stroke="var(--ink)" stroke-width="2"/>
+                </svg>
+                <h3>Summer</h3>
+                <p>Jul - Sep</p>
+                <span class="tooltip-text">
+                    <strong>Includes:</strong><br>Tomatoes, Peppers, Corn, Zucchini, Melons
+                </span>
+            </div>
+
+            <!-- Fall -->
+            <div class="season-card drawn-box" id="card-fall">
+                <div class="watercolor-blob" style="background: var(--wash-red);"></div>
+                <svg width="60" height="60" viewBox="0 0 100 100">
+                    <path d="M50,20 Q80,20 80,60 Q80,90 50,90 Q20,90 20,60 Q20,20 50,20 M50,20 L55,10" stroke="var(--ink)" stroke-width="2" fill="none"/>
+                </svg>
+                <h3>Fall</h3>
+                <p>Oct - Dec</p>
+                <span class="tooltip-text">
+                    <strong>Includes:</strong><br>Pumpkins, Squash, Apples, Kale, Potatoes
+                </span>
+            </div>
+
+            <!-- Winter -->
+            <div class="season-card drawn-box" id="card-winter">
+                <div class="watercolor-blob" style="background: var(--wash-blue);"></div>
+                <svg width="60" height="60" viewBox="0 0 100 100">
+                    <path d="M20,20 L80,80 M80,20 L20,80" stroke="var(--ink)" stroke-width="2"/>
+                </svg>
+                <h3>Winter</h3>
+                <p>Jan - Mar</p>
+                <span class="tooltip-text">
+                    <strong>Includes:</strong><br>Root Veggies, Citrus, Preserves, Onions
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <!-- PLANS SECTION -->
+    <section id="plans">
+        <div class="container">
+            <h2>Build Your Share</h2>
+            <div class="pricing-interface">
+                
+                <!-- Controls -->
+                <div class="controls drawn-box">
+                    <h3>Frequency</h3>
+                    <div class="slider-container">
+                        <input type="range" id="freq-slider" min="0" max="1" step="1" value="0">
+                        <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-weight: bold;">
+                            <span>Weekly ($40)</span>
+                            <span>Bi-Weekly ($45)</span>
+                        </div>
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem; color: #666;">*Bi-weekly boxes are slightly larger.</p>
+                    </div>
+
+                    <h3>Weekly Add-ons</h3>
+                    <div class="toggle-group">
+                        <div class="toggle-item">
+                            <label for="add-eggs">Farm Fresh Eggs (+ $6)</label>
+                            <input type="checkbox" id="add-eggs" class="addon-check" data-price="6">
+                        </div>
+                        <div class="toggle-item">
+                            <label for="add-flowers">Wildflower Bouquet (+ $12)</label>
+                            <input type="checkbox" id="add-flowers" class="addon-check" data-price="12">
+                        </div>
+                        <div class="toggle-item">
+                            <label for="add-bread">Sourdough Bread (+ $8)</label>
+                            <input type="checkbox" id="add-bread" class="addon-check" data-price="8">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Receipt -->
+                <div class="receipt">
+                    <h3 style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px;">ESTIMATE</h3>
+                    <div id="receipt-items">
+                        <!-- JS will populate this -->
+                    </div>
+                    <div style="border-top: 2px solid #000; margin-top: 20px; padding-top: 10px; display: flex; justify-content: space-between; font-weight: bold; font-size: 1.2rem;">
+                        <span>TOTAL</span>
+                        <span id="total-price">$40.00</span>
+                    </div>
+                    <p style="font-size: 0.8rem; text-align: center; margin-top: 1rem;">/ shipment</p>
+                    <button class="btn" style="width: 100%; margin-top: 1rem; font-size: 1rem;">Subscribe</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAP SECTION -->
+    <section id="map" class="container">
+        <h2>Our Roots & Radius</h2>
+        <div class="map-container drawn-box" style="padding: 0;">
+            <!-- Abstract Map SVG -->
+            <svg width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+                <rect width="100%" height="100%" fill="#eaddcf" />
+                <!-- Roads -->
+                <path d="M0,200 Q300,150 600,250 T1200,200" stroke="#fff" stroke-width="5" fill="none" />
+                <path d="M400,0 Q450,200 400,400" stroke="#fff" stroke-width="5" fill="none" />
+                
+                <!-- Delivery Radius -->
+                <circle cx="50%" cy="50%" r="150" fill="rgba(107, 140, 66, 0.2)" stroke="var(--accent-green)" stroke-width="2" stroke-dasharray="5,5" />
+                
+                <!-- Farm Location -->
+                <circle cx="50%" cy="50%" r="8" fill="var(--accent-rust)" />
+                <text x="51%" y="49%" font-family="Georgia" font-size="14" fill="#333">The Farm</text>
+            </svg>
+        </div>
+        
+        <div class="pickup-list">
+            <div class="drawn-box" style="padding: 0.5rem 1rem;">
+                <strong>Downtown Market</strong> <span class="badge">5 mi</span>
+            </div>
+            <div class="drawn-box" style="padding: 0.5rem 1rem;">
+                <strong>Westside Co-op</strong> <span class="badge">12 mi</span>
+            </div>
+            <div class="drawn-box" style="padding: 0.5rem 1rem;">
+                <strong>The Old Barn</strong> <span class="badge">0 mi</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- TESTIMONIALS SECTION -->
+    <section id="testimonials" class="container">
+        <h2>Community Voices</h2>
+        <div class="carousel-container">
+            <div class="carousel-track" id="track">
+                <!-- Slide 1 -->
+                <div class="testimonial-card">
+                    <svg class="portrait-svg" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="48" fill="#fff" stroke="var(--ink)" stroke-width="2"/>
+                        <path d="M30,40 Q50,30 70,40" fill="none" stroke="var(--ink)" stroke-width="2"/> <!-- Eyes -->
+                        <path d="M40,70 Q50,80 60,70" fill="none" stroke="var(--ink)" stroke-width="2"/> <!-- Smile -->
+                        <path d="M20,50 Q10,20 50,10 Q90,20 80,50" fill="none" stroke="var(--ink)" stroke-width="2"/> <!-- Hair -->
+                    </svg>
+                    <p>“The quality of the heirloom tomatoes is unmatched. It feels like getting a present every week.”</p>
+                    <h4 style="margin-top: 1rem;">— Sarah J.</h4>
+                </div>
+                <!-- Slide 2 -->
+                <div class="testimonial-card">
+                    <svg class="portrait-svg" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="48" fill="#fff" stroke="var(--ink)" stroke-width="2"/>
+                        <circle cx="35" cy="40" r="3" fill="var(--ink)"/>
+                        <circle cx="65" cy="40" r="3" fill="var(--ink)"/>
+                        <line x1="50" y1="40" x2="50" y2="55" stroke="var(--ink)" stroke-width="2"/>
+                        <line x1="40" y1="70" x2="60" y2="70" stroke="var(--ink)" stroke-width="2"/>
+                    </svg>
+                    <p>“Knowing exactly where my food comes from has changed how my family eats. The eggs are incredible.”</p>
+                    <h4 style="margin-top: 1rem;">— Mark D.</h4>
+                </div>
+                <!-- Slide 3 -->
+                <div class="testimonial-card">
+                    <svg class="portrait-svg" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="48" fill="#fff" stroke="var(--ink)" stroke-width="2"/>
+                        <path d="M30,35 L40,40 L30,45" fill="none" stroke="var(--ink)" stroke-width="1"/>
+                        <path d="M70,35 L60,40 L70,45" fill="none" stroke="var(--ink)" stroke-width="1"/>
+                        <path d="M35,75 Q50,65 65,75" fill="none" stroke="var(--ink)" stroke-width="2"/>
+                    </svg>
+                    <p>“I love the wildflower add-on. It brightens up my kitchen every Friday!”</p>
+                    <h4 style="margin-top: 1rem;">— Emily R.</h4>
+                </div>
+            </div>
+            <div class="carousel-nav">
+                <div class="nav-dot active" data-index="0"></div>
+                <div class="nav-dot" data-index="1"></div>
+                <div class="nav-dot" data-index="2"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ & CONTACT -->
+    <section id="contact" class="container" style="margin-bottom: 2rem;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;">
+            <!-- FAQ -->
+            <div>
+                <h3>Common Questions</h3>
+                <div class="accordion">
+                    <details id="faq-1">
+                        <summary>What happens if I'm on vacation?</summary>
+                        <p>You can pause your share for up to 2 weeks per season. Just let us know 48 hours in advance.</p>
+                    </details>
+                    <details id="faq-2">
+                        <summary>Is everything certified organic?</summary>
+                        <p>We use organic practices but are not certified. We welcome you to visit the farm and see for yourself!</p>
+                    </details>
+                    <details id="faq-3">
+                        <summary>Do you deliver to apartments?</summary>
+                        <p>Yes, provided there is a safe place to leave the box or a doorman to receive it.</p>
+                    </details>
+                </div>
+            </div>
+
+            <!-- FORM -->
+            <div class="drawn-box" style="background: var(--paper);">
+                <h3>Get in Touch</h3>
+                <form id="contact-form" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <label for="email" class="sr-only" style="display:none;">Email</label>
+                    <input type="email" id="email" class="input-drawn" placeholder="Your Email" required>
+                    
+                    <label for="message" class="sr-only" style="display:none;">Message</label>
+                    <textarea id="message" class="input-drawn" rows="4" placeholder="How can we help?" required></textarea>
+                    
+                    <button type="submit" class="btn">Send Note</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer style="text-align: center; padding: 2rem; background: #eae5d9; font-size: 0.9rem;">
+        <p>&copy; 2023 Artisan CSA. Rooted in Community.</p>
+    </footer>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            /* --- Parallax Logic --- */
+            const heroSvg = document.getElementById('hero-svg');
+            window.addEventListener('scroll', () => {
+                const scrolled = window.pageYOffset;
+                if (scrolled < 600) {
+                    heroSvg.style.transform = `translateY(${scrolled * 0.2}px)`;
+                }
+            });
+
+            /* --- ZIP Checker --- */
+            const validZips = ['10001', '10002', '10003', '90210', '12345'];
+            const zipInput = document.getElementById('zip-input');
+            const zipBtn = document.getElementById('check-zip-btn');
+            const zipMsg = document.getElementById('zip-message');
+
+            zipBtn.addEventListener('click', () => {
+                const val = zipInput.value.trim();
+                if (validZips.includes(val)) {
+                    zipMsg.textContent = "We deliver to your area! 🌱";
+                    zipMsg.className = "success";
+                } else {
+                    zipMsg.textContent = "Sorry, we aren't in that area yet.";
+                    zipMsg.className = "error";
+                }
+            });
+
+            /* --- Pricing Calculator --- */
+            const freqSlider = document.getElementById('freq-slider');
+            const addons = document.querySelectorAll('.addon-check');
+            const totalPriceEl = document.getElementById('total-price');
+            const receiptList = document.getElementById('receipt-items');
+
+            function updatePrice() {
+                let isBiWeekly = freqSlider.value === "1";
+                let basePrice = isBiWeekly ? 45 : 40;
+                let label = isBiWeekly ? "Bi-Weekly Share" : "Weekly Share";
+                let total = basePrice;
+                
+                let html = `<div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>${label}</span><span>$${basePrice}</span></div>`;
+
+                addons.forEach(addon => {
+                    if (addon.checked) {
+                        let price = parseInt(addon.dataset.price);
+                        total += price;
+                        // Get label text without price part
+                        let name = addon.previousElementSibling.textContent.split('(')[0];
+                        html += `<div style="display:flex; justify-content:space-between; margin-bottom:5px; color:#666; font-size:0.9rem;"><span>+ ${name}</span><span>$${price}</span></div>`;
+                    }
+                });
+
+                receiptList.innerHTML = html;
+                totalPriceEl.textContent = `$${total}.00`;
+            }
+
+            freqSlider.addEventListener('input', updatePrice);
+            addons.forEach(a => a.addEventListener('change', updatePrice));
+            updatePrice(); // Init
+
+            /* --- Testimonial Carousel --- */
+            const track = document.getElementById('track');
+            const dots = document.querySelectorAll('.nav-dot');
+            let currentIndex = 0;
+
+            dots.forEach(dot => {
+                dot.addEventListener('click', (e) => {
+                    currentIndex = parseInt(e.target.dataset.index);
+                    updateCarousel();
+                });
+            });
+
+            function updateCarousel() {
+                const width = track.clientWidth; // This is technically 100% of container
+                track.style.transform = `translateX(-${currentIndex * 100}%)`; // Shift by percentage
+                
+                dots.forEach(d => d.classList.remove('active'));
+                dots[currentIndex].classList.add('active');
+            }
+
+            /* --- FAQ Smooth Toggle (Optional enhancement to standard details) --- */
+            // Native <details> handles logic, CSS handles layout. 
+            // Adding a listener to close others when one opens for accordion effect.
+            const details = document.querySelectorAll("details");
+            details.forEach((targetDetail) => {
+                targetDetail.addEventListener("click", () => {
+                    details.forEach((detail) => {
+                        if (detail !== targetDetail) {
+                            detail.removeAttribute("open");
+                        }
+                    });
+                });
+            });
+
+            /* --- Simple Contact Form Prevent Default --- */
+            document.getElementById('contact-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                alert("Thanks for your note! We'll get back to you shortly.");
+                e.target.reset();
+            });
+        });
+    </script>
+</body>
+</html>

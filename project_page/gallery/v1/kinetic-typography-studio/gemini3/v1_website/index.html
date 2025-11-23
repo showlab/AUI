@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kinetic Typography Studio</title>
+    <style>
+        :root {
+            --bg-main: #ffffff;
+            --bg-panel: #f0f0f0;
+            --bg-input: #ffffff;
+            --text-main: #000000;
+            --text-muted: #555555;
+            --border: #000000;
+            --accent: #0000ee;
+            --accent-hover: #0000cc;
+            --focus-outline: 3px solid #0000ee;
+            --spacing: 12px;
+            --radius: 0px; /* Destylized: sharp corners */
+            --control-height: 44px;
+        }
+
+        * { box-sizing: border-box; outline: none; }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- Focus Management --- */
+        *:focus-visible {
+            outline: var(--focus-outline);
+            outline-offset: 2px;
+        }
+
+        /* --- Layout --- */
+        header {
+            height: 60px;
+            background: var(--bg-panel);
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 var(--spacing);
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .logo { font-weight: 900; font-size: 1.2rem; letter-spacing: 1px; text-transform: uppercase; }
+
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 320px 1fr 320px;
+            height: calc(100vh - 210px); /* Header 60 + Footer 150 */
+            overflow: hidden;
+        }
+
+        aside {
+            background: var(--bg-panel);
+            overflow-y: auto;
+            padding: var(--spacing);
+            border-right: 2px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        aside.right-panel {
+            border-left: 2px solid var(--border);
+            border-right: none;
+        }
+
+        #viewport-area {
+            background: #222; /* Dark backdrop for canvas contrast */
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            /* Checkboard pattern for transparency */
+            background-image: 
+                linear-gradient(45deg, #333 25%, transparent 25%), 
+                linear-gradient(-45deg, #333 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #333 75%), 
+                linear-gradient(-45deg, transparent 75%, #333 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+
+        #timeline-area {
+            height: 150px;
+            background: var(--bg-panel);
+            border-top: 2px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        /* --- Components --- */
+        .panel-section { display: flex; flex-direction: column; gap: 12px; }
+        .section-title { font-size: 14px; text-transform: uppercase; font-weight: 800; border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-bottom: 4px; }
+
+        .control-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .control-col { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+        
+        label { font-size: 14px; font-weight: 600; }
+        .helper-text { font-size: 12px; color: var(--text-muted); margin-top: -2px; }
+
+        input[type="text"], select, input[type="number"], textarea {
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            color: var(--text-main);
+            padding: 8px;
+            border-radius: var(--radius);
+            font-size: 14px;
+            min-height: var(--control-height);
+            width: 100%;
+        }
+        
+        textarea { resize: vertical; min-height: 80px; font-family: monospace; }
+
+        input[type="color"] {
+            -webkit-appearance: none; border: 2px solid var(--border); width: 100%; height: var(--control-height); padding: 2px; cursor: pointer;
+        }
+
+        /* Range Slider with numeric feedback */
+        .range-wrapper { display: flex; align-items: center; gap: 8px; width: 100%; }
+        .range-val { font-family: monospace; width: 4ch; text-align: right; }
+        .step-btn {
+            width: 32px; height: 32px; border: 2px solid var(--border); background: #fff; font-weight: bold; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        input[type="range"] {
+            flex: 1; -webkit-appearance: none; background: transparent; height: 24px; cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 24px; width: 24px; background: var(--accent); border: 2px solid var(--border); margin-top: -8px;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%; height: 8px; background: #ccc; border: 1px solid var(--border);
+        }
+
+        button {
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            color: var(--text-main);
+            padding: 0 16px;
+            height: var(--control-height);
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        button:hover { background: #eee; }
+        button:active { background: #ddd; transform: translateY(1px); }
+        
+        button.primary { background: var(--accent); color: #fff; border-color: #000; }
+        button.primary:hover { background: var(--accent-hover); }
+        
+        button.active { background: #000; color: #fff; border-color: #fff; }
+
+        /* Checkbox styling for hit area */
+        .checkbox-wrapper { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        input[type="checkbox"] { width: 24px; height: 24px; border: 2px solid var(--border); margin: 0; cursor: pointer; }
+
+        /* --- Canvas --- */
+        canvas#main-canvas { box-shadow: 0 0 0 2px #fff; max-width: 100%; max-height: 100%; object-fit: contain; }
+
+        /* --- Timeline --- */
+        .timeline-controls {
+            height: 50px; display: flex; align-items: center; padding: 0 var(--spacing); border-bottom: 2px solid var(--border); gap: 16px;
+        }
+        .timeline-track {
+            flex: 1; position: relative; background: #333; overflow: hidden; cursor: crosshair;
+        }
+        #playhead {
+            position: absolute; top: 0; bottom: 0; width: 2px; background: #ff0000; z-index: 10; pointer-events: none;
+        }
+        .waveform {
+            position: absolute; top: 0; left: 0; height: 100%; width: 100%; opacity: 0.5; pointer-events: none;
+        }
+
+        /* --- Utilities --- */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .hidden { display: none !important; }
+        .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
+        /* Proxies for Automation */
+        #dom-proxies { position: fixed; bottom: 0; right: 0; background: rgba(255,255,255,0.9); border: 1px solid #000; padding: 5px; font-size: 10px; z-index: 9999; opacity: 0.8; pointer-events: none; }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            main { grid-template-columns: 280px 1fr 280px; }
+        }
+        @media (max-width: 768px) {
+            main { grid-template-columns: 1fr; height: auto; overflow-y: auto; display: flex; flex-direction: column; }
+            aside { height: auto; border-right: none; border-bottom: 2px solid var(--border); }
+            #viewport-area { min-height: 300px; border-bottom: 2px solid var(--border); }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">Kinetic Studio</div>
+    
+    <div style="display: flex; align-items: center; gap: 16px;">
+        <div class="checkbox-wrapper">
+            <input type="checkbox" id="reduced-motion-toggle">
+            <label for="reduced-motion-toggle">Reduced Motion</label>
+        </div>
+        
+        <div class="control-col" style="width: auto;">
+            <label for="aspect-select" class="visually-hidden">Aspect Ratio</label>
+            <select id="aspect-select" aria-label="Aspect Ratio" style="width: 160px;">
+                <option value="16:9">16:9 Landscape</option>
+                <option value="9:16">9:16 Portrait</option>
+                <option value="1:1">1:1 Square</option>
+            </select>
+        </div>
+
+        <button id="btn-export" class="primary" aria-label="Export Video">Export WebM</button>
+    </div>
+</header>
+
+<main>
+    <!-- Left Panel: Style & Content -->
+    <aside id="panel-style">
+        <div class="panel-section">
+            <div class="section-title">Content</div>
+            <label for="text-input" class="visually-hidden">Text Content</label>
+            <textarea id="text-input" placeholder="Type text here...">Kinetic
+Studio</textarea>
+            <span class="helper-text">Edits update live. Enter for new line.</span>
+        </div>
+
+        <div class="panel-section">
+            <div class="section-title">Typography</div>
+            <label for="font-family">Font Family</label>
+            <select id="font-family">
+                <option value="sans-serif">Sans Serif</option>
+                <option value="serif">Serif</option>
+                <option value="monospace">Monospace</option>
+                <option value="Impact, sans-serif">Impact</option>
+                <option value="Georgia, serif">Georgia</option>
+                <option value="Courier New, monospace">Courier</option>
+                <option value="Verdana, sans-serif">Verdana</option>
+            </select>
+
+            <div class="grid-2">
+                <div class="control-col">
+                    <label for="font-weight">Weight</label>
+                    <input type="number" id="font-weight" value="700" step="100" min="100" max="900">
+                </div>
+                <div class="control-col">
+                    <label for="font-size">Size (px)</label>
+                    <input type="number" id="font-size" value="80" step="1">
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="control-col">
+                    <label for="line-height">Line Height</label>
+                    <input type="number" id="line-height" value="1.1" step="0.1">
+                </div>
+                <div class="control-col">
+                    <label for="letter-spacing">Tracking</label>
+                    <input type="number" id="letter-spacing" value="0" step="1">
+                </div>
+            </div>
+
+            <div class="control-col">
+                <label for="text-color">Text Color</label>
+                <input type="color" id="text-color" value="#ffffff">
+            </div>
+
+            <div class="grid-2">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="italic-toggle">
+                    <label for="italic-toggle">Italic</label>
+                </div>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="stroke-toggle">
+                    <label for="stroke-toggle">Outline</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-section">
+            <div class="section-title">Effects</div>
+            <label for="shadow-blur">Shadow Blur</label>
+            <div class="range-wrapper">
+                <button class="step-btn" data-target="shadow-blur" data-step="-1">-</button>
+                <input type="range" id="shadow-blur" min="0" max="50" value="0">
+                <button class="step-btn" data-target="shadow-blur" data-step="1">+</button>
+                <span id="val-shadow-blur" class="range-val">0</span>
+            </div>
+
+            <div class="checkbox-wrapper">
+                <input type="checkbox" id="motion-blur-toggle">
+                <label for="motion-blur-toggle">Motion Blur</label>
+            </div>
+
+            <div class="control-col">
+                <label for="bg-color">Background</label>
+                <input type="color" id="bg-color" value="#121212">
+            </div>
+
+            <div class="checkbox-wrapper">
+                <input type="checkbox" id="gradient-toggle">
+                <label for="gradient-toggle">Gradient Text</label>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Center: Viewport -->
+    <div id="viewport-area">
+        <canvas id="main-canvas" width="1280" height="720" aria-label="Animation Preview"></canvas>
+        <!-- Hidden Overlay for Export Status -->
+        <div id="export-overlay" style="display:none; position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); color: white; flex-direction: column; align-items: center; justify-content: center; z-index: 20;">
+            <h2 id="export-msg">Exporting...</h2>
+            <progress id="export-progress" value="0" max="100"></progress>
+        </div>
+    </div>
+
+    <!-- Right Panel: Animation & Audio -->
+    <aside id="panel-anim" class="right-panel">
+        <div class="panel-section">
+            <div class="section-title">Animation</div>
+            <label for="anim-preset">Preset</label>
+            <select id="anim-preset">
+                <option value="none">None (Static)</option>
+                <option value="fadeUp" selected>Fade Up</option>
+                <option value="typewriter">Typewriter</option>
+                <option value="bounce">Elastic Bounce</option>
+                <option value="cascade">Cascade Drop</option>
+                <option value="glitch">Cyber Glitch</option>
+                <option value="liquid">Liquid Wave</option>
+            </select>
+
+            <label for="anim-duration">Duration (sec)</label>
+            <div class="range-wrapper">
+                <button class="step-btn" data-target="anim-duration" data-step="-0.5">-</button>
+                <input type="range" id="anim-duration" min="0.5" max="10" step="0.1" value="3">
+                <button class="step-btn" data-target="anim-duration" data-step="0.5">+</button>
+                <span id="val-anim-duration" class="range-val">3.0</span>
+            </div>
+
+            <label for="anim-stagger">Stagger (ms)</label>
+            <div class="range-wrapper">
+                <button class="step-btn" data-target="anim-stagger" data-step="-10">-</button>
+                <input type="range" id="anim-stagger" min="0" max="500" step="10" value="50">
+                <button class="step-btn" data-target="anim-stagger" data-step="10">+</button>
+                <span id="val-anim-stagger" class="range-val">50</span>
+            </div>
+
+            <div class="checkbox-wrapper">
+                <input type="checkbox" id="loop-toggle" checked>
+                <label for="loop-toggle">Loop Animation</label>
+            </div>
+        </div>
+
+        <div class="panel-section">
+            <div class="section-title">Easing</div>
+            <label for="ease-type" class="visually-hidden">Easing Function</label>
+            <select id="ease-type">
+                <option value="linear">Linear</option>
+                <option value="easeOutQuad">Ease Out Quad</option>
+                <option value="easeOutElastic">Elastic</option>
+                <option value="easeInOutCubic">Smooth (Cubic)</option>
+            </select>
+        </div>
+
+        <div class="panel-section">
+            <div class="section-title">Audio Sync</div>
+            <label for="audio-upload">Upload Audio</label>
+            <input type="file" id="audio-upload" accept="audio/*">
+            
+            <div class="checkbox-wrapper" style="margin-top: 8px;">
+                <input type="checkbox" id="audio-reactive-toggle">
+                <label for="audio-reactive-toggle">Audio Reactive</label>
+            </div>
+
+            <label for="audio-sensitivity">Sensitivity</label>
+            <div class="range-wrapper">
+                <input type="range" id="audio-sensitivity" min="0" max="2" step="0.1" value="1">
+                <span id="val-audio-sensitivity" class="range-val">1.0</span>
+            </div>
+
+            <label for="audio-effect">Effect</label>
+            <select id="audio-effect">
+                <option value="scale">Pulse Scale</option>
+                <option value="opacity">Flash Opacity</option>
+                <option value="chromatic">Chromatic Aberration</option>
+            </select>
+        </div>
+
+        <div class="panel-section">
+            <div class="section-title">Guides</div>
+            <div class="checkbox-wrapper">
+                <input type="checkbox" id="guide-safe">
+                <label for="guide-safe">Safe Area</label>
+            </div>
+            <div class="checkbox-wrapper">
+                <input type="checkbox" id="guide-grid">
+                <label for="guide-grid">Grid</label>
+            </div>
+        </div>
+    </aside>
+</main>
+
+<footer id="timeline-area">
+    <div class="timeline-controls">
+        <button id="btn-play" aria-label="Play Animation">Play</button>
+        <button id="btn-stop" aria-label="Stop Animation">Stop</button>
+        <span id="time-display" style="font-family: monospace; font-size: 16px; font-weight: bold;">0.00 / 3.00</span>
+    </div>
+    <div class="timeline-track" id="timeline-track">
+        <canvas id="waveform-canvas" width="1000" height="100" class="waveform"></canvas>
+        <div id="playhead"></div>
+    </div>
+</footer>
+
+<!-- Automation Proxies -->
+<div id="dom-proxies">
+    <div id="exportStatus">idle</div>
+    <div id="playStatus">stopped</div>
+    <div id="activePreset">fadeUp</div>
+    <div id="motionStatus">full</div>
+</div>
+
+<script>
+/**
+ * Kinetic Typography Studio Engine
+ */
+
+// --- State Management ---
+const state = {
+    text: "Kinetic\nStudio",
+    style: {
+        fontFamily: "sans-serif",
+        fontWeight: 700,
+        fontSize: 80,
+        lineHeight: 1.1,
+        letterSpacing: 0,
+        color: "#ffffff",
+        italic: false,
+        stroke: false,
+        shadowBlur: 0,
+        motionBlur: false,
+        bgColor: "#121212",
+        gradient: false
+    },
+    anim: {
+        preset: "fadeUp",
+        duration: 3, // seconds
+        stagger: 0.05, // seconds per glyph
+        loop: true,
+        ease: "easeOutQuad",
+        isPlaying: false,
+        currentTime: 0, // seconds
+        reducedMotion: false
+    },
+    audio: {
+        enabled: false,
+        buffer: null,
+        source: null,
+        analyser: null,
+        dataArray: null,
+        context: null,
+        sensitivity: 1,
+        effect: "scale",
+        peak: 0,
+        startTime: 0
+    },
+    layout: {
+        width: 1280,
+        height: 720,
+        safeArea: false,
+        grid: false
+    },
+    exporting: false
+};
+
+// --- DOM Elements ---
+const canvas = document.getElementById('main-canvas');
+const ctx = canvas.getContext('2d');
+const timelineTrack = document.getElementById('timeline-track');
+const playhead = document.getElementById('playhead');
+const timeDisplay = document.getElementById('time-display');
+const waveformCanvas = document.getElementById('waveform-canvas');
+const waveformCtx = waveformCanvas.getContext('2d');
+
+// Proxies
+const exportStatusProxy = document.getElementById('exportStatus');
+const playStatusProxy = document.getElementById('playStatus');
+const activePresetProxy = document.getElementById('activePreset');
+const motionStatusProxy = document.getElementById('motionStatus');
+
+// --- Helper: Update Range Values ---
+function updateRangeDisplay(id, val) {
+    const el = document.getElementById('val-' + id);
+    if(el) el.textContent = val;
+}
+
+// --- Audio Context Init ---
+const getAudioContext = () => {
+    if (!state.audio.context) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        state.audio.context = new AudioContext();
+        state.audio.analyser = state.audio.context.createAnalyser();
+        state.audio.analyser.fftSize = 256;
+        state.audio.dataArray = new Uint8Array(state.audio.analyser.frequencyBinCount);
+    }
+    if (state.audio.context.state === 'suspended') {
+        state.audio.context.resume();
+    }
+    return state.audio.context;
+};
+
+// --- Easing Functions ---
+const Easing = {
+    linear: t => t,
+    easeOutQuad: t => t * (2 - t),
+    easeOutElastic: t => {
+        const c4 = (2 * Math.PI) / 3;
+        return t === 0 ? 0 : t === 1 ? 1 : Math.pow(2, -10 * t) * Math.sin((t * 10 - 0.75) * c4) + 1;
+    },
+    easeInOutCubic: t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+};
+
+// --- Rendering Logic ---
+
+function drawGuides() {
+    if (state.layout.grid) {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.lineWidth = 1;
+        const gridSize = 50;
+        for (let x = 0; x < canvas.width; x += gridSize) {
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+        }
+        for (let y = 0; y < canvas.height; y += gridSize) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+        }
+    }
+    if (state.layout.safeArea) {
+        ctx.strokeStyle = 'rgba(0, 255, 255, 0.3)';
+        ctx.lineWidth = 2;
+        const xM = canvas.width * 0.1;
+        const yM = canvas.height * 0.1;
+        ctx.strokeRect(xM, yM, canvas.width - xM*2, canvas.height - yM*2);
+        // Crosshair
+        ctx.beginPath();
+        ctx.moveTo(canvas.width/2, yM); ctx.lineTo(canvas.width/2, canvas.height-yM);
+        ctx.moveTo(xM, canvas.height/2); ctx.lineTo(canvas.width-xM, canvas.height/2);
+        ctx.stroke();
+    }
+}
+
+function analyzeAudio() {
+    if (!state.audio.enabled || !state.audio.analyser || !state.anim.isPlaying) {
+        state.audio.peak = 0;
+        return;
+    }
+    state.audio.analyser.getByteFrequencyData(state.audio.dataArray);
+    // Simple bass detection (lower frequencies)
+    let sum = 0;
+    for(let i=0; i<10; i++) sum += state.audio.dataArray[i];
+    const avg = sum / 10;
+    state.audio.peak = (avg / 255) * state.audio.sensitivity;
+}
+
+function render() {
+    // 1. Clear
+    ctx.fillStyle = state.style.bgColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 2. Audio Analysis
+    analyzeAudio();
+
+    // 3. Text Setup
+    const lines = state.text.split('\n');
+    ctx.font = `${state.style.italic ? 'italic ' : ''}${state.style.fontWeight} ${state.style.fontSize}px ${state.style.fontFamily}`;
+    ctx.textBaseline = 'middle';
+    
+    const lineHeightPx = state.style.fontSize * state.style.lineHeight;
+    const totalHeight = lines.length * lineHeightPx;
+    let startY = (canvas.height - totalHeight) / 2 + (lineHeightPx/2);
+
+    const audioScale = 1 + (state.audio.peak * 0.5); 
+    const audioOffset = state.audio.peak * 20;
+
+    lines.forEach((line, lineIndex) => {
+        const chars = line.split('');
+        let totalWidth = 0;
+        const charWidths = chars.map(c => {
+            const w = ctx.measureText(c).width + parseInt(state.style.letterSpacing);
+            totalWidth += w;
+            return w;
+        });
+        
+        let currentX = (canvas.width - totalWidth) / 2;
+
+        chars.forEach((char, charIndex) => {
+            // Calculate Animation Progress
+            let progress = state.anim.currentTime / state.anim.duration;
+            if (progress > 1) progress = 1;
+            
+            // Stagger calculation
+            const staggerDelay = (lineIndex * 5 + charIndex) * (state.anim.stagger / state.anim.duration);
+            let localT = (progress - staggerDelay) / (1 - staggerDelay); 
+            if (localT < 0) localT = 0;
+            if (localT > 1) localT = 1;
+
+            // Force full completion if Reduced Motion is on
+            if (state.anim.reducedMotion) {
+                localT = 1; 
+            }
+
+            const easedT = Easing[state.anim.ease](localT);
+
+            // Default Transforms
+            let x = currentX;
+            let y = startY;
+            let scaleX = 1;
+            let scaleY = 1;
+            let rotation = 0;
+            let alpha = 1;
+            let blur = 0;
+
+            // Apply Presets only if not reduced motion (or reduced to simple fade)
+            if (!state.anim.reducedMotion) {
+                switch (state.anim.preset) {
+                    case 'fadeUp':
+                        y += (1 - easedT) * 50;
+                        alpha = easedT;
+                        break;
+                    case 'typewriter':
+                        alpha = localT > 0.5 ? 1 : 0;
+                        break;
+                    case 'bounce':
+                        scaleX = scaleY = localT < 1 ? easedT : 1;
+                        if (localT === 0) scaleX = scaleY = 0;
+                        break;
+                    case 'cascade':
+                        y -= (1 - easedT) * 200;
+                        alpha = easedT;
+                        rotation = (1 - easedT) * 0.5;
+                        break;
+                    case 'glitch':
+                        alpha = 1;
+                        if (localT < 1 && Math.random() > 0.8) {
+                            x += (Math.random() - 0.5) * 10;
+                            scaleX = 1.2;
+                        }
+                        break;
+                    case 'liquid':
+                        y += Math.sin(state.anim.currentTime * 5 + charIndex * 0.5) * 10;
+                        alpha = 1;
+                        break;
+                    case 'none':
+                    default:
+                        alpha = 1;
+                        break;
+                }
+            } else {
+                // Reduced Motion Fallback
+                alpha = 1; 
+            }
+
+            // Audio Reactivity Overrides (disable if reduced motion)
+            if (state.audio.enabled && !state.anim.reducedMotion) {
+                if (state.audio.effect === 'scale') {
+                    scaleX *= audioScale;
+                    scaleY *= audioScale;
+                } else if (state.audio.effect === 'opacity') {
+                    alpha *= (state.audio.peak + 0.2);
+                } else if (state.audio.effect === 'chromatic') {
+                    x += (Math.random() - 0.5) * audioOffset;
+                }
+            }
+
+            // Static Style Transforms
+            if (state.style.motionBlur && state.anim.isPlaying && !state.anim.reducedMotion) {
+                blur = (1-easedT) * 10;
+            }
+
+            // Drawing
+            ctx.save();
+            ctx.translate(x + charWidths[charIndex]/2, y);
+            ctx.rotate(rotation);
+            ctx.scale(scaleX, scaleY);
+            ctx.translate(-(x + charWidths[charIndex]/2), -y);
+            
+            if (blur > 0 || state.style.shadowBlur > 0) {
+                ctx.filter = `blur(${blur}px)`;
+                ctx.shadowColor = "rgba(0,0,0,0.5)";
+                ctx.shadowBlur = state.style.shadowBlur;
+            }
+
+            ctx.globalAlpha = Math.min(Math.max(alpha, 0), 1);
+
+            // Fill
+            if (state.style.gradient) {
+                const grad = ctx.createLinearGradient(x, y - 40, x, y + 40);
+                grad.addColorStop(0, state.style.color);
+                grad.addColorStop(1, "#000000");
+                ctx.fillStyle = grad;
+            } else {
+                ctx.fillStyle = state.style.color;
+            }
+            
+            if (!state.style.stroke) ctx.fillText(char, x, y);
+            
+            // Outline
+            if (state.style.stroke) {
+                ctx.strokeStyle = state.style.color;
+                ctx.lineWidth = 2;
+                ctx.strokeText(char, x, y);
+            }
+            
+            // Glitch chromatic pass
+            if (state.anim.preset === 'glitch' && localT < 1 && Math.random() > 0.9 && !state.anim.reducedMotion) {
+                 ctx.fillStyle = 'cyan';
+                 ctx.fillText(char, x - 2, y);
+                 ctx.fillStyle = 'red';
+                 ctx.fillText(char, x + 2, y);
+            }
+
+            ctx.restore();
+            
+            currentX += charWidths[charIndex];
+        });
+        startY += lineHeightPx;
+    });
+
+    drawGuides();
+}
+
+// --- Loop & Animation Control ---
+let animationFrameId;
+
+function gameLoop() {
+    if (state.anim.isPlaying) {
+        if (!state.audio.enabled) {
+            // Time based
+            const delta = 1/60;
+            state.anim.currentTime += delta;
+        } else if (state.audio.context) {
+            // Audio based
+            state.anim.currentTime = state.audio.context.currentTime - state.audio.startTime;
+        }
+        
+        // Loop Logic
+        if (state.anim.currentTime >= state.anim.duration) {
+            if (state.exporting) {
+                stopAnimation();
+                return; // Export handles stop
+            }
+            if (state.anim.loop) {
+                state.anim.currentTime = 0;
+                if (state.audio.enabled) playAudio();
+            } else {
+                stopAnimation();
+                state.anim.currentTime = state.anim.duration;
+            }
+        }
+    }
+
+    render();
+    updateUI();
+
+    if (state.anim.isPlaying || state.audio.peak > 0) {
+        animationFrameId = requestAnimationFrame(gameLoop);
+    }
+}
+
+function updateUI() {
+    // Update Time Display
+    const cur = state.anim.currentTime.toFixed(2);
+    const tot = state.anim.duration.toFixed(2);
+    timeDisplay.innerText = `${cur} / ${tot}`;
+    
+    // Update Timeline Playhead
+    const pct = (state.anim.currentTime / state.anim.duration) * 100;
+    playhead.style.left = `${pct}%`;
+}
+
+function startAnimation() {
+    if (state.anim.isPlaying) return;
+    state.anim.isPlaying = true;
+    
+    playStatusProxy.textContent = 'playing';
+    
+    if (state.audio.enabled) playAudio();
+    
+    gameLoop();
+    document.getElementById('btn-play').innerText = "Pause";
+    document.getElementById('btn-play').classList.add('active');
+}
+
+function stopAnimation() {
+    state.anim.isPlaying = false;
+    cancelAnimationFrame(animationFrameId);
+    if (state.audio.source) {
+        try { state.audio.source.stop(); } catch(e){}
+    }
+    playStatusProxy.textContent = 'stopped';
+    document.getElementById('btn-play').innerText = "Play";
+    document.getElementById('btn-play').classList.remove('active');
+    render(); // Draw static frame
+}
+
+// --- Audio Handling ---
+async function loadAudio(file) {
+    const ctx = getAudioContext();
+    const arrayBuffer = await file.arrayBuffer();
+    state.audio.buffer = await ctx.decodeAudioData(arrayBuffer);
+    drawWaveform();
+}
+
+function playAudio() {
+    if (!state.audio.buffer) return;
+    const ctx = getAudioContext();
+    // Disconnect old
+    if (state.audio.source) try{ state.audio.source.disconnect(); } catch(e){}
+    
+    state.audio.source = ctx.createBufferSource();
+    state.audio.source.buffer = state.audio.buffer;
+    state.audio.source.connect(state.audio.analyser);
+    state.audio.analyser.connect(ctx.destination);
+    
+    // Sync time
+    state.audio.startTime = ctx.currentTime - state.anim.currentTime;
+    state.audio.source.start(0, state.anim.currentTime);
+}
+
+function drawWaveform() {
+    if (!state.audio.buffer) return;
+    const rawData = state.audio.buffer.getChannelData(0);
+    const samples = 1000; // width of canvas
+    const blockSize = Math.floor(rawData.length / samples);
+    
+    waveformCtx.clearRect(0,0,1000,100);
+    waveformCtx.fillStyle = "#00bcd4";
+    
+    for (let i = 0; i < samples; i++) {
+        const start = i * blockSize;
+        let max = 0;
+        for (let j = 0; j < blockSize; j++) {
+            if (rawData[start+j] > max) max = rawData[start+j];
+        }
+        const h = max * 100;
+        waveformCtx.fillRect(i, (100-h)/2, 1, h);
+    }
+}
+
+// --- Export Logic ---
+function exportVideo() {
+    if (state.exporting) return;
+    
+    exportStatusProxy.textContent = 'exporting';
+    state.exporting = true;
+    state.anim.currentTime = 0;
+    stopAnimation(); // reset
+
+    const overlay = document.getElementById('export-overlay');
+    const progress = document.getElementById('export-progress');
+    overlay.style.display = 'flex';
+
+    const stream = canvas.captureStream(60); // 60 FPS
+    const mimeType = MediaRecorder.isTypeSupported("video/webm; codecs=vp9") 
+        ? "video/webm; codecs=vp9" 
+        : "video/webm";
+    
+    const recorder = new MediaRecorder(stream, { 
+        mimeType: mimeType,
+        videoBitsPerSecond: 5000000 // 5Mbps
+    });
+    
+    const chunks = [];
+    recorder.ondataavailable = e => chunks.push(e.data);
+    recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `kinetic-text-${Date.now()}.webm`;
+        a.click();
+        
+        state.exporting = false;
+        exportStatusProxy.textContent = 'done';
+        overlay.style.display = 'none';
+    };
+
+    recorder.start();
+    
+    // Override loop for export
+    const originalLoop = state.anim.loop;
+    state.anim.loop = false;
+    
+    startAnimation(); 
+
+    // Progress tracker
+    const checkEnd = setInterval(() => {
+        if (state.anim.isPlaying) {
+            const pct = (state.anim.currentTime / state.anim.duration) * 100;
+            progress.value = pct;
+        }
+        if (!state.anim.isPlaying && state.exporting) {
+            recorder.stop();
+            state.anim.loop = originalLoop;
+            clearInterval(checkEnd);
+        }
+    }, 100);
+}
+
+// --- Event Listeners ---
+
+// General Binder
+const bind = (id, key, subKey = null, type = 'value') => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener(type === 'checkbox' ? 'change' : 'input', (e) => {
+        const val = type === 'checkbox' ? e.target.checked : e.target.value;
+        if (subKey) state[key][subKey] = val;
+        else state[key] = val;
+        
+        // Update numeric display if exists
+        updateRangeDisplay(id, val);
+        
+        // Special proxies
+        if(id === 'anim-preset') activePresetProxy.textContent = val;
+
+        if (!state.anim.isPlaying) render();
+    });
+    // Init numeric display
+    if(el.type === 'range') updateRangeDisplay(id, el.value);
+};
+
+// Step Button Logic
+document.querySelectorAll('.step-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const targetId = btn.dataset.target;
+        const step = parseFloat(btn.dataset.step);
+        const input = document.getElementById(targetId);
+        if(!input) return;
+        
+        let newVal = parseFloat(input.value) + step;
+        // Clamp
+        if(newVal < parseFloat(input.min)) newVal = parseFloat(input.min);
+        if(newVal > parseFloat(input.max)) newVal = parseFloat(input.max);
+        
+        input.value = newVal;
+        input.dispatchEvent(new Event('input')); // Trigger bind listener
+    });
+});
+
+// Inputs
+bind('text-input', 'text');
+document.getElementById('text-input').focus(); // Focus on load
+
+bind('font-family', 'style', 'fontFamily');
+bind('font-weight', 'style', 'fontWeight');
+bind('font-size', 'style', 'fontSize');
+bind('line-height', 'style', 'lineHeight');
+bind('letter-spacing', 'style', 'letterSpacing');
+bind('text-color', 'style', 'color');
+bind('bg-color', 'style', 'bgColor');
+bind('italic-toggle', 'style', 'italic', 'checkbox');
+bind('stroke-toggle', 'style', 'stroke', 'checkbox');
+bind('shadow-blur', 'style', 'shadowBlur');
+bind('motion-blur-toggle', 'style', 'motionBlur', 'checkbox');
+bind('gradient-toggle', 'style', 'gradient', 'checkbox');
+
+// Animation
+bind('anim-preset', 'anim', 'preset');
+bind('anim-duration', 'anim', 'duration');
+// Stagger conversion
+document.getElementById('anim-stagger').addEventListener('input', e => {
+    state.anim.stagger = e.target.value / 1000;
+    updateRangeDisplay('anim-stagger', e.target.value);
+    if(!state.anim.isPlaying) render();
+});
+updateRangeDisplay('anim-stagger', document.getElementById('anim-stagger').value);
+
+bind('loop-toggle', 'anim', 'loop', 'checkbox');
+bind('ease-type', 'anim', 'ease');
+
+// Reduced Motion Toggle
+document.getElementById('reduced-motion-toggle').addEventListener('change', (e) => {
+    state.anim.reducedMotion = e.target.checked;
+    motionStatusProxy.textContent = e.target.checked ? 'reduced' : 'full';
+    if(!state.anim.isPlaying) render();
+});
+
+// Guides & Viewport
+bind('guide-safe', 'layout', 'safeArea', 'checkbox');
+bind('guide-grid', 'layout', 'grid', 'checkbox');
+
+document.getElementById('aspect-select').addEventListener('change', (e) => {
+    const [w, h] = e.target.value.split(':').map(Number);
+    let newW = 1280, newH = 720;
+    
+    if (e.target.value === "16:9") { newW = 1280; newH = 720; }
+    if (e.target.value === "9:16") { newW = 405; newH = 720; }
+    if (e.target.value === "1:1") { newW = 720; newH = 720; }
+    
+    canvas.width = newW;
+    canvas.height = newH;
+    state.layout.width = newW;
+    state.layout.height = newH;
+    render();
+});
+
+// Audio
+document.getElementById('audio-upload').addEventListener('change', e => {
+    if (e.target.files[0]) loadAudio(e.target.files[0]);
+});
+bind('audio-reactive-toggle', 'audio', 'enabled', 'checkbox');
+bind('audio-sensitivity', 'audio', 'sensitivity');
+bind('audio-effect', 'audio', 'effect');
+
+// Timeline Controls
+document.getElementById('btn-play').addEventListener('click', () => {
+    if (state.anim.isPlaying) stopAnimation();
+    else startAnimation();
+});
+document.getElementById('btn-stop').addEventListener('click', () => {
+    stopAnimation();
+    state.anim.currentTime = 0;
+    updateUI();
+    render();
+});
+
+// Scrubbing
+timelineTrack.addEventListener('mousedown', (e) => {
+    const scrub = (ev) => {
+        const rect = timelineTrack.getBoundingClientRect();
+        let pct = (ev.clientX - rect.left) / rect.width;
+        pct = Math.max(0, Math.min(1, pct));
+        state.anim.currentTime = pct * state.anim.duration;
+        if (!state.anim.isPlaying) render();
+        updateUI();
+    };
+    scrub(e); 
+    
+    const onMove = (ev) => scrub(ev);
+    const onUp = () => {
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+});
+
+document.getElementById('btn-export').addEventListener('click', exportVideo);
+
+// Reduced Motion Check on Load
+if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.getElementById('reduced-motion-toggle').checked = true;
+    state.anim.reducedMotion = true;
+    motionStatusProxy.textContent = 'reduced';
+}
+
+// Init
+render();
+
+</script>
+</body>
+</html>

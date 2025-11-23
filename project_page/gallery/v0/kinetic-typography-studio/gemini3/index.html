@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kinetic Typography Studio</title>
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-panel: #1e1e1e;
+            --bg-input: #2c2c2c;
+            --accent: #00bcd4;
+            --accent-hover: #26c6da;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --border: #333;
+            --spacing: 8px;
+            --radius: 4px;
+            --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * { box-sizing: border-box; outline: none; user-select: none; }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-ui);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- Layout --- */
+        header {
+            height: 50px;
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 var(--spacing);
+            justify-content: space-between;
+        }
+
+        .logo { font-weight: 700; color: var(--accent); letter-spacing: 1px; }
+
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 300px 1fr 250px;
+            height: calc(100vh - 200px); /* Reserve space for timeline */
+        }
+
+        aside {
+            background: var(--bg-panel);
+            overflow-y: auto;
+            padding: var(--spacing);
+            border-right: 1px solid var(--border);
+        }
+
+        aside.right-panel {
+            border-left: 1px solid var(--border);
+            border-right: none;
+        }
+
+        #viewport-area {
+            background: #000;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-image: 
+                linear-gradient(45deg, #1a1a1a 25%, transparent 25%), 
+                linear-gradient(-45deg, #1a1a1a 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #1a1a1a 75%), 
+                linear-gradient(-45deg, transparent 75%, #1a1a1a 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+
+        #timeline-area {
+            height: 150px;
+            background: var(--bg-panel);
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Components --- */
+        .panel-section { margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+        .panel-section:last-child { border-bottom: none; }
+        .section-title { font-size: 12px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; }
+
+        .control-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .control-col { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+        
+        label { font-size: 12px; color: var(--text-muted); }
+
+        input[type="text"], select, input[type="number"] {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 4px 8px;
+            border-radius: var(--radius);
+            font-size: 12px;
+        }
+        
+        input[type="color"] {
+            -webkit-appearance: none; border: none; width: 20px; height: 20px; background: none; cursor: pointer;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none; width: 100%; background: transparent;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%; background: var(--accent); cursor: pointer; margin-top: -5px;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; cursor: pointer; background: var(--border); border-radius: 2px;
+        }
+
+        button {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: var(--radius);
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover { background: #3a3a3a; }
+        button.primary { background: var(--accent); color: #000; border: none; font-weight: 600; }
+        button.primary:hover { background: var(--accent-hover); }
+        button.active { border-color: var(--accent); color: var(--accent); }
+
+        /* --- Canvas --- */
+        canvas { box-shadow: 0 0 20px rgba(0,0,0,0.5); max-width: 95%; max-height: 95%; }
+
+        /* --- Timeline --- */
+        .timeline-controls {
+            height: 40px; display: flex; align-items: center; padding: 0 var(--spacing); border-bottom: 1px solid var(--border); gap: 10px;
+        }
+        .timeline-track {
+            flex: 1; position: relative; background: #151515; overflow: hidden; cursor: crosshair;
+        }
+        #playhead {
+            position: absolute; top: 0; bottom: 0; width: 2px; background: var(--accent); z-index: 10; pointer-events: none;
+        }
+        .waveform {
+            position: absolute; top: 0; left: 0; height: 100%; width: 100%; opacity: 0.3; pointer-events: none;
+        }
+        .keyframe-marker {
+            position: absolute; width: 8px; height: 8px; background: var(--text-muted); transform: rotate(45deg); top: 5px; margin-left: -4px;
+        }
+
+        /* --- Utility Classes --- */
+        .hidden { display: none; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            main { grid-template-columns: 1fr; height: auto; overflow-y: auto; }
+            aside { height: auto; max-height: 300px; }
+            #viewport-area { height: 300px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">KINETIC TYPOGRAPHY</div>
+    <div style="display: flex; gap: 10px;">
+        <select id="aspect-select" aria-label="Aspect Ratio">
+            <option value="16:9">16:9 Landscape</option>
+            <option value="9:16">9:16 Portrait</option>
+            <option value="1:1">1:1 Square</option>
+        </select>
+        <button id="btn-export" class="primary" aria-label="Export Video">Export WebM</button>
+    </div>
+</header>
+
+<main>
+    <!-- Left Panel: Style & Content -->
+    <aside id="panel-style">
+        <div class="panel-section">
+            <div class="section-title">Text Content</div>
+            <textarea id="text-input" rows="3" style="width: 100%; background: var(--bg-input); color: white; border:1px solid var(--border); padding:5px;">Kinetic
+Studio</textarea>
+        </div>
+
+        <div class="panel-section">
+            <div class="section-title">Typography</div>
+            <div class="control-col">
+                <label for="font-family">Font</label>
+                <select id="font-family">
+                    <option value="sans-serif">Sans Serif</option>
+                    <option value="serif">Serif</option>
+                    <option value="monospace">Monospace</option>
+                    <option value="Impact, sans-serif">Impact</option>
+                    <option value="Georgia, serif">Georgia</option>
+                    <option value="Courier New, monospace">Courier</option>
+                    <option value="Verdana, sans-serif">Verdana</option>
+                </select>
+            </div>
+            <div class="grid-2" style="margin-top: 8px;">
+                <div class="control-col">
+                    <label>Weight</label>
+                    <input type="number" id="font-weight" value="700" step="100" min="100" max="900">
+                </div>
+                <div class="control-col">
+                    <label>Size (px)</label>
+                    <input type="number" id="font-size" value="80" step="1">
+                </div>
+            </div>
+            <div class="grid-2" style="margin-top: 8px;">
+                <div class="control-col">
+                    <label>Line Ht.</label>
+                    <input type="number" id="line-height" value="1.1" step="0.1">
+                </div>
+                <div class="control-col">
+                    <label>Tracking</label>
+                    <input type="number" id="letter-spacing" value="0" step="1">
+                </div>
+            </div>
+            <div class="control-row" style="margin-top: 8px;">
+                <label>Color</label>
+                <input type="color" id="text-color" value="#ffffff">
+            </div>
+            <div class="control-row">
+                <label><input type="checkbox" id="italic-toggle"> Italic</label>
+                <label><input type="checkbox" id="stroke-toggle"> Outline</label>
+            </div>
+        </div>
+
+        <div class="panel-section">
+            <div class="section-title">Effects</div>
+            <div class="control-row">
+                <label>Shadow Blur</label>
+                <input type="range" id="shadow-blur" min="0" max="50" value="0">
+            </div>
+            <div class="control-row">
+                <label>Motion Blur</label>
+                <input type="checkbox" id="motion-blur-toggle">
+            </div>
+            <div class="control-row">
+                <label>Background</label>
+                <input type="color" id="bg-color" value="#121212">
+            </div>
+            <div class="control-row">
+                <label>Gradient Text</label>
+                <input type="checkbox" id="gradient-toggle">
+            </div>
+        </div>
+    </aside>
+
+    <!-- Center: Viewport -->
+    <div id="viewport-area">
+        <canvas id="main-canvas" width="1280" height="720" aria-label="Animation Preview"></canvas>
+    </div>
+
+    <!-- Right Panel: Animation & Audio -->
+    <aside id="panel-anim" class="right-panel">
+        <div class="panel-section">
+            <div class="section-title">Animation Preset</div>
+            <select id="anim-preset">
+                <option value="none">None (Static)</option>
+                <option value="fadeUp">Fade Up</option>
+                <option value="typewriter">Typewriter</option>
+                <option value="bounce">Elastic Bounce</option>
+                <option value="cascade">Cascade Drop</option>
+                <option value="glitch">Cyber Glitch</option>
+                <option value="liquid">Liquid Wave</option>
+            </select>
+            <div class="control-row" style="margin-top: 8px;">
+                <label>Duration (s)</label>
+                <input type="number" id="anim-duration" value="3" min="0.5" step="0.1">
+            </div>
+            <div class="control-row">
+                <label>Stagger (ms)</label>
+                <input type="number" id="anim-stagger" value="50" step="10">
+            </div>
+            <div class="control-row">
+                <label>Loop</label>
+                <input type="checkbox" id="loop-toggle" checked>
+            </div>
+        </div>
+
+        <div class="panel-section">
+            <div class="section-title">Easing</div>
+            <select id="ease-type">
+                <option value="linear">Linear</option>
+                <option value="easeOutQuad">Ease Out Quad</option>
+                <option value="easeOutElastic">Elastic</option>
+                <option value="easeInOutCubic">Smooth (Cubic)</option>
+            </select>
+        </div>
+
+        <div class="panel-section">
+            <div class="section-title">Audio Reactive</div>
+            <input type="file" id="audio-upload" accept="audio/*" style="font-size:10px; width:100%; margin-bottom:8px;">
+            <div class="control-row">
+                <label>Enabled</label>
+                <input type="checkbox" id="audio-reactive-toggle">
+            </div>
+            <div class="control-row">
+                <label>React to Bass</label>
+                <input type="range" id="audio-sensitivity" min="0" max="2" step="0.1" value="1">
+            </div>
+            <div class="section-title" style="margin-top:10px;">Effect</div>
+            <select id="audio-effect">
+                <option value="scale">Pulse Scale</option>
+                <option value="opacity">Flash Opacity</option>
+                <option value="chromatic">Chromatic Aberration</option>
+            </select>
+        </div>
+
+        <div class="panel-section">
+            <div class="section-title">Guides</div>
+            <div class="control-row">
+                <label>Safe Area</label>
+                <input type="checkbox" id="guide-safe">
+            </div>
+            <div class="control-row">
+                <label>Grid</label>
+                <input type="checkbox" id="guide-grid">
+            </div>
+        </div>
+    </aside>
+</main>
+
+<footer id="timeline-area">
+    <div class="timeline-controls">
+        <button id="btn-play" aria-label="Play/Pause">Play</button>
+        <button id="btn-stop" aria-label="Stop">Stop</button>
+        <span id="time-display" style="font-family: monospace; font-size: 12px;">00:00 / 03:00</span>
+    </div>
+    <div class="timeline-track" id="timeline-track">
+        <canvas id="waveform-canvas" width="1000" height="100" class="waveform"></canvas>
+        <div id="playhead"></div>
+    </div>
+</footer>
+
+<script>
+/**
+ * Kinetic Typography Studio Engine
+ * Uses Vanilla JS and HTML5 Canvas
+ */
+
+// --- State Management ---
+const state = {
+    text: "Kinetic\nStudio",
+    style: {
+        fontFamily: "sans-serif",
+        fontWeight: 700,
+        fontSize: 80,
+        lineHeight: 1.1,
+        letterSpacing: 0,
+        color: "#ffffff",
+        italic: false,
+        stroke: false,
+        shadowBlur: 0,
+        motionBlur: false,
+        bgColor: "#121212",
+        gradient: false
+    },
+    anim: {
+        preset: "fadeUp",
+        duration: 3, // seconds
+        stagger: 0.05, // seconds per glyph
+        loop: true,
+        ease: "easeOutQuad",
+        isPlaying: false,
+        currentTime: 0, // seconds
+        totalFrames: 0
+    },
+    audio: {
+        enabled: false,
+        buffer: null,
+        source: null,
+        analyser: null,
+        dataArray: null,
+        context: null,
+        sensitivity: 1,
+        effect: "scale",
+        peak: 0
+    },
+    layout: {
+        width: 1280,
+        height: 720,
+        safeArea: false,
+        grid: false
+    },
+    exporting: false
+};
+
+// --- DOM Elements ---
+const canvas = document.getElementById('main-canvas');
+const ctx = canvas.getContext('2d');
+const timelineTrack = document.getElementById('timeline-track');
+const playhead = document.getElementById('playhead');
+const timeDisplay = document.getElementById('time-display');
+const waveformCanvas = document.getElementById('waveform-canvas');
+const waveformCtx = waveformCanvas.getContext('2d');
+
+// --- Audio Context Init ---
+const getAudioContext = () => {
+    if (!state.audio.context) {
+        state.audio.context = new (window.AudioContext || window.webkitAudioContext)();
+        state.audio.analyser = state.audio.context.createAnalyser();
+        state.audio.analyser.fftSize = 256;
+        state.audio.dataArray = new Uint8Array(state.audio.analyser.frequencyBinCount);
+    }
+    return state.audio.context;
+};
+
+// --- Easing Functions ---
+const Easing = {
+    linear: t => t,
+    easeOutQuad: t => t * (2 - t),
+    easeOutElastic: t => {
+        const c4 = (2 * Math.PI) / 3;
+        return t === 0 ? 0 : t === 1 ? 1 : Math.pow(2, -10 * t) * Math.sin((t * 10 - 0.75) * c4) + 1;
+    },
+    easeInOutCubic: t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+};
+
+// --- Rendering Logic ---
+
+function drawGuides() {
+    if (state.layout.grid) {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.lineWidth = 1;
+        const gridSize = 50;
+        for (let x = 0; x < canvas.width; x += gridSize) {
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+        }
+        for (let y = 0; y < canvas.height; y += gridSize) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+        }
+    }
+    if (state.layout.safeArea) {
+        ctx.strokeStyle = 'rgba(0, 255, 255, 0.3)';
+        ctx.lineWidth = 2;
+        const xM = canvas.width * 0.1;
+        const yM = canvas.height * 0.1;
+        ctx.strokeRect(xM, yM, canvas.width - xM*2, canvas.height - yM*2);
+        // Crosshair
+        ctx.beginPath();
+        ctx.moveTo(canvas.width/2, yM); ctx.lineTo(canvas.width/2, canvas.height-yM);
+        ctx.moveTo(xM, canvas.height/2); ctx.lineTo(canvas.width-xM, canvas.height/2);
+        ctx.stroke();
+    }
+}
+
+function analyzeAudio() {
+    if (!state.audio.enabled || !state.audio.analyser || !state.anim.isPlaying) {
+        state.audio.peak = 0;
+        return;
+    }
+    state.audio.analyser.getByteFrequencyData(state.audio.dataArray);
+    // Simple bass detection (lower frequencies)
+    let sum = 0;
+    for(let i=0; i<10; i++) sum += state.audio.dataArray[i];
+    const avg = sum / 10;
+    state.audio.peak = (avg / 255) * state.audio.sensitivity;
+}
+
+function render() {
+    // 1. Clear
+    ctx.fillStyle = state.style.bgColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 2. Audio Analysis
+    analyzeAudio();
+
+    // 3. Text Setup
+    const lines = state.text.split('\n');
+    ctx.font = `${state.style.italic ? 'italic ' : ''}${state.style.fontWeight} ${state.style.fontSize}px ${state.style.fontFamily}`;
+    ctx.textBaseline = 'middle';
+    
+    const lineHeightPx = state.style.fontSize * state.style.lineHeight;
+    const totalHeight = lines.length * lineHeightPx;
+    let startY = (canvas.height - totalHeight) / 2 + (lineHeightPx/2);
+
+    const audioScale = 1 + (state.audio.peak * 0.5); 
+    const audioAlpha = Math.max(0.2, 1 - state.audio.peak); 
+    const audioOffset = state.audio.peak * 20;
+
+    lines.forEach((line, lineIndex) => {
+        const chars = line.split('');
+        let totalWidth = 0;
+        const charWidths = chars.map(c => {
+            const w = ctx.measureText(c).width + parseInt(state.style.letterSpacing);
+            totalWidth += w;
+            return w;
+        });
+        
+        let currentX = (canvas.width - totalWidth) / 2;
+
+        chars.forEach((char, charIndex) => {
+            // Calculate Animation Progress (0 to 1)
+            // Global time offset
+            let progress = state.anim.currentTime / state.anim.duration;
+            if (progress > 1) progress = 1;
+            
+            // Stagger calculation
+            const staggerDelay = (lineIndex * 5 + charIndex) * (state.anim.stagger / state.anim.duration);
+            let localT = (progress - staggerDelay) / (1 - staggerDelay); 
+            if (localT < 0) localT = 0;
+            if (localT > 1) localT = 1;
+
+            const easedT = Easing[state.anim.ease](localT);
+
+            // Default Transforms
+            let x = currentX;
+            let y = startY;
+            let scaleX = 1;
+            let scaleY = 1;
+            let rotation = 0;
+            let alpha = 1;
+            let blur = 0;
+
+            // Apply Presets
+            switch (state.anim.preset) {
+                case 'fadeUp':
+                    y += (1 - easedT) * 50;
+                    alpha = easedT;
+                    break;
+                case 'typewriter':
+                    alpha = localT > 0.5 ? 1 : 0;
+                    break;
+                case 'bounce':
+                    scaleX = scaleY = localT < 1 ? easedT : 1;
+                    if (localT === 0) scaleX = scaleY = 0;
+                    break;
+                case 'cascade':
+                    y -= (1 - easedT) * 200;
+                    alpha = easedT;
+                    rotation = (1 - easedT) * 0.5;
+                    break;
+                case 'glitch':
+                    alpha = 1;
+                    if (localT < 1 && Math.random() > 0.8) {
+                        x += (Math.random() - 0.5) * 10;
+                        scaleX = 1.2;
+                    }
+                    break;
+                case 'liquid':
+                    y += Math.sin(state.anim.currentTime * 5 + charIndex * 0.5) * 10;
+                    alpha = 1; // Always visible
+                    break;
+                case 'none':
+                default:
+                    alpha = 1;
+                    break;
+            }
+
+            // Audio Reactivity Overrides
+            if (state.audio.enabled) {
+                if (state.audio.effect === 'scale') {
+                    scaleX *= audioScale;
+                    scaleY *= audioScale;
+                } else if (state.audio.effect === 'opacity') {
+                    alpha *= (state.audio.peak + 0.2);
+                } else if (state.audio.effect === 'chromatic') {
+                    x += (Math.random() - 0.5) * audioOffset;
+                }
+            }
+
+            // Static Style Transforms
+            if (state.style.motionBlur && state.anim.isPlaying) {
+                blur = (1-easedT) * 10;
+            }
+
+            // Drawing
+            ctx.save();
+            ctx.translate(x + charWidths[charIndex]/2, y);
+            ctx.rotate(rotation);
+            ctx.scale(scaleX, scaleY);
+            ctx.translate(-(x + charWidths[charIndex]/2), -y);
+            
+            if (blur > 0 || state.style.shadowBlur > 0) {
+                ctx.filter = `blur(${blur}px)`;
+                ctx.shadowColor = "rgba(0,0,0,0.5)";
+                ctx.shadowBlur = state.style.shadowBlur;
+            }
+
+            ctx.globalAlpha = Math.min(Math.max(alpha, 0), 1);
+
+            // Fill
+            if (state.style.gradient) {
+                const grad = ctx.createLinearGradient(x, y - 40, x, y + 40);
+                grad.addColorStop(0, state.style.color);
+                grad.addColorStop(1, "#000000");
+                ctx.fillStyle = grad;
+            } else {
+                ctx.fillStyle = state.style.color;
+            }
+            
+            if (!state.style.stroke) ctx.fillText(char, x, y);
+            
+            // Outline
+            if (state.style.stroke) {
+                ctx.strokeStyle = state.style.color;
+                ctx.lineWidth = 2;
+                ctx.strokeText(char, x, y);
+            }
+            
+            // Glitch chromatic pass
+            if (state.anim.preset === 'glitch' && localT < 1 && Math.random() > 0.9) {
+                 ctx.fillStyle = 'cyan';
+                 ctx.fillText(char, x - 2, y);
+                 ctx.fillStyle = 'red';
+                 ctx.fillText(char, x + 2, y);
+            }
+
+            ctx.restore();
+            
+            currentX += charWidths[charIndex];
+        });
+        startY += lineHeightPx;
+    });
+
+    drawGuides();
+}
+
+// --- Loop & Animation Control ---
+let animationFrameId;
+
+function gameLoop() {
+    if (state.anim.isPlaying) {
+        if (!state.audio.enabled) {
+            // Time based
+            const delta = 1/60;
+            state.anim.currentTime += delta;
+        } else if (state.audio.context) {
+            // Audio based
+            state.anim.currentTime = state.audio.context.currentTime - state.audio.startTime;
+        }
+        
+        // Loop Logic
+        if (state.anim.currentTime >= state.anim.duration) {
+            if (state.exporting) {
+                stopAnimation();
+                return; // Export handles stop
+            }
+            if (state.anim.loop) {
+                state.anim.currentTime = 0;
+                if (state.audio.enabled) playAudio();
+            } else {
+                stopAnimation();
+                state.anim.currentTime = state.anim.duration;
+            }
+        }
+    }
+
+    render();
+    updateUI();
+
+    if (state.anim.isPlaying || state.audio.peak > 0) {
+        animationFrameId = requestAnimationFrame(gameLoop);
+    }
+}
+
+function updateUI() {
+    // Update Time Display
+    const cur = state.anim.currentTime.toFixed(2);
+    const tot = state.anim.duration.toFixed(2);
+    timeDisplay.innerText = `${cur} / ${tot}`;
+    
+    // Update Timeline Playhead
+    const pct = (state.anim.currentTime / state.anim.duration) * 100;
+    playhead.style.left = `${pct}%`;
+}
+
+function startAnimation() {
+    if (state.anim.isPlaying) return;
+    state.anim.isPlaying = true;
+    
+    if (state.audio.enabled) playAudio();
+    
+    gameLoop();
+    document.getElementById('btn-play').innerText = "Pause";
+    document.getElementById('btn-play').classList.add('active');
+}
+
+function stopAnimation() {
+    state.anim.isPlaying = false;
+    cancelAnimationFrame(animationFrameId);
+    if (state.audio.source) {
+        try { state.audio.source.stop(); } catch(e){}
+    }
+    document.getElementById('btn-play').innerText = "Play";
+    document.getElementById('btn-play').classList.remove('active');
+    render(); // Draw static frame
+}
+
+// --- Audio Handling ---
+async function loadAudio(file) {
+    const ctx = getAudioContext();
+    const arrayBuffer = await file.arrayBuffer();
+    state.audio.buffer = await ctx.decodeAudioData(arrayBuffer);
+    drawWaveform();
+}
+
+function playAudio() {
+    if (!state.audio.buffer) return;
+    const ctx = getAudioContext();
+    // Disconnect old
+    if (state.audio.source) try{ state.audio.source.disconnect(); } catch(e){}
+    
+    state.audio.source = ctx.createBufferSource();
+    state.audio.source.buffer = state.audio.buffer;
+    state.audio.source.connect(state.audio.analyser);
+    state.audio.analyser.connect(ctx.destination);
+    
+    // Sync time
+    state.audio.startTime = ctx.currentTime - state.anim.currentTime;
+    state.audio.source.start(0, state.anim.currentTime);
+}
+
+function drawWaveform() {
+    if (!state.audio.buffer) return;
+    const rawData = state.audio.buffer.getChannelData(0);
+    const samples = 1000; // width of canvas
+    const blockSize = Math.floor(rawData.length / samples);
+    
+    waveformCtx.clearRect(0,0,1000,100);
+    waveformCtx.fillStyle = "#00bcd4";
+    
+    for (let i = 0; i < samples; i++) {
+        const start = i * blockSize;
+        let max = 0;
+        for (let j = 0; j < blockSize; j++) {
+            if (rawData[start+j] > max) max = rawData[start+j];
+        }
+        const h = max * 100;
+        waveformCtx.fillRect(i, (100-h)/2, 1, h);
+    }
+}
+
+// --- Export Logic ---
+function exportVideo() {
+    if (state.exporting) return;
+    const confirmExport = confirm("Start recording? The animation will play through once.");
+    if(!confirmExport) return;
+
+    state.exporting = true;
+    state.anim.currentTime = 0;
+    stopAnimation(); // reset
+
+    const stream = canvas.captureStream(60); // 60 FPS
+    const mimeType = MediaRecorder.isTypeSupported("video/webm; codecs=vp9") 
+        ? "video/webm; codecs=vp9" 
+        : "video/webm";
+    
+    const recorder = new MediaRecorder(stream, { 
+        mimeType: mimeType,
+        videoBitsPerSecond: 5000000 // 5Mbps
+    });
+    
+    const chunks = [];
+    recorder.ondataavailable = e => chunks.push(e.data);
+    recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `kinetic-text-${Date.now()}.webm`;
+        a.click();
+        state.exporting = false;
+        alert("Export finished!");
+    };
+
+    recorder.start();
+    startAnimation(); // Plays, loop check handles stop, stop triggers recorder save
+    
+    // Override loop for export
+    const originalLoop = state.anim.loop;
+    state.anim.loop = false;
+
+    // Hook into render loop stop to finish recording
+    const checkEnd = setInterval(() => {
+        if (!state.anim.isPlaying && state.exporting) {
+            recorder.stop();
+            state.anim.loop = originalLoop;
+            clearInterval(checkEnd);
+        }
+    }, 100);
+}
+
+// --- Event Listeners ---
+
+// 1. Layout & Style Inputs
+const bind = (id, key, subKey = null, type = 'value') => {
+    const el = document.getElementById(id);
+    el.addEventListener('input', (e) => {
+        const val = type === 'checkbox' ? e.target.checked : e.target.value;
+        if (subKey) state[key][subKey] = val;
+        else state[key] = val;
+        if (!state.anim.isPlaying) render();
+    });
+};
+
+// Text
+bind('text-input', 'text');
+
+// Styles
+bind('font-family', 'style', 'fontFamily');
+bind('font-weight', 'style', 'fontWeight');
+bind('font-size', 'style', 'fontSize');
+bind('line-height', 'style', 'lineHeight');
+bind('letter-spacing', 'style', 'letterSpacing');
+bind('text-color', 'style', 'color');
+bind('bg-color', 'style', 'bgColor');
+bind('italic-toggle', 'style', 'italic', 'checkbox');
+bind('stroke-toggle', 'style', 'stroke', 'checkbox');
+bind('shadow-blur', 'style', 'shadowBlur');
+bind('motion-blur-toggle', 'style', 'motionBlur', 'checkbox');
+bind('gradient-toggle', 'style', 'gradient', 'checkbox');
+
+// Animation
+bind('anim-preset', 'anim', 'preset');
+bind('anim-duration', 'anim', 'duration');
+document.getElementById('anim-stagger').addEventListener('input', e => state.anim.stagger = e.target.value / 1000);
+bind('loop-toggle', 'anim', 'loop', 'checkbox');
+bind('ease-type', 'anim', 'ease');
+
+// Guides & Viewport
+bind('guide-safe', 'layout', 'safeArea', 'checkbox');
+bind('guide-grid', 'layout', 'grid', 'checkbox');
+
+document.getElementById('aspect-select').addEventListener('change', (e) => {
+    const [w, h] = e.target.value.split(':').map(Number);
+    const baseH = 720;
+    let newW = 1280, newH = 720;
+    
+    if (e.target.value === "16:9") { newW = 1280; newH = 720; }
+    if (e.target.value === "9:16") { newW = 405; newH = 720; }
+    if (e.target.value === "1:1") { newW = 720; newH = 720; }
+    
+    canvas.width = newW;
+    canvas.height = newH;
+    state.layout.width = newW;
+    state.layout.height = newH;
+    render();
+});
+
+// Audio Controls
+document.getElementById('audio-upload').addEventListener('change', e => {
+    if (e.target.files[0]) loadAudio(e.target.files[0]);
+});
+bind('audio-reactive-toggle', 'audio', 'enabled', 'checkbox');
+bind('audio-sensitivity', 'audio', 'sensitivity');
+bind('audio-effect', 'audio', 'effect');
+
+// Timeline Controls
+document.getElementById('btn-play').addEventListener('click', () => {
+    if (state.anim.isPlaying) stopAnimation();
+    else startAnimation();
+});
+document.getElementById('btn-stop').addEventListener('click', () => {
+    stopAnimation();
+    state.anim.currentTime = 0;
+    updateUI();
+    render();
+});
+
+// Scrubbing
+timelineTrack.addEventListener('mousedown', (e) => {
+    const scrub = (e) => {
+        const rect = timelineTrack.getBoundingClientRect();
+        let pct = (e.clientX - rect.left) / rect.width;
+        pct = Math.max(0, Math.min(1, pct));
+        state.anim.currentTime = pct * state.anim.duration;
+        if (!state.anim.isPlaying) render();
+        updateUI();
+    };
+    scrub(e); // initial click
+    
+    const onMove = (ev) => scrub(ev);
+    const onUp = () => {
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+});
+
+// Export
+document.getElementById('btn-export').addEventListener('click', exportVideo);
+
+// Keyboard Shortcuts
+window.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+    if (e.code === 'Space') {
+        e.preventDefault();
+        if (state.anim.isPlaying) stopAnimation(); else startAnimation();
+    }
+});
+
+// Reduced Motion
+if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    state.anim.preset = "none"; // Disable heavy animation
+    document.getElementById('anim-preset').value = "none";
+}
+
+// Initial Render
+document.getElementById('anim-stagger').value = state.anim.stagger * 1000; // Init UI value
+render();
+
+</script>
+</body>
+</html>

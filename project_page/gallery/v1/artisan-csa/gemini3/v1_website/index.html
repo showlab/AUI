@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artisan CSA — Farm Landing</title>
+    <style>
+        /* --- CSS Variables & Reset --- */
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --primary-color: #2c2c2c;
+            --accent-green: #4a6b2f;
+            --accent-rust: #a0522d;
+            --light-gray: #f0f0f0;
+            --border-color: #cccccc;
+            --focus-ring: 2px solid #000000;
+            --font-sans: 'Segoe UI', 'Verdana', sans-serif;
+            --font-serif: 'Georgia', 'Times New Roman', serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-sans);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* --- Typography --- */
+        h1, h2, h3, h4 {
+            font-family: var(--font-serif);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        h1 { font-size: 2.5rem; }
+        h2 { font-size: 2rem; margin-top: 2rem; border-bottom: 2px solid var(--light-gray); padding-bottom: 0.5rem; }
+        h3 { font-size: 1.5rem; }
+
+        a { color: var(--accent-rust); text-decoration: underline; }
+        a:hover { color: var(--text-color); }
+
+        /* --- Layout Utilities --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+        }
+
+        section { margin-bottom: 4rem; scroll-margin-top: 80px; }
+
+        /* --- Controls & Inputs --- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--accent-rust);
+            color: white;
+            border: 2px solid transparent;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            min-height: 44px;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--primary-color);
+            color: #fff;
+        }
+
+        .btn:focus-visible, input:focus-visible, select:focus-visible, button:focus-visible {
+            outline: var(--focus-ring);
+            outline-offset: 2px;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--light-gray);
+            color: #000;
+        }
+
+        .btn-large {
+            width: 100%;
+            font-size: 1.2rem;
+        }
+
+        input[type="text"], input[type="email"], textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            font-family: var(--font-sans);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            background: #fff;
+            min-height: 44px;
+        }
+
+        input[type="text"]:focus, input[type="email"]:focus, textarea:focus {
+            border-color: var(--primary-color);
+        }
+
+        /* --- HEADER --- */
+        header {
+            position: sticky;
+            top: 0;
+            background: #fff;
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-link {
+            margin-left: 1.5rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.5rem;
+        }
+
+        .nav-link:hover, .nav-link:focus {
+            text-decoration: underline;
+        }
+
+        /* --- HERO --- */
+        #hero {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: center;
+            min-height: auto;
+            padding-top: 2rem;
+        }
+
+        .hero-text { padding-right: 1rem; }
+        .hero-visual { height: 300px; position: relative; border: 1px solid var(--border-color); background: var(--light-gray); }
+        #hero-svg { width: 100%; height: 100%; }
+
+        .zip-checker {
+            display: flex;
+            gap: 10px;
+            margin-top: 1.5rem;
+            align-items: flex-start;
+        }
+
+        #zip-input { margin-bottom: 0; flex: 1; max-width: 200px; }
+        
+        #zip-message {
+            margin-top: 0.5rem;
+            font-weight: bold;
+            min-height: 1.5rem;
+        }
+        .success { color: var(--accent-green); }
+        .error { color: #d32f2f; }
+
+        /* --- MAP SECTION (Moved up) --- */
+        .map-container {
+            width: 100%;
+            height: 400px;
+            background: #e6e0d4;
+            border: 2px solid var(--primary-color);
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .pickup-list {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .pickup-badge {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .distance-tag {
+            background: var(--accent-green);
+            color: white;
+            padding: 2px 6px;
+            font-size: 0.8rem;
+            border-radius: 999px;
+        }
+
+        /* --- SHARES --- */
+        .seasons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .season-card {
+            background: #fff;
+            border: 2px solid var(--border-color);
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .season-card:hover, .season-card:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .season-details {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed var(--border-color);
+            display: none; /* Hidden by default */
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .season-card.expanded .season-details { display: block; }
+
+        /* --- PLANS --- */
+        .pricing-interface {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+
+        .controls-panel {
+            background: #fff;
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .frequency-toggle {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .freq-btn {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            background: #fff;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .freq-btn.active {
+            border-color: var(--accent-green);
+            background: var(--accent-green);
+            color: #fff;
+        }
+
+        .toggle-group { display: flex; flex-direction: column; gap: 1rem; }
+        
+        .addon-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .receipt-panel {
+            background: #fff;
+            padding: 2rem;
+            border: 2px solid var(--primary-color);
+            position: relative;
+        }
+
+        .receipt-header { border-bottom: 2px dashed #000; padding-bottom: 10px; margin-bottom: 10px; text-align: center; font-family: monospace; font-weight: bold; font-size: 1.2rem; }
+        
+        .receipt-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-family: monospace;
+        }
+
+        .receipt-total {
+            border-top: 2px solid #000;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 1.2rem;
+            font-family: monospace;
+        }
+
+        /* --- TESTIMONIALS --- */
+        .carousel-container {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            background: #fff;
+        }
+
+        .testimonial-slide {
+            display: none;
+            text-align: center;
+        }
+
+        .testimonial-slide.active { display: block; }
+
+        .carousel-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .carousel-btn {
+            background: transparent;
+            border: 1px solid var(--primary-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carousel-dots { display: flex; gap: 0.5rem; }
+        .dot {
+            width: 12px;
+            height: 12px;
+            background: var(--border-color);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+        .dot.active { background: var(--accent-rust); }
+
+        /* --- FAQ --- */
+        .accordion-item {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .accordion-header {
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            padding: 1rem 0;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion-header:hover { color: var(--accent-rust); }
+
+        .accordion-content {
+            display: none;
+            padding-bottom: 1rem;
+            color: #444;
+        }
+
+        .accordion-content.open { display: block; }
+
+        /* --- FOOTER --- */
+        #site-footer {
+            background: var(--light-gray);
+            padding: 2rem;
+            margin-top: 4rem;
+            text-align: center;
+        }
+
+        .footer-links a {
+            margin: 0 1rem;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 768px) {
+            #hero { grid-template-columns: 1fr; }
+            .hero-visual { display: none; }
+            .pricing-interface { grid-template-columns: 1fr; }
+            .header-content { flex-direction: column; gap: 1rem; }
+            .nav-link { margin: 0 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <div class="container header-content">
+            <div style="font-family: var(--font-serif); font-weight: 700; font-size: 1.5rem;">Artisan CSA</div>
+            <nav id="main-nav">
+                <a href="#roots-radius" class="nav-link" id="nav-map">Radius</a>
+                <a href="#share" class="nav-link" id="nav-shares">Shares</a>
+                <a href="#plans" class="nav-link" id="nav-plans">Plans</a>
+                <a href="#faq-section" class="nav-link" id="nav-faq">FAQ</a>
+                <a href="#contact" class="nav-link" id="nav-contact">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- HERO -->
+    <section id="hero" class="container">
+        <div class="hero-text">
+            <h1>Rooted in Soil.<br>Raised for You.</h1>
+            <p style="font-size: 1.2rem; margin-bottom: 2rem;">Hand-picked, organic produce delivered from our family farm to your table.</p>
+            
+            <label for="zip-input" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Check Delivery Availability</label>
+            <div class="zip-checker">
+                <input type="text" id="zip-input" placeholder="Enter ZIP code (e.g., 10001)" aria-describedby="zip-message">
+                <button id="check-zip-btn" class="btn">Check</button>
+            </div>
+            <div id="zip-message">Enter your ZIP to check availability.</div>
+            <br>
+            <a href="#plans" class="btn" id="join-harvest-btn" style="background: var(--accent-green);">Join the Harvest</a>
+        </div>
+        
+        <div class="hero-visual">
+            <!-- Simplified SVG -->
+            <svg id="hero-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" aria-label="Basket of fresh vegetables">
+                <circle cx="200" cy="200" r="150" fill="#e6e0d4" />
+                <path d="M100,250 Q110,350 200,360 Q290,350 300,250 L280,250 L120,250 Z" fill="none" stroke="#2c2c2c" stroke-width="3"/>
+                <path d="M120,250 Q110,150 200,140 Q290,150 280,250" fill="none" stroke="#2c2c2c" stroke-width="3" stroke-dasharray="10,5"/>
+                <circle cx="180" cy="200" r="20" fill="#ff9966" stroke="#2c2c2c" stroke-width="2"/>
+                <circle cx="220" cy="200" r="20" fill="#88aa00" stroke="#2c2c2c" stroke-width="2"/>
+            </svg>
+        </div>
+    </section>
+
+    <!-- MAP (Moved up per failure analysis) -->
+    <section id="roots-radius" class="container">
+        <h2 id="delivery-radius-label">Our Roots & Radius</h2>
+        <p>Check the map below to see our primary delivery zones.</p>
+        <div class="map-container" aria-label="Map showing delivery radius">
+            <svg width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+                <rect width="100%" height="100%" fill="#eaddcf" />
+                <path d="M0,200 Q300,150 600,250 T1200,200" stroke="#fff" stroke-width="5" fill="none" />
+                <circle cx="50%" cy="50%" r="150" fill="rgba(107, 140, 66, 0.2)" stroke="#556b2f" stroke-width="2" stroke-dasharray="5,5" />
+                <circle cx="50%" cy="50%" r="8" fill="#a0522d" />
+                <text x="51%" y="49%" font-family="Georgia" font-size="14" fill="#333">The Farm</text>
+            </svg>
+            <div class="map-legend" style="position: absolute; bottom: 10px; right: 10px; background: white; padding: 5px; border: 1px solid #ccc; font-size: 0.8rem;">
+                <span style="display:inline-block; width: 10px; height: 10px; background: rgba(107, 140, 66, 0.2); border: 1px solid #556b2f; margin-right: 5px;"></span> Delivery Zone
+            </div>
+        </div>
+        
+        <h3 id="pickup-locations-heading">Nearest Pickup Locations</h3>
+        <div class="pickup-list" aria-labelledby="pickup-locations-heading">
+            <div class="pickup-badge">
+                <strong>Downtown Market</strong> <span class="distance-tag">5 mi</span>
+            </div>
+            <div class="pickup-badge">
+                <strong>Westside Co-op</strong> <span class="distance-tag">12 mi</span>
+            </div>
+            <div class="pickup-badge">
+                <strong>The Old Barn</strong> <span class="distance-tag">0 mi</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- SHARES -->
+    <section id="share" class="container">
+        <h2>Seasonal Shares</h2>
+        <p class="season-instructions">Click a season card to view produce details.</p>
+        
+        <div class="seasons-grid">
+            <!-- Spring -->
+            <div class="season-card" id="card-spring" tabindex="0" role="button" aria-expanded="false">
+                <h3>Spring</h3>
+                <p>Apr - Jun</p>
+                <div class="season-details">
+                    <strong>Includes:</strong><br>Asparagus, Peas, Radish, Spinach, Strawberries.
+                    <br><em>Focus on fresh greens and early risers.</em>
+                </div>
+            </div>
+
+            <!-- Summer -->
+            <div class="season-card" id="card-summer" tabindex="0" role="button" aria-expanded="false">
+                <h3>Summer</h3>
+                <p>Jul - Sep</p>
+                <div class="season-details">
+                    <strong>Includes:</strong><br>Tomatoes, Peppers, Corn, Zucchini, Melons.
+                    <br><em>Peak harvest with sun-loving crops.</em>
+                </div>
+            </div>
+
+            <!-- Fall -->
+            <div class="season-card" id="card-fall" tabindex="0" role="button" aria-expanded="false">
+                <h3>Fall</h3>
+                <p>Oct - Dec</p>
+                <div class="season-details">
+                    <strong>Includes:</strong><br>Pumpkins, Squash, Apples, Kale, Potatoes.
+                    <br><em>Hearty roots and storage crops.</em>
+                </div>
+            </div>
+
+            <!-- Winter -->
+            <div class="season-card" id="card-winter" tabindex="0" role="button" aria-expanded="false">
+                <h3>Winter</h3>
+                <p>Jan - Mar</p>
+                <div class="season-details">
+                    <strong>Includes:</strong><br>Root Veggies, Citrus, Preserves, Onions.
+                    <br><em>Storage staples and greenhouse greens.</em>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PLANS -->
+    <section id="plans" class="container">
+        <h2>Build Your Share</h2>
+        <div class="pricing-interface" id="build-share">
+            
+            <!-- Controls -->
+            <div class="controls-panel">
+                <h3>Select Frequency</h3>
+                <div class="frequency-toggle" role="group" aria-label="Plan frequency">
+                    <button type="button" class="freq-btn active" id="freq-weekly" aria-pressed="true" onclick="setFrequency('weekly')">
+                        Weekly<br><small>($40)</small>
+                    </button>
+                    <button type="button" class="freq-btn" id="freq-biweekly" aria-pressed="false" onclick="setFrequency('biweekly')">
+                        Bi-Weekly<br><small>($45)</small>
+                    </button>
+                </div>
+
+                <h3>Weekly Add-ons</h3>
+                <div class="toggle-group">
+                    <div class="addon-item">
+                        <label for="add-eggs">Farm Fresh Eggs (+$6)</label>
+                        <input type="checkbox" id="add-eggs" class="addon-check" data-price="6" onchange="updatePrice()">
+                    </div>
+                    <div class="addon-item">
+                        <label for="add-flowers">Wildflower Bouquet (+$12)</label>
+                        <input type="checkbox" id="add-flowers" class="addon-check" data-price="12" onchange="updatePrice()">
+                    </div>
+                    <div class="addon-item">
+                        <label for="add-bread">Sourdough Bread (+$8)</label>
+                        <input type="checkbox" id="add-bread" class="addon-check" data-price="8" onchange="updatePrice()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Receipt -->
+            <div class="receipt-panel" id="estimate-card">
+                <div class="receipt-header">ESTIMATE</div>
+                <div id="receipt-items">
+                    <!-- JS Populated -->
+                </div>
+                <div class="receipt-total">
+                    <span>TOTAL</span>
+                    <span id="total-price">$40.00</span>
+                </div>
+                <p style="text-align: center; font-size: 0.8rem; margin-top: 0.5rem;">/ shipment</p>
+                <button class="btn btn-large" style="margin-top: 1rem;" id="subscribe-btn">Subscribe Now</button>
+                <div id="plan-frequency-value" style="display:none;">weekly</div> <!-- Proxy for automation -->
+            </div>
+        </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section id="testimonials" class="container">
+        <h2>Community Voices</h2>
+        <div class="carousel-container">
+            <div class="testimonial-slide active" data-index="0">
+                <blockquote style="font-size: 1.2rem; font-style: italic;">“The quality of the heirloom tomatoes is unmatched. It feels like getting a present every week.”</blockquote>
+                <p style="margin-top: 1rem; font-weight: bold;">— Sarah J., Member since 2020</p>
+            </div>
+            <div class="testimonial-slide" data-index="1">
+                <blockquote style="font-size: 1.2rem; font-style: italic;">“Knowing exactly where my food comes from has changed how my family eats. The eggs are incredible.”</blockquote>
+                <p style="margin-top: 1rem; font-weight: bold;">— Mark D., Farmer</p>
+            </div>
+            <div class="testimonial-slide" data-index="2">
+                <blockquote style="font-size: 1.2rem; font-style: italic;">“I love the wildflower add-on. It brightens up my kitchen every Friday!”</blockquote>
+                <p style="margin-top: 1rem; font-weight: bold;">— Emily R., Member since 2021</p>
+            </div>
+
+            <div class="carousel-controls">
+                <button class="carousel-btn prev" aria-label="Previous testimonial" onclick="moveCarousel(-1)">&#8592;</button>
+                <div class="carousel-dots">
+                    <button class="dot active" data-index="0" aria-label="Testimonial 1" onclick="jumpCarousel(0)"></button>
+                    <button class="dot" data-index="1" aria-label="Testimonial 2" onclick="jumpCarousel(1)"></button>
+                    <button class="dot" data-index="2" aria-label="Testimonial 3" onclick="jumpCarousel(2)"></button>
+                </div>
+                <button class="carousel-btn next" aria-label="Next testimonial" onclick="moveCarousel(1)">&#8594;</button>
+            </div>
+            <!-- Proxy for active index -->
+            <div id="active-testimonial-index" style="display:none;">0</div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq-section" class="container">
+        <h2 class="common-questions">Plan FAQs & Common Questions</h2>
+        <p class="faq-intro">Everything you need to know about managing your share.</p>
+        
+        <div class="faq-accordion" id="plan-faqs">
+            <div class="accordion-item">
+                <button class="accordion-header" aria-expanded="false" onclick="toggleAccordion(this)">
+                    What happens if I'm on vacation?
+                    <span class="icon">+</span>
+                </button>
+                <div class="accordion-content" id="faq-1">
+                    <p>You can pause your share for up to 2 weeks per season. Just let us know 48 hours in advance via the member portal.</p>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <button class="accordion-header" aria-expanded="false" onclick="toggleAccordion(this)">
+                    Is everything certified organic?
+                    <span class="icon">+</span>
+                </button>
+                <div class="accordion-content" id="faq-2">
+                    <p>We use organic practices but are not certified. We welcome you to visit the farm and see for yourself!</p>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <button class="accordion-header" aria-expanded="false" onclick="toggleAccordion(this)">
+                    Do you deliver to apartments?
+                    <span class="icon">+</span>
+                </button>
+                <div class="accordion-content" id="faq-3">
+                    <p>Yes, provided there is a safe place to leave the box or a doorman to receive it.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="container">
+        <div style="max-width: 600px; margin: 0 auto;">
+            <h2>Get in Touch</h2>
+            <form id="contact-form">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" placeholder="your@email.com" required>
+                
+                <label for="message">Message</label>
+                <textarea id="message" rows="5" placeholder="How can we help?" required></textarea>
+                
+                <button type="submit" class="btn btn-large" id="send-note-btn">Send Note</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer id="site-footer">
+        <div class="container">
+            <div class="footer-links">
+                <a href="#hero" id="footer-hero-link">Back to top</a>
+                <a href="#">Terms</a>
+                <a href="#">Privacy</a>
+            </div>
+            <p style="margin-top: 1rem;">&copy; 2023 Artisan CSA. Rooted in Community.</p>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script>
+        /* --- ZIP Checker --- */
+        const validZips = ['10001', '10002', '10003', '90210', '12345'];
+        const zipInput = document.getElementById('zip-input');
+        const zipBtn = document.getElementById('check-zip-btn');
+        const zipMsg = document.getElementById('zip-message');
+        const joinBtn = document.getElementById('join-harvest-btn');
+
+        function checkZip() {
+            const val = zipInput.value.trim();
+            if (validZips.includes(val)) {
+                zipMsg.textContent = "We deliver to your area! 🌱";
+                zipMsg.className = "success";
+                // Enable/Highlight join button
+                joinBtn.style.boxShadow = "0 0 0 4px rgba(74, 107, 47, 0.3)";
+            } else {
+                zipMsg.textContent = "Sorry, we aren't in that area yet.";
+                zipMsg.className = "error";
+                joinBtn.style.boxShadow = "none";
+            }
+            // Proxy for automation
+            let statusProxy = document.getElementById('zip-status');
+            if (!statusProxy) {
+                statusProxy = document.createElement('div');
+                statusProxy.id = 'zip-status';
+                statusProxy.style.display = 'none';
+                document.body.appendChild(statusProxy);
+            }
+            statusProxy.textContent = validZips.includes(val) ? "valid" : "invalid";
+        }
+
+        zipBtn.addEventListener('click', checkZip);
+        zipInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') checkZip();
+        });
+
+        /* --- Pricing Calculator --- */
+        let currentFrequency = 'weekly';
+        const receiptList = document.getElementById('receipt-items');
+        const totalPriceEl = document.getElementById('total-price');
+        const freqProxy = document.getElementById('plan-frequency-value');
+
+        function setFrequency(freq) {
+            currentFrequency = freq;
+            document.getElementById('freq-weekly').classList.toggle('active', freq === 'weekly');
+            document.getElementById('freq-weekly').setAttribute('aria-pressed', freq === 'weekly');
+            document.getElementById('freq-biweekly').classList.toggle('active', freq === 'biweekly');
+            document.getElementById('freq-biweekly').setAttribute('aria-pressed', freq === 'biweekly');
+            
+            // Update proxy
+            freqProxy.textContent = freq;
+            
+            updatePrice();
+        }
+
+        // Expose globally for keep_api requirements
+        window.updatePrice = function() {
+            const basePrice = currentFrequency === 'weekly' ? 40 : 45;
+            const label = currentFrequency === 'weekly' ? "Weekly Share" : "Bi-Weekly Share";
+            let total = basePrice;
+            
+            let html = `<div class="receipt-line"><span>${label}</span><span>$${basePrice}.00</span></div>`;
+
+            document.querySelectorAll('.addon-check').forEach(addon => {
+                if (addon.checked) {
+                    const price = parseInt(addon.getAttribute('data-price'));
+                    const name = addon.previousElementSibling.textContent.split('(')[0].trim();
+                    total += price;
+                    html += `<div class="receipt-line" style="color:#666;"><span>+ ${name}</span><span>$${price}.00</span></div>`;
+                }
+            });
+
+            receiptList.innerHTML = html;
+            totalPriceEl.textContent = `$${total}.00`;
+        };
+
+        // Initial calc
+        updatePrice();
+
+        /* --- Seasonal Shares Interaction --- */
+        document.querySelectorAll('.season-card').forEach(card => {
+            const toggleExpand = () => {
+                // Close others
+                document.querySelectorAll('.season-card').forEach(c => {
+                    if (c !== card) {
+                        c.classList.remove('expanded');
+                        c.setAttribute('aria-expanded', 'false');
+                    }
+                });
+                const wasExpanded = card.classList.contains('expanded');
+                card.classList.toggle('expanded');
+                card.setAttribute('aria-expanded', !wasExpanded);
+            };
+
+            card.addEventListener('click', toggleExpand);
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleExpand();
+                }
+            });
+        });
+
+        /* --- Testimonials Carousel --- */
+        let slideIndex = 0;
+        const slides = document.querySelectorAll('.testimonial-slide');
+        const dots = document.querySelectorAll('.dot');
+        const indexProxy = document.getElementById('active-testimonial-index');
+
+        // Expose updateCarousel to satisfy keep_api requirement
+        window.updateCarousel = function() {
+            slides.forEach((slide, i) => {
+                if (i === slideIndex) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+            dots.forEach((dot, i) => {
+                if (i === slideIndex) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+            indexProxy.textContent = slideIndex;
+        };
+
+        window.moveCarousel = function(direction) {
+            slideIndex += direction;
+            if (slideIndex < 0) slideIndex = slides.length - 1;
+            if (slideIndex >= slides.length) slideIndex = 0;
+            updateCarousel();
+        };
+
+        window.jumpCarousel = function(index) {
+            slideIndex = index;
+            updateCarousel();
+        };
+
+        /* --- FAQ Accordion --- */
+        window.toggleAccordion = function(btn) {
+            const content = btn.nextElementSibling;
+            const isOpen = content.classList.contains('open');
+            
+            // Close others if desired (optional, but keeps UI clean)
+            // For this implementation, we allow multiple open
+            
+            content.classList.toggle('open');
+            btn.setAttribute('aria-expanded', !isOpen);
+            btn.querySelector('.icon').textContent = !isOpen ? '-' : '+';
+        };
+
+        /* --- Contact Form --- */
+        document.getElementById('contact-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert("Thanks for your note! We'll get back to you shortly.");
+            e.target.reset();
+        });
+
+        /* --- Back to Top --- */
+        document.getElementById('footer-hero-link').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('hero').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        /* --- Smooth Scroll for Nav --- */
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>

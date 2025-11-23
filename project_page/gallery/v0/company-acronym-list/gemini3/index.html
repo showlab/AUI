@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Acronym List</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary-color: #64748b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-light: #64748b;
+            --border-color: #e2e8f0;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --cat-tech: #e0f2fe; --text-tech: #0369a1;
+            --cat-business: #f0fdf4; --text-business: #15803d;
+            --cat-process: #fefce8; --text-process: #a16207;
+            --cat-general: #f3f4f6; --text-general: #374151;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-controls button {
+            padding: 0.5rem 1rem;
+            margin-left: 0.5rem;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            color: var(--text-light);
+        }
+
+        .nav-controls button.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* Main Container */
+        main {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 2rem;
+        }
+
+        /* View Sections */
+        .view-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Search & Filter Area */
+        .controls-area {
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        #search-input {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #search-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .filter-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            background-color: #f1f5f9;
+        }
+
+        .filter-btn.active {
+            background-color: var(--text-main);
+            color: white;
+            border-color: var(--text-main);
+        }
+
+        /* Acronym Grid */
+        .acronym-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .acronym-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+        }
+
+        .category-tag {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .definition {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+            line-height: 1.4;
+        }
+
+        .description {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            line-height: 1.5;
+        }
+
+        /* Quiz Mode Styles */
+        .quiz-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .quiz-header {
+            margin-bottom: 2rem;
+        }
+
+        .quiz-score {
+            display: inline-block;
+            background: var(--bg-color);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .question-text {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            color: var(--text-main);
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .option-btn {
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            background: transparent;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+        }
+
+        .option-btn.correct {
+            background-color: var(--cat-business);
+            border-color: var(--success-color);
+            color: var(--text-business);
+        }
+
+        .option-btn.wrong {
+            background-color: #fef2f2;
+            border-color: var(--error-color);
+            color: #991b1b;
+        }
+
+        .quiz-actions {
+            margin-top: 2rem;
+        }
+
+        .primary-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .primary-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Category Coloring */
+        .tag-Technology { background: var(--cat-tech); color: var(--text-tech); }
+        .tag-Business { background: var(--cat-business); color: var(--text-business); }
+        .tag-Process { background: var(--cat-process); color: var(--text-process); }
+        .tag-General { background: var(--cat-general); color: var(--text-general); }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-light);
+            grid-column: 1 / -1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .acronym-grid { grid-template-columns: 1fr; }
+            .controls-area { gap: 0.5rem; }
+            main { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            AcronymList
+        </div>
+        <nav class="nav-controls">
+            <button id="nav-list-btn" class="active" onclick="switchView('list')">Dictionary</button>
+            <button id="nav-quiz-btn" onclick="switchView('quiz')">Quiz Mode</button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- LIST VIEW -->
+        <section id="view-list" class="view-section active">
+            <div class="controls-area">
+                <div class="search-wrapper">
+                    <input type="text" id="search-input" placeholder="Search acronyms or definitions..." autocomplete="off">
+                </div>
+                <div class="filter-tags" id="category-filters">
+                    <button class="filter-btn active" data-category="All" id="filter-all">All</button>
+                    <button class="filter-btn" data-category="Technology" id="filter-tech">Technology</button>
+                    <button class="filter-btn" data-category="Business" id="filter-business">Business</button>
+                    <button class="filter-btn" data-category="Process" id="filter-process">Process</button>
+                    <button class="filter-btn" data-category="General" id="filter-general">General</button>
+                </div>
+            </div>
+
+            <div id="acronym-container" class="acronym-grid">
+                <!-- Items injected via JS -->
+            </div>
+        </section>
+
+        <!-- QUIZ VIEW -->
+        <section id="view-quiz" class="view-section">
+            <!-- Start Screen -->
+            <div id="quiz-start-screen" class="quiz-container">
+                <h2 style="margin-bottom: 1rem;">Test Your Knowledge</h2>
+                <p style="margin-bottom: 2rem; color: var(--text-light);">You will be asked 5 questions. Can you identify the correct definitions for the acronyms?</p>
+                <button id="start-quiz-btn" class="primary-btn">Start Quiz</button>
+            </div>
+
+            <!-- Question Screen -->
+            <div id="quiz-question-screen" class="quiz-container hidden">
+                <div class="quiz-header">
+                    <span class="quiz-score">Score: <span id="current-score">0</span> / <span id="total-questions">5</span></span>
+                </div>
+                <div class="question-text">
+                    What does <strong id="question-acronym" style="color: var(--primary-color)"></strong> stand for?
+                </div>
+                <div id="options-container" class="options-grid">
+                    <!-- Options injected via JS -->
+                </div>
+                <div class="quiz-actions hidden" id="next-btn-container">
+                    <button id="next-question-btn" class="primary-btn">Next Question</button>
+                </div>
+            </div>
+
+            <!-- Results Screen -->
+            <div id="quiz-result-screen" class="quiz-container hidden">
+                <h2 style="margin-bottom: 1rem;">Quiz Complete!</h2>
+                <div style="font-size: 4rem; font-weight: 800; color: var(--primary-color); margin-bottom: 1rem;" id="final-score-display">4/5</div>
+                <p id="result-message" style="margin-bottom: 2rem; color: var(--text-light);">Great job!</p>
+                <button id="restart-quiz-btn" class="primary-btn">Try Again</button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // --- DATASETS ---
+        const acronyms = [
+            { id: 1, term: "API", definition: "Application Programming Interface", category: "Technology", desc: "A set of functions and procedures allowing the creation of applications that access the features or data of an operating system, application, or other service." },
+            { id: 2, term: "KPI", definition: "Key Performance Indicator", category: "Business", desc: "A quantifiable measure used to evaluate the success of an organization, employee, etc., in meeting objectives for performance." },
+            { id: 3, term: "SOP", definition: "Standard Operating Procedure", category: "Process", desc: "Established or prescribed methods to be followed routinely for the performance of designated operations or in designated situations." },
+            { id: 4, term: "MVP", definition: "Minimum Viable Product", category: "Business", desc: "A version of a product with just enough features to be usable by early customers who can then provide feedback for future product development." },
+            { id: 5, term: "CI/CD", definition: "Continuous Integration / Continuous Deployment", category: "Technology", desc: "A method to frequently deliver apps to customers by introducing automation into the stages of app development." },
+            { id: 6, term: "ROI", definition: "Return on Investment", category: "Business", desc: "A ratio between net profit and cost of investment. A high ROI means the investment's gains compare favorably to its cost." },
+            { id: 7, term: "EOD", definition: "End of Day", category: "General", desc: "Used to set a deadline for a task to be completed by the end of the business day." },
+            { id: 8, term: "UX", definition: "User Experience", category: "Technology", desc: "The overall experience of a person using a product such as a website or computer application, especially in terms of how easy or pleasing it is to use." },
+            { id: 9, term: "OKR", definition: "Objectives and Key Results", category: "Business", desc: "A goal-setting framework for defining and tracking objectives and their outcomes." },
+            { id: 10, term: "QA", definition: "Quality Assurance", category: "Technology", desc: "A way of preventing mistakes and defects in manufactured products and avoiding problems when delivering products or services to customers." },
+            { id: 11, term: "OOO", definition: "Out of Office", category: "General", desc: "Used in email auto-responses or calendars to indicate unavailability." },
+            { id: 12, term: "SaaS", definition: "Software as a Service", category: "Technology", desc: "A software licensing and delivery model in which software is licensed on a subscription basis and is centrally hosted." },
+            { id: 13, term: "B2B", definition: "Business to Business", category: "Business", desc: "A form of transaction between businesses, such as one involving a manufacturer and wholesaler, or a wholesaler and a retailer." },
+            { id: 14, term: "CRM", definition: "Customer Relationship Management", category: "Technology", desc: "Technology for managing all your company's relationships and interactions with customers and potential customers." },
+            { id: 15, term: "WFH", definition: "Work From Home", category: "General", desc: "An employment arrangement where the employee works from their place of residence rather than the office." }
+        ];
+
+        // --- STATE MANAGEMENT ---
+        let state = {
+            filterCategory: 'All',
+            searchTerm: '',
+            quiz: {
+                active: false,
+                score: 0,
+                currentQuestionIndex: 0,
+                questions: [], // Array of objects { target: acronymObj, options: [acronymObj, ...] }
+                maxQuestions: 5
+            }
+        };
+
+        // --- DOM ELEMENTS ---
+        const container = document.getElementById('acronym-container');
+        const searchInput = document.getElementById('search-input');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const navButtons = document.querySelectorAll('.nav-controls button');
+        
+        // Quiz Elements
+        const startQuizBtn = document.getElementById('start-quiz-btn');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const restartQuizBtn = document.getElementById('restart-quiz-btn');
+        const quizStartScreen = document.getElementById('quiz-start-screen');
+        const quizQuestionScreen = document.getElementById('quiz-question-screen');
+        const quizResultScreen = document.getElementById('quiz-result-screen');
+        const questionAcronymEl = document.getElementById('question-acronym');
+        const optionsContainer = document.getElementById('options-container');
+        const currentScoreEl = document.getElementById('current-score');
+        const nextBtnContainer = document.getElementById('next-btn-container');
+
+        // --- INITIALIZATION ---
+        function init() {
+            renderList();
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            // Search
+            searchInput.addEventListener('input', (e) => {
+                state.searchTerm = e.target.value.toLowerCase();
+                renderList();
+            });
+
+            // Filter Tags
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // UI Update
+                    filterButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Logic Update
+                    state.filterCategory = btn.dataset.category;
+                    renderList();
+                });
+            });
+
+            // Quiz Buttons
+            startQuizBtn.addEventListener('click', startQuiz);
+            nextQuestionBtn.addEventListener('click', nextQuestion);
+            restartQuizBtn.addEventListener('click', startQuiz);
+        }
+
+        // --- LIST VIEW LOGIC ---
+        function renderList() {
+            container.innerHTML = '';
+
+            const filtered = acronyms.filter(item => {
+                const matchesSearch = item.term.toLowerCase().includes(state.searchTerm) || 
+                                      item.definition.toLowerCase().includes(state.searchTerm);
+                const matchesCategory = state.filterCategory === 'All' || item.category === state.filterCategory;
+                return matchesSearch && matchesCategory;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="empty-state">No acronyms found matching your criteria.</div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="acronym-title">${item.term}</div>
+                        <span class="category-tag tag-${item.category}">${item.category}</span>
+                    </div>
+                    <div class="definition">${item.definition}</div>
+                    <div class="description">${item.desc}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function switchView(viewName) {
+            // Update Nav UI
+            navButtons.forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`nav-${viewName}-btn`).classList.add('active');
+
+            // Update Sections
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${viewName}`).classList.add('active');
+
+            if (viewName === 'quiz' && !state.quiz.active) {
+                showQuizScreen('start');
+            }
+        }
+
+        // --- QUIZ LOGIC ---
+
+        function showQuizScreen(screenName) {
+            quizStartScreen.classList.add('hidden');
+            quizQuestionScreen.classList.add('hidden');
+            quizResultScreen.classList.add('hidden');
+
+            if (screenName === 'start') quizStartScreen.classList.remove('hidden');
+            if (screenName === 'question') quizQuestionScreen.classList.remove('hidden');
+            if (screenName === 'result') quizResultScreen.classList.remove('hidden');
+        }
+
+        function startQuiz() {
+            state.quiz.score = 0;
+            state.quiz.currentQuestionIndex = 0;
+            state.quiz.active = true;
+            state.quiz.questions = generateQuestions();
+            
+            currentScoreEl.innerText = '0';
+            showQuizScreen('question');
+            renderQuestion();
+        }
+
+        function generateQuestions() {
+            // Shuffle array and pick top 5
+            const shuffled = [...acronyms].sort(() => 0.5 - Math.random());
+            const selected = shuffled.slice(0, state.quiz.maxQuestions);
+
+            return selected.map(target => {
+                // Create distractors (wrong answers)
+                const others = acronyms.filter(a => a.id !== target.id);
+                const distractors = others.sort(() => 0.5 - Math.random()).slice(0, 3);
+                
+                // Combine and shuffle options
+                const options = [...distractors, target].sort(() => 0.5 - Math.random());
+                
+                return { target, options };
+            });
+        }
+
+        function renderQuestion() {
+            const currentQ = state.quiz.questions[state.quiz.currentQuestionIndex];
+            
+            questionAcronymEl.innerText = currentQ.target.term;
+            nextBtnContainer.classList.add('hidden');
+            optionsContainer.innerHTML = '';
+
+            currentQ.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.id = `quiz-opt-${index}`;
+                btn.innerText = opt.definition;
+                btn.onclick = () => handleAnswer(btn, opt.id === currentQ.target.id);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(btnElement, isCorrect) {
+            // Disable all buttons
+            const allBtns = optionsContainer.querySelectorAll('.option-btn');
+            allBtns.forEach(btn => btn.disabled = true);
+
+            if (isCorrect) {
+                btnElement.classList.add('correct');
+                state.quiz.score++;
+                currentScoreEl.innerText = state.quiz.score;
+            } else {
+                btnElement.classList.add('wrong');
+                // Highlight the correct one
+                const correctOpt = state.quiz.questions[state.quiz.currentQuestionIndex].target.definition;
+                allBtns.forEach(btn => {
+                    if (btn.innerText === correctOpt) btn.classList.add('correct');
+                });
+            }
+
+            nextBtnContainer.classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            state.quiz.currentQuestionIndex++;
+            
+            if (state.quiz.currentQuestionIndex >= state.quiz.maxQuestions) {
+                finishQuiz();
+            } else {
+                renderQuestion();
+            }
+        }
+
+        function finishQuiz() {
+            showQuizScreen('result');
+            document.getElementById('final-score-display').innerText = `${state.quiz.score} / ${state.quiz.maxQuestions}`;
+            
+            const msgEl = document.getElementById('result-message');
+            const percentage = (state.quiz.score / state.quiz.maxQuestions) * 100;
+            
+            if (percentage === 100) msgEl.innerText = "Perfect score! You are an acronym master!";
+            else if (percentage >= 80) msgEl.innerText = "Great job! You know your stuff.";
+            else if (percentage >= 60) msgEl.innerText = "Not bad! Keep practicing.";
+            else msgEl.innerText = "Keep studying the dictionary and try again!";
+            
+            state.quiz.active = false;
+        }
+
+        // Run App
+        init();
+
+    </script>
+</body>
+</html>

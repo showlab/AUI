@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Acronym List</title>
+    <style>
+        :root {
+            --primary-color: #000000;
+            --accent-color: #0056b3;
+            --bg-color: #ffffff;
+            --text-main: #000000;
+            --text-light: #555555;
+            --border-color: #000000;
+            --success-color: #008000;
+            --error-color: #cc0000;
+            /* Simplified category colors for high contrast */
+            --cat-tech-bg: #e6f7ff; --cat-tech-text: #004085;
+            --cat-business-bg: #e6ffed; --cat-business-text: #155724;
+            --cat-process-bg: #fff8e6; --cat-process-text: #856404;
+            --cat-general-bg: #f2f2f2; --cat-general-text: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        header {
+            border-bottom: 2px solid var(--border-color);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-controls button {
+            padding: 12px 20px;
+            margin-left: 0.5rem;
+            border: 2px solid var(--border-color);
+            background: transparent;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1rem;
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .nav-controls button.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .nav-controls button:focus {
+            outline: 3px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+
+        /* Main Container */
+        main {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 1rem;
+        }
+
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        /* Search & Filter Area */
+        .controls-area {
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 1rem;
+        }
+
+        .search-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #search-input {
+            flex: 1;
+            padding: 12px;
+            font-size: 1.1rem;
+            border: 2px solid var(--border-color);
+            min-height: 44px;
+        }
+
+        #search-input:focus {
+            outline: 3px solid var(--accent-color);
+        }
+
+        #clear-search-btn {
+            padding: 0 20px;
+            height: 44px;
+            border: 2px solid var(--border-color);
+            background: #f0f0f0;
+            cursor: pointer;
+            font-weight: bold;
+            display: none; /* Hidden by default */
+        }
+        
+        #clear-search-btn.visible {
+            display: block;
+        }
+
+        #search-status {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            min-height: 1.2em;
+        }
+
+        .category-label {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .filter-tags {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid var(--border-color);
+            background: #fff;
+            cursor: pointer;
+            font-size: 1rem;
+            min-height: 44px;
+            font-weight: 600;
+        }
+
+        .filter-btn:hover, .filter-btn:focus {
+            background-color: #f0f0f0;
+            outline: 2px solid var(--accent-color);
+        }
+
+        .filter-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* Acronym Grid */
+        .acronym-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .card {
+            background: var(--bg-color);
+            border: 2px solid var(--border-color);
+            padding: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .acronym-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+        }
+
+        .category-tag {
+            font-size: 0.85rem;
+            padding: 0.25rem 0.75rem;
+            border: 1px solid #000;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .definition {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+            line-height: 1.4;
+        }
+
+        .description {
+            font-size: 1rem;
+            color: var(--text-light);
+            line-height: 1.5;
+        }
+
+        /* Quiz Mode */
+        .quiz-container {
+            max-width: 700px;
+            margin: 0 auto;
+            border: 2px solid var(--border-color);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .quiz-header {
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .quiz-score {
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .question-text {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            font-weight: bold;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .option-btn {
+            padding: 1.2rem;
+            border: 2px solid var(--border-color);
+            background: #fff;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-align: left;
+            font-weight: 600;
+            min-height: 60px;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: #f0f0f0;
+            border-color: var(--accent-color);
+        }
+
+        .option-btn:focus {
+            outline: 3px solid var(--accent-color);
+        }
+
+        .option-btn.correct {
+            background-color: var(--cat-business-bg);
+            border-color: var(--success-color);
+            color: var(--cat-business-text);
+        }
+
+        .option-btn.wrong {
+            background-color: #ffe6e6;
+            border-color: var(--error-color);
+            color: var(--error-color);
+        }
+
+        .quiz-actions {
+            margin-top: 2rem;
+        }
+
+        .primary-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: 2px solid var(--primary-color);
+            padding: 1rem 2.5rem;
+            font-size: 1.2rem;
+            cursor: pointer;
+            font-weight: 700;
+            min-height: 50px;
+        }
+
+        .primary-btn:hover {
+            background-color: #333;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Category Styling */
+        .tag-Technology { background: var(--cat-tech-bg); color: var(--cat-tech-text); }
+        .tag-Business { background: var(--cat-business-bg); color: var(--cat-business-text); }
+        .tag-Process { background: var(--cat-process-bg); color: var(--cat-process-text); }
+        .tag-General { background: var(--cat-general-bg); color: var(--cat-general-text); }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-light);
+            grid-column: 1 / -1;
+            border: 2px dashed #ccc;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .acronym-grid { grid-template-columns: 1fr; }
+            main { padding: 0.5rem; }
+            .nav-controls button { padding: 8px 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            AcronymList
+        </div>
+        <nav class="nav-controls">
+            <button id="nav-list-btn" class="active" onclick="switchView('list')">Dictionary</button>
+            <button id="nav-quiz-btn" onclick="switchView('quiz')">Quiz Mode</button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- LIST VIEW -->
+        <section id="view-list" class="view-section active">
+            <div class="controls-area">
+                <div class="search-wrapper">
+                    <input type="text" id="search-input" placeholder="Search acronyms (e.g. API)..." autocomplete="off" aria-label="Search acronyms">
+                    <button id="clear-search-btn" aria-label="Clear search">Clear</button>
+                </div>
+                <div id="search-status" aria-live="polite"></div>
+                
+                <div>
+                    <span class="category-label">Filter by category</span>
+                    <div class="filter-tags" id="category-filters">
+                        <button class="filter-btn active" data-category="All" id="filter-all">All</button>
+                        <button class="filter-btn" data-category="Technology" id="filter-tech">Technology</button>
+                        <button class="filter-btn" data-category="Business" id="filter-business">Business</button>
+                        <button class="filter-btn" data-category="Process" id="filter-process">Process</button>
+                        <button class="filter-btn" data-category="General" id="filter-general">General</button>
+                    </div>
+                </div>
+                <!-- Proxy for testing state -->
+                <span id="active-category-proxy" style="display:none;">All</span>
+                <span id="result-count-proxy" style="display:none;">0</span>
+            </div>
+
+            <div id="acronym-container" class="acronym-grid">
+                <!-- Items injected via JS -->
+            </div>
+        </section>
+
+        <!-- QUIZ VIEW -->
+        <section id="view-quiz" class="view-section">
+            <!-- Start Screen -->
+            <div id="quiz-start-screen" class="quiz-container">
+                <h2 style="margin-bottom: 1rem;">Test Your Knowledge</h2>
+                <p style="margin-bottom: 2rem;">Identify definitions for 5 random acronyms.</p>
+                <button id="start-quiz-btn" class="primary-btn">Start Quiz</button>
+            </div>
+
+            <!-- Question Screen -->
+            <div id="quiz-question-screen" class="quiz-container hidden">
+                <div class="quiz-header">
+                    <span class="quiz-score">Score: <span id="current-score">0</span> / <span id="total-questions">5</span></span>
+                    <span id="question-counter">Question 1 of 5</span>
+                </div>
+                <div class="question-text">
+                    What does <strong id="question-acronym"></strong> stand for?
+                </div>
+                <div id="options-container" class="options-grid">
+                    <!-- Options injected via JS -->
+                </div>
+                <div class="quiz-actions hidden" id="next-btn-container">
+                    <button id="next-question-btn" class="primary-btn">Next Question</button>
+                </div>
+            </div>
+
+            <!-- Results Screen -->
+            <div id="quiz-result-screen" class="quiz-container hidden">
+                <h2 style="margin-bottom: 1rem;">Quiz Complete!</h2>
+                <div style="font-size: 4rem; font-weight: 800; margin-bottom: 1rem;" id="final-score-display"></div>
+                <p id="result-message" style="margin-bottom: 2rem;">Great job!</p>
+                
+                <div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
+                    <button id="restart-quiz-btn" class="primary-btn">Start New Quiz</button>
+                    <button id="review-quiz-btn" class="filter-btn">Return to Dictionary</button>
+                </div>
+                <span id="quiz-status-proxy" style="display:none;">finished</span>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // --- DATASETS ---
+        const acronyms = [
+            { id: 1, term: "API", definition: "Application Programming Interface", category: "Technology", desc: "Allows applications to talk to each other." },
+            { id: 2, term: "KPI", definition: "Key Performance Indicator", category: "Business", desc: "A measure used to evaluate success." },
+            { id: 3, term: "SOP", definition: "Standard Operating Procedure", category: "Process", desc: "Step-by-step instructions for routine tasks." },
+            { id: 4, term: "MVP", definition: "Minimum Viable Product", category: "Business", desc: "Product with just enough features for early customers." },
+            { id: 5, term: "CI/CD", definition: "Continuous Integration / Continuous Deployment", category: "Technology", desc: "Automation in app development stages." },
+            { id: 6, term: "ROI", definition: "Return on Investment", category: "Business", desc: "Ratio between net profit and cost." },
+            { id: 7, term: "EOD", definition: "End of Day", category: "General", desc: "Deadline for end of business day." },
+            { id: 8, term: "UX", definition: "User Experience", category: "Technology", desc: "How a user interacts with and experiences a product." },
+            { id: 9, term: "OKR", definition: "Objectives and Key Results", category: "Business", desc: "Goal-setting framework." },
+            { id: 10, term: "QA", definition: "Quality Assurance", category: "Technology", desc: "Preventing mistakes and defects." },
+            { id: 11, term: "OOO", definition: "Out of Office", category: "General", desc: "Indicates unavailability." },
+            { id: 12, term: "SaaS", definition: "Software as a Service", category: "Technology", desc: "Software licensed on subscription." },
+            { id: 13, term: "B2B", definition: "Business to Business", category: "Business", desc: "Transactions between businesses." },
+            { id: 14, term: "CRM", definition: "Customer Relationship Management", category: "Technology", desc: "Managing interactions with customers." },
+            { id: 15, term: "WFH", definition: "Work From Home", category: "General", desc: "Working from residence." }
+        ];
+
+        // --- STATE MANAGEMENT ---
+        let state = {
+            filterCategory: 'All',
+            searchTerm: '',
+            quiz: {
+                active: false,
+                score: 0,
+                currentQuestionIndex: 0,
+                questions: [],
+                maxQuestions: 5
+            }
+        };
+
+        // --- DOM ELEMENTS ---
+        const container = document.getElementById('acronym-container');
+        const searchInput = document.getElementById('search-input');
+        const searchStatus = document.getElementById('search-status');
+        const clearSearchBtn = document.getElementById('clear-search-btn');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const navButtons = document.querySelectorAll('.nav-controls button');
+        
+        const activeCategoryProxy = document.getElementById('active-category-proxy');
+        const resultCountProxy = document.getElementById('result-count-proxy');
+        const quizStatusProxy = document.getElementById('quiz-status-proxy');
+
+        // Quiz Elements
+        const startQuizBtn = document.getElementById('start-quiz-btn');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const restartQuizBtn = document.getElementById('restart-quiz-btn');
+        const reviewQuizBtn = document.getElementById('review-quiz-btn');
+        const quizStartScreen = document.getElementById('quiz-start-screen');
+        const quizQuestionScreen = document.getElementById('quiz-question-screen');
+        const quizResultScreen = document.getElementById('quiz-result-screen');
+        const questionAcronymEl = document.getElementById('question-acronym');
+        const optionsContainer = document.getElementById('options-container');
+        const currentScoreEl = document.getElementById('current-score');
+        const nextBtnContainer = document.getElementById('next-btn-container');
+        const questionCounterEl = document.getElementById('question-counter');
+
+        // --- INITIALIZATION ---
+        function init() {
+            renderList();
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            // Search
+            searchInput.addEventListener('input', (e) => {
+                const rawVal = e.target.value;
+                state.searchTerm = rawVal.trim().toLowerCase();
+                
+                // Handle whitespace only: treat as empty but update UI
+                if(rawVal.length > 0 && state.searchTerm.length === 0) {
+                    state.searchTerm = ''; // effective empty
+                }
+
+                updateSearchControls(rawVal);
+                renderList();
+            });
+
+            clearSearchBtn.addEventListener('click', () => {
+                state.searchTerm = '';
+                searchInput.value = '';
+                searchInput.focus();
+                updateSearchControls('');
+                renderList();
+            });
+
+            // Filter Tags
+            filterButtons.forEach(btn => {
+                if(btn.id === 'review-quiz-btn') return; // skip utility button
+                
+                btn.addEventListener('click', () => {
+                    // Clear search on category change as per requirement to reset inputs on context switch
+                    state.searchTerm = '';
+                    searchInput.value = '';
+                    updateSearchControls('');
+
+                    // UI Update
+                    document.querySelectorAll('#category-filters .filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Logic Update
+                    state.filterCategory = btn.dataset.category;
+                    activeCategoryProxy.textContent = state.filterCategory;
+                    renderList();
+                });
+            });
+
+            // Quiz Buttons
+            startQuizBtn.addEventListener('click', startQuiz);
+            nextQuestionBtn.addEventListener('click', nextQuestion);
+            restartQuizBtn.addEventListener('click', startQuiz);
+            reviewQuizBtn.addEventListener('click', () => switchView('list'));
+        }
+
+        function updateSearchControls(val) {
+            if (val.length > 0) {
+                clearSearchBtn.classList.add('visible');
+            } else {
+                clearSearchBtn.classList.remove('visible');
+            }
+        }
+
+        // --- LIST VIEW LOGIC ---
+        function renderList() {
+            container.innerHTML = '';
+
+            const filtered = acronyms.filter(item => {
+                const termMatch = item.term.toLowerCase().includes(state.searchTerm);
+                const defMatch = item.definition.toLowerCase().includes(state.searchTerm);
+                const matchesSearch = termMatch || defMatch;
+                
+                const matchesCategory = state.filterCategory === 'All' || item.category === state.filterCategory;
+                return matchesSearch && matchesCategory;
+            });
+
+            // Update Proxies & Status
+            resultCountProxy.textContent = filtered.length;
+            
+            if (state.searchTerm) {
+                searchStatus.textContent = `Found ${filtered.length} result${filtered.length !== 1 ? 's' : ''} for "${state.searchTerm}"`;
+            } else if (state.filterCategory !== 'All') {
+                searchStatus.textContent = `Showing ${filtered.length} ${state.filterCategory} acronyms`;
+            } else {
+                searchStatus.textContent = `Showing all ${acronyms.length} acronyms`;
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="empty-state">No results found matching your criteria. Try clearing filters or search.</div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="acronym-title">${item.term}</div>
+                        <span class="category-tag tag-${item.category}">${item.category}</span>
+                    </div>
+                    <div class="definition">${item.definition}</div>
+                    <div class="description">${item.desc}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function switchView(viewName) {
+            navButtons.forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`nav-${viewName}-btn`).classList.add('active');
+
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${viewName}`).classList.add('active');
+
+            if (viewName === 'quiz' && !state.quiz.active) {
+                showQuizScreen('start');
+            }
+        }
+
+        // --- QUIZ LOGIC ---
+
+        function showQuizScreen(screenName) {
+            quizStartScreen.classList.add('hidden');
+            quizQuestionScreen.classList.add('hidden');
+            quizResultScreen.classList.add('hidden');
+
+            if (screenName === 'start') {
+                quizStartScreen.classList.remove('hidden');
+                quizStatusProxy.textContent = 'idle';
+            }
+            if (screenName === 'question') {
+                quizQuestionScreen.classList.remove('hidden');
+                quizStatusProxy.textContent = 'active';
+            }
+            if (screenName === 'result') {
+                quizResultScreen.classList.remove('hidden');
+                quizStatusProxy.textContent = 'finished';
+            }
+        }
+
+        function startQuiz() {
+            state.quiz.score = 0;
+            state.quiz.currentQuestionIndex = 0;
+            state.quiz.active = true;
+            state.quiz.questions = generateQuestions();
+            
+            currentScoreEl.innerText = '0';
+            showQuizScreen('question');
+            renderQuestion();
+        }
+
+        function generateQuestions() {
+            const shuffled = [...acronyms].sort(() => 0.5 - Math.random());
+            const selected = shuffled.slice(0, state.quiz.maxQuestions);
+
+            return selected.map(target => {
+                const others = acronyms.filter(a => a.id !== target.id);
+                const distractors = others.sort(() => 0.5 - Math.random()).slice(0, 3);
+                const options = [...distractors, target].sort(() => 0.5 - Math.random());
+                return { target, options };
+            });
+        }
+
+        function renderQuestion() {
+            const currentQ = state.quiz.questions[state.quiz.currentQuestionIndex];
+            
+            questionAcronymEl.innerText = currentQ.target.term;
+            questionCounterEl.innerText = `Question ${state.quiz.currentQuestionIndex + 1} of ${state.quiz.maxQuestions}`;
+            nextBtnContainer.classList.add('hidden');
+            optionsContainer.innerHTML = '';
+
+            currentQ.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.id = `quiz-opt-${index}`;
+                btn.innerText = opt.definition;
+                btn.onclick = () => handleAnswer(btn, opt.id === currentQ.target.id);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(btnElement, isCorrect) {
+            const allBtns = optionsContainer.querySelectorAll('.option-btn');
+            allBtns.forEach(btn => btn.disabled = true);
+
+            if (isCorrect) {
+                btnElement.classList.add('correct');
+                state.quiz.score++;
+                currentScoreEl.innerText = state.quiz.score;
+            } else {
+                btnElement.classList.add('wrong');
+                const correctOpt = state.quiz.questions[state.quiz.currentQuestionIndex].target.definition;
+                allBtns.forEach(btn => {
+                    if (btn.innerText === correctOpt) btn.classList.add('correct');
+                });
+            }
+
+            nextBtnContainer.classList.remove('hidden');
+            document.getElementById('next-question-btn').focus();
+        }
+
+        function nextQuestion() {
+            state.quiz.currentQuestionIndex++;
+            
+            if (state.quiz.currentQuestionIndex >= state.quiz.maxQuestions) {
+                finishQuiz();
+            } else {
+                renderQuestion();
+            }
+        }
+
+        function finishQuiz() {
+            showQuizScreen('result');
+            document.getElementById('final-score-display').innerText = `${state.quiz.score} / ${state.quiz.maxQuestions}`;
+            
+            const msgEl = document.getElementById('result-message');
+            const percentage = (state.quiz.score / state.quiz.maxQuestions) * 100;
+            
+            if (percentage === 100) msgEl.innerText = "Perfect score! You are an acronym master!";
+            else if (percentage >= 80) msgEl.innerText = "Great job! You know your stuff.";
+            else if (percentage >= 60) msgEl.innerText = "Not bad! Keep practicing.";
+            else msgEl.innerText = "Keep studying the dictionary and try again!";
+            
+            state.quiz.active = false;
+            document.getElementById('restart-quiz-btn').focus();
+        }
+
+        // Run App
+        init();
+
+    </script>
+</body>
+</html>

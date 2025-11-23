@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEON ARENA - Esports Tournament 2024</title>
+    <style>
+        /* --- CSS VARIABLES & RESET --- */
+        :root {
+            --color-bg: #050510;
+            --color-bg-alt: #0a0a1a;
+            --color-primary: #00f3ff; /* Cyan */
+            --color-secondary: #ff0055; /* Pink */
+            --color-accent: #bc13fe; /* Purple */
+            --color-text: #ffffff;
+            --color-text-muted: #8888aa;
+            --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --spacing-container: 1200px;
+            --glow-primary: 0 0 10px var(--color-primary), 0 0 20px var(--color-primary);
+            --glow-secondary: 0 0 10px var(--color-secondary), 0 0 20px var(--color-secondary);
+            --border-radius: 2px; /* Sharp edges for cyber look */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: var(--font-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--color-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--color-primary); }
+
+        /* --- UTILITIES --- */
+        .container {
+            max-width: var(--spacing-container);
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--color-bg);
+            background: var(--color-primary);
+            border: none;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--glow-primary);
+        }
+        .btn-secondary {
+            background: transparent;
+            color: var(--color-secondary);
+            border: 1px solid var(--color-secondary);
+        }
+        .btn-secondary:hover {
+            background: var(--color-secondary);
+            color: white;
+            box-shadow: var(--glow-secondary);
+        }
+        h2 {
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+        }
+        .section-padding { padding: 80px 0; }
+
+        /* --- SCANLINES OVERLAY --- */
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.3;
+        }
+
+        /* --- NAV --- */
+        nav {
+            position: fixed;
+            top: 0; width: 100%;
+            background: rgba(5, 5, 16, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.2);
+        }
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 900;
+            font-style: italic;
+            color: var(--color-primary);
+            text-transform: uppercase;
+        }
+        .nav-links { display: flex; gap: 20px; }
+        .nav-links a {
+            color: var(--color-text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover { color: var(--color-primary); text-shadow: 0 0 8px var(--color-primary); }
+
+        /* --- HERO --- */
+        #hero {
+            position: relative;
+            height: 100vh;
+            min-height: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        #hero-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            background: rgba(5, 5, 16, 0.6);
+            padding: 40px;
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            backdrop-filter: blur(4px);
+        }
+        .hero-title {
+            font-size: 4rem;
+            line-height: 1;
+            font-weight: 900;
+            font-style: italic;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, var(--color-primary), #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(0, 243, 255, 0.5));
+        }
+        .hero-date {
+            font-size: 1.5rem;
+            color: var(--color-secondary);
+            margin-bottom: 30px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .hero-cta-group { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+
+        /* --- STREAM PREVIEW & TICKER --- */
+        #stream { background: var(--color-bg-alt); border-bottom: 1px solid #333; }
+        .stream-container {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .video-placeholder {
+            background: #000;
+            aspect-ratio: 16/9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: 1px solid var(--color-primary);
+        }
+        .video-placeholder::after { content: "LIVE STREAM OFFLINE"; color: var(--color-text-muted); }
+        .stream-chat {
+            background: #111;
+            border: 1px solid #333;
+            padding: 10px;
+            height: 100%;
+            display: flex; flex-direction: column;
+        }
+        .chat-lines { flex: 1; font-size: 0.8rem; color: #aaa; overflow: hidden; }
+        .ticker-wrap {
+            width: 100%;
+            overflow: hidden;
+            background: var(--color-primary);
+            color: var(--color-bg);
+            padding: 8px 0;
+            white-space: nowrap;
+        }
+        .ticker { display: inline-block; animation: ticker 20s linear infinite; font-weight: bold; text-transform: uppercase; }
+        @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+        
+        .sponsor-carousel {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px 0;
+            opacity: 0.7;
+            filter: grayscale(100%);
+        }
+        .sponsor-carousel span { font-weight: bold; font-size: 1.2rem; }
+
+        /* --- BRACKET --- */
+        #bracket { overflow-x: auto; }
+        .bracket-wrapper {
+            display: flex;
+            justify-content: space-between;
+            min-width: 800px;
+            padding: 40px 0;
+        }
+        .bracket-col {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            flex: 1;
+            position: relative;
+        }
+        .match-card {
+            background: #111;
+            border: 1px solid #333;
+            padding: 10px;
+            margin: 10px;
+            position: relative;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .match-card:hover { border-color: var(--color-primary); box-shadow: var(--glow-primary); }
+        .match-card.active-demo { border-color: var(--color-secondary); box-shadow: var(--glow-secondary); }
+        .team-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+        }
+        .team-name { font-weight: bold; }
+        .team-score { color: var(--color-primary); }
+        
+        /* Connectors */
+        .bracket-col:not(:last-child) .match-card::after {
+            content: ''; position: absolute;
+            right: -20px; top: 50%; width: 20px; height: 2px; background: #333;
+        }
+
+        /* --- SCHEDULE --- */
+        #schedule { background: var(--color-bg-alt); }
+        .filters { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; }
+        .match-list { display: grid; gap: 15px; }
+        .match-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.03);
+            padding: 20px;
+            border-left: 4px solid var(--color-text-muted);
+            transition: 0.3s;
+        }
+        .match-item:hover { background: rgba(255,255,255,0.08); border-left-color: var(--color-primary); }
+        .match-time { font-family: monospace; color: var(--color-primary); font-size: 1.1rem; }
+        .match-teams { font-size: 1.2rem; font-weight: bold; }
+        
+        /* --- TEAMS --- */
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        .team-card {
+            background: #0f0f1f;
+            border: 1px solid #333;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+        .team-card:hover { transform: translateY(-5px); border-color: var(--color-accent); }
+        .team-header {
+            background: linear-gradient(90deg, #222, #111);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .team-flag { width: 30px; height: 20px; background: #555; display: inline-block; }
+        .team-roster { padding: 20px; }
+        .player { display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px solid #222; padding-bottom: 2px; }
+        .role { font-size: 0.7rem; color: var(--color-text-muted); text-transform: uppercase; }
+        .form-bar { height: 4px; background: #333; margin-top: 10px; display: flex; gap: 2px; }
+        .form-win { flex: 1; background: var(--color-primary); }
+        .form-loss { flex: 1; background: var(--color-secondary); }
+
+        /* --- VENUE --- */
+        #venue { background: var(--color-bg-alt); }
+        .venue-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        .map-placeholder {
+            width: 100%; height: 300px;
+            background: #151525;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px dashed var(--color-text-muted);
+            position: relative;
+        }
+        .map-pin { font-size: 2rem; color: var(--color-secondary); animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        /* --- SOCIAL PROOF --- */
+        .testimonial-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .testimonial {
+            background: #111; padding: 20px;
+            border-left: 2px solid var(--color-accent);
+            font-style: italic;
+        }
+        .author { display: block; margin-top: 10px; font-style: normal; color: var(--color-primary); font-weight: bold; }
+
+        /* --- FOOTER --- */
+        footer { background: #020205; padding: 60px 0 100px 0; border-top: 1px solid #222; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; }
+        .footer-col h4 { color: var(--color-primary); margin-bottom: 20px; text-transform: uppercase; }
+        .footer-col ul { list-style: none; }
+        .footer-col li { margin-bottom: 10px; }
+        .footer-col a { color: #aaa; text-decoration: none; }
+        .footer-col a:hover { color: #fff; }
+
+        /* Sticky Mobile CTA */
+        #mobile-cta {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            padding: 15px; background: rgba(5,5,16,0.95);
+            border-top: 1px solid var(--color-primary);
+            display: none; z-index: 9999;
+            text-align: center;
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.5rem; }
+            .stream-container { grid-template-columns: 1fr; }
+            .venue-grid { grid-template-columns: 1fr; }
+            .nav-links { display: none; } /* Simple hide for brevity */
+            #mobile-cta { display: block; }
+            .bracket-wrapper { overflow-x: scroll; }
+        }
+
+        /* Prefers Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            * { animation: none !important; transition: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Overlay Scanlines -->
+    <div class="scanlines"></div>
+
+    <!-- Navbar -->
+    <nav>
+        <div class="container nav-content">
+            <div class="logo">NEON<span style="color:#fff">ARENA</span></div>
+            <div class="nav-links">
+                <a href="#schedule">Schedule</a>
+                <a href="#bracket">Bracket</a>
+                <a href="#teams">Teams</a>
+                <a href="#venue">Venue</a>
+            </div>
+            <a href="#" id="nav-ticket-btn" class="btn btn-secondary">Buy Tickets</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero">
+        <canvas id="hero-canvas"></canvas>
+        <div class="hero-content">
+            <div class="hero-date">NOV 15-17, 2024 • TOKYO</div>
+            <h1 class="hero-title">CYBER CLASH<br>FINALS 2024</h1>
+            <p style="margin-bottom: 30px; font-size: 1.2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+                The world's top 8 teams collide in the ultimate digital showdown.
+            </p>
+            <div class="hero-cta-group">
+                <a href="#" id="btn-register-team" class="btn">Register Team</a>
+                <a href="#" id="btn-get-tickets" class="btn btn-secondary">Get Tickets</a>
+                <a href="#stream" id="btn-watch-live" class="btn btn-secondary" style="border-color:var(--color-accent); color:var(--color-accent)">Watch Live</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stream Preview -->
+    <section id="stream">
+        <div class="ticker-wrap">
+            <div class="ticker">
+                LIVE: Team Alpha vs Omega [1-0] /// NEXT: Gamma vs Delta at 14:00 UTC /// FINAL TICKETS 90% SOLD OUT /// 
+            </div>
+        </div>
+        <div class="container section-padding">
+            <div class="stream-container">
+                <div class="video-player">
+                    <div class="video-placeholder">
+                        <!-- Fake play button -->
+                        <div style="width: 60px; height: 60px; border: 4px solid #fff; border-radius: 50%; display:flex; align-items:center; justify-content:center;">
+                            <div style="width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-left: 20px solid #fff; margin-left: 5px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stream-chat">
+                    <div class="chat-lines" id="chat-box">
+                        <div style="color:var(--color-primary)"><strong>System:</strong> Welcome to the chat!</div>
+                    </div>
+                    <input type="text" placeholder="Send a message..." style="background:#222; border:none; padding:10px; color:#fff; margin-top:10px;">
+                </div>
+            </div>
+            <div class="sponsor-carousel">
+                <span>HYPERTECH</span>
+                <span>QUANTUM RIGS</span>
+                <span>ENERGY DRIP</span>
+                <span>NEON WEAR</span>
+                <span>LOGIC GEAR</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bracket -->
+    <section id="bracket" class="section-padding">
+        <div class="container">
+            <h2>Tournament Bracket</h2>
+            <p style="text-align: center; margin-bottom: 20px; color: var(--color-text-muted);">Hover to see path • <span id="demo-status">Demo Mode Active</span></p>
+            
+            <div class="bracket-wrapper" id="bracket-container">
+                <!-- Generated by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Schedule -->
+    <section id="schedule" class="section-padding">
+        <div class="container">
+            <h2>Match Schedule</h2>
+            <div class="filters">
+                <button class="btn btn-secondary" onclick="filterSchedule('all')">All</button>
+                <button class="btn btn-secondary" onclick="filterSchedule('Group Stage')">Groups</button>
+                <button class="btn btn-secondary" onclick="filterSchedule('Playoffs')">Playoffs</button>
+            </div>
+            <div style="text-align:right; margin-bottom:10px;">
+                <button class="btn" style="font-size:0.7rem; padding:8px 16px;" onclick="downloadICS()">Add to Calendar (ICS)</button>
+            </div>
+            <div id="match-list-container" class="match-list">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Teams -->
+    <section id="teams" class="section-padding">
+        <div class="container">
+            <h2>Competing Teams</h2>
+            <div class="teams-grid" id="teams-grid">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Venue -->
+    <section id="venue" class="section-padding">
+        <div class="container">
+            <h2>Venue & Travel</h2>
+            <div class="venue-grid">
+                <div class="venue-info">
+                    <h3 style="color:var(--color-primary); margin-bottom:15px;">CyberDome Arena, Tokyo</h3>
+                    <p style="margin-bottom:20px;">The world's most advanced esports facility. Featuring 80ft LED screens and haptic seating.</p>
+                    
+                    <h4 style="margin-bottom:10px;">Accessibility</h4>
+                    <ul style="margin-bottom:20px; padding-left:20px; color:var(--color-text-muted);">
+                        <li>Wheelchair accessible entrances (Gate A, C)</li>
+                        <li>Sensory rooms available</li>
+                        <li>Assisted listening devices</li>
+                    </ul>
+
+                    <h4 style="margin-bottom:10px;">Nearby Hotels</h4>
+                    <ul style="list-style:none;">
+                        <li style="margin-bottom:10px; border-left:2px solid var(--color-secondary); padding-left:10px;">
+                            <strong>Neon Plaza Hotel</strong> <br> <span style="font-size:0.8rem">0.2 miles away • ⭐⭐⭐⭐⭐</span>
+                        </li>
+                        <li style="margin-bottom:10px; border-left:2px solid var(--color-secondary); padding-left:10px;">
+                            <strong>Gamer's Rest Hostel</strong> <br> <span style="font-size:0.8rem">0.5 miles away • ⭐⭐⭐</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="venue-map">
+                    <div class="map-placeholder">
+                        <div class="map-pin">📍</div>
+                        <span style="position:absolute; bottom:20px;">Interactive Map Disabled</span>
+                    </div>
+                    <div style="margin-top:10px; display:flex; gap:10px;">
+                        <a href="#" class="btn btn-secondary" style="flex:1; text-align:center;">Get Directions</a>
+                        <a href="#" class="btn btn-secondary" style="flex:1; text-align:center;">Parking Info</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof -->
+    <section id="social" class="section-padding" style="background:#080810;">
+        <div class="container">
+            <h2 style="font-size:1.5rem;">Community Hype</h2>
+            <div class="testimonial-grid">
+                <div class="testimonial">
+                    "The production value last year was insane. Can't wait for the finals!"
+                    <span class="author">@ProGamer_99</span>
+                </div>
+                <div class="testimonial">
+                    "Best tournament experience in the scene. The neon aesthetics are 🔥"
+                    <span class="author">EsportsDaily</span>
+                </div>
+                <div class="testimonial">
+                    "Got my tickets. Alpha Team is taking it all the way."
+                    <span class="author">FanaticUser</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="footer">
+        <div class="container footer-grid">
+            <div class="footer-col">
+                <h4>Info</h4>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Rules (PDF)</a></li>
+                    <li><a href="#">Code of Conduct</a></li>
+                    <li><a href="#">Press Kit</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Contact Support</a></li>
+                    <li><a href="#">Lost & Found</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Newsletter</h4>
+                <form onsubmit="event.preventDefault(); alert('Subscribed!');">
+                    <input type="email" placeholder="Enter email" style="width:100%; padding:10px; margin-bottom:10px; border:none;">
+                    <button class="btn" style="width:100%;">Subscribe</button>
+                </form>
+            </div>
+        </div>
+        <div style="text-align:center; margin-top:40px; color:#444;">
+            &copy; 2024 Neon Arena Esports. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- Mobile Sticky CTA -->
+    <div id="mobile-cta">
+        <a href="#" class="btn" style="width:100%;">Buy Tickets Now</a>
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        // --- STATE & DATA ---
+        const teams = [
+            { id: 1, name: 'Team Alpha', color: '#ff0055', country: 'KR', form: [1,1,1,0,1], players: ['FakerLike', 'ZeusGod', 'Oner'] },
+            { id: 2, name: 'Team Beta', color: '#00f3ff', country: 'CN', form: [0,1,1,1,0], players: ['UziBack', 'Ming', 'Xiaohu'] },
+            { id: 3, name: 'Gamma Ray', color: '#bc13fe', country: 'EU', form: [1,0,0,1,1], players: ['Caps', 'Jankos', 'Mikyx'] },
+            { id: 4, name: 'Delta Force', color: '#ffff00', country: 'NA', form: [0,0,1,0,1], players: ['Doublelift', 'Bjergsen', 'CoreJJ'] },
+            { id: 5, name: 'Echo Fox', color: '#ff8800', country: 'KR', form: [1,1,0,1,0], players: ['Showmaker', 'Canyon', 'Nuguri'] },
+            { id: 6, name: 'Zeta Div', color: '#00ff00', country: 'BR', form: [0,1,0,0,0], players: ['BrTT', 'Kami', 'Revolta'] },
+            { id: 7, name: 'Omega', color: '#0000ff', country: 'CN', form: [1,1,1,1,1], players: ['Ruler', 'Kanavi', 'Knight'] },
+            { id: 8, name: 'Theta', color: '#ff00ff', country: 'EU', form: [0,0,0,1,0], players: ['Perkz', 'Elyoya', 'Kaiser'] }
+        ];
+
+        const matches = [
+            { id: 101, stage: 'Playoffs', team1: 'Team Alpha', team2: 'Theta', time: '2024-11-15T10:00:00Z' },
+            { id: 102, stage: 'Playoffs', team1: 'Delta Force', team2: 'Echo Fox', time: '2024-11-15T13:00:00Z' },
+            { id: 103, stage: 'Playoffs', team1: 'Team Beta', team2: 'Zeta Div', time: '2024-11-15T16:00:00Z' },
+            { id: 104, stage: 'Playoffs', team1: 'Gamma Ray', team2: 'Omega', time: '2024-11-15T19:00:00Z' },
+            { id: 201, stage: 'Group Stage', team1: 'Alpha', team2: 'Beta', time: '2024-11-14T10:00:00Z' },
+        ];
+
+        // --- HERO ANIMATION (CANVAS) ---
+        const canvas = document.getElementById('hero-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.z = Math.random() * 2; // Depth
+                this.size = Math.random() * 2;
+                this.speed = Math.random() * 0.5 + 0.1;
+            }
+            update() {
+                this.y += this.speed;
+                if (this.y > height) {
+                    this.y = 0;
+                    this.x = Math.random() * width;
+                }
+            }
+            draw() {
+                ctx.fillStyle = `rgba(0, 243, 255, ${Math.random() * 0.8})`; // Cyan flicker
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 100; i++) particles.push(new Particle());
+
+        // Grid properties
+        let offset = 0;
+
+        function animate() {
+            // Check for reduced motion preference
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            ctx.fillStyle = '#050510';
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw retro grid
+            ctx.strokeStyle = 'rgba(188, 19, 254, 0.2)'; // Purple
+            ctx.lineWidth = 1;
+            
+            // Perspective lines
+            const centerX = width / 2;
+            const centerY = height / 2;
+            
+            for (let i = 0; i < width; i+=100) {
+                ctx.beginPath();
+                ctx.moveTo(i, height);
+                ctx.lineTo(centerX, centerY - 100); // Vanishing point
+                ctx.stroke();
+            }
+
+            // Horizontal moving lines
+            offset = (offset + 0.5) % 50;
+            for (let i = centerY; i < height; i+=50) {
+                let y = i + offset;
+                if(y > height) y -= (height - centerY);
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // --- BRACKET LOGIC ---
+        function renderBracket() {
+            const container = document.getElementById('bracket-container');
+            // Simple 8 team bracket structure
+            const rounds = [
+                { name: 'Quarterfinals', matches: 4, id: 'qf' },
+                { name: 'Semifinals', matches: 2, id: 'sf' },
+                { name: 'Finals', matches: 1, id: 'f' }
+            ];
+
+            rounds.forEach((round, rIndex) => {
+                const col = document.createElement('div');
+                col.className = 'bracket-col';
+                col.innerHTML = `<h3 style="text-align:center; margin-bottom:20px; color:var(--color-primary)">${round.name}</h3>`;
+                
+                for(let i=0; i<round.matches; i++) {
+                    const matchId = `${round.id}-${i}`;
+                    const card = document.createElement('div');
+                    card.className = 'match-card';
+                    card.id = `match-${matchId}`;
+                    
+                    // Mock data logic
+                    let t1 = "TBD", t2 = "TBD", s1 = 0, s2 = 0;
+                    if(rIndex === 0) {
+                        t1 = teams[i*2].name;
+                        t2 = teams[i*2+1].name;
+                    }
+
+                    card.innerHTML = `
+                        <div class="team-row"><span class="team-name">${t1}</span><span class="team-score" id="score-${matchId}-1">${s1}</span></div>
+                        <div class="team-row"><span class="team-name">${t2}</span><span class="team-score" id="score-${matchId}-2">${s2}</span></div>
+                        <div style="font-size:0.7rem; color:#666; margin-top:5px;">${rIndex === 0 ? '20:00 CET' : 'Upcoming'}</div>
+                    `;
+                    col.appendChild(card);
+                }
+                container.appendChild(col);
+            });
+        }
+        renderBracket();
+
+        // Bracket Demo Mode
+        function runBracketDemo() {
+            const matchCards = document.querySelectorAll('.match-card');
+            let current = 0;
+            
+            setInterval(() => {
+                matchCards.forEach(c => c.classList.remove('active-demo'));
+                if(current < matchCards.length) {
+                    matchCards[current].classList.add('active-demo');
+                    current++;
+                } else {
+                    current = 0;
+                }
+            }, 1500);
+        }
+        // Start demo if not reduced motion
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            runBracketDemo();
+        } else {
+            document.getElementById('demo-status').style.display = 'none';
+        }
+
+
+        // --- SCHEDULE LOGIC ---
+        function renderSchedule(filter = 'all') {
+            const container = document.getElementById('match-list-container');
+            container.innerHTML = '';
+
+            matches.forEach(match => {
+                if (filter !== 'all' && match.stage !== filter) return;
+
+                const date = new Date(match.time);
+                // Timezone aware formatting
+                const timeStr = date.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                const div = document.createElement('div');
+                div.className = 'match-item';
+                div.innerHTML = `
+                    <div>
+                        <div style="font-size:0.8rem; color:var(--color-secondary); text-transform:uppercase;">${match.stage}</div>
+                        <div class="match-teams">${match.team1} <span style="color:#555">vs</span> ${match.team2}</div>
+                    </div>
+                    <div class="match-time">${timeStr}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+        window.filterSchedule = renderSchedule;
+        renderSchedule();
+
+        window.downloadICS = function() {
+            let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//NeonArena//Esports//EN\n";
+            matches.forEach(m => {
+                const start = m.time.replace(/[-:]/g, '').split('.')[0]; // Simple format
+                icsContent += `BEGIN:VEVENT\nSUMMARY:${m.team1} vs ${m.team2}\nDTSTART:${start}\nDESCRIPTION:${m.stage} Match\nEND:VEVENT\n`;
+            });
+            icsContent += "END:VCALENDAR";
+            
+            const blob = new Blob([icsContent], { type: 'text/calendar' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'tournament.ics';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        };
+
+
+        // --- TEAM CARDS LOGIC ---
+        function renderTeams() {
+            const container = document.getElementById('teams-grid');
+            
+            teams.forEach(team => {
+                // Generate form bar HTML
+                const formHtml = team.form.map(res => 
+                    `<div class="${res ? 'form-win' : 'form-loss'}"></div>`
+                ).join('');
+
+                const card = document.createElement('div');
+                card.className = 'team-card';
+                card.innerHTML = `
+                    <div class="team-header">
+                        <div class="team-flag">${team.country}</div>
+                        <h3 style="margin:0; color:${team.color}">${team.name}</h3>
+                    </div>
+                    <div class="team-roster">
+                        <div class="player"><span>${team.players[0]}</span><span class="role">Top</span></div>
+                        <div class="player"><span>${team.players[1]}</span><span class="role">Jungle</span></div>
+                        <div class="player"><span>${team.players[2]}</span><span class="role">Mid</span></div>
+                        <div style="margin-top:15px;">
+                            <span style="font-size:0.7rem; text-transform:uppercase;">Recent Form</span>
+                            <div class="form-bar">${formHtml}</div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+        renderTeams();
+
+        // --- CHAT SIMULATION ---
+        const chatBox = document.getElementById('chat-box');
+        const chatMessages = ["PogChamp", "Lets go Alpha!", "NA LUL", "What a play!", "GG", "Scripted?"];
+        
+        setInterval(() => {
+            const msg = chatMessages[Math.floor(Math.random() * chatMessages.length)];
+            const user = "User" + Math.floor(Math.random() * 1000);
+            const div = document.createElement('div');
+            div.innerHTML = `<span style="color:#888">${user}:</span> ${msg}`;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            
+            // Keep DOM light
+            if(chatBox.children.length > 20) chatBox.removeChild(chatBox.children[0]);
+        }, 2000);
+
+        // Lazy Loading Implementation (Standard Intersection Observer)
+        document.addEventListener("DOMContentLoaded", function() {
+            const lazyElements = document.querySelectorAll('.match-item'); // Example target
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = 1;
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+            // Usually applied to images, but here applied to list items for fade-in effect
+            lazyElements.forEach(el => {
+                el.style.opacity = 0;
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'opacity 0.5s, transform 0.5s';
+                observer.observe(el);
+            });
+        });
+
+    </script>
+</body>
+</html>

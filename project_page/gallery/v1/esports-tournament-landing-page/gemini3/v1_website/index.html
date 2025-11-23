@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEON ARENA - Esports Tournament 2024</title>
+    <style>
+        /* --- RESET & VARIABLES --- */
+        :root {
+            --color-bg: #ffffff;
+            --color-text: #000000;
+            --color-primary: #00bcd4; /* Cyan */
+            --color-secondary: #e91e63; /* Pink */
+            --color-accent: #9c27b0; /* Purple */
+            --color-border: #000000;
+            --color-surface: #f5f5f5;
+            --spacing-unit: 16px;
+            --font-main: system-ui, -apple-system, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: var(--font-main);
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        /* --- UTILITIES --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-unit);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            min-height: 44px;
+            min-width: 44px;
+            background: var(--color-primary);
+            color: #fff;
+            border: 2px solid var(--color-border);
+            font-weight: bold;
+            text-transform: uppercase;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.8; }
+        .btn:focus-visible { outline: 4px solid var(--color-accent); outline-offset: 2px; }
+        
+        .btn-secondary {
+            background: #fff;
+            color: var(--color-text);
+            border: 2px solid var(--color-text);
+        }
+        .btn-secondary:hover { background: var(--color-surface); }
+
+        h1, h2, h3 { text-transform: uppercase; margin-bottom: var(--spacing-unit); font-weight: 900; }
+        h2 { font-size: 2rem; text-align: center; border-bottom: 2px solid var(--color-text); padding-bottom: 8px; }
+        
+        .section-padding { padding: 40px 0; }
+        
+        /* --- PROXIES (Hidden but accessible for automation) --- */
+        .proxy-indicator {
+            position: fixed; bottom: 0; left: 0; opacity: 0.01; pointer-events: none; z-index: -1;
+        }
+
+        /* --- NAVIGATION --- */
+        nav {
+            position: sticky;
+            top: 0;
+            background: var(--color-bg);
+            border-bottom: 2px solid var(--color-border);
+            z-index: 1000;
+            height: 60px;
+            display: flex;
+            align-items: center;
+        }
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-unit);
+        }
+        .logo { font-size: 1.5rem; font-weight: 900; color: var(--color-text); text-decoration: none; }
+        .logo span { color: var(--color-primary); }
+        
+        .nav-links { display: flex; gap: 4px; }
+        .nav-links a {
+            padding: 8px 12px;
+            color: var(--color-text);
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border: 2px solid transparent;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            background: var(--color-surface);
+            border-bottom: 4px solid var(--color-primary);
+        }
+        .nav-links a:focus-visible { outline: 2px solid var(--color-accent); }
+
+        /* --- HERO --- */
+        #hero {
+            padding: 60px 0;
+            text-align: center;
+            background: var(--color-surface);
+            border-bottom: 2px solid var(--color-border);
+        }
+        .hero-title { font-size: 3.5rem; line-height: 1.1; margin-bottom: 16px; }
+        .hero-date { font-size: 1.2rem; font-weight: bold; color: var(--color-secondary); margin-bottom: 24px; }
+        .hero-cta-group { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+        /* --- STREAM --- */
+        #stream { background: #000; color: #fff; padding: 20px 0; }
+        #stream-preview { /* Logical wrapper for targeting */ }
+        .stream-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+        .video-placeholder {
+            aspect-ratio: 16/9;
+            background: #222;
+            border: 2px solid var(--color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .video-placeholder::after { content: "LIVE STREAM OFFLINE"; color: #888; font-weight: bold; }
+        
+        .ticker-wrap {
+            background: var(--color-primary);
+            color: #fff;
+            padding: 8px 0;
+            overflow: hidden;
+            white-space: nowrap;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .ticker-content { display: inline-block; padding-left: 100%; animation: ticker 30s linear infinite; }
+        @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+
+        /* --- BRACKET --- */
+        #bracket { background: var(--color-bg); overflow-x: auto; }
+        .bracket-wrapper {
+            display: flex;
+            justify-content: space-between;
+            min-width: 800px;
+            padding: 20px 0;
+        }
+        .bracket-col { flex: 1; display: flex; flex-direction: column; justify-content: space-around; margin: 0 10px; }
+        .match-card {
+            background: var(--color-surface);
+            border: 2px solid var(--color-border);
+            padding: 10px;
+            margin: 10px 0;
+            position: relative;
+            cursor: pointer;
+        }
+        .match-card:hover { border-color: var(--color-primary); background: #e0f7fa; }
+        .team-row { display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; padding: 4px 0; }
+        .team-row:last-child { border-bottom: none; }
+        .team-score { font-weight: bold; }
+
+        /* --- SCHEDULE --- */
+        #schedule { background: var(--color-surface); border-top: 2px solid var(--color-border); }
+        .filters { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid var(--color-text);
+            background: #fff;
+            cursor: pointer;
+            font-weight: bold;
+            min-height: 44px;
+        }
+        .filter-btn.active { background: var(--color-text); color: #fff; }
+        
+        .match-list { display: grid; gap: 10px; }
+        .match-item {
+            background: #fff;
+            border: 2px solid var(--color-border);
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .match-info { display: flex; flex-direction: column; }
+        .match-stage { font-size: 0.8rem; text-transform: uppercase; color: #666; }
+        .match-teams { font-weight: bold; font-size: 1.1rem; }
+        .match-time { font-family: monospace; font-size: 1rem; color: var(--color-secondary); }
+
+        /* --- TEAMS --- */
+        #teams { background: var(--color-bg); }
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .team-card {
+            border: 2px solid var(--color-border);
+            padding: 16px;
+            background: #fff;
+        }
+        .team-card h3 { border-bottom: 2px solid var(--color-primary); padding-bottom: 8px; margin-bottom: 12px; }
+        .player-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #eee; }
+
+        /* --- VENUE --- */
+        #venue { background: var(--color-surface); }
+        .venue-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .venue-info ul { list-style: none; padding-left: 0; margin-top: 10px; }
+        .venue-info li { padding: 8px 0; border-bottom: 1px solid #ccc; }
+        .map-placeholder {
+            background: #ddd;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #999;
+            font-weight: bold;
+        }
+
+        /* --- CONTACT (New Section) --- */
+        #contact { background: var(--color-bg); border-top: 2px solid var(--color-border); }
+        .contact-form { max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 4px; }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--color-border);
+            font-family: var(--font-main);
+            font-size: 1rem;
+        }
+        .form-group input:focus, .form-group textarea:focus { outline: 2px solid var(--color-primary); border-color: var(--color-primary); }
+
+        /* --- FOOTER --- */
+        footer {
+            background: #000;
+            color: #fff;
+            padding: 40px 0;
+            margin-top: 40px;
+        }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+        }
+        .footer-col h4 { color: var(--color-primary); margin-bottom: 16px; text-transform: uppercase; }
+        .footer-col ul { list-style: none; }
+        .footer-col li { margin-bottom: 8px; }
+        .footer-col a { color: #ccc; text-decoration: none; }
+        .footer-col a:hover { color: #fff; text-decoration: underline; }
+
+        /* --- MOBILE CTA --- */
+        #mobile-cta {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 16px;
+            background: var(--color-bg);
+            border-top: 2px solid var(--color-primary);
+            display: none; /* Hidden on desktop */
+            z-index: 2000;
+            text-align: center;
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            .nav-links { display: none; } /* Simplified for brevity, mobile menu logic omitted */
+            .hero-title { font-size: 2.5rem; }
+            .stream-container, .venue-grid { grid-template-columns: 1fr; }
+            #mobile-cta { display: block; }
+            .bracket-wrapper { overflow-x: scroll; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PROXY ELEMENTS FOR AUTOMATION -->
+    <div id="activeSection" class="proxy-indicator">hero</div>
+    <div id="downloadStatus" class="proxy-indicator">idle</div>
+    <div id="ticketStatus" class="proxy-indicator">idle</div>
+    <div id="filterStatus" class="proxy-indicator">all</div>
+    <div id="contactStatus" class="proxy-indicator">idle</div>
+    <div id="lastMatchClicked" class="proxy-indicator">none</div>
+
+    <!-- NAVIGATION -->
+    <nav id="main-nav">
+        <div class="nav-content">
+            <a href="#" class="logo">NEON<span>ARENA</span></a>
+            <div class="nav-links">
+                <a href="#hero" class="nav-link" data-target="hero">Home</a>
+                <a href="#stream" class="nav-link" id="nav-stream" data-target="stream">Stream</a>
+                <a href="#schedule" class="nav-link" data-target="schedule">Schedule</a>
+                <a href="#bracket" class="nav-link" data-target="bracket">Bracket</a>
+                <a href="#teams" class="nav-link" data-target="teams">Teams</a>
+                <a href="#venue" class="nav-link" data-target="venue">Venue</a>
+                <a href="#contact" class="nav-link" id="nav-contact" data-target="contact">Contact</a>
+            </div>
+            <a href="#" id="nav-ticket-btn" class="btn btn-secondary" onclick="triggerTicket()">Buy Tickets</a>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <header id="hero" class="section-padding">
+        <div class="container">
+            <div class="hero-date">NOV 15-17, 2024 • TOKYO</div>
+            <h1 class="hero-title">CYBER CLASH FINALS</h1>
+            <p style="max-width: 600px; margin: 0 auto 30px auto;">The world's top 8 teams collide in the ultimate digital showdown.</p>
+            <div class="hero-cta-group">
+                <a href="#" id="btn-register-team" class="btn" onclick="alert('Registration Open!')">Register Team</a>
+                <a href="#" id="btn-get-tickets" class="btn btn-secondary" onclick="triggerTicket()">Get Tickets</a>
+                <a href="#stream" id="btn-watch-live" class="btn btn-secondary" style="border-color:var(--color-primary); color:var(--color-primary)">Watch Live</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- STREAM PREVIEW -->
+    <section id="stream">
+        <div class="ticker-wrap">
+            <div class="ticker-content" id="now-next">
+                LIVE: Team Alpha vs Omega [1-0] /// NEXT: Gamma vs Delta at 14:00 UTC /// FINAL TICKETS 90% SOLD OUT /// 
+            </div>
+        </div>
+        <div class="container" id="stream-preview">
+            <div class="stream-container">
+                <div class="video-player">
+                    <div class="video-placeholder">
+                        <div style="width: 60px; height: 60px; background:var(--color-primary); border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                            <div style="width:0; height:0; border-top:10px solid transparent; border-bottom:10px solid transparent; border-left:20px solid #fff; margin-left:4px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stream-info" style="background:#111; padding:20px;">
+                    <h3 style="color:var(--color-primary)">Live Chat</h3>
+                    <div style="height:150px; overflow-y:auto; border:1px solid #333; margin-bottom:10px; color:#ccc; font-size:0.9rem; padding:8px;">
+                        <div>System: Chat initialized...</div>
+                        <div>User1: Hype!</div>
+                        <div>User2: Go Alpha!</div>
+                    </div>
+                    <input type="text" placeholder="Send message..." style="width:100%; padding:8px; background:#333; border:1px solid #555; color:#fff;">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- BRACKET -->
+    <section id="bracket" class="section-padding">
+        <div class="container">
+            <h2>Tournament Bracket</h2>
+            <p style="text-align:center; margin-bottom:20px;">Click matches to view schedule details.</p>
+            <div class="bracket-wrapper" id="bracket-container">
+                <!-- Rendered by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- SCHEDULE -->
+    <section id="schedule" class="section-padding">
+        <div class="container">
+            <h2>Match Schedule</h2>
+            <div class="filters">
+                <button id="filter-all" class="filter-btn active" onclick="filterSchedule('all')">All Matches</button>
+                <button id="filter-groups" class="filter-btn" onclick="filterSchedule('Group Stage')">Groups</button>
+                <button id="filter-playoffs" class="filter-btn" onclick="filterSchedule('Playoffs')">Playoffs</button>
+            </div>
+            <div style="text-align:right; margin-bottom:10px;">
+                <button id="download-ics-btn" class="btn btn-secondary" style="font-size:0.8rem; padding:8px 12px;" onclick="downloadICS()">Add to Calendar (ICS)</button>
+            </div>
+            <div id="match-list-container" class="match-list">
+                <!-- Rendered by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- TEAMS -->
+    <section id="teams" class="section-padding">
+        <div class="container">
+            <h2>Competing Teams</h2>
+            <div class="teams-grid" id="teams-grid">
+                <!-- Rendered by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- VENUE -->
+    <section id="venue" class="section-padding">
+        <div class="container">
+            <h2>Venue & Travel</h2>
+            <div class="venue-grid">
+                <div class="venue-info">
+                    <h3>CyberDome Arena, Tokyo</h3>
+                    <p>The world's most advanced esports facility.</p>
+                    
+                    <h4 style="margin-top:20px;">Accessibility & Safety</h4>
+                    <ul>
+                        <li>Wheelchair accessible entrances (Gate A, C)</li>
+                        <li>Sensory rooms available on Level 2</li>
+                        <li>First Aid stations at every section</li>
+                    </ul>
+
+                    <h4 style="margin-top:20px;">Nearby Hotels</h4>
+                    <ul>
+                        <li><strong>Neon Plaza Hotel</strong> - 0.2 miles away</li>
+                        <li><strong>Gamer's Rest Hostel</strong> - 0.5 miles away</li>
+                    </ul>
+                    
+                    <div style="margin-top:20px; display:flex; gap:10px;">
+                        <a href="#" class="btn btn-secondary">Get Directions</a>
+                        <a href="#" class="btn btn-secondary">Parking Info</a>
+                    </div>
+                </div>
+                <div class="venue-map">
+                    <div class="map-placeholder">
+                        MAP PREVIEW
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT / PARTNERSHIPS (New) -->
+    <section id="contact" class="section-padding">
+        <div class="container">
+            <h2 id="contact-section">Contact & Partnerships</h2>
+            <form class="contact-form" onsubmit="handleContactSubmit(event)">
+                <div class="form-group">
+                    <label for="contact-name">Name</label>
+                    <input type="text" id="contact-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="contact-email">Email</label>
+                    <input type="email" id="contact-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="contact-subject">Subject</label>
+                    <select id="contact-subject" style="width:100%; padding:12px; border:2px solid #000;">
+                        <option value="general">General Inquiry</option>
+                        <option value="sponsorship">Sponsorship/Partnership</option>
+                        <option value="press">Press</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="contact-message">Message</label>
+                    <textarea id="contact-message" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="btn">Send Message</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer id="footer">
+        <div class="container footer-grid">
+            <div class="footer-col">
+                <h4>Tournament Info</h4>
+                <ul>
+                    <li><a href="#">Rules & Regulations (PDF)</a></li>
+                    <li><a href="#">Code of Conduct</a></li>
+                    <li><a href="#">Press Kit</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Contact Support</a></li>
+                    <li><a href="#">Lost & Found</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Newsletter</h4>
+                <form onsubmit="event.preventDefault(); alert('Subscribed!');">
+                    <input type="email" placeholder="Enter email" style="width:100%; padding:10px; border:none; margin-bottom:8px;">
+                    <button class="btn" style="width:100%;">Subscribe</button>
+                </form>
+            </div>
+        </div>
+        <div style="text-align:center; margin-top:40px; font-size:0.8rem; color:#888;">
+            &copy; 2024 Neon Arena Esports. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- MOBILE CTA -->
+    <div id="mobile-cta">
+        <a href="#" class="btn" style="width:100%;" onclick="triggerTicket()">Buy Tickets Now</a>
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        /* --- DATA --- */
+        const teams = [
+            { id: 1, name: 'Team Alpha', country: 'KR', form: [1,1,1,0,1], players: ['FakerLike', 'ZeusGod', 'Oner'] },
+            { id: 2, name: 'Team Beta', country: 'CN', form: [0,1,1,1,0], players: ['UziBack', 'Ming', 'Xiaohu'] },
+            { id: 3, name: 'Gamma Ray', country: 'EU', form: [1,0,0,1,1], players: ['Caps', 'Jankos', 'Mikyx'] },
+            { id: 4, name: 'Delta Force', country: 'NA', form: [0,0,1,0,1], players: ['Doublelift', 'Bjergsen', 'CoreJJ'] },
+            { id: 5, name: 'Echo Fox', country: 'KR', form: [1,1,0,1,0], players: ['Showmaker', 'Canyon', 'Nuguri'] },
+            { id: 6, name: 'Zeta Div', country: 'BR', form: [0,1,0,0,0], players: ['BrTT', 'Kami', 'Revolta'] },
+            { id: 7, name: 'Omega', country: 'CN', form: [1,1,1,1,1], players: ['Ruler', 'Kanavi', 'Knight'] },
+            { id: 8, name: 'Theta', country: 'EU', form: [0,0,0,1,0], players: ['Perkz', 'Elyoya', 'Kaiser'] }
+        ];
+
+        const matches = [
+            { id: 101, stage: 'Playoffs', team1: 'Team Alpha', team2: 'Theta', time: '2024-11-15T10:00:00Z' },
+            { id: 102, stage: 'Playoffs', team1: 'Delta Force', team2: 'Echo Fox', time: '2024-11-15T13:00:00Z' },
+            { id: 103, stage: 'Playoffs', team1: 'Team Beta', team2: 'Zeta Div', time: '2024-11-15T16:00:00Z' },
+            { id: 104, stage: 'Playoffs', team1: 'Gamma Ray', team2: 'Omega', time: '2024-11-15T19:00:00Z' },
+            { id: 201, stage: 'Group Stage', team1: 'Alpha', team2: 'Beta', time: '2024-11-14T10:00:00Z' },
+            { id: 202, stage: 'Group Stage', team1: 'Gamma', team2: 'Delta', time: '2024-11-14T12:00:00Z' }
+        ];
+
+        /* --- MOCK FUNCTIONS FROM ORIGINAL (Preserved API) --- */
+        function resize() {
+            // Placeholder for original resize logic if needed for canvas
+            // (Canvas removed/simplified for destylization/performance per instructions)
+        }
+        window.addEventListener('resize', resize);
+
+        function animate() {
+            // Placeholder for original animate
+        }
+        
+        function runBracketDemo() {
+            // Simple highlight loop for bracket cards
+            const cards = document.querySelectorAll('.match-card');
+            if(cards.length === 0) return;
+            let idx = 0;
+            setInterval(() => {
+                cards.forEach(c => c.style.borderColor = 'var(--color-border)');
+                cards[idx].style.borderColor = 'var(--color-primary)';
+                idx = (idx + 1) % cards.length;
+            }, 2000);
+        }
+
+        /* --- RENDERING --- */
+        function renderBracket() {
+            const container = document.getElementById('bracket-container');
+            container.innerHTML = '';
+            
+            const rounds = [
+                { name: 'Quarterfinals', matches: 4 },
+                { name: 'Semifinals', matches: 2 },
+                { name: 'Finals', matches: 1 }
+            ];
+
+            rounds.forEach((round, rIndex) => {
+                const col = document.createElement('div');
+                col.className = 'bracket-col';
+                col.innerHTML = `<h3 style="text-align:center;font-size:1rem;margin-bottom:10px;color:var(--color-primary)">${round.name}</h3>`;
+                
+                for(let i=0; i<round.matches; i++) {
+                    const mId = `match-${rIndex}-${i}`;
+                    const card = document.createElement('div');
+                    card.className = 'match-card';
+                    card.id = mId;
+                    card.onclick = () => {
+                        document.getElementById('lastMatchClicked').textContent = mId;
+                        // Scroll schedule into view as improvement
+                        document.getElementById('schedule').scrollIntoView({behavior:'smooth'});
+                    };
+                    
+                    let t1 = "TBD", t2 = "TBD";
+                    if(rIndex === 0) {
+                        t1 = teams[i*2]?.name || "TBD";
+                        t2 = teams[i*2+1]?.name || "TBD";
+                    }
+
+                    card.innerHTML = `
+                        <div class="team-row"><span>${t1}</span><span class="team-score">0</span></div>
+                        <div class="team-row"><span>${t2}</span><span class="team-score">0</span></div>
+                        <div style="font-size:0.7rem; margin-top:4px; color:#666;">Match Info</div>
+                    `;
+                    col.appendChild(card);
+                }
+                container.appendChild(col);
+            });
+        }
+
+        function renderSchedule(filter = 'all') {
+            const container = document.getElementById('match-list-container');
+            container.innerHTML = '';
+            
+            // Update filter status proxy
+            document.getElementById('filterStatus').textContent = filter;
+            
+            // Update active button state
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.textContent.includes(filter === 'all' ? 'All' : filter.split(' ')[0])) {
+                    btn.classList.add('active');
+                }
+            });
+
+            const filtered = matches.filter(m => filter === 'all' || m.stage === filter);
+            
+            if (filtered.length === 0) {
+                container.innerHTML = '<div style="padding:20px; text-align:center; border:1px solid #ddd;">No matches found.</div>';
+                return;
+            }
+
+            filtered.forEach(match => {
+                const date = new Date(match.time);
+                const timeStr = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                const div = document.createElement('div');
+                div.className = 'match-item';
+                div.innerHTML = `
+                    <div class="match-info">
+                        <span class="match-stage">${match.stage}</span>
+                        <span class="match-teams">${match.team1} <span style="color:#888">vs</span> ${match.team2}</span>
+                    </div>
+                    <div class="match-time">${timeStr}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+        // Expose global
+        window.filterSchedule = renderSchedule;
+
+        function renderTeams() {
+            const container = document.getElementById('teams-grid');
+            container.innerHTML = '';
+            
+            teams.forEach(team => {
+                const formHtml = team.form.map(w => 
+                    `<span style="display:inline-block; width:10px; height:10px; background:${w?'var(--color-primary)':'var(--color-secondary)'}; margin-right:2px;"></span>`
+                ).join('');
+
+                const div = document.createElement('div');
+                div.className = 'team-card';
+                div.innerHTML = `
+                    <h3>${team.name} (${team.country})</h3>
+                    <div style="margin-bottom:10px;">
+                        ${team.players.map(p => `<div class="player-row"><span>${p}</span></div>`).join('')}
+                    </div>
+                    <div style="font-size:0.8rem; font-weight:bold;">Recent Form: ${formHtml}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        /* --- INTERACTIONS --- */
+        function downloadICS() {
+            // Simulate download
+            document.getElementById('downloadStatus').textContent = 'downloaded';
+            // Real logic: create blob, trigger download
+            const blob = new Blob(["BEGIN:VCALENDAR\nVERSION:2.0\nEND:VCALENDAR"], { type: 'text/calendar' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'schedule.ics';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+        window.downloadICS = downloadICS;
+
+        function triggerTicket() {
+            document.getElementById('ticketStatus').textContent = 'clicked';
+            // Mock modal or redirect
+            alert('Ticket purchase flow triggered.');
+        }
+        window.triggerTicket = triggerTicket;
+
+        function handleContactSubmit(e) {
+            e.preventDefault();
+            document.getElementById('contactStatus').textContent = 'submitted';
+            alert('Message sent! We will get back to you shortly.');
+            e.target.reset();
+        }
+        window.handleContactSubmit = handleContactSubmit;
+
+        /* --- NAVIGATION --- */
+        // Intersection Observer for active section proxy
+        document.addEventListener("DOMContentLoaded", function() {
+            renderBracket();
+            renderSchedule();
+            renderTeams();
+            runBracketDemo();
+
+            const sections = document.querySelectorAll('section, header#hero');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.id;
+                        document.getElementById('activeSection').textContent = id;
+                        // Update nav visual state
+                        document.querySelectorAll('.nav-link').forEach(link => {
+                            link.classList.remove('active');
+                            if(link.getAttribute('href') === `#${id}`) link.classList.add('active');
+                        });
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            sections.forEach(s => observer.observe(s));
+            
+            // Smooth scrolling logic for nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    const target = document.getElementById(targetId);
+                    if(target) {
+                        window.scrollTo({
+                            top: target.offsetTop - 70,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        });
+
+    </script>
+</body>
+</html>

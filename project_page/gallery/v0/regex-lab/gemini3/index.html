@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal Regex Playground</title>
+    <style>
+        :root {
+            --bg-color: #1e1e1e;
+            --panel-bg: #252526;
+            --text-color: #d4d4d4;
+            --accent-color: #007acc;
+            --border-color: #3e3e42;
+            --highlight-match: rgba(255, 215, 0, 0.3);
+            --highlight-group-1: rgba(86, 156, 214, 0.3);
+            --error-color: #f48771;
+            --success-color: #89d185;
+            --font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f3f3f3;
+            --panel-bg: #ffffff;
+            --text-color: #333333;
+            --accent-color: #005f9e;
+            --border-color: #cccccc;
+            --highlight-match: rgba(255, 215, 0, 0.5);
+            --error-color: #d32f2f;
+            --success-color: #388e3c;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h1 { font-size: 1.2rem; margin: 0; font-family: var(--font-mono); }
+        
+        .header-controls button {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-left: 8px;
+            font-size: 0.8rem;
+        }
+        .header-controls button:hover { background-color: var(--border-color); }
+
+        /* Main Layout */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            grid-template-rows: auto 1fr auto;
+            gap: 10px;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        /* Sections */
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.7;
+            margin-bottom: 10px;
+        }
+
+        /* Inputs Section (Top Right) */
+        #regex-bar {
+            grid-column: 2;
+            grid-row: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .slash { font-size: 1.5rem; opacity: 0.5; font-family: var(--font-mono); }
+
+        #input-pattern {
+            flex: 1;
+            padding: 10px;
+            font-family: var(--font-mono);
+            font-size: 1.1rem;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 4px;
+        }
+        #input-pattern:focus { outline: 2px solid var(--accent-color); border-color: transparent; }
+        #input-pattern.invalid { outline: 2px solid var(--error-color); }
+
+        .flags-container {
+            display: flex;
+            gap: 5px;
+            font-size: 0.8rem;
+            font-family: var(--font-mono);
+        }
+        .flag-label { cursor: pointer; user-select: none; display: flex; align-items: center; }
+        .flag-label input { margin-right: 4px; }
+
+        /* Sidebar (Tools & Quick Insert) */
+        #sidebar {
+            grid-column: 1;
+            grid-row: 1 / -1;
+            overflow-y: auto;
+        }
+
+        .quick-insert-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+        }
+
+        .token-btn {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 5px;
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .token-btn:hover { border-color: var(--accent-color); color: var(--accent-color); }
+
+        /* Editor Area */
+        #editor-area {
+            grid-column: 2;
+            grid-row: 2;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-wrapper {
+            position: relative;
+            flex: 1;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        /* Overlay and Textarea must match exactly */
+        #input-text, #highlights {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 10px;
+            margin: 0;
+            border: none;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow: auto;
+        }
+
+        #input-text {
+            z-index: 2;
+            background: transparent;
+            color: var(--text-color);
+            resize: none;
+        }
+        
+        #input-text:focus { outline: none; }
+
+        #highlights {
+            z-index: 1;
+            color: transparent; /* Text invisible, background visible */
+            pointer-events: none;
+        }
+
+        mark {
+            background-color: var(--highlight-match);
+            border-radius: 2px;
+            color: transparent;
+        }
+
+        /* Results/Table Area */
+        #results-area {
+            grid-column: 2;
+            grid-row: 3;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        #error-message {
+            color: var(--error-color);
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            min-height: 1.2em;
+        }
+
+        .table-container {
+            flex: 1;
+            overflow: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            font-family: var(--font-mono);
+        }
+
+        th, td {
+            padding: 6px 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th { background-color: var(--bg-color); position: sticky; top: 0; }
+        tr:hover { background-color: rgba(255, 255, 255, 0.05); }
+
+        /* Explanation Box inside Sidebar */
+        .explanation-box {
+            margin-top: 20px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        .token-desc { margin-bottom: 5px; display: flex; }
+        .token-desc code { 
+            background: var(--bg-color); 
+            padding: 2px 4px; 
+            border-radius: 3px; 
+            margin-right: 8px; 
+            min-width: 30px;
+            text-align: center;
+        }
+
+        /* Toast Notification */
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 100;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 800px) {
+            main {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto auto;
+            }
+            #sidebar { grid-column: 1; grid-row: 4; height: 200px; }
+            #regex-bar { grid-column: 1; grid-row: 1; }
+            #editor-area { grid-column: 1; grid-row: 2; height: 250px; }
+            #results-area { grid-column: 1; grid-row: 3; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>> Regex_Playground_</h1>
+        <div class="header-controls">
+            <button id="btn-theme" title="Toggle Theme">Light/Dark</button>
+            <button id="btn-share" title="Copy Permalink">Share/Save</button>
+            <button id="btn-clear" title="Clear All">Clear</button>
+        </div>
+    </header>
+
+    <main>
+        <!-- Sidebar: Tokens & Explanation -->
+        <div class="panel" id="sidebar">
+            <h2>Quick Insert</h2>
+            <div class="quick-insert-grid">
+                <div class="token-btn" data-insert="\d" title="Digit">\d</div>
+                <div class="token-btn" data-insert="\w" title="Word Char">\w</div>
+                <div class="token-btn" data-insert="\s" title="Whitespace">\s</div>
+                <div class="token-btn" data-insert="." title="Any Char">.</div>
+                <div class="token-btn" data-insert="[A-Z]" title="Char Set">[..]</div>
+                <div class="token-btn" data-insert="(...)" title="Group">(...)</div>
+                <div class="token-btn" data-insert="^" title="Start">^</div>
+                <div class="token-btn" data-insert="$" title="End">$</div>
+                <div class="token-btn" data-insert="*" title="0 or more">*</div>
+                <div class="token-btn" data-insert="+" title="1 or more">+</div>
+                <div class="token-btn" data-insert="?=" title="Lookahead">?=</div>
+                <div class="token-btn" data-insert="?!" title="Neg Lookahead">?!</div>
+            </div>
+
+            <div class="explanation-box">
+                <h2>Pattern Breakdown</h2>
+                <div id="explanation-content">Start typing to see breakdown...</div>
+            </div>
+        </div>
+
+        <!-- Regex Input -->
+        <div class="panel" id="regex-bar">
+            <h2>Regular Expression</h2>
+            <div class="input-group">
+                <span class="slash">/</span>
+                <input type="text" id="input-pattern" placeholder="expression..." autocomplete="off" spellcheck="false">
+                <span class="slash">/</span>
+                <div class="flags-container" id="flags-container">
+                    <label class="flag-label" title="Global match"><input type="checkbox" value="g" checked>g</label>
+                    <label class="flag-label" title="Case insensitive"><input type="checkbox" value="i">i</label>
+                    <label class="flag-label" title="Multiline"><input type="checkbox" value="m" checked>m</label>
+                    <label class="flag-label" title="DotAll"><input type="checkbox" value="s">s</label>
+                    <label class="flag-label" title="Unicode"><input type="checkbox" value="u">u</label>
+                    <label class="flag-label" title="Sticky"><input type="checkbox" value="y">y</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Editor / Test String -->
+        <div class="panel" id="editor-area">
+            <h2>Test String</h2>
+            <div class="editor-wrapper">
+                <div id="highlights" aria-hidden="true"></div>
+                <textarea id="input-text" placeholder="Paste your test text here...">
+Hello world! 
+Contact support@example.com or test.user@domain.co.uk.
+Dates: 2023-01-01, 2023-12-31.
+Code: AX-492, BZ-102.
+                </textarea>
+            </div>
+        </div>
+
+        <!-- Results Table -->
+        <div class="panel" id="results-area">
+            <div style="display:flex; justify-content:space-between;">
+                <h2>Matches</h2>
+                <div id="match-count" style="font-family:var(--font-mono); opacity:0.8;">0 found</div>
+            </div>
+            <div id="error-message"></div>
+            <div class="table-container">
+                <table id="match-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Match</th>
+                            <th>Index</th>
+                            <th>Groups</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Matches go here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast">Link copied to clipboard!</div>
+
+    <script>
+        // DOM Elements
+        const els = {
+            pattern: document.getElementById('input-pattern'),
+            text: document.getElementById('input-text'),
+            highlights: document.getElementById('highlights'),
+            matchTableBody: document.querySelector('#match-table tbody'),
+            matchCount: document.getElementById('match-count'),
+            errorMsg: document.getElementById('error-message'),
+            flags: document.querySelectorAll('.flags-container input'),
+            btnTheme: document.getElementById('btn-theme'),
+            btnShare: document.getElementById('btn-share'),
+            btnClear: document.getElementById('btn-clear'),
+            insertBtns: document.querySelectorAll('.token-btn'),
+            explanation: document.getElementById('explanation-content'),
+            toast: document.getElementById('toast')
+        };
+
+        // State
+        let state = {
+            pattern: '', // Default pattern
+            flags: ['g', 'm'],
+            text: els.text.value,
+            theme: 'dark'
+        };
+
+        // Initialization
+        function init() {
+            loadFromHash();
+            applyTheme();
+            setupListeners();
+            processRegex();
+        }
+
+        // --- Logic ---
+
+        function getFlagsString() {
+            return Array.from(els.flags).filter(c => c.checked).map(c => c.value).join('');
+        }
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function processRegex() {
+            // Update State
+            state.pattern = els.pattern.value;
+            state.text = els.text.value;
+            state.flags = getFlagsString().split('');
+
+            els.errorMsg.innerText = '';
+            els.pattern.classList.remove('invalid');
+            els.highlights.innerHTML = escapeHtml(state.text); // Default plain text
+            els.matchTableBody.innerHTML = '';
+            els.matchCount.innerText = '0 found';
+
+            updateExplanation();
+
+            if (!state.pattern) return;
+
+            try {
+                const regex = new RegExp(state.pattern, getFlagsString());
+                
+                // Safety check for infinite loops (e.g. pattern that matches empty string with global flag)
+                // Though standard JS engines handle this reasonably well now, we just need to be careful with custom loops.
+                
+                let matches = [];
+                
+                // If 'g' is not present, exec only runs once. We simulate 'g' behavior for display purposes 
+                // or just respect the user's choice.
+                if (!state.flags.includes('g')) {
+                    const m = regex.exec(state.text);
+                    if (m) matches.push(m);
+                } else {
+                    // Use matchAll for modern browsers
+                    matches = [...state.text.matchAll(regex)];
+                }
+
+                renderHighlights(matches);
+                renderTable(matches);
+
+            } catch (e) {
+                els.errorMsg.innerText = `Error: ${e.message}`;
+                els.pattern.classList.add('invalid');
+            }
+        }
+
+        function renderHighlights(matches) {
+            if (matches.length === 0) {
+                els.highlights.innerHTML = escapeHtml(state.text);
+                return;
+            }
+
+            // We need to reconstruct the text with <mark> tags.
+            // Since matches can't overlap in a single regex run (unless consuming),
+            // we can sort by index and slice.
+            
+            let html = '';
+            let lastIndex = 0;
+
+            matches.forEach(match => {
+                const start = match.index;
+                const end = match.index + match[0].length;
+                const matchText = match[0];
+
+                // Text before match
+                html += escapeHtml(state.text.slice(lastIndex, start));
+                
+                // Matched text
+                if (matchText.length === 0) {
+                    // Handle zero-width matches (like ^ or $) visually if needed, 
+                    // but usually just ignored in highlights or shown as a thin bar.
+                    html += `<mark style="border-left: 2px solid var(--accent-color); padding:0;">&#8203;</mark>`;
+                } else {
+                    html += `<mark>${escapeHtml(matchText)}</mark>`;
+                }
+
+                lastIndex = end;
+            });
+
+            // Text after last match
+            html += escapeHtml(state.text.slice(lastIndex));
+
+            // Fix for trailing newline scrolling issue
+            if (state.text.endsWith('\n')) {
+                html += '&nbsp;';
+            }
+
+            els.highlights.innerHTML = html;
+        }
+
+        function renderTable(matches) {
+            els.matchCount.innerText = `${matches.length} found`;
+            
+            const fragment = document.createDocumentFragment();
+            
+            matches.forEach((match, i) => {
+                const tr = document.createElement('tr');
+                
+                // Capture Groups formatting
+                let groupsHtml = '';
+                if (match.length > 1) {
+                    const groups = Array.from(match).slice(1);
+                    groupsHtml = groups.map((g, gi) => 
+                        `<div style="margin-bottom:2px;">
+                            <span style="opacity:0.6;">$${gi+1}:</span> 
+                            <code>${escapeHtml(g || "undefined")}</code>
+                         </div>`
+                    ).join('');
+                } else {
+                    groupsHtml = '<span style="opacity:0.5;">-</span>';
+                }
+
+                // Truncate long matches for table
+                let displayMatch = match[0];
+                if (displayMatch.length > 50) displayMatch = displayMatch.substring(0, 50) + '...';
+                if (displayMatch.length === 0) displayMatch = '[Empty String]';
+
+                tr.innerHTML = `
+                    <td>${i + 1}</td>
+                    <td style="font-family:var(--font-mono); color:var(--success-color);">${escapeHtml(displayMatch)}</td>
+                    <td>${match.index}-${match.index + match[0].length}</td>
+                    <td style="font-family:var(--font-mono); font-size:0.8rem;">${groupsHtml}</td>
+                `;
+                fragment.appendChild(tr);
+            });
+            
+            els.matchTableBody.appendChild(fragment);
+        }
+
+        function updateExplanation() {
+            const p = state.pattern;
+            if(!p) {
+                els.explanation.innerHTML = '<span style="opacity:0.5">Start typing...</span>';
+                return;
+            }
+
+            // Very basic tokenizer for explanation (not a full parser)
+            let html = '';
+            const tokens = [
+                { regex: /\\d/, desc: 'Digit [0-9]' },
+                { regex: /\\w/, desc: 'Word character [a-zA-Z0-9_]' },
+                { regex: /\\s/, desc: 'Whitespace' },
+                { regex: /\^/, desc: 'Start of line' },
+                { regex: /\$/, desc: 'End of line' },
+                { regex: /\./, desc: 'Any character (except newline)' },
+                { regex: /\+/, desc: 'One or more quantifier' },
+                { regex: /\*/, desc: 'Zero or more quantifier' },
+                { regex: /\?/, desc: 'Zero or one / Lazy' },
+                { regex: /\[.*?\]/, desc: 'Character Set' },
+                { regex: /\(.*?\)/, desc: 'Capture Group' },
+            ];
+
+            // Just finding presence for the playground overview
+            let expls = [];
+            
+            // Check for specific constructs
+            if(p.includes('^')) expls.push({ code: '^', txt: 'Asserts position at start of line/string'});
+            if(p.includes('$')) expls.push({ code: '$', txt: 'Asserts position at end of line/string'});
+            if(p.includes('\\d')) expls.push({ code: '\\d', txt: 'Matches any digit'});
+            if(p.includes('\\w')) expls.push({ code: '\\w', txt: 'Matches any word character'});
+            if(/\[.*\]/.test(p)) expls.push({ code: '[...]', txt: 'Matches any character in the set'});
+            if(/\(.*\)/.test(p)) expls.push({ code: '(...)', txt: 'Capturing group'});
+            
+            if (expls.length === 0) {
+                html = 'Matching specific characters literal.';
+            } else {
+                html = expls.map(e => 
+                    `<div class="token-desc"><code>${escapeHtml(e.code)}</code> <span>${e.txt}</span></div>`
+                ).join('');
+            }
+            
+            els.explanation.innerHTML = html;
+        }
+
+        // --- Sync Scroll ---
+        function syncScroll() {
+            els.highlights.scrollTop = els.text.scrollTop;
+            els.highlights.scrollLeft = els.text.scrollLeft;
+        }
+
+        // --- Utilities ---
+
+        function insertToken(token) {
+            const input = els.pattern;
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            
+            const val = input.value;
+            const newVal = val.substring(0, start) + token + val.substring(end);
+            
+            input.value = newVal;
+            input.focus();
+            input.selectionStart = input.selectionEnd = start + token.length;
+            
+            processRegex();
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', state.theme);
+        }
+
+        function applyTheme() {
+            document.body.setAttribute('data-theme', state.theme);
+        }
+
+        function share() {
+            const data = {
+                p: els.pattern.value,
+                f: getFlagsString(),
+                t: els.text.value
+            };
+            // Simple Base64 encoding for the hash
+            const str = JSON.stringify(data);
+            const b64 = btoa(encodeURIComponent(str)); // encodeURIComponent handles unicode for btoa
+            window.location.hash = b64;
+
+            // Show toast
+            els.toast.style.opacity = '1';
+            setTimeout(() => els.toast.style.opacity = '0', 2000);
+            
+            // Also copy to clipboard
+            navigator.clipboard.writeText(window.location.href);
+        }
+
+        function loadFromHash() {
+            try {
+                if (window.location.hash) {
+                    const b64 = window.location.hash.substring(1);
+                    const str = decodeURIComponent(atob(b64));
+                    const data = JSON.parse(str);
+                    
+                    if(data.p !== undefined) els.pattern.value = data.p;
+                    if(data.t !== undefined) els.text.value = data.t;
+                    if(data.f !== undefined) {
+                        const flags = data.f.split('');
+                        els.flags.forEach(cb => {
+                            cb.checked = flags.includes(cb.value);
+                        });
+                    }
+                } else {
+                    // Default demo
+                    els.pattern.value = '\\b[A-Z][a-z]*-\\d+';
+                }
+            } catch (e) {
+                console.error("Failed to load from hash", e);
+            }
+        }
+
+        function clearAll() {
+            els.pattern.value = '';
+            els.text.value = '';
+            processRegex();
+        }
+
+        function setupListeners() {
+            els.pattern.addEventListener('input', processRegex);
+            els.text.addEventListener('input', processRegex);
+            els.text.addEventListener('scroll', syncScroll);
+            
+            els.flags.forEach(f => f.addEventListener('change', processRegex));
+            
+            els.insertBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => insertToken(e.target.dataset.insert));
+            });
+
+            els.btnTheme.addEventListener('click', toggleTheme);
+            els.btnShare.addEventListener('click', share);
+            els.btnClear.addEventListener('click', clearAll);
+            
+            // Handle window resize for scroll sync
+            window.addEventListener('resize', syncScroll);
+        }
+
+        // Start
+        init();
+
+    </script>
+</body>
+</html>
