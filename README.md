@@ -31,9 +31,9 @@
 </div>
 
 **Pipeline:**
-- **Stage 0 (Preparation)**: Generate initial websites (multi-model, parallel) and 30 tasks per app (GPT-5).
+- **Stage 0 (Preparation)**: Generate initial websites and tasks per app.
 - **Stage 1 (Task Solvability Check)**: Judge extracts task-state rules on initial websites to determine task validity.
-- **Stage 2 (CUA Navigation Test)**: CUA executes only supported tasks; oracle evaluation is rule-based (no VLM fallback).
+- **Stage 2 (CUA Navigation Test)**: CUA executes supported tasks; oracle evaluation is rule-based.
 - **Stage 3 (Iterative Refinement)**:
     - **3.0 Revise**: Update websites based on unsupported tasks (Task Solvability Feedback) and CUA failures (Navigation Feedback via Dashboard).
     - **3.1 Re-Judge**: Re-evaluate task solvability on revised websites.
