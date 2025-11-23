@@ -10,6 +10,33 @@ body {
   color: #0f172a;
 }
 
+body::before {
+  content: "";
+  position: fixed;
+  inset: -20%;
+  background:
+    radial-gradient(40% 35% at 20% 25%, rgba(125, 211, 252, 0.5), transparent 60%),
+    radial-gradient(35% 30% at 80% 20%, rgba(199, 210, 254, 0.45), transparent 60%),
+    radial-gradient(50% 40% at 50% 70%, rgba(165, 243, 252, 0.4), transparent 65%);
+  filter: blur(70px);
+  opacity: 0.75;
+  animation: auiFlow 16s ease-in-out infinite alternate;
+  z-index: -1;
+  pointer-events: none;
+}
+
+@keyframes auiFlow {
+  0% {
+    transform: translate3d(-20px, -10px, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(20px, 15px, 0) scale(1.05);
+  }
+  100% {
+    transform: translate3d(-15px, 25px, 0) scale(1.02);
+  }
+}
+
 body.theme-agent {
   font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas,
     "Liberation Mono", "Courier New", monospace;
@@ -142,6 +169,10 @@ h6 {
 
 .hero {
   margin: 1rem 0 0 !important;
+}
+
+.hero .container.is-max-desktop {
+  max-width: 1200px;
 }
 
 .publication-venue {
