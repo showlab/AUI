@@ -1,4 +1,4 @@
-# Computer-Use Agents as Judges for Generative User Interface
+# Agent for Generative UI
 
 <!-- <p align="center">
   <b>AUI: Computer-Use Agents as Judges for Automatic GUI Design</b><br>
