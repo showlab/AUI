@@ -12,7 +12,13 @@
 
 The left UI is designed for 🧑🏻‍💻humans—prioritizing aesthetics. The right UI is redesigned for 🤖agents—focused on clarity and functionality.
 
-https://github.com/user-attachments/assets/c3d5d009-e05f-4ce6-909f-545282431611
+<p align="center">
+  <video src="https://github.com/user-attachments/assets/c3d5d009-e05f-4ce6-909f-545282431611"
+         style="max-width: 80%; height: auto; border-radius: 10px;"
+         controls
+         muted>
+  </video>
+</p>
 
 
 ## 🔥 Update
