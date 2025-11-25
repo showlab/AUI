@@ -4,11 +4,11 @@ body {
   position: relative;
   overflow-x: hidden;
   background:
-    radial-gradient(32% 30% at 18% 18%, rgba(80, 146, 255, 0.22), transparent 55%),
-    radial-gradient(38% 34% at 78% 22%, rgba(67, 217, 173, 0.2), transparent 60%),
-    radial-gradient(45% 38% at 52% 78%, rgba(141, 104, 255, 0.18), transparent 65%),
-    linear-gradient(180deg, #0b1021 0%, #0d1229 45%, #0b1021 100%);
-  color: #e8edf7;
+    radial-gradient(26% 32% at 20% 18%, rgba(99, 135, 255, 0.25), transparent 60%),
+    radial-gradient(30% 28% at 82% 22%, rgba(82, 196, 255, 0.2), transparent 62%),
+    radial-gradient(40% 35% at 52% 78%, rgba(126, 255, 214, 0.16), transparent 65%),
+    linear-gradient(180deg, #f7fbff 0%, #eef3ff 45%, #f9fbff 100%);
+  color: #0f172a;
 }
 
 body::before,
@@ -30,13 +30,13 @@ body::before {
 }
 
 body::after {
-  opacity: 0.35;
+  opacity: 0.45;
   mix-blend-mode: screen;
   background:
-    linear-gradient(90deg, rgba(120, 162, 255, 0.15) 1px, transparent 1px),
-    linear-gradient(0deg, rgba(120, 162, 255, 0.15) 1px, transparent 1px),
-    linear-gradient(135deg, rgba(67, 217, 173, 0.08) 0%, rgba(67, 217, 173, 0) 65%);
-  background-size: 120px 120px, 120px 120px, 100% 100%;
+    linear-gradient(90deg, rgba(120, 170, 255, 0.16) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(120, 170, 255, 0.16) 1px, transparent 1px),
+    radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.28), transparent 55%);
+  background-size: 140px 140px, 140px 140px, 100% 100%;
   background-position: 0 0, 0 0, 0 0;
 }
 
@@ -117,7 +117,7 @@ body.theme-agent .table tbody tr:hover {
 }
 
 a {
-  color: #60a5fa;
+  color: #2563eb;
   text-decoration: none;
 }
 
@@ -127,7 +127,7 @@ a:hover {
 
 .title,
 .subtitle {
-  color: #e9f2ff !important;
+  color: #0f172a !important;
   font-family: Calibri, "SF Pro Text", "Segoe UI", system-ui, -apple-system,
     BlinkMacSystemFont, sans-serif !important;
 }
@@ -138,7 +138,7 @@ h3,
 h4,
 h5,
 h6 {
-  color: #e9f2ff !important;
+  color: #0f172a !important;
 }
 
 /* Sections */
@@ -207,12 +207,11 @@ h6 {
   font-weight: 800;
   font-size: 1.3rem;
   margin-bottom: 1.2rem !important;
-  color: #c7ddff;
 }
 
 .publication-author, .publication-institution, .publication-role {
   margin-bottom: 0.5rem;
-  color: #dfe7ff !important;
+  color: #000000 !important;
 }
 
 .publication-links {
@@ -224,51 +223,46 @@ h6 {
 }
 
 .content p {
-  color: #dfe7ff;
-}
-
-.content strong {
-  color: #ffffff;
+  color: #000000;
 }
 
 .caption {
   margin: 0.3rem 0;
-  color: #a8c1ff;
+  color: #555555;
   font-style: italic;
 }
 
 .table {
   border-collapse: separate;
   border-spacing: 0;
-  background: rgba(15, 22, 40, 0.92);
+  background: #ffffff;
   border-radius: 0.75rem;
-  box-shadow: 0 12px 30px rgba(3, 7, 18, 0.45);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
   overflow: hidden;
 }
 
 .table thead th {
-  background: #1b2542;
-  color: #eaf2ff;
+  background: #0f172a;
+  color: #e5e7eb;
   font-weight: 600;
   border: none;
 }
 
 .table tbody tr {
-  background: rgba(15, 22, 40, 0.92);
+  background: #ffffff;
 }
 
 .table tbody tr:nth-child(even) {
-  background: rgba(21, 31, 55, 0.92);
+  background: #f9fafb;
 }
 
 .table tbody tr:hover {
-  background: rgba(36, 48, 78, 0.95);
+  background: #eff6ff;
 }
 
 .table td,
 .table th {
   border: none !important;
-  color: #dfe7ff;
 }
 
 /* Leaderboard bar chart */
@@ -279,8 +273,7 @@ h6 {
 .aui-leaderboard-toggle {
   display: inline-flex;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(96, 165, 250, 0.5);
+  background: #e5e7eb;
   padding: 2px;
   margin-bottom: 0.75rem;
 }
@@ -293,12 +286,12 @@ h6 {
   font-weight: 600;
   border-radius: 999px;
   cursor: pointer;
-  color: #c7d7ff;
+  color: #4b5563;
 }
 
 .aui-leaderboard-toggle button.is-active {
-  background: #1f3a72;
-  color: #f8fbff;
+  background: #111827;
+  color: #f9fafb;
 }
 
 .aui-leaderboard-chart {
@@ -445,12 +438,12 @@ body.mode-agent .aui-gallery-thumb-wrapper {
 .aui-gallery-card-title {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #eaf2ff;
+  color: #e5e7eb;
 }
 
 .aui-gallery-card-subtitle {
   font-size: 0.8rem;
-  color: #c3d2ff;
+  color: #9ca3af;
 }
 
 .aui-gallery-arrow {
@@ -467,33 +460,33 @@ body.mode-agent .aui-gallery-thumb-wrapper {
 .aui-gallery-qa-box {
   margin-top: 1.25rem;
   text-align: left;
-  background-color: #0f172a;
+  background-color: #f9fafb;
   padding: 12px 18px;
   border-radius: 8px;
-  border-left: 4px solid #60a5fa;
+  border-left: 4px solid #111827;
 }
 
 .aui-gallery-qa-question {
   font-weight: 600;
-  color: #e9f2ff;
+  color: #1f2937;
   margin-bottom: 4px;
 }
 
 .aui-gallery-qa-answer {
-  color: #c7d6ff;
+  color: #4b5563;
   font-size: 0.9rem;
   white-space: pre-line;
   line-height: 1.5;
 }
 
 .aui-gallery-qa-qtag {
-  color: #8be9c7;
+  color: #111827;
   font-weight: 700;
   margin-right: 6px;
 }
 
 .aui-gallery-qa-atag {
-  color: #60a5fa;
+  color: #198754;
   font-weight: 700;
   margin-right: 6px;
 }
@@ -508,7 +501,7 @@ body.mode-agent .aui-gallery-thumb-wrapper {
 .aui-mode-switch-label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #c7d5ff;
+  color: #4b5563;
 }
 
 .aui-mode-switch {
@@ -531,9 +524,9 @@ body.mode-agent .aui-gallery-thumb-wrapper {
 .aui-mode-switch-slider {
   position: absolute;
   inset: 0;
-  background: #1b2b55;
+  background: #ef4444;
   border-radius: 999px;
-  border: 2px solid #7cb6ff;
+  border: 2px solid #0f172a;
   transition: background 0.2s ease;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.18);
 }
@@ -546,15 +539,15 @@ body.mode-agent .aui-gallery-thumb-wrapper {
   left: 3px;
   top: 50%;
   transform: translate(0, -50%);
-  background-color: #e8f1ff;
+  background-color: #ffffff;
   border-radius: 50%;
-  border: 2px solid #7cb6ff;
+  border: 2px solid #0f172a;
   box-shadow: 0 4px 8px rgba(15, 23, 42, 0.25);
   transition: transform 0.2s ease;
 }
 
 .aui-mode-switch input:checked + .aui-mode-switch-slider {
-  background: #1f6feb;
+  background: #22c55e;
 }
 
 .aui-mode-switch input:checked + .aui-mode-switch-slider::before {
