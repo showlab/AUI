@@ -11,10 +11,7 @@
   <a href="https://showlab.github.io/AUI">🌐 Project</a>
 </p>
 
-**What does UI for Agents look like? Check this demo video:**
-
-The left UI is designed for 🧑🏻‍💻humans—prioritizing aesthetics. The right UI is redesigned for 🤖agents—focused on clarity and functionality.
-
+**What does Agent-friendly look like? Check out below demo:**
 
 <p align="center">
   <video
@@ -26,6 +23,9 @@ The left UI is designed for 🧑🏻‍💻humans—prioritizing aesthetics. The
   </video>
 </p>
 
+The left UI is designed for 🧑🏻‍💻humans—prioritizing aesthetics. 
+
+The right UI is redesigned for 🤖agents—focused on clarity and functionality.
 
 
 ## 🔥 Update
