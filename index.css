@@ -270,6 +270,13 @@ h6 {
   font-size: 0.95rem;
 }
 
+.demo-video-question {
+  margin-top: 0.7rem;
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 1rem;
+}
+
 .caption {
   margin: 0.3rem 0;
   color: #555555;
