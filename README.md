@@ -2,11 +2,14 @@
 
 <p align="center">
   <a href="https://arxiv.org/abs/2511.15567">📄 Paper</a> &nbsp; | &nbsp;
+  <a href="https://huggingface.co/papers/2511.15567">🤗 Paper</a> &nbsp; | &nbsp;
   <a href="https://huggingface.co/spaces/showlab/AUI">🤗 Demo</a> &nbsp; | &nbsp;
   <a href="https://showlab.github.io/AUI">🌐 Project</a>
 </p>
 
----
+> [**Computer-Use Agents as Judges for Generative User Interface**](https://arxiv.org/abs/2511.15567)<br>
+> [Kevin Qinghong Lin](https://qinghonglin.github.io/), [Siyuan Hu](https://scholar.google.com.sg/citations?user=y605TWYAAAAJ&hl=en), [Linjie Li](https://scholar.google.com/citations?user=WR875gYAAAAJ&hl=en), [Zhengyuan Yang](https://zyang-ur.github.io/), [Lijuan Wang](https://scholar.google.com/citations?user=cDcWXuIAAAAJ&hl=en), [Philip Torr](https://scholar.google.com/citations?user=kPxa2w0AAAAJ&hl=en), [Mike Zheng Shou](https://scholar.google.com/citations?user=h1-3lSoAAAAJ&hl=en)
+> <br>Torr Vision Group @ Oxford University, Show Lab @ National University of Singapore, Microsoft<br>
 
 **What does UI for Agents look like? Check this demo video:**
 
