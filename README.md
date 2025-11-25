@@ -6,8 +6,8 @@
 
 <p align="center">
   <a href="https://arxiv.org/abs/2511.15567">📄 Paper</a> &nbsp; | &nbsp;
-  <a href="https://huggingface.co/papers/2511.15567">🤗 Paper</a> &nbsp; | &nbsp;
-  <a href="https://huggingface.co/spaces/showlab/AUI">🤗 Demo</a> &nbsp; | &nbsp;
+  <a href="https://huggingface.co/papers/2511.15567">🤗 HF Daily Paper</a> &nbsp; | &nbsp;
+  <a href="https://huggingface.co/spaces/showlab/AUI">🤗 HF Demo</a> &nbsp; | &nbsp;
   <a href="https://showlab.github.io/AUI">🌐 Project</a>
 </p>
 
