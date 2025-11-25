@@ -510,9 +510,10 @@
           loadTaskPrompt(app);
           if (grid) {
             grid.classList.remove("is-sliding-out");
+            // prepare for slide-in from right
             grid.classList.add("is-sliding-in");
-            // allow transition to run before cleanup
             requestAnimationFrame(function () {
+              // trigger transition to base position/opacity
               grid.classList.remove("is-sliding-in");
             });
           }

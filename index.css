@@ -353,17 +353,17 @@ h6 {
   gap: 1.35rem;
   max-width: 1400px;
   margin: 0 auto;
-  transition: transform 0.4s ease, opacity 0.4s ease;
+  transition: transform 0.5s ease, opacity 0.5s ease;
 }
 
 .aui-gallery-grid.is-sliding-out {
   opacity: 0;
-  transform: translateX(-28px);
+  transform: translateX(-80px);
 }
 
 .aui-gallery-grid.is-sliding-in {
-  opacity: 1;
-  transform: translateX(0);
+  opacity: 0;
+  transform: translateX(80px);
 }
 
 .aui-gallery-main-row {
