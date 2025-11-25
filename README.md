@@ -1,4 +1,4 @@
-# Computer-Use Agents for Generative UI
+# Agent-friendly UI
 
 <p align="center">
   <a href="https://arxiv.org/abs/2511.15567">📄 Paper</a> &nbsp; | &nbsp;
