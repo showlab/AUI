@@ -518,7 +518,29 @@
         });
       }
 
+      // auto rotate apps to the right
+      var autoRotateMs = 6500;
+      var autoTimer = null;
+      function startAuto() {
+        stopAuto();
+        autoTimer = setInterval(function () {
+          setActiveApp(currentIndex + 1);
+        }, autoRotateMs);
+      }
+      function stopAuto() {
+        if (autoTimer) clearInterval(autoTimer);
+        autoTimer = null;
+      }
+
+      // pause on hover over gallery grid or arrows
+      [grid, prevBtn, nextBtn].forEach(function (el) {
+        if (!el) return;
+        el.addEventListener("mouseenter", stopAuto);
+        el.addEventListener("mouseleave", startAuto);
+      });
+
       setActiveApp(currentIndex);
+      startAuto();
 
       // Leaderboard interactive bar chart (ECharts)
       var chartRoot = document.getElementById("aui-leaderboard-chart");
