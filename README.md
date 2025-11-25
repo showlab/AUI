@@ -14,7 +14,7 @@ The left UI is designed for 🧑🏻‍💻humans—prioritizing aesthetics. The
 
 <p align="center">
   <video src="https://github.com/user-attachments/assets/c3d5d009-e05f-4ce6-909f-545282431611"
-         style="max-width: 80%; height: auto; border-radius: 10px;"
+         style="max-width: 80%; height: 200px; border-radius: 10px;"
          controls
          muted>
   </video>
