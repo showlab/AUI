@@ -8,6 +8,13 @@
 
 ---
 
+**What does UI for Agents look like? Check this demo video:**
+
+The left UI is designed for 🧑🏻‍💻humans—prioritizing aesthetics. The right UI is redesigned for 🤖agents—focused on clarity and functionality.
+
+https://github.com/user-attachments/assets/c3d5d009-e05f-4ce6-909f-545282431611
+
+
 ## 🔥 Update
 - [x] [2025.11.20] Huggingface Demo is released.
 - [x] [2025.11.19] Arxiv paper is released.
