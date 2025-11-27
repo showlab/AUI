@@ -11,7 +11,7 @@
   <a href="https://showlab.github.io/AUI">🌐 Project</a>
 </p>
 
-**What does Agent-friendly look like? Check out below demo:**
+**What does Agent-friendly UI look like? Check out below demo:**
 
 <p align="center">
   <video
